@@ -9,6 +9,7 @@ find_package(CppUnit)
 
 add_library(telnetpp
     src/dummy.cpp
+    src/subnegotiation.cpp
 )
 
 target_include_directories(telnetpp
