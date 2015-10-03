@@ -7,7 +7,7 @@
 namespace telnetpp {
     
 //* =========================================================================
-/// \brief A class that encapsulates a TELNET negotiation.
+/// \brief A class that encapsulates a Telnet negotiation.
 //* =========================================================================
 class negotiation
 {

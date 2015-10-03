@@ -8,7 +8,8 @@ include(cotire OPTIONAL)
 find_package(CppUnit)
 
 add_library(telnetpp
-    src/dummy.cpp
+    src/command.cpp
+    src/detail/parse_helper.cpp
     src/subnegotiation.cpp
 )
 
@@ -30,6 +31,7 @@ enable_testing()
 
 add_executable(telnetpp_tester
     test/main.cpp
+    test/parser_test.cpp
 )
 
 target_compile_features(telnetpp_tester
