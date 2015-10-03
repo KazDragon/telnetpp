@@ -1,5 +1,3 @@
-[![Stories in Ready](https://badge.waffle.io/KazDragon/telnetpp.png?label=ready&title=Ready)](https://waffle.io/KazDragon/telnetpp)
-
 [![Stories on the Backlog](https://badge.waffle.io/KazDragon/telnetpp.png?label=backlog&title=Stories%20On%20The%20Backlog)](https://waffle.io/KazDragon/telnetpp)
 
 [![Stories in Ready](https://badge.waffle.io/KazDragon/telnetpp.png?label=ready&title=Stories%20In%20Ready)](https://waffle.io/KazDragon/telnetpp)
