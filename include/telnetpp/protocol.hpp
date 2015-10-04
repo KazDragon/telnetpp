@@ -6,7 +6,6 @@
 namespace telnetpp {
  
 // TELNET Commands
-static constexpr u8 const eor  = 239; // End Of Record
 static constexpr u8 const se   = 240; // Subnegotiation End
 static constexpr u8 const nop  = 241; // No Operation
 static constexpr u8 const dm   = 242; // Data Mark

@@ -1,4 +1,5 @@
 #include "telnetpp/subnegotiation.hpp"
+#include <iostream>
 #include <utility>
 
 namespace telnetpp {
@@ -26,6 +27,32 @@ u8 subnegotiation::option() const
 subnegotiation_content const &subnegotiation::content() const
 {
     return content_;
+}
+
+// ==========================================================================    
+// OPERATOR==
+// ==========================================================================    
+bool operator==(subnegotiation const &lhs, subnegotiation const &rhs)
+{
+    return lhs.option() == rhs.option()
+        && lhs.content() == rhs.content();
+}
+
+// ==========================================================================    
+// OPERATOR<<
+// ==========================================================================    
+std::ostream &operator<<(std::ostream& out, const subnegotiation& sub)
+{
+    out << "subnegotiation[0x"
+        << std::hex << u32(sub.option()) 
+        << ", [";
+        
+    for (auto &&byte : sub.content())
+    {
+        out << "0x" << std::hex << u32(byte) << ", ";
+    }
+    
+    return out << "]]";
 }
 
 }

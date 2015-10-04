@@ -7,7 +7,7 @@
 namespace telnetpp {
     
 //* =========================================================================
-/// \brief A class that encapsulates a TELNET negotiation.
+/// \brief A class that encapsulates a Telnet negotiation.
 //* =========================================================================
 class negotiation
 {
@@ -42,6 +42,20 @@ private :
     u8 request_;
     u8 option_;
 };
+
+//* =========================================================================
+/// \brief Comparison function for negotiations
+//* =========================================================================
+constexpr bool operator==(negotiation const &lhs, negotiation const &rhs)
+{
+    return lhs.request() == rhs.request()
+        && lhs.option() == rhs.option();
+}
+
+//* =========================================================================
+/// \brief Stream output for negotiations
+//* =========================================================================
+std::ostream &operator<<(std::ostream &out, negotiation const &cmd);
 
 }
 
