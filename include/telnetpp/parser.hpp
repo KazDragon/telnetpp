@@ -7,8 +7,6 @@
 #include "telnetpp/subnegotiation.hpp"
 #include "telnetpp/token.hpp"
 #include "telnetpp/detail/parse_helper.hpp"
-#include "telnetpp/detail/parse_state.hpp"
-#include <cassert>
 #include <vector>
 
 namespace telnetpp {
@@ -24,61 +22,23 @@ namespace telnetpp {
 template <class InputIterator1, class InputIterator2>
 std::vector<token> parse(InputIterator1 &begin, InputIterator2 end)
 {
-    std::vector<token> result;
-    
-    detail::parse_state current_state(detail::parse_state::idle);
     detail::parse_temps temps;
     
     auto position = begin;
     while (position != end)
     {
-        switch (current_state)
-        {
-            case detail::parse_state::idle : 
-                current_state = detail::parse_idle(*position, result);
-                break;
-                
-            case detail::parse_state::iac :
-                current_state = detail::parse_iac(
-                    *position, result, temps);
-                break;
-                
-            case detail::parse_state::negotiation :
-                current_state = detail::parse_negotiation(
-                    *position, result, temps);
-                break;
-                
-            case detail::parse_state::subnegotiation :
-                current_state = detail::parse_subnegotiation(
-                    *position, result, temps);
-                break;
-                
-            case detail::parse_state::subnegotiation_content :
-                current_state = detail::parse_subnegotiation_content(
-                    *position, result, temps);
-                break;
-                
-            case detail::parse_state::subnegotiation_content_iac :
-                current_state = detail::parse_subnegotiation_content_iac(
-                    *position, result, temps);
-                break;
-                
-            default :
-                assert(!"Telnet Parser in invalid state");
-                break;
-        }
-        
+        detail::parse_helper(temps, *position);
         ++position;
         
         // If the current state is idle, then it means that a token has been
         // completely parsed, and therefore 
-        if (current_state == detail::parse_state::idle)
+        if (temps.state == detail::parse_state::idle)
         {
             begin = position;
         }
     }
     
-    return result;
+    return temps.tokens;
 }
 
 }
