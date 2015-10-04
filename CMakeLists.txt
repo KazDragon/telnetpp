@@ -9,6 +9,7 @@ find_package(CppUnit)
 
 add_library(telnetpp
     src/command.cpp
+    src/detail/generate_helper.cpp
     src/detail/parse_helper.cpp
     src/negotiation.cpp
     src/subnegotiation.cpp
@@ -32,6 +33,7 @@ enable_testing()
 
 add_executable(telnetpp_tester
     test/main.cpp
+    test/generator_test.cpp
     test/parser_test.cpp
 )
 
