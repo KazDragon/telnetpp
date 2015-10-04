@@ -10,6 +10,7 @@ find_package(CppUnit)
 add_library(telnetpp
     src/command.cpp
     src/detail/parse_helper.cpp
+    src/negotiation.cpp
     src/subnegotiation.cpp
 )
 

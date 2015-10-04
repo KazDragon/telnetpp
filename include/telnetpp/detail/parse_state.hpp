@@ -7,6 +7,8 @@ enum class parse_state
 {
     idle,
     iac,
+    negotiation,
+    subnegotiation,
 };
 
 }}

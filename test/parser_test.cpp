@@ -21,6 +21,16 @@ public :
         CPPUNIT_TEST(iac_ec_parses_to_command);
         CPPUNIT_TEST(iac_el_parses_to_command);
         CPPUNIT_TEST(iac_ga_parses_to_command);
+        CPPUNIT_TEST(iac_sb_parses_to_nothing);
+        CPPUNIT_TEST(iac_will_parses_to_nothing);
+        CPPUNIT_TEST(iac_wont_parses_to_nothing);
+        CPPUNIT_TEST(iac_do_parses_to_nothing);
+        CPPUNIT_TEST(iac_dont_parses_to_nothing);
+        CPPUNIT_TEST(will_negotiation_parses_to_negotiation);
+        CPPUNIT_TEST(wont_negotiation_parses_to_negotiation);
+        CPPUNIT_TEST(do_negotiation_parses_to_negotiation);
+        CPPUNIT_TEST(dont_negotiation_parses_to_negotiation);
+        
     CPPUNIT_TEST_SUITE_END();
 private :
     
@@ -38,7 +48,15 @@ private :
     void iac_ec_parses_to_command();
     void iac_el_parses_to_command();
     void iac_ga_parses_to_command();
-    
+    void iac_sb_parses_to_nothing();
+    void iac_will_parses_to_nothing();
+    void iac_wont_parses_to_nothing();
+    void iac_do_parses_to_nothing();
+    void iac_dont_parses_to_nothing();
+    void will_negotiation_parses_to_negotiation();
+    void wont_negotiation_parses_to_negotiation();
+    void do_negotiation_parses_to_negotiation();
+    void dont_negotiation_parses_to_negotiation();
 };
 
 CPPUNIT_TEST_SUITE_REGISTRATION(parser_test);
@@ -241,5 +259,126 @@ void parser_test::iac_ga_parses_to_command()
     auto result = telnetpp::parse(begin, end);
     CPPUNIT_ASSERT_EQUAL(size_t{1}, result.size());
     CPPUNIT_ASSERT_EQUAL(expected0, boost::get<telnetpp::command>(result[0]));
+    CPPUNIT_ASSERT(begin == end);
+}
+
+void parser_test::iac_sb_parses_to_nothing()
+{
+    auto data = std::vector<telnetpp::u8>{ 0xFF, 0xFA };
+    
+    auto begin = data.begin();
+    auto end   = data.end();
+    
+    auto result = telnetpp::parse(begin, end);
+    CPPUNIT_ASSERT_EQUAL(size_t{0}, result.size());
+    CPPUNIT_ASSERT(begin == data.begin());
+}
+
+void parser_test::iac_will_parses_to_nothing()
+{
+    auto data = std::vector<telnetpp::u8>{ 0xFF, 0xFB };
+    
+    auto begin = data.begin();
+    auto end   = data.end();
+    
+    auto result = telnetpp::parse(begin, end);
+    CPPUNIT_ASSERT_EQUAL(size_t{0}, result.size());
+    CPPUNIT_ASSERT(begin == data.begin());
+}
+
+void parser_test::iac_wont_parses_to_nothing()
+{
+    auto data = std::vector<telnetpp::u8>{ 0xFF, 0xFC };
+    
+    auto begin = data.begin();
+    auto end   = data.end();
+    
+    auto result = telnetpp::parse(begin, end);
+    CPPUNIT_ASSERT_EQUAL(size_t{0}, result.size());
+    CPPUNIT_ASSERT(begin == data.begin());
+}
+
+void parser_test::iac_do_parses_to_nothing()
+{
+    auto data = std::vector<telnetpp::u8>{ 0xFF, 0xFD };
+    
+    auto begin = data.begin();
+    auto end   = data.end();
+    
+    auto result = telnetpp::parse(begin, end);
+    CPPUNIT_ASSERT_EQUAL(size_t{0}, result.size());
+    CPPUNIT_ASSERT(begin == data.begin());
+
+}
+
+void parser_test::iac_dont_parses_to_nothing()
+{
+    auto data = std::vector<telnetpp::u8>{ 0xFF, 0xFE };
+    
+    auto begin = data.begin();
+    auto end   = data.end();
+    
+    auto result = telnetpp::parse(begin, end);
+    CPPUNIT_ASSERT_EQUAL(size_t{0}, result.size());
+    CPPUNIT_ASSERT(begin == data.begin());
+}
+
+void parser_test::will_negotiation_parses_to_negotiation()
+{
+    auto data = std::vector<telnetpp::u8>{ 0xFF, 0xFB, 0xAB };
+    auto expected0 = telnetpp::negotiation(telnetpp::will, 0xAB);
+    
+    auto begin = data.begin();
+    auto end   = data.end();
+    
+    auto result = telnetpp::parse(begin, end);
+    CPPUNIT_ASSERT_EQUAL(size_t{1}, result.size());
+    CPPUNIT_ASSERT_EQUAL(
+        expected0, boost::get<telnetpp::negotiation>(result[0]));
+    CPPUNIT_ASSERT(begin == end);
+}
+
+void parser_test::wont_negotiation_parses_to_negotiation()
+{
+    auto data = std::vector<telnetpp::u8>{ 0xFF, 0xFC, 0xBC };
+    auto expected0 = telnetpp::negotiation(telnetpp::wont, 0xBC);
+    
+    auto begin = data.begin();
+    auto end   = data.end();
+    
+    auto result = telnetpp::parse(begin, end);
+    CPPUNIT_ASSERT_EQUAL(size_t{1}, result.size());
+    CPPUNIT_ASSERT_EQUAL(
+        expected0, boost::get<telnetpp::negotiation>(result[0]));
+    CPPUNIT_ASSERT(begin == end);
+}
+
+void parser_test::do_negotiation_parses_to_negotiation()
+{
+    auto data = std::vector<telnetpp::u8>{ 0xFF, 0xFD, 0xCD };
+    auto expected0 = telnetpp::negotiation(telnetpp::do_, 0xCD);
+    
+    auto begin = data.begin();
+    auto end   = data.end();
+    
+    auto result = telnetpp::parse(begin, end);
+    CPPUNIT_ASSERT_EQUAL(size_t{1}, result.size());
+    CPPUNIT_ASSERT_EQUAL(
+        expected0, boost::get<telnetpp::negotiation>(result[0]));
+    CPPUNIT_ASSERT(begin == end);
+}
+
+void parser_test::dont_negotiation_parses_to_negotiation()
+{
+    auto data = std::vector<telnetpp::u8>{ 0xFF, 0xFE, 0xDE };
+    auto expected0 = telnetpp::negotiation(telnetpp::dont, 0xDE);
+    
+    auto begin = data.begin();
+    auto end   = data.end();
+    
+    auto result = telnetpp::parse(begin, end);
+    CPPUNIT_ASSERT_EQUAL(size_t{1}, result.size());
+    CPPUNIT_ASSERT_EQUAL(
+        expected0, boost::get<telnetpp::negotiation>(result[0]));
     CPPUNIT_ASSERT(begin == end);
 }

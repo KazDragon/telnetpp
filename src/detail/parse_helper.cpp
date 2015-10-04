@@ -35,8 +35,9 @@ parse_state parse_idle(
 // PARSE_IAC
 // ==========================================================================
 parse_state parse_iac(
-    u8                            byte, 
-    std::vector<telnetpp::token> &tokens)
+    u8                            byte,
+    std::vector<telnetpp::token> &tokens,
+    u8                           &iac_starter)
 {
     if (byte == telnetpp::iac)
     {
@@ -45,9 +46,34 @@ parse_state parse_iac(
     }
     else
     {
+        switch (byte)
+        {
+            case telnetpp::will : // fall-through
+            case telnetpp::wont : // fall-through
+            case telnetpp::do_  : // fall-through
+            case telnetpp::dont : // fall-through
+                iac_starter = byte;
+                return parse_state::negotiation;
+                
+            case telnetpp::sb :
+                return parse_state::subnegotiation;
+        }
+
         append_parsed_token(tokens, telnetpp::command(byte));
         return parse_state::idle;
     }
+}
+
+// ==========================================================================
+// PARSE_NEGOTIATION
+// ==========================================================================
+parse_state parse_negotiation(
+    telnetpp::u8        byte, 
+    std::vector<token> &tokens, 
+    telnetpp::u8        iac_starter)
+{
+    tokens.emplace_back(negotiation{iac_starter, byte});
+    return parse_state::idle;
 }
 
 namespace {
@@ -73,7 +99,7 @@ struct token_visitor : boost::static_visitor<>
     {
         if (tokens_.empty() || tokens_.back().type() != typeid(std::string))
         {
-            tokens_.push_back(text);
+            tokens_.emplace_back(text);
         }
         else
         {
@@ -86,7 +112,7 @@ struct token_visitor : boost::static_visitor<>
     //* =====================================================================
     void operator()(telnetpp::command const &cmd)
     {
-        tokens_.push_back(cmd);
+        tokens_.emplace_back(cmd);
     }
     
     //* =====================================================================
@@ -94,7 +120,7 @@ struct token_visitor : boost::static_visitor<>
     //* =====================================================================
     void operator()(telnetpp::negotiation const &neg)
     {
-        tokens_.push_back(neg);
+        tokens_.emplace_back(neg);
     }
 
     //* =====================================================================
@@ -102,7 +128,7 @@ struct token_visitor : boost::static_visitor<>
     //* =====================================================================
     void operator()(telnetpp::subnegotiation const &sub)
     {
-        tokens_.push_back(sub);
+        tokens_.emplace_back(sub);
     }
     
     std::vector<telnetpp::token> &tokens_;
