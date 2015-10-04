@@ -2,6 +2,7 @@
 #define TELNETPP_SUBNEGOTIATION_HPP_
 
 #include "telnetpp/core.hpp"
+#include <iosfwd>
 #include <vector>
 
 namespace telnetpp {
