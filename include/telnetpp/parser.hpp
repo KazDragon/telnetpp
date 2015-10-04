@@ -27,9 +27,7 @@ std::vector<token> parse(InputIterator1 &begin, InputIterator2 end)
     std::vector<token> result;
     
     detail::parse_state current_state(detail::parse_state::idle);
-    
-    std::string temp_string;
-    u8          iac_starter;
+    detail::parse_temps temps;
     
     auto position = begin;
     while (position != end)
@@ -42,12 +40,27 @@ std::vector<token> parse(InputIterator1 &begin, InputIterator2 end)
                 
             case detail::parse_state::iac :
                 current_state = detail::parse_iac(
-                    *position, result, iac_starter);
+                    *position, result, temps);
                 break;
                 
             case detail::parse_state::negotiation :
                 current_state = detail::parse_negotiation(
-                    *position, result, iac_starter);
+                    *position, result, temps);
+                break;
+                
+            case detail::parse_state::subnegotiation :
+                current_state = detail::parse_subnegotiation(
+                    *position, result, temps);
+                break;
+                
+            case detail::parse_state::subnegotiation_content :
+                current_state = detail::parse_subnegotiation_content(
+                    *position, result, temps);
+                break;
+                
+            case detail::parse_state::subnegotiation_content_iac :
+                current_state = detail::parse_subnegotiation_content_iac(
+                    *position, result, temps);
                 break;
                 
             default :

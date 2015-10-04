@@ -9,6 +9,14 @@ enum class parse_state
     iac,
     negotiation,
     subnegotiation,
+    subnegotiation_content,
+    subnegotiation_content_iac
+};
+
+struct parse_temps
+{
+    u8 id;
+    std::vector<u8> content;
 };
 
 }}

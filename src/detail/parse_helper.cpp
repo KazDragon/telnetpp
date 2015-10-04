@@ -37,7 +37,7 @@ parse_state parse_idle(
 parse_state parse_iac(
     u8                            byte,
     std::vector<telnetpp::token> &tokens,
-    u8                           &iac_starter)
+    parse_temps                  &temps)
 {
     if (byte == telnetpp::iac)
     {
@@ -52,7 +52,7 @@ parse_state parse_iac(
             case telnetpp::wont : // fall-through
             case telnetpp::do_  : // fall-through
             case telnetpp::dont : // fall-through
-                iac_starter = byte;
+                temps.id = byte;
                 return parse_state::negotiation;
                 
             case telnetpp::sb :
@@ -70,10 +70,64 @@ parse_state parse_iac(
 parse_state parse_negotiation(
     telnetpp::u8        byte, 
     std::vector<token> &tokens, 
-    telnetpp::u8        iac_starter)
+    parse_temps        &temps)
 {
-    tokens.emplace_back(negotiation{iac_starter, byte});
+    append_parsed_token(tokens, negotiation{temps.id, byte});
     return parse_state::idle;
+}
+
+// ==========================================================================
+// PARSE_SUBNEGOTIATION
+// ==========================================================================
+parse_state parse_subnegotiation(
+    telnetpp::u8        byte, 
+    std::vector<token> &tokens, 
+    parse_temps        &temps)
+{
+    temps.id = byte;
+    temps.content.clear();
+    return parse_state::subnegotiation_content;
+}
+
+// ==========================================================================
+// PARSE_SUBNEGOTIATION_CONTENT
+// ==========================================================================
+parse_state parse_subnegotiation_content(
+    telnetpp::u8        byte, 
+    std::vector<token> &tokens, 
+    parse_temps        &temps)
+{
+    if (byte == telnetpp::iac)
+    {
+        return parse_state::subnegotiation_content_iac;
+    }
+    else
+    {
+        temps.content.push_back(byte);
+        return parse_state::subnegotiation_content;
+    }
+}
+
+// ==========================================================================
+// PARSE_SUBNEGOTIATION_CONTENT_IAC
+// ==========================================================================
+parse_state parse_subnegotiation_content_iac(
+    telnetpp::u8        byte, 
+    std::vector<token> &tokens, 
+    parse_temps        &temps)
+{
+    if (byte == telnetpp::se)
+    {
+        append_parsed_token(
+            tokens,
+            subnegotiation(temps.id, temps.content));
+        return parse_state::idle;
+    }
+    else
+    {
+        temps.content.push_back(byte);
+        return parse_state::subnegotiation_content;
+    }
 }
 
 namespace {

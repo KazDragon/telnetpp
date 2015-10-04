@@ -34,6 +34,16 @@ private :
     subnegotiation_content content_;
 };
 
+//* =========================================================================
+/// \brief Comparison function for subnegotiations
+//* =========================================================================
+bool operator==(subnegotiation const &lhs, subnegotiation const &rhs);
+
+//* =========================================================================
+/// \brief Stream output for subnegotiations
+//* =========================================================================
+std::ostream &operator<<(std::ostream &out, subnegotiation const &cmd);
+
 }
 
 #endif

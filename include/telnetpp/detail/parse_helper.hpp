@@ -16,12 +16,28 @@ parse_state parse_idle(
 parse_state parse_iac(
     telnetpp::u8                  byte,
     std::vector<telnetpp::token> &tokens,
-    telnetpp::u8                 &iac_starter);
+    parse_temps                  &temps);
 
 parse_state parse_negotiation(
     telnetpp::u8                  byte,
     std::vector<telnetpp::token> &tokens,
-    telnetpp::u8                  iac_starter);
+    parse_temps                  &temps);
+
+parse_state parse_subnegotiation(
+    telnetpp::u8                  byte,
+    std::vector<telnetpp::token> &tokens,
+    parse_temps                  &temps);
+
+parse_state parse_subnegotiation_content(
+    telnetpp::u8                  byte,
+    std::vector<telnetpp::token> &tokens,
+    parse_temps                  &temps);
+
+parse_state parse_subnegotiation_content_iac(
+    telnetpp::u8                  byte,
+    std::vector<telnetpp::token> &tokens,
+    parse_temps                  &temps);
+
 }}
 
 #endif
