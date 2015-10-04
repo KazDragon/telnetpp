@@ -10,7 +10,7 @@ A C++ library for interacting with TELNET streams
 
 # Features / Roadmap / Progress
 
-1. [ ] Basic constants and structures for use with TELNET
+1. [x] Basic constants and structures for use with TELNET
   * [x] Constants such as IAC, SB, SE, WILL, WONT, DO, DONT
   * [x] Helper structures for commands, negotiations, and subnegotiations
   * [x] Parser that can convert a stream of bytes into a variant of commands, negotiations, subnegotiations and plain text.
