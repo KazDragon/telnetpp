@@ -16,7 +16,7 @@ namespace telnetpp {
 /// \param begin a reference to the start of the series.  This will be 
 ///        modified to be an iterator to the position after the last
 ///        completely-parsed token.
-/// \param end an iterator to the end of the series.
+/// \param end an iterator to one past the end of the series.
 /// \returns a collection of completely parsed tokens.
 //* =========================================================================
 template <class InputIterator1, class InputIterator2>
