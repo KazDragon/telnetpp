@@ -131,12 +131,12 @@ void parse_subnegotiation_content_iac(
 //* =========================================================================
 /// \brief A visitor that will append a token to a collection of tokens.
 //* =========================================================================
-struct token_visitor : boost::static_visitor<>
+struct parser_token_visitor : boost::static_visitor<>
 {
     //* =====================================================================
     /// \brief Constructor
     //* =====================================================================
-    token_visitor(std::vector<telnetpp::token> &tokens)
+    parser_token_visitor(std::vector<telnetpp::token> &tokens)
       : tokens_(tokens)
     {
     }
@@ -191,7 +191,7 @@ void append_parsed_token(
     std::vector<telnetpp::token> &tokens,
     telnetpp::token const &token)
 {
-    token_visitor visitor(tokens);
+    parser_token_visitor visitor(tokens);
     boost::apply_visitor(visitor, token);
 }
 
