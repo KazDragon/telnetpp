@@ -13,8 +13,8 @@ A C++ library for interacting with TELNET streams
 1. [ ] Basic constants and structures for use with TELNET
   * [x] Constants such as IAC, SB, SE, WILL, WONT, DO, DONT
   * [x] Helper structures for commands, negotiations, and subnegotiations
-  * [ ] Parser that can convert a stream of bytes into a variant of commands, negotiations, subnegotiations and plain text.
-  * [ ] Generator that can convert a stream of the above-mentioned variant into a stream of bytes.
+  * [x] Parser that can convert a stream of bytes into a variant of commands, negotiations, subnegotiations and plain text.
+  * [x] Generator that can convert a stream of the above-mentioned variant into a stream of bytes.
 2. [ ] A framework for managing TELNET
   * [ ] Structures for client and server options
   * [ ] A method of routing incoming negotiations and subnegotiations to the relevant options.
