@@ -9,7 +9,15 @@ namespace telnetpp { namespace options { namespace naws {
 // ==========================================================================
 std::vector<telnetpp::token> server::activate()
 {
-    return { telnetpp::negotiation(option, telnetpp::will) };
+    if (state_ == state::inactive)
+    {
+        state_ = state::activating;
+        return { telnetpp::negotiation(option, telnetpp::will) };
+    }
+    else
+    {
+        return {};
+    }
 }
 
 // ==========================================================================
@@ -25,7 +33,7 @@ std::vector<telnetpp::token> server::deactivate()
 // ==========================================================================
 bool server::is_active() const
 {
-    return false;
+    return state_ == state::active;
 }
 
 // ==========================================================================
@@ -33,7 +41,29 @@ bool server::is_active() const
 // ==========================================================================
 std::vector<telnetpp::token> server::negotiate(telnetpp::u8 request)
 {
-    return { telnetpp::negotiation(option, telnetpp::wont) };
+    switch(state_)
+    {
+        case state::inactive :
+            return { telnetpp::negotiation(option, telnetpp::wont) };
+            
+        case state::activating :
+            if (request == telnetpp::do_)
+            {
+                state_ = state::active;
+            }
+            else
+            {
+                state_ = state::inactive;
+            }
+            
+            return {};
+
+        case state::active :
+            return {};
+            
+        case state::deactivating :
+            return {};
+    }
 }
 
 

@@ -31,7 +31,15 @@ public :
     std::vector<telnetpp::token> negotiate(telnetpp::u8 request);
     
 private :
-    bool active_ = false;
+    enum class state
+    {
+        inactive,
+        activating,
+        active,
+        deactivating,
+    };
+    
+    state state_ = state::inactive;
 };
 
 }}}
