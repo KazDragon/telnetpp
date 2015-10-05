@@ -21,6 +21,7 @@ public :
         // TODO: CPPUNIT_TEST(activating_deactivate_responds_with_???);
 
         // Test the active state
+        CPPUNIT_TEST(activated_negotiate_do_responds_with_will);
     CPPUNIT_TEST_SUITE_END();
     
 private :
@@ -32,6 +33,8 @@ private :
     void activating_negotiate_do_responds_with_nothing_is_active();
     void activating_negotiate_dont_responds_with_nothing_is_inactive();
     void activating_activate_responds_with_nothing();
+    
+    void activated_negotiate_do_responds_with_will();
 };
 
 CPPUNIT_TEST_SUITE_REGISTRATION(naws_server_test);
@@ -41,7 +44,7 @@ void naws_server_test::deactivated_negotiate_do_responds_with_wont()
     telnetpp::options::naws::server server;
     
     expect_tokens(
-        { telnetpp::negotiation(telnetpp::options::naws::option, telnetpp::wont) },
+        { telnetpp::negotiation(telnetpp::wont, telnetpp::options::naws::option) },
         server.negotiate(telnetpp::do_));
     
     CPPUNIT_ASSERT_EQUAL(false, server.is_active());
@@ -53,7 +56,7 @@ void naws_server_test::deactivated_negotiate_dont_responds_with_wont()
     telnetpp::options::naws::server server;
     
     expect_tokens(
-        { telnetpp::negotiation(telnetpp::options::naws::option, telnetpp::wont) },
+        { telnetpp::negotiation(telnetpp::wont, telnetpp::options::naws::option) },
         server.negotiate(telnetpp::dont));
     
     CPPUNIT_ASSERT_EQUAL(false, server.is_active());
@@ -64,7 +67,7 @@ void naws_server_test::deactivated_activate_responds_with_will()
     telnetpp::options::naws::server server;
     
     expect_tokens(
-        { telnetpp::negotiation(telnetpp::options::naws::option, telnetpp::will) },
+        { telnetpp::negotiation(telnetpp::will, telnetpp::options::naws::option) },
         server.activate());
     
     CPPUNIT_ASSERT_EQUAL(false, server.is_active());
@@ -104,4 +107,16 @@ void naws_server_test::activating_activate_responds_with_nothing()
     
     expect_tokens({}, server.activate());
     CPPUNIT_ASSERT_EQUAL(false, server.is_active());
+}
+
+void naws_server_test::activated_negotiate_do_responds_with_will()
+{
+    telnetpp::options::naws::server server;
+    server.activate();
+    server.negotiate(telnetpp::do_);
+    
+    expect_tokens(
+        { telnetpp::negotiation(telnetpp::will, telnetpp::options::naws::option) },
+        server.negotiate(telnetpp::do_));
+    CPPUNIT_ASSERT_EQUAL(true, server.is_active());
 }

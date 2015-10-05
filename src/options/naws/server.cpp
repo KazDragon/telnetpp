@@ -12,7 +12,10 @@ std::vector<telnetpp::token> server::activate()
     if (state_ == state::inactive)
     {
         state_ = state::activating;
-        return { telnetpp::negotiation(option, telnetpp::will) };
+        return { 
+            telnetpp::negotiation(
+                telnetpp::will, telnetpp::options::naws::option) 
+        };
     }
     else
     {
@@ -44,7 +47,10 @@ std::vector<telnetpp::token> server::negotiate(telnetpp::u8 request)
     switch(state_)
     {
         case state::inactive :
-            return { telnetpp::negotiation(option, telnetpp::wont) };
+            return { 
+                telnetpp::negotiation(
+                    telnetpp::wont, telnetpp::options::naws::option)
+            };
             
         case state::activating :
             if (request == telnetpp::do_)
@@ -59,6 +65,11 @@ std::vector<telnetpp::token> server::negotiate(telnetpp::u8 request)
             return {};
 
         case state::active :
+            if (request == telnetpp::do_)
+            {
+                return { telnetpp::negotiation(telnetpp::will, option) };
+            }
+            
             return {};
             
         case state::deactivating :
