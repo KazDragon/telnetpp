@@ -28,7 +28,18 @@ std::vector<telnetpp::token> server::activate()
 // ==========================================================================
 std::vector<telnetpp::token> server::deactivate()
 {
-    return {};
+    if (state_ == state::active)
+    {
+        state_ = state::deactivating;
+        return {
+            telnetpp::negotiation(
+                telnetpp::wont, telnetpp::options::naws::option)
+        };
+    }
+    else
+    {
+        return {};
+    }
 }
 
 // ==========================================================================
@@ -69,10 +80,22 @@ std::vector<telnetpp::token> server::negotiate(telnetpp::u8 request)
             {
                 return { telnetpp::negotiation(telnetpp::will, option) };
             }
-            
-            return {};
+            else
+            {
+                state_ = state::inactive;
+                return { telnetpp::negotiation(telnetpp::wont, option) };
+            }
             
         case state::deactivating :
+            if (request == telnetpp::do_)
+            {
+                // NOTE: This is technically unspecified.  No client would send
+                // a DO when we're already active, and they're not allowed to
+                // send a DO after receiving a WONT.  But to be nice, we'll
+                // re-activate.
+                state_ = state::active;
+            }
+                
             return {};
     }
 }
