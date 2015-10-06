@@ -13,6 +13,7 @@ add_library(telnetpp
     src/detail/generate_helper.cpp
     src/detail/parse_helper.cpp
     src/negotiation.cpp
+    src/options/echo/server.cpp
     src/options/naws/server.cpp
     src/server_option.cpp
     src/subnegotiation.cpp
@@ -36,6 +37,7 @@ enable_testing()
 
 add_executable(telnetpp_tester 
     test/client_option_test.cpp
+    test/echo_server_test.cpp
     test/expect_tokens.cpp
     test/generator_test.cpp
     test/main.cpp

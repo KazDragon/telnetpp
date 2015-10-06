@@ -1,5 +1,5 @@
-#ifndef TELNETPP_client_OPTION
-#define TELNETPP_client_OPTION
+#ifndef TELNETPP_CLIENT_OPTION
+#define TELNETPP_CLIENT_OPTION
 
 #include "telnetpp/core.hpp"
 #include "telnetpp/token.hpp"
