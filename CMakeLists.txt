@@ -12,6 +12,7 @@ add_library(telnetpp
     src/detail/parse_helper.cpp
     src/negotiation.cpp
     src/options/naws/server.cpp
+    src/server_option.cpp
     src/subnegotiation.cpp
 )
 
@@ -33,6 +34,7 @@ add_executable(telnetpp_tester
     test/main.cpp
     test/naws_server_test.cpp    
     test/parser_test.cpp
+    test/server_option_test.cpp
 )
 
 target_compile_features(telnetpp_tester
