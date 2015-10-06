@@ -1,5 +1,5 @@
-#ifndef TELNET_OPTIONS_NAWS_HPP_
-#define TELNET_OPTIONS_NAWS_HPP_
+#ifndef TELNET_OPTIONS_ECHO_HPP_
+#define TELNET_OPTIONS_ECHO_HPP_
 
 #include "telnetpp/core.hpp"
 

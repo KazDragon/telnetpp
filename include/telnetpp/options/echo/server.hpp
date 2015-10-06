@@ -1,5 +1,5 @@
-#ifndef TELNETPP_OPTIONS_echo_SERVER
-#define TELNETPP_OPTIONS_echo_SERVER
+#ifndef TELNETPP_OPTIONS_ECHO_SERVER
+#define TELNETPP_OPTIONS_ECHO_SERVER
 
 #include "telnetpp/server_option.hpp"
 
