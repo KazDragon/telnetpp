@@ -48,6 +48,7 @@ add_executable(telnetpp_tester
     test/negotiation_router_test.cpp
     test/parser_test.cpp
     test/server_option_test.cpp
+    test/subnegotiation_router_test.cpp
 )
 
 target_compile_features(telnetpp_tester

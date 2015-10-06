@@ -3,9 +3,29 @@
 
 #include <functional>
 #include <map>
+#include <type_traits>
 #include <utility>
 
 namespace telnetpp {
+
+namespace detail {
+
+template <class T>
+struct default_result;
+
+template <class T>
+struct default_result
+{
+    static T get_result() { return T{}; }
+};
+
+template <>
+struct default_result<void>
+{
+    static void get_result() {}
+};
+
+}
 
 //* =========================================================================
 /// \class router
@@ -123,11 +143,14 @@ public :
         {
             return unregistered_route_(message);
         }
-
-        return {};
+        
+        // This garbage is just to return either a default-constructed Result,
+        // or void if Result is void.
+        return detail::default_result<Result>::get_result();
     }
 
 private :
+    
     registered_functions_map_type registered_functions_;
     function_type                 unregistered_route_;
 };

@@ -98,7 +98,7 @@ void negotiation_router_test::activating_option_returns_activation_sequence()
         telnetpp::dont, 
         telnetpp::options::echo::option);
     
-    register_route_from_negotiation_to_option(router, expected, server);
+    register_route_from_negotiation_to_option(router, telnetpp::dont, server);
     
     auto result = router(telnetpp::negotiation(
         telnetpp::dont, telnetpp::options::echo::option));

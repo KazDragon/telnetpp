@@ -42,13 +42,14 @@ class negotiation_router
 template <class NegotiableOption>
 void register_route_from_negotiation_to_option(
     negotiation_router &route,
-    negotiation        &neg,
+    u8                  request,
     NegotiableOption   &option)
 {
-    route.register_route(neg, [&option](auto &&neg)
-    {
-        return option.negotiate(neg.request());
-    });
+    route.register_route(negotiation(request, option.option()), 
+        [&option, request](auto &&neg)
+        {
+            return option.negotiate(request);
+        });
 }
 
 }
