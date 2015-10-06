@@ -19,6 +19,11 @@ std::vector<telnetpp::token> server::activate()
     }
     else
     {
+        if (state_ == state::active)
+        {
+            on_state_changed();
+        }
+        
         return {};
     }
 }
@@ -73,10 +78,12 @@ std::vector<telnetpp::token> server::negotiate(telnetpp::u8 request)
             if (request == telnetpp::do_)
             {
                 state_ = state::active;
+                on_state_changed();
             }
             else
             {
                 state_ = state::inactive;
+                on_state_changed();
             }
             
             return {};
@@ -100,6 +107,12 @@ std::vector<telnetpp::token> server::negotiate(telnetpp::u8 request)
                 // send a DO after receiving a WONT.  But to be nice, we'll
                 // re-activate.
                 state_ = state::active;
+                on_state_changed();
+            }
+            else if (request == telnetpp::dont)
+            {
+                state_ = state::inactive;
+                on_state_changed();
             }
                 
             return {};

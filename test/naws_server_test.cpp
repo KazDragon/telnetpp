@@ -15,21 +15,21 @@ public :
         CPPUNIT_TEST(deactivated_deactivate_responds_with_nothing_with_signal);
         
         // Test the activating state
-        CPPUNIT_TEST(activating_negotiate_do_responds_with_nothing_is_active);
-        CPPUNIT_TEST(activating_negotiate_dont_responds_with_nothing_is_inactive);
-        CPPUNIT_TEST(activating_activate_responds_with_nothing);
+        CPPUNIT_TEST(activating_negotiate_do_responds_with_nothing_is_active_with_signal);
+        CPPUNIT_TEST(activating_negotiate_dont_responds_with_nothing_is_inactive_with_signal);
+        CPPUNIT_TEST(activating_activate_responds_with_nothing_no_signal);
         // TODO: CPPUNIT_TEST(activating_deactivate_responds_with_???);
 
         // Test the active state
-        CPPUNIT_TEST(activated_negotiate_do_responds_with_will_is_active);
-        CPPUNIT_TEST(activated_negotiate_dont_responds_with_wont_is_inactive);
-        CPPUNIT_TEST(activated_activate_responds_with_nothing_is_active);
-        CPPUNIT_TEST(activated_deactive_responds_with_wont_is_inactive);
+        CPPUNIT_TEST(activated_negotiate_do_responds_with_will_is_active_no_signal);
+        CPPUNIT_TEST(activated_negotiate_dont_responds_with_wont_is_inactive_no_signal);
+        CPPUNIT_TEST(activated_activate_responds_with_nothing_is_active_with_signal);
+        CPPUNIT_TEST(activated_deactive_responds_with_wont_is_inactive_no_signal);
         
-        CPPUNIT_TEST(deactivating_negotiate_do_responds_with_nothing_is_active);
-        CPPUNIT_TEST(deactivating_negotiate_dont_responds_with_nothin_is_inactive);
+        CPPUNIT_TEST(deactivating_negotiate_do_responds_with_nothing_is_active_with_signal);
+        CPPUNIT_TEST(deactivating_negotiate_dont_responds_with_nothing_is_inactive_with_signal);
         //TODO: CPPUNIT_TEST(deactivating_activate_responds_with_???);
-        CPPUNIT_TEST(deactivating_deactivate_responds_with_nothing_is_inactive);
+        CPPUNIT_TEST(deactivating_deactivate_responds_with_nothing_is_inactive_no_signal);
     CPPUNIT_TEST_SUITE_END();
     
 private :
@@ -38,18 +38,18 @@ private :
     void deactivated_activate_responds_with_will_no_signal();
     void deactivated_deactivate_responds_with_nothing_with_signal();
     
-    void activating_negotiate_do_responds_with_nothing_is_active();
-    void activating_negotiate_dont_responds_with_nothing_is_inactive();
-    void activating_activate_responds_with_nothing();
+    void activating_negotiate_do_responds_with_nothing_is_active_with_signal();
+    void activating_negotiate_dont_responds_with_nothing_is_inactive_with_signal();
+    void activating_activate_responds_with_nothing_no_signal();
     
-    void activated_negotiate_do_responds_with_will_is_active();
-    void activated_negotiate_dont_responds_with_wont_is_inactive();
-    void activated_activate_responds_with_nothing_is_active();
-    void activated_deactive_responds_with_wont_is_inactive();
+    void activated_negotiate_do_responds_with_will_is_active_no_signal();
+    void activated_negotiate_dont_responds_with_wont_is_inactive_no_signal();
+    void activated_activate_responds_with_nothing_is_active_with_signal();
+    void activated_deactive_responds_with_wont_is_inactive_no_signal();
     
-    void deactivating_negotiate_do_responds_with_nothing_is_active();
-    void deactivating_negotiate_dont_responds_with_nothin_is_inactive();
-    void deactivating_deactivate_responds_with_nothing_is_inactive();
+    void deactivating_negotiate_do_responds_with_nothing_is_active_with_signal();
+    void deactivating_negotiate_dont_responds_with_nothing_is_inactive_with_signal();
+    void deactivating_deactivate_responds_with_nothing_is_inactive_no_signal();
 };
 
 CPPUNIT_TEST_SUITE_REGISTRATION(naws_server_test);
@@ -121,108 +121,178 @@ void naws_server_test::deactivated_deactivate_responds_with_nothing_with_signal(
     CPPUNIT_ASSERT_EQUAL(true, called);
 }
 
-void naws_server_test::activating_negotiate_do_responds_with_nothing_is_active()
+void naws_server_test::activating_negotiate_do_responds_with_nothing_is_active_with_signal()
 {
     telnetpp::options::naws::server server;
     server.activate();
+    
+    bool called = false;
+    server.on_state_changed.connect([&called]()
+    {
+        called = true;
+    });
     
     expect_tokens({}, server.negotiate(telnetpp::do_));
     CPPUNIT_ASSERT_EQUAL(true, server.is_active());
+    CPPUNIT_ASSERT_EQUAL(true, called);
 }
 
-void naws_server_test::activating_negotiate_dont_responds_with_nothing_is_inactive()
+void naws_server_test::activating_negotiate_dont_responds_with_nothing_is_inactive_with_signal()
 {
     telnetpp::options::naws::server server;
     server.activate();
     
+    bool called = false;
+    server.on_state_changed.connect([&called]()
+    {
+        called = true;
+    });
+
     expect_tokens({}, server.negotiate(telnetpp::dont));
     CPPUNIT_ASSERT_EQUAL(false, server.is_active());
+    CPPUNIT_ASSERT_EQUAL(true, called);
 }
 
-void naws_server_test::activating_activate_responds_with_nothing()
+void naws_server_test::activating_activate_responds_with_nothing_no_signal()
 {
     telnetpp::options::naws::server server;
     server.activate();
+    
+    bool called = false;
+    server.on_state_changed.connect([&called]()
+    {
+        called = true;
+    });
     
     expect_tokens({}, server.activate());
     CPPUNIT_ASSERT_EQUAL(false, server.is_active());
+    CPPUNIT_ASSERT_EQUAL(false, called);
 }
 
-void naws_server_test::activated_negotiate_do_responds_with_will_is_active()
+void naws_server_test::activated_negotiate_do_responds_with_will_is_active_no_signal()
 {
     telnetpp::options::naws::server server;
     server.activate();
     server.negotiate(telnetpp::do_);
+
+    bool called = false;
+    server.on_state_changed.connect([&called]()
+    {
+        called = true;
+    });
     
     expect_tokens(
         { telnetpp::negotiation(telnetpp::will, telnetpp::options::naws::option) },
         server.negotiate(telnetpp::do_));
     CPPUNIT_ASSERT_EQUAL(true, server.is_active());
+    CPPUNIT_ASSERT_EQUAL(false, called);
 }
 
-void naws_server_test::activated_negotiate_dont_responds_with_wont_is_inactive()
+void naws_server_test::activated_negotiate_dont_responds_with_wont_is_inactive_no_signal()
 {
     telnetpp::options::naws::server server;
     server.activate();
     server.negotiate(telnetpp::do_);
     
+    bool called = false;
+    server.on_state_changed.connect([&called]()
+    {
+        called = true;
+    });
+
     expect_tokens(
         { telnetpp::negotiation(telnetpp::wont, telnetpp::options::naws::option) },
         server.negotiate(telnetpp::dont));
     CPPUNIT_ASSERT_EQUAL(false, server.is_active());
+    CPPUNIT_ASSERT_EQUAL(false, called);
 }
 
-void naws_server_test::activated_activate_responds_with_nothing_is_active()
+void naws_server_test::activated_activate_responds_with_nothing_is_active_with_signal()
 {
     telnetpp::options::naws::server server;
     server.activate();
     server.negotiate(telnetpp::do_);
     
+    bool called = false;
+    server.on_state_changed.connect([&called]()
+    {
+        called = true;
+    });
+
     expect_tokens({}, server.activate());
     CPPUNIT_ASSERT_EQUAL(true, server.is_active());
+    CPPUNIT_ASSERT_EQUAL(true, called);
 }
 
-void naws_server_test::activated_deactive_responds_with_wont_is_inactive()
+void naws_server_test::activated_deactive_responds_with_wont_is_inactive_no_signal()
 {
     telnetpp::options::naws::server server;
     server.activate();
     server.negotiate(telnetpp::do_);
+    
+    bool called = false;
+    server.on_state_changed.connect([&called]()
+    {
+        called = true;
+    });
     
     expect_tokens(
         { telnetpp::negotiation(telnetpp::wont, telnetpp::options::naws::option) },
         server.deactivate());
     CPPUNIT_ASSERT_EQUAL(false, server.is_active());
+    CPPUNIT_ASSERT_EQUAL(false, called);
 }
 
-void naws_server_test::deactivating_negotiate_do_responds_with_nothing_is_active()
+void naws_server_test::deactivating_negotiate_do_responds_with_nothing_is_active_with_signal()
 {
     telnetpp::options::naws::server server;
     server.activate();
     server.negotiate(telnetpp::do_);
     server.deactivate();
+    
+    bool called = false;
+    server.on_state_changed.connect([&called]()
+    {
+        called = true;
+    });
     
     expect_tokens({}, server.negotiate(telnetpp::do_));
     CPPUNIT_ASSERT_EQUAL(true, server.is_active());
+    CPPUNIT_ASSERT_EQUAL(true, called);
 }
 
-void naws_server_test::deactivating_negotiate_dont_responds_with_nothin_is_inactive()
+void naws_server_test::deactivating_negotiate_dont_responds_with_nothing_is_inactive_with_signal()
 {
     telnetpp::options::naws::server server;
     server.activate();
     server.negotiate(telnetpp::do_);
     server.deactivate();
     
+    bool called = false;
+    server.on_state_changed.connect([&called]()
+    {
+        called = true;
+    });
+    
     expect_tokens({}, server.negotiate(telnetpp::dont));
     CPPUNIT_ASSERT_EQUAL(false, server.is_active());
+    CPPUNIT_ASSERT_EQUAL(true, called);
 }
 
-void naws_server_test::deactivating_deactivate_responds_with_nothing_is_inactive()
+void naws_server_test::deactivating_deactivate_responds_with_nothing_is_inactive_no_signal()
 {
     telnetpp::options::naws::server server;
     server.activate();
     server.negotiate(telnetpp::do_);
     server.deactivate();
 
+    bool called = false;
+    server.on_state_changed.connect([&called]()
+    {
+        called = true;
+    });
+    
     expect_tokens({}, server.deactivate());
     CPPUNIT_ASSERT_EQUAL(false, server.is_active());
+    CPPUNIT_ASSERT_EQUAL(false, called);
 }
