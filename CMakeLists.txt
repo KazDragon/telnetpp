@@ -4,14 +4,19 @@ cmake_policy(VERSION 3.2)
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules")
 include(cotire OPTIONAL)
-
 find_package(CppUnit)
+find_package(Boost)
 
 add_library(telnetpp
+    src/client_option.cpp
     src/command.cpp
     src/detail/generate_helper.cpp
     src/detail/parse_helper.cpp
     src/negotiation.cpp
+    src/options/echo/client.cpp
+    src/options/echo/server.cpp
+    src/options/naws/server.cpp
+    src/server_option.cpp
     src/subnegotiation.cpp
 )
 
@@ -31,10 +36,16 @@ endif()
 
 enable_testing()
 
-add_executable(telnetpp_tester
-    test/main.cpp
+add_executable(telnetpp_tester 
+    test/client_option_test.cpp
+    test/echo_client_test.cpp
+    test/echo_server_test.cpp
+    test/expect_tokens.cpp
     test/generator_test.cpp
+    test/main.cpp
+    test/naws_server_test.cpp    
     test/parser_test.cpp
+    test/server_option_test.cpp
 )
 
 target_compile_features(telnetpp_tester
@@ -44,9 +55,9 @@ target_compile_features(telnetpp_tester
 
 target_link_libraries(telnetpp_tester telnetpp cppunit)
 
-if (COMMAND cotire)
-    cotire(telnetpp_tester)
-endif()
+# NOTE: Do not cotire() telnetpp_tester for now.  It causes Boost.Signals2
+# to have various errors, and it appears to be difficult not to get it to
+# be ignored in the pch.
 
 add_test(telnetpp_test telnetpp_tester)
 

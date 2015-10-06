@@ -1,4 +1,5 @@
 #include "telnetpp/parser.hpp"
+#include "expect_tokens.hpp"
 #include <cppunit/TestFixture.h>
 #include <cppunit/extensions/HelperMacros.h>
 #include <vector>
@@ -476,7 +477,7 @@ void parser_test::subnegotiation_with_iac_iac_parses_to_iac()
 
 void parser_test::many_tokens_parses_to_many_tokens()
 {
-    std::vector<telnetpp::u8> data = {
+    telnetpp::u8 data[] = {
         'a', 'b', 'c', 0xFF, 0xFF, // string: abc\xFF\xFF
         0xFF, 0xF1,                // command: NOP
         0xFF, 0xF6,                // command: AYT
@@ -492,78 +493,24 @@ void parser_test::many_tokens_parses_to_many_tokens()
         0xFF, 0xFF, 0xFF, 0xFF, 'i'// text: \xFF\xFFi
     };
     
-    auto expected = std::vector<telnetpp::token>{
-        std::string("abc\xFF"),
-        telnetpp::command(telnetpp::nop),
-        telnetpp::command(telnetpp::ayt),
-        std::string("d"),
-        telnetpp::negotiation(telnetpp::will, 0x00),
-        telnetpp::negotiation(telnetpp::dont, 0x01),
-        telnetpp::subnegotiation(0x20, {'e', 'f'}),
-        telnetpp::subnegotiation(0xFF, {}),
-        std::string("gh"),
-        telnetpp::negotiation(telnetpp::wont, 0xFF),
-        std::string("\xFF\xFFi")
-    };
+    auto begin = std::begin(data);
+    auto end   = std::end(data);
     
-    struct meets_expectation : boost::static_visitor<>
-    {
-        meets_expectation(telnetpp::token const &token)
-          : token_(token)
+    expect_tokens(
         {
-        }
-
-        void operator()(std::string const &expected) const
-        {
-            CPPUNIT_ASSERT(token_.type() == typeid(expected));
-            CPPUNIT_ASSERT_EQUAL(
-                expected,
-                boost::get<std::string>(token_));
-        }
-        
-        void operator()(telnetpp::command const &expected) const
-        {
-            CPPUNIT_ASSERT(token_.type() == typeid(expected));
-            CPPUNIT_ASSERT_EQUAL(
-                expected,
-                boost::get<telnetpp::command>(token_));
-        }
-
-        void operator()(telnetpp::negotiation const &expected) const
-        {
-            CPPUNIT_ASSERT(token_.type() == typeid(expected));
-            CPPUNIT_ASSERT_EQUAL(
-                expected,
-                boost::get<telnetpp::negotiation>(token_));
-        }
-
-        void operator()(telnetpp::subnegotiation const &expected) const
-        {
-            CPPUNIT_ASSERT(token_.type() == typeid(expected));
-            CPPUNIT_ASSERT_EQUAL(
-                expected,
-                boost::get<telnetpp::subnegotiation>(token_));
-        }
-
-        telnetpp::token const &token_;
-    };
-
-    auto begin = data.begin();
-    auto end   = data.end();
+            std::string("abc\xFF"),
+            telnetpp::command(telnetpp::nop),
+            telnetpp::command(telnetpp::ayt),
+            std::string("d"),
+            telnetpp::negotiation(telnetpp::will, 0x00),
+            telnetpp::negotiation(telnetpp::dont, 0x01),
+            telnetpp::subnegotiation(0x20, {'e', 'f'}),
+            telnetpp::subnegotiation(0xFF, {}),
+            std::string("gh"),
+            telnetpp::negotiation(telnetpp::wont, 0xFF),
+            std::string("\xFF\xFFi") 
+        },
+        telnetpp::parse(begin, end));
     
-    auto results = telnetpp::parse(begin, end);
-    CPPUNIT_ASSERT_EQUAL(expected.size(), results.size());
-
-    auto current_expectation = expected.begin();
-    auto current_result      = results.begin();
-    
-    while (current_expectation != expected.end())
-    {
-        boost::apply_visitor(
-            meets_expectation(*current_expectation),
-            *current_result);
-        
-        ++current_expectation;
-        ++current_result;
-    }
+    CPPUNIT_ASSERT(begin == end);
 }
