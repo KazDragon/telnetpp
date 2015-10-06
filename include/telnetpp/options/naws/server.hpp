@@ -4,6 +4,7 @@
 #include "telnetpp/options/naws.hpp"
 #include "telnetpp/negotiation.hpp"
 #include "telnetpp/token.hpp"
+#include <boost/signals2/signal.hpp>
 #include <vector>
 
 namespace telnetpp { namespace options { namespace naws {
@@ -29,6 +30,8 @@ public :
     /// \brief Makes a request of the option
     //* =====================================================================
     std::vector<telnetpp::token> negotiate(telnetpp::u8 request);
+    
+    boost::signals2::signal<void ()> on_state_changed;
     
 private :
     enum class state

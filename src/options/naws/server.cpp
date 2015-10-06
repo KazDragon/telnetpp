@@ -28,6 +28,12 @@ std::vector<telnetpp::token> server::activate()
 // ==========================================================================
 std::vector<telnetpp::token> server::deactivate()
 {
+    if (state_ == state::inactive)
+    {
+        on_state_changed();
+        return {};
+    }
+    
     if (state_ == state::active)
     {
         state_ = state::deactivating;
