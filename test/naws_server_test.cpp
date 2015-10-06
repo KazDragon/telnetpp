@@ -1,4 +1,5 @@
 #include "telnetpp/options/naws/server.hpp"
+#include "telnetpp/options/naws.hpp"
 #include "telnetpp/protocol.hpp"
 #include "expect_tokens.hpp"
 #include <cppunit/TestFixture.h>

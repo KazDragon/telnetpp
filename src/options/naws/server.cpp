@@ -1,6 +1,5 @@
 #include "telnetpp/options/naws/server.hpp"
 #include "telnetpp/options/naws.hpp"
-#include "telnetpp/protocol.hpp"
 
 namespace telnetpp { namespace options { namespace naws {
 

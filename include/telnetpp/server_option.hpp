@@ -1,7 +1,7 @@
 #ifndef TELNETPP_SERVER_OPTION
 #define TELNETPP_SERVER_OPTION
 
-#include "telnetpp/negotiation.hpp"
+#include "telnetpp/core.hpp"
 #include "telnetpp/token.hpp"
 #include <boost/signals2.hpp>
 #include <vector>

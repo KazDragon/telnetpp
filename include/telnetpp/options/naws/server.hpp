@@ -1,11 +1,7 @@
 #ifndef TELNETPP_OPTIONS_NAWS_SERVER
 #define TELNETPP_OPTIONS_NAWS_SERVER
 
-#include "telnetpp/options/naws.hpp"
 #include "telnetpp/server_option.hpp"
-#include "telnetpp/token.hpp"
-#include <boost/signals2.hpp>
-#include <vector>
 
 namespace telnetpp { namespace options { namespace naws {
 
