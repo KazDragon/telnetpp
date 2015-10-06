@@ -310,8 +310,6 @@ void naws_server_test::valid_subnegotiation_signals_window_size_change()
     
     telnetpp::u16 width = 0, height = 0;
     
-    auto ld = [](auto, auto){};
-    
     server.on_window_size_changed.connect(
         [&width, &height](telnetpp::u16 new_width, telnetpp::u16 new_height)
         {
