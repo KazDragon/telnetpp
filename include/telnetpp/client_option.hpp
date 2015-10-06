@@ -54,7 +54,7 @@ private :
     /// state.
     //* =====================================================================
     virtual void handle_subnegotiation(
-        std::vector<telnetpp::u8> const &content) = 0;
+        std::vector<telnetpp::u8> const &content);
 
     enum class state
     {

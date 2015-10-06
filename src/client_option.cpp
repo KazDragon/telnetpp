@@ -138,4 +138,13 @@ void client_option::subnegotiate(std::vector<telnetpp::u8> const &content)
     }
 }
 
+// ==========================================================================
+// HANDLE_SUBNEGOTIATION
+// ==========================================================================
+void client_option::handle_subnegotiation(std::vector<telnetpp::u8> const&)
+{
+    // By default, do nothing.    
+}
+        
+
 }
