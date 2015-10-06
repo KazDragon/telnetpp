@@ -42,6 +42,14 @@ constexpr bool operator==(command const &lhs, command const &rhs)
 }
 
 //* =========================================================================
+/// \brief Comparison function for commands
+//* =========================================================================
+constexpr bool operator<(command const &lhs, command const &rhs)
+{
+    return lhs.value() < rhs.value();
+}
+
+//* =========================================================================
 /// \brief Stream output for commands
 //* =========================================================================
 std::ostream &operator<<(std::ostream &out, command const &cmd);

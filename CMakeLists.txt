@@ -37,6 +37,7 @@ endif()
 enable_testing()
 
 add_executable(telnetpp_tester 
+    test/command_router_fixture.cpp
     test/client_option_test.cpp
     test/echo_client_test.cpp
     test/echo_server_test.cpp
