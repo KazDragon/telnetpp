@@ -119,5 +119,15 @@ std::vector<telnetpp::token> server::negotiate(telnetpp::u8 request)
     }
 }
 
+// ==========================================================================
+// SUBNEGOTIATE
+// ==========================================================================
+void server::subnegotiate(std::vector<telnetpp::u8> const &content)
+{
+    telnetpp::u16 width  = content[0] << 8 | content[1];
+    telnetpp::u16 height = content[2] << 8 | content[3];
+    
+    on_window_size_changed(width, height);
+}
 
 }}}

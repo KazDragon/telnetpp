@@ -30,6 +30,8 @@ public :
         CPPUNIT_TEST(deactivating_negotiate_dont_responds_with_nothing_is_inactive_with_signal);
         //TODO: CPPUNIT_TEST(deactivating_activate_responds_with_???);
         CPPUNIT_TEST(deactivating_deactivate_responds_with_nothing_is_inactive_no_signal);
+        
+        CPPUNIT_TEST(valid_subnegotiation_signals_window_size_change);
     CPPUNIT_TEST_SUITE_END();
     
 private :
@@ -50,6 +52,8 @@ private :
     void deactivating_negotiate_do_responds_with_nothing_is_active_with_signal();
     void deactivating_negotiate_dont_responds_with_nothing_is_inactive_with_signal();
     void deactivating_deactivate_responds_with_nothing_is_inactive_no_signal();
+    
+    void valid_subnegotiation_signals_window_size_change();
 };
 
 CPPUNIT_TEST_SUITE_REGISTRATION(naws_server_test);
@@ -109,6 +113,7 @@ void naws_server_test::deactivated_activate_responds_with_will_no_signal()
 void naws_server_test::deactivated_deactivate_responds_with_nothing_with_signal()
 {
     telnetpp::options::naws::server server;
+
     bool called = false;
     server.on_state_changed.connect([&called]()
     {
@@ -295,4 +300,30 @@ void naws_server_test::deactivating_deactivate_responds_with_nothing_is_inactive
     expect_tokens({}, server.deactivate());
     CPPUNIT_ASSERT_EQUAL(false, server.is_active());
     CPPUNIT_ASSERT_EQUAL(false, called);
+}
+
+void naws_server_test::valid_subnegotiation_signals_window_size_change()
+{
+    telnetpp::options::naws::server server;
+    server.activate();
+    server.negotiate(telnetpp::do_);
+    
+    telnetpp::u16 width = 0, height = 0;
+    
+    auto ld = [](auto, auto){};
+    
+    server.on_window_size_changed.connect(
+        [&width, &height](telnetpp::u16 new_width, telnetpp::u16 new_height)
+        {
+            width = new_width;
+            height = new_height;
+        });
+
+    server.subnegotiate({0x01, 0x02, 0x03, 0x04});
+    
+    telnetpp::u16 const expected_width  = 0x01 << 8 | 0x02;
+    telnetpp::u16 const expected_height = 0x03 << 8 | 0x04;
+    
+    CPPUNIT_ASSERT_EQUAL(expected_width, width);
+    CPPUNIT_ASSERT_EQUAL(expected_height, height);
 }

@@ -4,7 +4,7 @@
 #include "telnetpp/options/naws.hpp"
 #include "telnetpp/negotiation.hpp"
 #include "telnetpp/token.hpp"
-#include <boost/signals2/signal.hpp>
+#include <boost/signals2.hpp>
 #include <vector>
 
 namespace telnetpp { namespace options { namespace naws {
@@ -31,6 +31,12 @@ public :
     //* =====================================================================
     std::vector<telnetpp::token> negotiate(telnetpp::u8 request);
     
+    //* =====================================================================
+    /// \brief Send a subnegotiation to the option.
+    //* =====================================================================
+    void subnegotiate(std::vector<telnetpp::u8> const &content);
+
+    boost::signals2::signal<void (telnetpp::u16, telnetpp::u16)> on_window_size_changed;
     boost::signals2::signal<void ()> on_state_changed;
     
 private :
