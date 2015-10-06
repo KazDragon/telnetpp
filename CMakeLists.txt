@@ -3,8 +3,9 @@ cmake_minimum_required(VERSION 3.2 FATAL_ERROR)
 cmake_policy(VERSION 3.2)
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules")
-
+include(cotire OPTIONAL)
 find_package(CppUnit)
+find_package(Boost)
 
 add_library(telnetpp
     src/command.cpp
@@ -26,6 +27,10 @@ target_compile_features(telnetpp
         cxx_relaxed_constexpr
 )
 
+if (COMMAND cotire)
+    cotire(telnetpp)
+endif()
+
 enable_testing()
 
 add_executable(telnetpp_tester 
@@ -43,6 +48,10 @@ target_compile_features(telnetpp_tester
         cxx_relaxed_constexpr)
 
 target_link_libraries(telnetpp_tester telnetpp cppunit)
+
+# NOTE: Do not cotire() telnetpp_tester for now.  It causes Boost.Signals2
+# to have various errors, and it appears to be difficult not to get it to
+# be ignored in the pch.
 
 add_test(telnetpp_test telnetpp_tester)
 
