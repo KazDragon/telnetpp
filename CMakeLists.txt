@@ -8,6 +8,7 @@ find_package(CppUnit)
 find_package(Boost)
 
 add_library(telnetpp
+    src/client_option.cpp
     src/command.cpp
     src/detail/generate_helper.cpp
     src/detail/parse_helper.cpp
@@ -34,6 +35,7 @@ endif()
 enable_testing()
 
 add_executable(telnetpp_tester 
+    test/client_option_test.cpp
     test/expect_tokens.cpp
     test/generator_test.cpp
     test/main.cpp
