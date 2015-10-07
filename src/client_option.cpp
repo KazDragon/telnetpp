@@ -33,10 +33,12 @@ std::vector<telnetpp::token> client_option::activate()
     {
         if (state_ == state::active)
         {
-            on_state_changed();
+            return on_state_changed();
         }
-        
-        return {};
+        else
+        {
+            return {};
+        }
     }
 }
 
@@ -47,8 +49,7 @@ std::vector<telnetpp::token> client_option::deactivate()
 {
     if (state_ == state::inactive)
     {
-        on_state_changed();
-        return {};
+        return on_state_changed();
     }
     
     if (state_ == state::active)
@@ -86,12 +87,12 @@ std::vector<telnetpp::token> client_option::negotiate(telnetpp::u8 request)
             if (request == telnetpp::will)
             {
                 state_ = state::active;
-                on_state_changed();
+                return on_state_changed();
             }
-            else
+            else if (request == telnetpp::wont)
             {
                 state_ = state::inactive;
-                on_state_changed();
+                return on_state_changed();
             }
             
             return {};
@@ -115,12 +116,12 @@ std::vector<telnetpp::token> client_option::negotiate(telnetpp::u8 request)
                 // send a WILL after receiving a DONT.  But to be nice, we'll
                 // re-activate.
                 state_ = state::active;
-                on_state_changed();
+                return on_state_changed();
             }
             else if (request == telnetpp::wont)
             {
                 state_ = state::inactive;
-                on_state_changed();
+                return on_state_changed();
             }
                 
             return {};
@@ -130,20 +131,27 @@ std::vector<telnetpp::token> client_option::negotiate(telnetpp::u8 request)
 // ==========================================================================
 // SUBNEGOTIATE
 // ==========================================================================
-void client_option::subnegotiate(std::vector<telnetpp::u8> const &content)
+std::vector<telnetpp::token> client_option::subnegotiate(
+    std::vector<telnetpp::u8> const &content)
 {
     if (state_ == state::active)
     {
-        handle_subnegotiation(content);
+        return handle_subnegotiation(content);
+    }
+    else
+    {
+        return {};
     }
 }
 
 // ==========================================================================
 // HANDLE_SUBNEGOTIATION
 // ==========================================================================
-void client_option::handle_subnegotiation(std::vector<telnetpp::u8> const&)
+std::vector<telnetpp::token> client_option::handle_subnegotiation(
+    std::vector<telnetpp::u8> const&)
 {
-    // By default, do nothing.    
+    // By default, do nothing.   
+    return {};
 }
         
 

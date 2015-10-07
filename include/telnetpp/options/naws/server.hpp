@@ -12,14 +12,17 @@ public :
     //* =====================================================================
     server();
 
-    boost::signals2::signal<void (telnetpp::u16, telnetpp::u16)> on_window_size_changed;
+    boost::signals2::signal<
+        std::vector<telnetpp::token> (telnetpp::u16, telnetpp::u16),
+        telnetpp::token_combiner
+    > on_window_size_changed;
 
 private :
     //* =====================================================================
     /// \brief Handle a negotiation that has been received in the active
     /// state.
     //* =====================================================================
-    void handle_subnegotiation(
+    std::vector<telnetpp::token> handle_subnegotiation(
         std::vector<telnetpp::u8> const &content) override;
 
 };

@@ -103,9 +103,11 @@ void subnegotiation_router_test::routing_subnegotiation_returns_subnegotiation_r
     telnetpp::u16 height = 0;
     server.on_window_size_changed.connect(
         [&width, &height](auto new_width, auto new_height)
+            -> std::vector<telnetpp::token>
         {
             width = new_width;
             height = new_height;
+            return {};
         });
     
     router(telnetpp::subnegotiation(
