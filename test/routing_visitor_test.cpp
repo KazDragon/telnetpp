@@ -108,9 +108,10 @@ void routing_visitor_test::negotiation_routes_to_negotiation_router()
     
     bool state_changed = false;
     server.on_state_changed.connect(
-        [&state_changed]
+        [&state_changed]() -> std::vector<telnetpp::token>
         {
             state_changed = true;
+            return {};
         });
     
     telnetpp::register_route_from_negotiation_to_option(
@@ -148,9 +149,11 @@ void routing_visitor_test::subnegotiation_routes_to_subnegotiation_router()
     telnetpp::u16 height = 0;
     server.on_window_size_changed.connect(
         [&width, &height](auto &&new_width, auto &&new_height)
+            -> std::vector<telnetpp::token>
         {
             width = new_width;
             height = new_height;
+            return {};
         });
         
     telnetpp::register_route_from_subnegotiation_to_option(

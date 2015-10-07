@@ -36,9 +36,11 @@ void naws_server_test::valid_subnegotiation_signals_window_size_change()
     
     server.on_window_size_changed.connect(
         [&width, &height](telnetpp::u16 new_width, telnetpp::u16 new_height)
+            -> std::vector<telnetpp::token>
         {
             width = new_width;
             height = new_height;
+            return {};
         });
 
     server.subnegotiate({0x01, 0x02, 0x03, 0x04});
