@@ -5,6 +5,8 @@
 #include <cppunit/TestFixture.h>
 #include <cppunit/extensions/HelperMacros.h>
 
+#include <iostream>
+
 class routing_visitor_test : public CppUnit::TestFixture
 {
 public :
@@ -14,6 +16,7 @@ public :
         CPPUNIT_TEST(command_routes_to_command_router);
         CPPUNIT_TEST(negotiation_routes_to_negotiation_router);
         CPPUNIT_TEST(subnegotiation_routes_to_subnegotiation_router);
+        CPPUNIT_TEST(subnegotiation_accumulates_responses);
     CPPUNIT_TEST_SUITE_END();
 
 private :
@@ -22,6 +25,7 @@ private :
     void command_routes_to_command_router();
     void negotiation_routes_to_negotiation_router();
     void subnegotiation_routes_to_subnegotiation_router();
+    void subnegotiation_accumulates_responses();
 };
 
 CPPUNIT_TEST_SUITE_REGISTRATION(routing_visitor_test);
@@ -180,4 +184,52 @@ void routing_visitor_test::subnegotiation_routes_to_subnegotiation_router()
     
     CPPUNIT_ASSERT_EQUAL(expected_width, width);
     CPPUNIT_ASSERT_EQUAL(expected_height, height);
+}
+
+void routing_visitor_test::subnegotiation_accumulates_responses()
+{
+    telnetpp::command_router cmd_router;
+    telnetpp::negotiation_router neg_router;
+    telnetpp::subnegotiation_router sub_router;
+    telnetpp::options::naws::server server;
+    server.activate();
+    server.negotiate(telnetpp::do_);
+
+    server.on_window_size_changed.connect(
+        [&server](auto &&, auto &&)
+            -> std::vector<telnetpp::token>
+        {
+            auto result = server.deactivate();
+            std::cout << "\nassert result size = " << result.size() << std::endl;
+            return result;
+        });
+        
+    telnetpp::register_route_from_subnegotiation_to_option(
+        sub_router, server);
+        
+    telnetpp::routing_visitor visitor(
+        [](auto &&) -> std::vector<telnetpp::token>
+        {
+            return {};
+        },
+        cmd_router,
+        neg_router,
+        sub_router);
+
+    telnetpp::token sub_token(
+        telnetpp::subnegotiation(
+            telnetpp::options::naws::option,
+            {0, 80, 0, 24}));
+
+    auto result = boost::apply_visitor(visitor, sub_token);
+
+    std::cout << "\nassert result sizex = " << result.size() << std::endl;
+    telnetpp::negotiation expected(
+        telnetpp::wont, telnetpp::options::naws::option);
+    
+    CPPUNIT_ASSERT_EQUAL(size_t(1), result.size());
+    /*
+    CPPUNIT_ASSERT_EQUAL(
+        expected, 
+        boost::get<telnetpp::negotiation>(result[0]));*/
 }

@@ -53,8 +53,7 @@ std::vector<token> routing_visitor::operator()(negotiation const &neg)
 // ==========================================================================
 std::vector<token> routing_visitor::operator()(subnegotiation const &sub)
 {
-    subnegotiation_router_(sub);
-    return {};
+    return subnegotiation_router_(sub);
 }
 
 }
