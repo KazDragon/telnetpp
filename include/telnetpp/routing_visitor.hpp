@@ -23,7 +23,7 @@ public :
     std::vector<token> operator()(std::string const &text);
     std::vector<token> operator()(command const &cmd);
     std::vector<token> operator()(negotiation const &neg);
-    std::vector<token> operator()(subnegoiation const &sub);
+    std::vector<token> operator()(subnegotiation const &sub);
     
 private :
     std::function<std::vector<token> (std::string const &)> on_text_;
