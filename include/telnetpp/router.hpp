@@ -8,25 +8,6 @@
 
 namespace telnetpp {
 
-namespace detail {
-
-template <class T>
-struct default_result;
-
-template <class T>
-struct default_result
-{
-    static T get_result() { return T{}; }
-};
-
-template <>
-struct default_result<void>
-{
-    static void get_result() {}
-};
-
-}
-
 //* =========================================================================
 /// \class router
 /// \brief A class template to route messages.
@@ -146,7 +127,7 @@ public :
         
         // This garbage is just to return either a default-constructed Result,
         // or void if Result is void.
-        return detail::default_result<Result>::get_result();
+        return {};
     }
 
 private :
