@@ -14,12 +14,13 @@ server::server()
 // ==========================================================================
 // HANDLE_SUBNEGOTIATION
 // ==========================================================================
-void server::handle_subnegotiation(std::vector<telnetpp::u8> const &content)
+std::vector<telnetpp::token> server::handle_subnegotiation(
+    std::vector<telnetpp::u8> const &content)
 {
     telnetpp::u16 width  = content[0] << 8 | content[1];
     telnetpp::u16 height = content[2] << 8 | content[3];
     
-    on_window_size_changed(width, height);
+    return on_window_size_changed(width, height);
 }
 
 }}}

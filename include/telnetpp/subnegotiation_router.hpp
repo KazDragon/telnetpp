@@ -24,7 +24,7 @@ class subnegotiation_router
   : public router<
         u8,
         subnegotiation,
-        void,
+        std::vector<token>,
         detail::subnegotiation_router_key_from_message_policy
     >
 {
@@ -35,10 +35,11 @@ void register_route_from_subnegotiation_to_option(
     subnegotiation_router &route,
     SubnegotiableOption   &option)
 {
-    route.register_route(option.option(), [&option](auto &&sub)
-    {
-        option.subnegotiate(sub.content());
-    });
+    route.register_route(option.option(), 
+        [&option](auto &&sub)
+        {
+            return option.subnegotiate(sub.content());
+        });
 }
 
 }

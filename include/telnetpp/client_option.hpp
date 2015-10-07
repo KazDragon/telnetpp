@@ -43,17 +43,20 @@ public :
     //* =====================================================================
     /// \brief Send a subnegotiation to the option.
     //* =====================================================================
-    void subnegotiate(std::vector<telnetpp::u8> const &content);
+    std::vector<telnetpp::token> subnegotiate(
+        std::vector<telnetpp::u8> const &content);
 
-    boost::signals2::signal<void (telnetpp::u16, telnetpp::u16)> on_window_size_changed;
-    boost::signals2::signal<void ()> on_state_changed;
+    boost::signals2::signal<
+        std::vector<token> (),
+        token_combiner
+    > on_state_changed;
     
 private :
     //* =====================================================================
     /// \brief Handle a negotiation that has been received in the active
     /// state.
     //* =====================================================================
-    virtual void handle_subnegotiation(
+    virtual std::vector<telnetpp::token> handle_subnegotiation(
         std::vector<telnetpp::u8> const &content);
 
     enum class state
