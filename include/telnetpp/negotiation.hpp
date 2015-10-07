@@ -54,6 +54,15 @@ constexpr bool operator==(negotiation const &lhs, negotiation const &rhs)
 }
 
 //* =========================================================================
+/// \brief Ordering function for negotiations
+//* =========================================================================
+constexpr bool operator<(negotiation const &lhs, negotiation const &rhs)
+{
+    return std::make_pair(lhs.request(), lhs.option())
+         < std::make_pair(rhs.request(), rhs.option());
+}
+
+//* =========================================================================
 /// \brief Stream output for negotiations
 //* =========================================================================
 std::ostream &operator<<(std::ostream &out, negotiation const &cmd);
