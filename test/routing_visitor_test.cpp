@@ -195,11 +195,8 @@ void routing_visitor_test::subnegotiation_accumulates_responses()
 
     server.on_window_size_changed.connect(
         [&server](auto &&, auto &&)
-            -> std::vector<telnetpp::token>
         {
-            auto result = server.deactivate();
-            std::cout << "\nassert result size = " << result.size() << std::endl;
-            return result;
+            return server.deactivate();
         });
         
     telnetpp::register_route_from_subnegotiation_to_option(
@@ -221,7 +218,6 @@ void routing_visitor_test::subnegotiation_accumulates_responses()
 
     auto result = boost::apply_visitor(visitor, sub_token);
 
-    std::cout << "\nassert result sizex = " << result.size() << std::endl;
     telnetpp::negotiation expected(
         telnetpp::wont, telnetpp::options::naws::option);
     
