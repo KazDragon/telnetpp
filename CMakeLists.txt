@@ -15,6 +15,7 @@ add_library(telnetpp
     src/negotiation.cpp
     src/options/echo/client.cpp
     src/options/echo/server.cpp
+    src/options/naws/client.cpp
     src/options/naws/server.cpp
     src/routing_visitor.cpp
     src/server_option.cpp
@@ -45,6 +46,7 @@ add_executable(telnetpp_tester
     test/expect_tokens.cpp
     test/generator_test.cpp
     test/main.cpp
+    test/naws_client_test.cpp
     test/naws_server_test.cpp    
     test/negotiation_router_test.cpp
     test/parser_test.cpp
