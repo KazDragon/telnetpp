@@ -5,6 +5,9 @@
 
 namespace telnetpp { namespace options { namespace echo {
 
+//* =========================================================================
+/// \brief An implementation of the server side of the Telnet echo option.
+//* =========================================================================
 class server : public telnetpp::server_option {
 public :
     //* =====================================================================

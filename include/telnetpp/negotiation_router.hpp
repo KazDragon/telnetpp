@@ -22,7 +22,9 @@ struct negotiation_router_key_from_message_policy
 
 //* =========================================================================
 /// \brief A structure that can route incoming negotiations to their 
-/// associated options.  This can be used as a multiplexer between incoming
+/// associated options.  
+///
+/// This can be used as a multiplexer between incoming
 /// negotiations and the set of supported client and server options.
 /// =========================================================================
 class negotiation_router

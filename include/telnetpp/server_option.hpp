@@ -8,6 +8,17 @@
 
 namespace telnetpp {
 
+//* =========================================================================
+/// \brief A class that represents a Telnet option's server side.  That is,
+/// the side that received DO and DONT negotiations and sends WILL and WONT
+/// negotiations.
+/// 
+/// \par
+/// Note that the usage of server in this context may disagree with a
+/// particular option's RFC specification.  The determination of what is a
+/// server and what is a client is not rigorously applies throughout the
+/// RFCs, so consider this merely an implementation detail of this library.
+//* =========================================================================
 class server_option {
 public :
     //* =====================================================================
@@ -70,6 +81,17 @@ private :
     state state_ = state::inactive;
     u8 option_;
 };
+
+class negotiation_router;
+class subnegotiation_router;
+
+//* =========================================================================
+/// \brief Registers an option with negotiation and subnegotiation routers.
+//* =========================================================================
+void register_server_option(
+    server_option &option,
+    negotiation_router &neg_router,
+    subnegotiation_router &sub_router);
 
 }
 
