@@ -7,6 +7,9 @@
 
 namespace telnetpp { namespace options { namespace naws {
 
+//* =========================================================================
+/// \brief An implementation of the client side of the Telnet NAWS option.
+//* =========================================================================
 class client : public telnetpp::client_option {
 public :
     //* =====================================================================

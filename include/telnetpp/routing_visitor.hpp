@@ -10,6 +10,10 @@
 
 namespace telnetpp {
     
+//* =========================================================================
+/// \brief A structure that can be used to distribute incoming Telnet tokens
+/// amongst known routers.
+//* =========================================================================
 class routing_visitor 
   : public boost::static_visitor<std::vector<token>>
 {

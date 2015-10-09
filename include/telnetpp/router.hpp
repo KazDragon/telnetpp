@@ -1,6 +1,7 @@
 #ifndef TELNETPP_ROUTER_HPP_
 #define TELNETPP_ROUTER_HPP_
 
+#include "telnetpp/detail/return_default.hpp"
 #include <functional>
 #include <map>
 #include <type_traits>
@@ -127,7 +128,7 @@ public :
         
         // This garbage is just to return either a default-constructed Result,
         // or void if Result is void.
-        return {};
+        return detail::return_default_constructed<Result>{}();
     }
 
 private :
