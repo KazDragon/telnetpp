@@ -32,6 +32,11 @@ public :
     telnetpp::u8 option() const;
     
     //* =====================================================================
+    /// \brief Allows the option to be activated by the remote end.
+    //* =====================================================================
+    void set_activatable();
+
+    //* =====================================================================
     /// \brief Activates the option.
     //* =====================================================================
     std::vector<telnetpp::token> activate();
@@ -78,8 +83,9 @@ private :
         deactivating,
     };
     
-    state state_ = state::inactive;
-    u8 option_;
+    state state_       = state::inactive;
+    bool  activatable_ = false;
+    u8    option_;
 };
 
 class negotiation_router;
