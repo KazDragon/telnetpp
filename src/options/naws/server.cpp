@@ -17,10 +17,17 @@ server::server()
 std::vector<telnetpp::token> server::handle_subnegotiation(
     std::vector<telnetpp::u8> const &content)
 {
-    telnetpp::u16 width  = content[0] << 8 | content[1];
-    telnetpp::u16 height = content[2] << 8 | content[3];
+    if (content.size() == sizeof(telnetpp::u16) + sizeof(telnetpp::u16))
+    {
+        telnetpp::u16 width  = content[0] << 8 | content[1];
+        telnetpp::u16 height = content[2] << 8 | content[3];
     
-    return on_window_size_changed(width, height);
+        return on_window_size_changed(width, height);
+    }
+    else
+    {
+        return {};
+    }
 }
 
 }}}

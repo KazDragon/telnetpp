@@ -11,11 +11,13 @@ public :
     CPPUNIT_TEST_SUITE(naws_server_test);
         CPPUNIT_TEST(option_is_naws);
         CPPUNIT_TEST(valid_subnegotiation_signals_window_size_change);
+        CPPUNIT_TEST(short_subnegotiation_is_ignored);
     CPPUNIT_TEST_SUITE_END();
     
 private :
     void option_is_naws();
     void valid_subnegotiation_signals_window_size_change();
+    void short_subnegotiation_is_ignored();
 };
 
 CPPUNIT_TEST_SUITE_REGISTRATION(naws_server_test);
@@ -50,4 +52,23 @@ void naws_server_test::valid_subnegotiation_signals_window_size_change()
     
     CPPUNIT_ASSERT_EQUAL(expected_width, width);
     CPPUNIT_ASSERT_EQUAL(expected_height, height);
+}
+
+void naws_server_test::short_subnegotiation_is_ignored()
+{
+    telnetpp::options::naws::server server;
+    server.activate();
+    server.negotiate(telnetpp::do_);
+    
+    bool called = false;
+    server.on_window_size_changed.connect(
+        [&called](auto &&, auto&&) -> std::vector<telnetpp::token> 
+        {
+            called = true;
+            return {};
+        });
+   
+   server.subnegotiate({0x01, 0x02, 0x03});
+   
+   CPPUNIT_ASSERT_EQUAL(false, called);
 }
