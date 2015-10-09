@@ -74,8 +74,20 @@ telnetpp::negotiation_router negotiation_router;
 telnetpp::subnegotiation_router subnegotiation_router;
 
 // Various targets register with the routers, including text and command handlers,
-// and server and client options.
+// and server and client options.  For example...
+telnetpp::options::naws::server naws_server;
+naws_server.on_window_size_changed.connect(
+    [](telnetpp::u16 width, telnetpp::u16 height) -> std::vector<telnetpp::token>
+    {
+        // call my function that knows about screen size changes, return
+        // whatever result is appropriate.
+    });
+    
+// This function registers the naws_server's desired messages with the routers above.
+telnetpp::register_server_option(naws_server, negotiation_router, subnegotiation_router);
 
+// Create a visitor that can take streams of incoming tokens and ship them off to the
+// correct routers.
 telnetpp::routing_visitor visitor(
     on_text,
     command_router,
