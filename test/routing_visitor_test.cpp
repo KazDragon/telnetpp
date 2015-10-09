@@ -5,8 +5,6 @@
 #include <cppunit/TestFixture.h>
 #include <cppunit/extensions/HelperMacros.h>
 
-#include <iostream>
-
 class routing_visitor_test : public CppUnit::TestFixture
 {
 public :
@@ -228,8 +226,7 @@ void routing_visitor_test::subnegotiation_accumulates_responses()
         telnetpp::wont, telnetpp::options::naws::option);
     
     CPPUNIT_ASSERT_EQUAL(size_t(1), result.size());
-    /*
     CPPUNIT_ASSERT_EQUAL(
         expected, 
-        boost::get<telnetpp::negotiation>(result[0]));*/
+        boost::get<telnetpp::negotiation>(result[0]));
 }
