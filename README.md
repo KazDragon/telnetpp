@@ -21,7 +21,7 @@ A C++ library for interacting with TELNET streams
 3. [ ] Reference implementations of various standard options
   * [x] Arbitrary "subnegotiationless" options
   * [x] Echo
-  * [ ] NAWS
+  * [x] NAWS
   * [ ] Terminal Type
 
 # Status
