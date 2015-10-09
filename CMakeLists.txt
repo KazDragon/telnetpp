@@ -17,6 +17,7 @@ add_library(telnetpp
     src/options/echo/server.cpp
     src/options/naws/client.cpp
     src/options/naws/server.cpp
+    src/options/terminal_type/client.cpp
     src/routing_visitor.cpp
     src/server_option.cpp
     src/subnegotiation.cpp
@@ -53,6 +54,7 @@ add_executable(telnetpp_tester
     test/routing_visitor_test.cpp
     test/server_option_test.cpp
     test/subnegotiation_router_test.cpp
+    test/terminal_type_client_test.cpp
 )
 
 target_compile_features(telnetpp_tester
