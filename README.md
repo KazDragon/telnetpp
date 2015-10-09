@@ -18,11 +18,11 @@ A C++ library for interacting with TELNET streams
 2. [x] A framework for managing TELNET
   * [x] Structures for client and server options
   * [x] A method of routing incoming negotiations and subnegotiations to the relevant options.
-3. [ ] Reference implementations of various standard options
+3. [x] Reference implementations of various standard options
   * [x] Arbitrary "subnegotiationless" options
   * [x] Echo
   * [x] NAWS
-  * [ ] Terminal Type
+  * [x] Terminal Type
 
 # Status
 Telnet++ is automatically tested on:
