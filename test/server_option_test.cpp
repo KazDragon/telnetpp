@@ -16,6 +16,9 @@ public :
         CPPUNIT_TEST(deactivated_activate_responds_with_will_no_signal);
         CPPUNIT_TEST(deactivated_deactivate_responds_with_nothing_with_signal);
         
+        CPPUNIT_TEST(activatable_deactivated_negotiate_will_responds_with_do_with_signal);
+        CPPUNIT_TEST(activatable_deactivated_negotiate_wont_responds_with_dont_no_signal);
+        
         // Test the activating state
         CPPUNIT_TEST(activating_negotiate_do_responds_with_nothing_is_active_with_signal);
         CPPUNIT_TEST(activating_negotiate_dont_responds_with_nothing_is_inactive_with_signal);
@@ -44,6 +47,9 @@ private :
     void deactivated_negotiate_dont_responds_with_wont_no_signal();
     void deactivated_activate_responds_with_will_no_signal();
     void deactivated_deactivate_responds_with_nothing_with_signal();
+    
+    void activatable_deactivated_negotiate_will_responds_with_do_with_signal();
+    void activatable_deactivated_negotiate_wont_responds_with_dont_no_signal();
     
     void activating_negotiate_do_responds_with_nothing_is_active_with_signal();
     void activating_negotiate_dont_responds_with_nothing_is_inactive_with_signal();
@@ -172,6 +178,50 @@ void server_option_test::deactivated_deactivate_responds_with_nothing_with_signa
     
     CPPUNIT_ASSERT_EQUAL(false, server.is_active());
     CPPUNIT_ASSERT_EQUAL(true, called);
+}
+
+void server_option_test::activatable_deactivated_negotiate_will_responds_with_do_with_signal()
+{
+    fake_server_option server(0xA5);
+    server.set_activatable();
+    
+    bool called = false;
+    server.on_state_changed.connect(
+        [&called]() -> std::vector<telnetpp::token>
+        {
+            called = true;
+            return {};
+        });
+    
+    expect_tokens(
+        { telnetpp::negotiation(telnetpp::will, 0xA5) },
+        server.negotiate(telnetpp::do_));
+    
+    CPPUNIT_ASSERT_EQUAL(true, called);
+    CPPUNIT_ASSERT_EQUAL(true, server.is_active());
+
+}
+
+void server_option_test::activatable_deactivated_negotiate_wont_responds_with_dont_no_signal()
+{
+    fake_server_option server(0xA5);
+    server.set_activatable();
+    
+    bool called = false;
+    server.on_state_changed.connect(
+        [&called]() -> std::vector<telnetpp::token>
+        {
+            called = true;
+            return {};
+        });
+    
+    expect_tokens(
+        { telnetpp::negotiation(telnetpp::wont, 0xA5) }, 
+        server.negotiate(telnetpp::dont));
+    
+    CPPUNIT_ASSERT_EQUAL(false, called);
+    CPPUNIT_ASSERT_EQUAL(false, server.is_active());
+
 }
 
 void server_option_test::activating_negotiate_do_responds_with_nothing_is_active_with_signal()

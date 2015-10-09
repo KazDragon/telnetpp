@@ -22,6 +22,14 @@ u8 client_option::option() const
 }
 
 // ==========================================================================
+// SET_ACTIVATABLE
+// ==========================================================================
+void client_option::set_activatable()
+{
+    activatable_ = true;
+}
+
+// ==========================================================================
 // ACTIVATE
 // ==========================================================================
 std::vector<telnetpp::token> client_option::activate()
@@ -81,9 +89,20 @@ std::vector<telnetpp::token> client_option::negotiate(telnetpp::u8 request)
     switch(state_)
     {
         case state::inactive :
-            return { 
-                telnetpp::negotiation(telnetpp::dont, option_)
-            };
+            if (request == telnetpp::will && activatable_)
+            {
+                state_ = state::active;
+                auto response = on_state_changed();
+                response.insert(
+                    response.begin(),
+                    { telnetpp::negotiation(telnetpp::do_, option_) });
+                
+                return response;
+            }
+            else
+            {
+                return { telnetpp::negotiation(telnetpp::dont, option_) };
+            }
             
         case state::activating :
             if (request == telnetpp::will)
