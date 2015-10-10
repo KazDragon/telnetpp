@@ -47,40 +47,38 @@ if (COMMAND cotire)
     cotire(telnetpp)
 endif()
 
-if (CPPUNIT_FOUND)
-    enable_testing()
+enable_testing()
 
-    add_executable(telnetpp_tester 
-        test/command_router_test.cpp
-        test/client_option_test.cpp
-        test/echo_client_test.cpp
-        test/echo_server_test.cpp
-        test/expect_tokens.cpp
-        test/generator_test.cpp
-        test/main.cpp
-        test/naws_client_test.cpp
-        test/naws_server_test.cpp    
-        test/negotiation_router_test.cpp
-        test/parser_test.cpp
-        test/routing_visitor_test.cpp
-        test/server_option_test.cpp
-        test/subnegotiation_router_test.cpp
-        test/terminal_type_client_test.cpp
-    )
+add_executable(telnetpp_tester 
+    test/command_router_test.cpp
+    test/client_option_test.cpp
+    test/echo_client_test.cpp
+    test/echo_server_test.cpp
+    test/expect_tokens.cpp
+    test/generator_test.cpp
+    test/main.cpp
+    test/naws_client_test.cpp
+    test/naws_server_test.cpp    
+    test/negotiation_router_test.cpp
+    test/parser_test.cpp
+    test/routing_visitor_test.cpp
+    test/server_option_test.cpp
+    test/subnegotiation_router_test.cpp
+    test/terminal_type_client_test.cpp
+)
 
-    target_compile_features(telnetpp_tester
-        PUBLIC
-            cxx_strong_enums
-            cxx_relaxed_constexpr)
+target_compile_features(telnetpp_tester
+    PUBLIC
+        cxx_strong_enums
+        cxx_relaxed_constexpr)
 
-    target_link_libraries(telnetpp_tester telnetpp cppunit)
+target_link_libraries(telnetpp_tester telnetpp cppunit)
 
-    if (COMMAND cotire)
-        cotire(telnetpp_tester)
-    endif()
+# NOTE: Do not cotire() telnetpp_tester for now.  It causes Boost.Signals2
+# to have various errors, and it appears to be difficult not to get it to
+# be ignored in the pch.
 
-    add_test(telnetpp_test telnetpp_tester)
-endif()
+add_test(telnetpp_test telnetpp_tester)
 
 install(
     TARGETS
