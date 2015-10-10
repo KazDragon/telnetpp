@@ -10,18 +10,14 @@ class naws_client_test : public CppUnit::TestFixture
 public :
     CPPUNIT_TEST_SUITE(naws_client_test);
         CPPUNIT_TEST(option_is_naws);
-        CPPUNIT_TEST(activation_with_no_screen_size_sends_nothing);
-        CPPUNIT_TEST(setting_screen_size_when_not_activated_sends_nothing);
-        CPPUNIT_TEST(activation_with_screen_size_sends_screen_size);
-        CPPUNIT_TEST(setting_screen_size_when_activated_sends_screen_size);
+        CPPUNIT_TEST(valid_subnegotiation_signals_window_size_change);
+        CPPUNIT_TEST(short_subnegotiation_is_ignored);
     CPPUNIT_TEST_SUITE_END();
     
 private :
-    void option_is_naws();    
-    void activation_with_no_screen_size_sends_nothing();
-    void setting_screen_size_when_not_activated_sends_nothing();
-    void activation_with_screen_size_sends_screen_size();
-    void setting_screen_size_when_activated_sends_screen_size();
+    void option_is_naws();
+    void valid_subnegotiation_signals_window_size_change();
+    void short_subnegotiation_is_ignored();
 };
 
 CPPUNIT_TEST_SUITE_REGISTRATION(naws_client_test);
@@ -32,51 +28,47 @@ void naws_client_test::option_is_naws()
     CPPUNIT_ASSERT_EQUAL(telnetpp::options::naws::option, client.option());
 }
 
-void naws_client_test::activation_with_no_screen_size_sends_nothing()
-{
-    telnetpp::options::naws::client client;
-    client.activate();
-    auto result = client.negotiate(telnetpp::will);
-    
-    CPPUNIT_ASSERT_EQUAL(size_t{0}, result.size());
-}
-
-void naws_client_test::setting_screen_size_when_not_activated_sends_nothing()
-{
-    telnetpp::options::naws::client client;
-    auto result = client.set_window_size(80, 24);
-    
-    CPPUNIT_ASSERT_EQUAL(size_t{0}, result.size());
-}
-
-void naws_client_test::activation_with_screen_size_sends_screen_size()
-{
-    telnetpp::options::naws::client client;
-    client.set_window_size(80, 24);
-    client.activate();
-    
-    auto result = client.negotiate(telnetpp::will);
-    auto expected = telnetpp::subnegotiation(
-        telnetpp::options::naws::option, {0, 80, 0, 24});
-    
-    CPPUNIT_ASSERT_EQUAL(size_t{1}, result.size());
-    CPPUNIT_ASSERT_EQUAL(
-        expected, 
-        boost::get<telnetpp::subnegotiation>(result[0]));
-}
-
-void naws_client_test::setting_screen_size_when_activated_sends_screen_size()
+void naws_client_test::valid_subnegotiation_signals_window_size_change()
 {
     telnetpp::options::naws::client client;
     client.activate();
     client.negotiate(telnetpp::will);
-        
-    auto result = client.set_window_size(80, 24);
-    auto expected = telnetpp::subnegotiation(
-        telnetpp::options::naws::option, {0, 80, 0, 24});
     
-    CPPUNIT_ASSERT_EQUAL(size_t{1}, result.size());
-    CPPUNIT_ASSERT_EQUAL(
-        expected, 
-        boost::get<telnetpp::subnegotiation>(result[0]));
+    telnetpp::u16 width = 0, height = 0;
+    
+    client.on_window_size_changed.connect(
+        [&width, &height](telnetpp::u16 new_width, telnetpp::u16 new_height)
+            -> std::vector<telnetpp::token>
+        {
+            width = new_width;
+            height = new_height;
+            return {};
+        });
+
+    client.subnegotiate({0x01, 0x02, 0x03, 0x04});
+    
+    telnetpp::u16 const expected_width  = 0x01 << 8 | 0x02;
+    telnetpp::u16 const expected_height = 0x03 << 8 | 0x04;
+    
+    CPPUNIT_ASSERT_EQUAL(expected_width, width);
+    CPPUNIT_ASSERT_EQUAL(expected_height, height);
+}
+
+void naws_client_test::short_subnegotiation_is_ignored()
+{
+    telnetpp::options::naws::client client;
+    client.activate();
+    client.negotiate(telnetpp::will);
+    
+    bool called = false;
+    client.on_window_size_changed.connect(
+        [&called](auto &&, auto&&) -> std::vector<telnetpp::token> 
+        {
+            called = true;
+            return {};
+        });
+   
+   client.subnegotiate({0x01, 0x02, 0x03});
+   
+   CPPUNIT_ASSERT_EQUAL(false, called);
 }

@@ -1,5 +1,5 @@
 #include "telnetpp/subnegotiation_router.hpp"
-#include "telnetpp/options/naws/server.hpp"
+#include "telnetpp/options/naws/client.hpp"
 #include "telnetpp/options/naws.hpp"
 #include "telnetpp/protocol.hpp"
 #include <cppunit/TestFixture.h>
@@ -93,15 +93,15 @@ void subnegotiation_router_test::message_with_unregistered_key_goes_to_unregiste
 void subnegotiation_router_test::routing_subnegotiation_returns_subnegotiation_result()
 {
     telnetpp::subnegotiation_router router;
-    telnetpp::options::naws::server server;
-    server.activate();
-    server.negotiate(telnetpp::do_);
+    telnetpp::options::naws::client client;
+    client.activate();
+    client.negotiate(telnetpp::will);
     
-    register_route_from_subnegotiation_to_option(router, server);
+    register_route_from_subnegotiation_to_option(router, client);
     
     telnetpp::u16 width = 0;
     telnetpp::u16 height = 0;
-    server.on_window_size_changed.connect(
+    client.on_window_size_changed.connect(
         [&width, &height](auto new_width, auto new_height)
             -> std::vector<telnetpp::token>
         {

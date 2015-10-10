@@ -1,5 +1,5 @@
 #include "telnetpp/routing_visitor.hpp"
-#include "telnetpp/options/naws/server.hpp"
+#include "telnetpp/options/naws/client.hpp"
 #include "telnetpp/options/naws.hpp"
 #include "telnetpp/protocol.hpp"
 #include <cppunit/TestFixture.h>
@@ -105,18 +105,18 @@ void routing_visitor_test::negotiation_routes_to_negotiation_router()
     telnetpp::command_router cmd_router;
     telnetpp::negotiation_router neg_router;
     telnetpp::subnegotiation_router sub_router;
-    telnetpp::options::naws::server server;
-    server.activate();
+    telnetpp::options::naws::client client;
+    client.activate();
     
     bool state_changed = false;
-    server.on_state_changed.connect(
+    client.on_state_changed.connect(
         [&state_changed]() -> std::vector<telnetpp::token>
         {
             state_changed = true;
             return {};
         });
     
-    telnetpp::register_server_option(server, neg_router, sub_router);
+    telnetpp::register_client_option(client, neg_router, sub_router);
         
     telnetpp::routing_visitor visitor(
         [](auto &&) -> std::vector<telnetpp::token>
@@ -129,12 +129,12 @@ void routing_visitor_test::negotiation_routes_to_negotiation_router()
 
     telnetpp::token neg_token(
         telnetpp::negotiation(
-            telnetpp::do_, telnetpp::options::naws::option));
+            telnetpp::will, telnetpp::options::naws::option));
 
     boost::apply_visitor(visitor, neg_token);
     
     CPPUNIT_ASSERT_EQUAL(true, state_changed);
-    CPPUNIT_ASSERT_EQUAL(true, server.is_active());
+    CPPUNIT_ASSERT_EQUAL(true, client.is_active());
 }
 
 void routing_visitor_test::subnegotiation_routes_to_subnegotiation_router()
@@ -142,13 +142,13 @@ void routing_visitor_test::subnegotiation_routes_to_subnegotiation_router()
     telnetpp::command_router cmd_router;
     telnetpp::negotiation_router neg_router;
     telnetpp::subnegotiation_router sub_router;
-    telnetpp::options::naws::server server;
-    server.activate();
-    server.negotiate(telnetpp::do_);
+    telnetpp::options::naws::client client;
+    client.activate();
+    client.negotiate(telnetpp::will);
 
     telnetpp::u16 width = 0;
     telnetpp::u16 height = 0;
-    server.on_window_size_changed.connect(
+    client.on_window_size_changed.connect(
         [&width, &height](auto &&new_width, auto &&new_height)
             -> std::vector<telnetpp::token>
         {
@@ -158,7 +158,7 @@ void routing_visitor_test::subnegotiation_routes_to_subnegotiation_router()
         });
         
     telnetpp::register_route_from_subnegotiation_to_option(
-        sub_router, server);
+        sub_router, client);
         
     telnetpp::routing_visitor visitor(
         [](auto &&) -> std::vector<telnetpp::token>
@@ -188,14 +188,14 @@ void routing_visitor_test::subnegotiation_accumulates_responses()
     telnetpp::command_router cmd_router;
     telnetpp::negotiation_router neg_router;
     telnetpp::subnegotiation_router sub_router;
-    telnetpp::options::naws::server server;
+    telnetpp::options::naws::client client;
     
-    telnetpp::register_server_option(server, neg_router, sub_router);
+    telnetpp::register_client_option(client, neg_router, sub_router);
     
-    server.on_window_size_changed.connect(
-        [&server](auto &&, auto &&)
+    client.on_window_size_changed.connect(
+        [&client](auto &&, auto &&)
         {
-            return server.deactivate();
+            return client.deactivate();
         });
     
     telnetpp::routing_visitor visitor(
@@ -207,9 +207,9 @@ void routing_visitor_test::subnegotiation_accumulates_responses()
         neg_router,
         sub_router);
 
-    server.activate();
+    client.activate();
     telnetpp::token do_negotiation_token(
-        telnetpp::negotiation(telnetpp::do_, telnetpp::options::naws::option));
+        telnetpp::negotiation(telnetpp::will, telnetpp::options::naws::option));
     
     CPPUNIT_ASSERT_EQUAL(
         size_t{0},
@@ -223,7 +223,7 @@ void routing_visitor_test::subnegotiation_accumulates_responses()
     auto result = boost::apply_visitor(visitor, sub_token);
 
     telnetpp::negotiation expected(
-        telnetpp::wont, telnetpp::options::naws::option);
+        telnetpp::dont, telnetpp::options::naws::option);
     
     CPPUNIT_ASSERT_EQUAL(size_t(1), result.size());
     CPPUNIT_ASSERT_EQUAL(

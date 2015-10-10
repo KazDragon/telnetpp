@@ -9,6 +9,20 @@ namespace telnetpp { namespace options { namespace naws {
 server::server()
   : server_option(telnetpp::options::naws::option)
 {
+    on_state_changed.connect(
+        [this]()
+        {
+            return report_window_size();
+        });
+}
+
+// ==========================================================================
+// SET_WINDOW_SIZE
+// ==========================================================================
+std::vector<telnetpp::token> server::set_window_size(u16 width, u16 height)
+{
+    window_size_ = std::make_pair(width, height);
+    return report_window_size();
 }
 
 // ==========================================================================
@@ -17,12 +31,27 @@ server::server()
 std::vector<telnetpp::token> server::handle_subnegotiation(
     std::vector<telnetpp::u8> const &content)
 {
-    if (content.size() == sizeof(telnetpp::u16) + sizeof(telnetpp::u16))
+    return {};
+}
+
+// ==========================================================================
+// REPORT_WINDOW_SIZE
+// ==========================================================================
+std::vector<telnetpp::token> server::report_window_size()
+{
+    if (is_active() && window_size_.is_initialized())
     {
-        telnetpp::u16 width  = content[0] << 8 | content[1];
-        telnetpp::u16 height = content[2] << 8 | content[3];
-    
-        return on_window_size_changed(width, height);
+        return 
+        {
+            telnetpp::subnegotiation(
+                option(),
+                {
+                    telnetpp::u8(window_size_->first >> 8),
+                    telnetpp::u8(window_size_->first & 0xFF),
+                    telnetpp::u8(window_size_->second >> 8),
+                    telnetpp::u8(window_size_->second & 0xFF)
+                })
+        };
     }
     else
     {
