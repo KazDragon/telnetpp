@@ -5,7 +5,7 @@
 
 namespace telnetpp { namespace options { namespace echo {
    
-static constexpr telnetpp::u8 option = 0;
+static constexpr telnetpp::u8 option = 1;
 
 }}}
 
