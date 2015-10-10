@@ -5,6 +5,10 @@
 // of the various token types.
 #include "telnetpp/routing_visitor.hpp"
 
+// For sending commands, it's necessary to know what the commands in the
+// protocol are.
+#include "telnetpp/protocol.hpp"
+
 // With the addition of the parser and generator, the client need then only
 // include the specific required options in order to have a complete Telnet
 // layer.
