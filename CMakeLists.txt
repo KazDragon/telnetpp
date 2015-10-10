@@ -4,9 +4,6 @@ cmake_policy(VERSION 3.2)
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${PROJECT_SOURCE_DIR}/cmake/Modules")
 
-# Cotire is a tool for automatically generating pre-compiled headers.
-include(cotire OPTIONAL)
-
 # Boost is required as we used Boost.Variant, Boost.Optional, and 
 # Boost.Signals2.  All of these are header-only libraries, so no subcomponents
 # are required.
@@ -45,10 +42,6 @@ target_compile_features(telnetpp
         cxx_relaxed_constexpr
 )
 
-if (COMMAND cotire)
-    cotire(telnetpp)
-endif()
-
 enable_testing()
 
 add_executable(telnetpp_tester 
@@ -77,10 +70,6 @@ target_compile_features(telnetpp_tester
         cxx_relaxed_constexpr)
 
 target_link_libraries(telnetpp_tester telnetpp cppunit)
-
-# NOTE: Do not cotire() telnetpp_tester for now.  It causes Boost.Signals2
-# to have various errors, and it appears to be difficult not to get it to
-# be ignored in the pch.
 
 add_test(telnetpp_test telnetpp_tester)
 
