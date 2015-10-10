@@ -2,10 +2,20 @@ project(telnetpp)
 cmake_minimum_required(VERSION 3.2 FATAL_ERROR)
 cmake_policy(VERSION 3.2)
 
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules")
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${PROJECT_SOURCE_DIR}/cmake/Modules")
+
+# Cotire is a tool for automatically generating pre-compiled headers.
 include(cotire OPTIONAL)
+
+# Boost is required as we used Boost.Variant, Boost.Optional, and 
+# Boost.Signals2.  All of these are header-only libraries, so no subcomponents
+# are required.
+find_package(Boost 1.39.0 REQUIRED)
+
+# Optionally, Telnet++ support CppUnit for its unit tests.  These will be built
+# and a target added automatically if it is installed in the current 
+# environment.
 find_package(CppUnit)
-find_package(Boost)
 
 add_library(telnetpp
     src/client_option.cpp
@@ -24,7 +34,7 @@ add_library(telnetpp
 )
 
 target_include_directories(telnetpp
-    PUBLIC "${CMAKE_SOURCE_DIR}/include"
+    PUBLIC "${PROJECT_SOURCE_DIR}/include"
 )
 
 target_compile_features(telnetpp
@@ -37,38 +47,40 @@ if (COMMAND cotire)
     cotire(telnetpp)
 endif()
 
-enable_testing()
+if (CPPUNIT_FOUND)
+    enable_testing()
 
-add_executable(telnetpp_tester 
-    test/command_router_test.cpp
-    test/client_option_test.cpp
-    test/echo_client_test.cpp
-    test/echo_server_test.cpp
-    test/expect_tokens.cpp
-    test/generator_test.cpp
-    test/main.cpp
-    test/naws_client_test.cpp
-    test/naws_server_test.cpp    
-    test/negotiation_router_test.cpp
-    test/parser_test.cpp
-    test/routing_visitor_test.cpp
-    test/server_option_test.cpp
-    test/subnegotiation_router_test.cpp
-    test/terminal_type_client_test.cpp
-)
+    add_executable(telnetpp_tester 
+        test/command_router_test.cpp
+        test/client_option_test.cpp
+        test/echo_client_test.cpp
+        test/echo_server_test.cpp
+        test/expect_tokens.cpp
+        test/generator_test.cpp
+        test/main.cpp
+        test/naws_client_test.cpp
+        test/naws_server_test.cpp    
+        test/negotiation_router_test.cpp
+        test/parser_test.cpp
+        test/routing_visitor_test.cpp
+        test/server_option_test.cpp
+        test/subnegotiation_router_test.cpp
+        test/terminal_type_client_test.cpp
+    )
 
-target_compile_features(telnetpp_tester
-    PUBLIC
-        cxx_strong_enums
-        cxx_relaxed_constexpr)
+    target_compile_features(telnetpp_tester
+        PUBLIC
+            cxx_strong_enums
+            cxx_relaxed_constexpr)
 
-target_link_libraries(telnetpp_tester telnetpp cppunit)
+    target_link_libraries(telnetpp_tester telnetpp cppunit)
 
-# NOTE: Do not cotire() telnetpp_tester for now.  It causes Boost.Signals2
-# to have various errors, and it appears to be difficult not to get it to
-# be ignored in the pch.
+    if (COMMAND cotire)
+        cotire(telnetpp_tester)
+    endif()
 
-add_test(telnetpp_test telnetpp_tester)
+    add_test(telnetpp_test telnetpp_tester)
+endif()
 
 install(
     TARGETS
