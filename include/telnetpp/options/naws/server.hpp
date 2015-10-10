@@ -1,7 +1,9 @@
-#ifndef TELNETPP_OPTIONS_NAWS_SERVER
-#define TELNETPP_OPTIONS_NAWS_SERVER
+#ifndef TELNETPP_OPTIONS_NAWS_CLIENT
+#define TELNETPP_OPTIONS_NAWS_CLIENT
 
 #include "telnetpp/server_option.hpp"
+#include <boost/optional.hpp>
+#include <utility>
 
 namespace telnetpp { namespace options { namespace naws {
 
@@ -15,10 +17,10 @@ public :
     //* =====================================================================
     server();
 
-    boost::signals2::signal<
-        std::vector<telnetpp::token> (telnetpp::u16, telnetpp::u16),
-        telnetpp::token_combiner
-    > on_window_size_changed;
+    //* =====================================================================
+    /// \brief Sets the window size that this option will report.
+    //* =====================================================================
+    std::vector<telnetpp::token> set_window_size(u16 width, u16 height);
 
 private :
     //* =====================================================================
@@ -28,6 +30,12 @@ private :
     std::vector<telnetpp::token> handle_subnegotiation(
         std::vector<telnetpp::u8> const &content) override;
 
+    //* =====================================================================
+    /// \brief Report the window size.
+    //* =====================================================================
+    std::vector<telnetpp::token> report_window_size();
+    
+    boost::optional<std::pair<telnetpp::u16, telnetpp::u16>> window_size_;
 };
 
 }}}
