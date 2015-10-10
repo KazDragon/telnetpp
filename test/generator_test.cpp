@@ -48,7 +48,21 @@ void expect(
         CPPUNIT_ASSERT_EQUAL(expectation[index], result[index]);
     }
 }
+
+template <class Collection>
+void expect(
+    Collection &&collection,
+    std::vector<telnetpp::u8> const &expectation)
+{
+    auto result = telnetpp::generate(std::forward<Collection>(collection));
+    CPPUNIT_ASSERT_EQUAL(expectation.size(), result.size());
     
+    for (size_t index = 0; index < expectation.size(); ++index)
+    {
+        CPPUNIT_ASSERT_EQUAL(expectation[index], result[index]);
+    }
+}
+
 void generator_test::empty_array_generates_nothing()
 {
     std::vector<telnetpp::token> data = {};
@@ -159,5 +173,5 @@ void generator_test::many_tokens_generates_many_tokens()
         0xFF, 0xFA, 0xFF, 0xFF, 0xFF, 0xFF, 0xF0
     };
     
-    expect(data.begin(), data.end(), expected);
+    expect(data, expected);
 }

@@ -3,6 +3,8 @@
 
 #include "telnetpp/detail/generate_helper.hpp"
 #include <algorithm>
+#include <iterator>
+#include <utility>
 
 namespace telnetpp {
  
@@ -22,6 +24,19 @@ std::vector<u8> generate(InputIterator1 begin, InputIterator2 end)
     });
     
     return result;
+}
+
+//* =========================================================================
+/// \brief Parse a collection of Telnet tokens into a stream of bytes.
+/// \param collection the collection containing the tokens.
+//* =========================================================================
+template <class Collection>
+std::vector<u8> generate(Collection &&collection)
+{
+    using std::begin;
+    using std::end;
+    
+    return generate(begin(collection), end(collection));
 }
 
 }
