@@ -6,16 +6,16 @@
 
 
 # Telnet++
-A C++ library for interacting with TELNET streams
+A C++ library for interacting with Telnet streams
 
 # Features / Roadmap / Progress
 
-1. [x] Basic constants and structures for use with TELNET
+1. [x] Basic constants and structures for use with Telnet
   * [x] Constants such as IAC, SB, SE, WILL, WONT, DO, DONT
   * [x] Helper structures for commands, negotiations, and subnegotiations
   * [x] Parser that can convert a stream of bytes into a variant of commands, negotiations, subnegotiations and plain text.
   * [x] Generator that can convert a stream of the above-mentioned variant into a stream of bytes.
-2. [x] A framework for managing TELNET
+2. [x] A framework for managing Telnet
   * [x] Structures for client and server options
   * [x] A method of routing incoming negotiations and subnegotiations to the relevant options.
 3. [x] Reference implementations of various standard options
