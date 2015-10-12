@@ -17,7 +17,7 @@ public :
 
     boost::signals2::signal<
         std::vector<telnetpp::token> (telnetpp::u16, telnetpp::u16),
-        telnetpp::token_combiner
+        telnetpp::token_combiner<telnetpp::token>
     > on_window_size_changed;
 
 private :

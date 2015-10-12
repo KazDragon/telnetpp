@@ -64,7 +64,7 @@ public :
 
     boost::signals2::signal<
         std::vector<token> (),
-        token_combiner
+        token_combiner<token>
     > on_state_changed;
     
 private :

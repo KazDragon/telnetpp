@@ -82,7 +82,7 @@ public :
         
     boost::signals2::signal<
         std::vector<telnetpp::token> (std::vector<telnetpp::u8> const &content),
-        telnetpp::token_combiner
+        telnetpp::token_combiner<telnetpp::token>
     > on_subnegotiation;
         
 private :

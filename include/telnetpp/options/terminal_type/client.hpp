@@ -25,7 +25,7 @@ public :
     boost::signals2::signal
     <
         std::vector<telnetpp::token> (std::string const &),
-        telnetpp::token_combiner
+        telnetpp::token_combiner<token>
     > on_terminal_type;
     
 private :
