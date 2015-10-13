@@ -38,7 +38,7 @@ void routing_visitor_test::text_routes_to_text_function()
     std::string expected_text = "expected text";
     
     telnetpp::routing_visitor visitor(
-        [&text](auto &&new_text) -> std::vector<telnetpp::token>
+        [&text](auto &&new_text) -> std::vector<telnetpp::token_pass>
         {
             text = new_text;
             return {};
@@ -79,14 +79,14 @@ void routing_visitor_test::command_routes_to_command_router()
     telnetpp::command expected_command(telnetpp::ayt);
     
     cmd_router.register_route(expected_command,
-        [&cmd](auto &&new_cmd) -> std::vector<telnetpp::token>
+        [&cmd](auto &&new_cmd) -> std::vector<telnetpp::token_pass>
         {
             cmd = new_cmd;
             return {};
         });
         
     telnetpp::routing_visitor visitor(
-        [](auto &&) -> std::vector<telnetpp::token>
+        [](auto &&) -> std::vector<telnetpp::token_pass>
         {
             return {};
         },
@@ -110,7 +110,7 @@ void routing_visitor_test::negotiation_routes_to_negotiation_router()
     
     bool state_changed = false;
     client.on_state_changed.connect(
-        [&state_changed]() -> std::vector<telnetpp::token>
+        [&state_changed]() -> std::vector<telnetpp::token_pass>
         {
             state_changed = true;
             return {};
@@ -119,7 +119,7 @@ void routing_visitor_test::negotiation_routes_to_negotiation_router()
     telnetpp::register_client_option(client, neg_router, sub_router);
         
     telnetpp::routing_visitor visitor(
-        [](auto &&) -> std::vector<telnetpp::token>
+        [](auto &&) -> std::vector<telnetpp::token_pass>
         {
             return {};
         },
@@ -150,7 +150,7 @@ void routing_visitor_test::subnegotiation_routes_to_subnegotiation_router()
     telnetpp::u16 height = 0;
     client.on_window_size_changed.connect(
         [&width, &height](auto &&new_width, auto &&new_height)
-            -> std::vector<telnetpp::token>
+            -> std::vector<telnetpp::token_pass>
         {
             width = new_width;
             height = new_height;
@@ -161,7 +161,7 @@ void routing_visitor_test::subnegotiation_routes_to_subnegotiation_router()
         sub_router, client);
         
     telnetpp::routing_visitor visitor(
-        [](auto &&) -> std::vector<telnetpp::token>
+        [](auto &&) -> std::vector<telnetpp::token_pass>
         {
             return {};
         },
@@ -199,7 +199,7 @@ void routing_visitor_test::subnegotiation_accumulates_responses()
         });
     
     telnetpp::routing_visitor visitor(
-        [](auto &&) -> std::vector<telnetpp::token>
+        [](auto &&) -> std::vector<telnetpp::token_pass>
         {
             return {};
         },
@@ -228,5 +228,6 @@ void routing_visitor_test::subnegotiation_accumulates_responses()
     CPPUNIT_ASSERT_EQUAL(size_t(1), result.size());
     CPPUNIT_ASSERT_EQUAL(
         expected, 
-        boost::get<telnetpp::negotiation>(result[0]));
+        boost::get<telnetpp::negotiation>(
+            boost::get<telnetpp::token>(result[0])));
 }

@@ -15,22 +15,22 @@ namespace telnetpp {
 /// amongst known routers.
 //* =========================================================================
 class routing_visitor 
-  : public boost::static_visitor<std::vector<token>>
+  : public boost::static_visitor<std::vector<token_pass>>
 {
 public :
     routing_visitor(
-        std::function<std::vector<token> (std::string const &)> on_text,
+        std::function<std::vector<token_pass> (std::string const &)> on_text,
         command_router &cmd_router,
         negotiation_router &neg_router,
         subnegotiation_router &sub_router);
         
-    std::vector<token> operator()(std::string const &text);
-    std::vector<token> operator()(command const &cmd);
-    std::vector<token> operator()(negotiation const &neg);
-    std::vector<token> operator()(subnegotiation const &sub);
+    std::vector<token_pass> operator()(std::string const &text);
+    std::vector<token_pass> operator()(command const &cmd);
+    std::vector<token_pass> operator()(negotiation const &neg);
+    std::vector<token_pass> operator()(subnegotiation const &sub);
     
 private :
-    std::function<std::vector<token> (std::string const &)> on_text_;
+    std::function<std::vector<token_pass> (std::string const &)> on_text_;
     command_router &command_router_;
     negotiation_router &negotiation_router_;
     subnegotiation_router &subnegotiation_router_;

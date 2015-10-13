@@ -188,7 +188,6 @@ std::vector<telnetpp::token_pass> server_option::handle_subnegotiation(
 // ==========================================================================
 // REGISTER_CLIENT_OPTION
 // ==========================================================================
-/*
 void register_server_option(
     server_option &option, 
     negotiation_router &neg_router, 
@@ -201,6 +200,5 @@ void register_server_option(
     register_route_from_subnegotiation_to_option(
         sub_router, option);
 }
-*/
 
 }

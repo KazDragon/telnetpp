@@ -94,12 +94,10 @@ class subnegotiation_router;
 //* =========================================================================
 /// \brief Registers an option with negotiation and subnegotiation routers.
 //* =========================================================================
-/*
 void register_server_option(
     server_option &option,
     negotiation_router &neg_router,
     subnegotiation_router &sub_router);
-*/
 
 }
 

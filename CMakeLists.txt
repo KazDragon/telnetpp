@@ -27,7 +27,7 @@ add_library(telnetpp
     src/options/terminal_type/client.cpp
     src/options/suppress_ga/client.cpp
     src/options/suppress_ga/server.cpp
-#    src/routing_visitor.cpp
+    src/routing_visitor.cpp
     src/server_option.cpp
     src/subnegotiation.cpp
 )
@@ -56,7 +56,7 @@ add_executable(telnetpp_tester
     test/naws_server_test.cpp    
     test/negotiation_router_test.cpp
 #    test/parser_test.cpp
-#    test/routing_visitor_test.cpp
+    test/routing_visitor_test.cpp
     test/server_option_test.cpp
     test/subnegotiation_router_test.cpp
     test/suppress_ga_client_test.cpp

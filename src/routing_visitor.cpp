@@ -6,7 +6,7 @@ namespace telnetpp {
 // CONSTRUCTOR
 // ==========================================================================
 routing_visitor::routing_visitor(
-    std::function<std::vector<token> (std::string const &)> on_text,
+    std::function<std::vector<token_pass> (std::string const &)> on_text,
     command_router &cmd_router,
     negotiation_router &neg_router,
     subnegotiation_router &sub_router)
@@ -20,7 +20,7 @@ routing_visitor::routing_visitor(
 // ==========================================================================
 // OPERATOR()
 // ==========================================================================
-std::vector<token> routing_visitor::operator()(std::string const &text)
+std::vector<token_pass> routing_visitor::operator()(std::string const &text)
 {
     if (on_text_)
     {
@@ -35,7 +35,7 @@ std::vector<token> routing_visitor::operator()(std::string const &text)
 // ==========================================================================
 // OPERATOR()
 // ==========================================================================
-std::vector<token> routing_visitor::operator()(command const &cmd)
+std::vector<token_pass> routing_visitor::operator()(command const &cmd)
 {
     return command_router_(cmd);
 }
@@ -43,7 +43,7 @@ std::vector<token> routing_visitor::operator()(command const &cmd)
 // ==========================================================================
 // OPERATOR()
 // ==========================================================================
-std::vector<token> routing_visitor::operator()(negotiation const &neg)
+std::vector<token_pass> routing_visitor::operator()(negotiation const &neg)
 {
     return negotiation_router_(neg);
 }
@@ -51,7 +51,7 @@ std::vector<token> routing_visitor::operator()(negotiation const &neg)
 // ==========================================================================
 // OPERATOR()
 // ==========================================================================
-std::vector<token> routing_visitor::operator()(subnegotiation const &sub)
+std::vector<token_pass> routing_visitor::operator()(subnegotiation const &sub)
 {
     return subnegotiation_router_(sub);
 }
