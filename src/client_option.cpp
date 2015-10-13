@@ -37,7 +37,9 @@ std::vector<telnetpp::token> client_option::activate()
     if (state_ == state::inactive)
     {
         state_ = state::activating;
-        return { telnetpp::negotiation(telnetpp::do_, option_) };
+        return { telnetpp::element {
+            telnetpp::negotiation(telnetpp::do_, option_) }
+        };
     }
     else
     {
@@ -65,7 +67,9 @@ std::vector<telnetpp::token> client_option::deactivate()
     if (state_ == state::active)
     {
         state_ = state::deactivating;
-        return { telnetpp::negotiation(telnetpp::dont, option_) };
+        return { telnetpp::element {
+            telnetpp::negotiation(telnetpp::dont, option_) } 
+        };
     }
     else
     {
@@ -95,13 +99,17 @@ std::vector<telnetpp::token> client_option::negotiate(telnetpp::u8 request)
                 auto response = on_state_changed();
                 response.insert(
                     response.begin(),
-                    { telnetpp::negotiation(telnetpp::do_, option_) });
+                    { telnetpp::element {
+                        telnetpp::negotiation(telnetpp::do_, option_) } 
+                    });
                 
                 return response;
             }
             else
             {
-                return { telnetpp::negotiation(telnetpp::dont, option_) };
+                return { telnetpp::element {
+                    telnetpp::negotiation(telnetpp::dont, option_) }
+                };
             }
             
         case state::activating :
@@ -121,12 +129,16 @@ std::vector<telnetpp::token> client_option::negotiate(telnetpp::u8 request)
         case state::active :
             if (request == telnetpp::will)
             {
-                return { telnetpp::negotiation(telnetpp::do_, option_) };
+                return { telnetpp::element {
+                    telnetpp::negotiation(telnetpp::do_, option_) }
+                };
             }
             else
             {
                 state_ = state::inactive;
-                return { telnetpp::negotiation(telnetpp::dont, option_) };
+                return { telnetpp::element { 
+                    telnetpp::negotiation(telnetpp::dont, option_) }
+                };
             }
             
         case state::deactivating :
@@ -190,6 +202,5 @@ void register_client_option(
     register_route_from_subnegotiation_to_option(
         sub_router, option);
 }
-
 
 }

@@ -2,7 +2,6 @@
 #define TELNETPP_OPTIONS_TERMINAL_TYPE_CLIENT
 
 #include "telnetpp/client_option.hpp"
-#include <string>
 
 namespace telnetpp { namespace options { namespace terminal_type {
 

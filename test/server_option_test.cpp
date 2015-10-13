@@ -1,6 +1,6 @@
 #include "telnetpp/server_option.hpp"
 #include "telnetpp/protocol.hpp"
-#include "expect_tokens.hpp"
+#include "expect_elements.hpp"
 #include <cppunit/TestFixture.h>
 #include <cppunit/extensions/HelperMacros.h>
 
@@ -114,7 +114,7 @@ void server_option_test::deactivated_negotiate_do_responds_with_wont_no_signal()
         });
     
     expect_tokens(
-        { telnetpp::negotiation(telnetpp::wont, 0xA5) },
+        { telnetpp::element(telnetpp::negotiation(telnetpp::wont, 0xA5)) },
         server.negotiate(telnetpp::do_));
     
     CPPUNIT_ASSERT_EQUAL(false, server.is_active());
@@ -135,7 +135,7 @@ void server_option_test::deactivated_negotiate_dont_responds_with_wont_no_signal
         });
     
     expect_tokens(
-        { telnetpp::negotiation(telnetpp::wont, 0xA5) },
+        { telnetpp::element(telnetpp::negotiation(telnetpp::wont, 0xA5)) },
         server.negotiate(telnetpp::dont));
     
     CPPUNIT_ASSERT_EQUAL(false, server.is_active());
@@ -155,7 +155,7 @@ void server_option_test::deactivated_activate_responds_with_will_no_signal()
         });
     
     expect_tokens(
-        { telnetpp::negotiation(telnetpp::will, 0xA5) },
+        { telnetpp::element(telnetpp::negotiation(telnetpp::will, 0xA5)) },
         server.activate());
     
     CPPUNIT_ASSERT_EQUAL(false, server.is_active());
@@ -194,7 +194,7 @@ void server_option_test::activatable_deactivated_negotiate_will_responds_with_do
         });
     
     expect_tokens(
-        { telnetpp::negotiation(telnetpp::will, 0xA5) },
+        { telnetpp::element(telnetpp::negotiation(telnetpp::will, 0xA5)) },
         server.negotiate(telnetpp::do_));
     
     CPPUNIT_ASSERT_EQUAL(true, called);
@@ -216,7 +216,7 @@ void server_option_test::activatable_deactivated_negotiate_wont_responds_with_do
         });
     
     expect_tokens(
-        { telnetpp::negotiation(telnetpp::wont, 0xA5) }, 
+        { telnetpp::element(telnetpp::negotiation(telnetpp::wont, 0xA5)) }, 
         server.negotiate(telnetpp::dont));
     
     CPPUNIT_ASSERT_EQUAL(false, called);
@@ -293,7 +293,7 @@ void server_option_test::activated_negotiate_do_responds_with_will_is_active_no_
         });
     
     expect_tokens(
-        { telnetpp::negotiation(telnetpp::will, 0xA5) },
+        { telnetpp::element(telnetpp::negotiation(telnetpp::will, 0xA5)) },
         server.negotiate(telnetpp::do_));
     CPPUNIT_ASSERT_EQUAL(true, server.is_active());
     CPPUNIT_ASSERT_EQUAL(false, called);
@@ -314,7 +314,7 @@ void server_option_test::activated_negotiate_dont_responds_with_wont_is_inactive
         });
 
     expect_tokens(
-        { telnetpp::negotiation(telnetpp::wont, 0xA5) },
+        { telnetpp::element(telnetpp::negotiation(telnetpp::wont, 0xA5)) },
         server.negotiate(telnetpp::dont));
     CPPUNIT_ASSERT_EQUAL(false, server.is_active());
     CPPUNIT_ASSERT_EQUAL(false, called);
@@ -354,7 +354,7 @@ void server_option_test::activated_deactive_responds_with_wont_is_inactive_no_si
         });
     
     expect_tokens(
-        { telnetpp::negotiation(telnetpp::wont, 0xA5) },
+        { telnetpp::element(telnetpp::negotiation(telnetpp::wont, 0xA5)) },
         server.deactivate());
     CPPUNIT_ASSERT_EQUAL(false, server.is_active());
     CPPUNIT_ASSERT_EQUAL(false, called);

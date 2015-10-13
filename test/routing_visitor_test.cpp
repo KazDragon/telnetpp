@@ -2,6 +2,7 @@
 #include "telnetpp/options/naws/client.hpp"
 #include "telnetpp/options/naws.hpp"
 #include "telnetpp/protocol.hpp"
+#include "expect_elements.hpp"
 #include <cppunit/TestFixture.h>
 #include <cppunit/extensions/HelperMacros.h>
 
@@ -15,6 +16,7 @@ public :
         CPPUNIT_TEST(negotiation_routes_to_negotiation_router);
         CPPUNIT_TEST(subnegotiation_routes_to_subnegotiation_router);
         CPPUNIT_TEST(subnegotiation_accumulates_responses);
+        CPPUNIT_TEST(arbitrary_object_routes_to_pass_through);
     CPPUNIT_TEST_SUITE_END();
 
 private :
@@ -24,6 +26,7 @@ private :
     void negotiation_routes_to_negotiation_router();
     void subnegotiation_routes_to_subnegotiation_router();
     void subnegotiation_accumulates_responses();
+    void arbitrary_object_routes_to_pass_through();
 };
 
 CPPUNIT_TEST_SUITE_REGISTRATION(routing_visitor_test);
@@ -43,11 +46,12 @@ void routing_visitor_test::text_routes_to_text_function()
             text = new_text;
             return {};
         },
+        nullptr,
         cmd_router,
         neg_router,
         sub_router);
         
-    telnetpp::token text_token(expected_text);
+    telnetpp::element text_token(expected_text);
     boost::apply_visitor(visitor, text_token);
     
     CPPUNIT_ASSERT_EQUAL(expected_text, text);
@@ -61,11 +65,12 @@ void routing_visitor_test::text_does_not_route_to_null_function()
     
     telnetpp::routing_visitor visitor(
         nullptr,
+        nullptr,
         cmd_router,
         neg_router,
         sub_router);
         
-    telnetpp::token text_token("text token");
+    telnetpp::token text_token(telnetpp::element("text token"));
     boost::apply_visitor(visitor, text_token);
 }
 
@@ -90,11 +95,12 @@ void routing_visitor_test::command_routes_to_command_router()
         {
             return {};
         },
+        nullptr,
         cmd_router,
         neg_router,
         sub_router);
         
-    telnetpp::token cmd_token(expected_command);
+    telnetpp::element cmd_token(expected_command);
     boost::apply_visitor(visitor, cmd_token);
     
     CPPUNIT_ASSERT_EQUAL(expected_command, cmd);
@@ -123,11 +129,12 @@ void routing_visitor_test::negotiation_routes_to_negotiation_router()
         {
             return {};
         },
+        nullptr,
         cmd_router,
         neg_router,
         sub_router);
 
-    telnetpp::token neg_token(
+    telnetpp::element neg_token(
         telnetpp::negotiation(
             telnetpp::will, telnetpp::options::naws::option));
 
@@ -165,11 +172,12 @@ void routing_visitor_test::subnegotiation_routes_to_subnegotiation_router()
         {
             return {};
         },
+        nullptr,
         cmd_router,
         neg_router,
         sub_router);
 
-    telnetpp::token sub_token(
+    telnetpp::element sub_token(
         telnetpp::subnegotiation(
             telnetpp::options::naws::option,
             {0, 80, 0, 24}));
@@ -203,30 +211,55 @@ void routing_visitor_test::subnegotiation_accumulates_responses()
         {
             return {};
         },
+        nullptr,
         cmd_router,
         neg_router,
         sub_router);
 
     client.activate();
-    telnetpp::token do_negotiation_token(
+    telnetpp::element do_negotiation_token(
         telnetpp::negotiation(telnetpp::will, telnetpp::options::naws::option));
+
+    expect_elements(
+        {},
+        boost::apply_visitor(visitor, do_negotiation_token));
     
-    CPPUNIT_ASSERT_EQUAL(
-        size_t{0},
-        boost::apply_visitor(visitor, do_negotiation_token).size());
-    
-    telnetpp::token sub_token(
+    telnetpp::element sub_token(
         telnetpp::subnegotiation(
             telnetpp::options::naws::option,
             {0, 80, 0, 24}));
 
-    auto result = boost::apply_visitor(visitor, sub_token);
+    expect_elements({
+        telnetpp::negotiation(
+            telnetpp::dont, telnetpp::options::naws::option)
+        },
+        boost::apply_visitor(visitor, sub_token));
+}
 
-    telnetpp::negotiation expected(
-        telnetpp::dont, telnetpp::options::naws::option);
+void routing_visitor_test::arbitrary_object_routes_to_pass_through()
+{
+    telnetpp::command_router cmd_router;
+    telnetpp::negotiation_router neg_router;
+    telnetpp::subnegotiation_router sub_router;
+    telnetpp::options::naws::client client;
     
-    CPPUNIT_ASSERT_EQUAL(size_t(1), result.size());
+    boost::any any;
+    telnetpp::routing_visitor visitor(
+        nullptr,
+        [&any](auto &&object) -> std::vector<telnetpp::token>
+        {
+            any = object;
+            return {};
+        },
+        cmd_router,
+        neg_router,
+        sub_router);
+        
+    std::string test_string = "TEST";
+    telnetpp::token test_token(boost::any{test_string});
+    
+    boost::apply_visitor(visitor, test_token);
+    
     CPPUNIT_ASSERT_EQUAL(
-        expected, 
-        boost::get<telnetpp::negotiation>(result[0]));
+        test_string, boost::any_cast<std::string const&>(any));
 }

@@ -2,7 +2,7 @@
 #define TELNETPP_SERVER_OPTION
 
 #include "telnetpp/core.hpp"
-#include "telnetpp/token.hpp"
+#include "telnetpp/element.hpp"
 #include <boost/signals2.hpp>
 #include <vector>
 
@@ -63,7 +63,7 @@ public :
         std::vector<telnetpp::u8> const &content);
 
     boost::signals2::signal<
-        std::vector<token> (),
+        std::vector<telnetpp::token> (),
         token_combiner
     > on_state_changed;
     

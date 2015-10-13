@@ -3,7 +3,7 @@
 
 #include "telnetpp/router.hpp"
 #include "telnetpp/command.hpp"
-#include "telnetpp/token.hpp"
+#include "telnetpp/element.hpp"
 
 namespace telnetpp {
     

@@ -43,14 +43,14 @@ std::vector<telnetpp::token> server::report_window_size()
     {
         return 
         {
-            telnetpp::subnegotiation(
+            telnetpp::element(telnetpp::subnegotiation(
                 option(),
                 {
                     telnetpp::u8(window_size_->first >> 8),
                     telnetpp::u8(window_size_->first & 0xFF),
                     telnetpp::u8(window_size_->second >> 8),
                     telnetpp::u8(window_size_->second & 0xFF)
-                })
+                }))
         };
     }
     else

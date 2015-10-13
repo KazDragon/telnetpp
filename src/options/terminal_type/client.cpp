@@ -18,8 +18,8 @@ std::vector<telnetpp::token> client::request_terminal_type()
 {
     return 
     { 
-        telnetpp::subnegotiation(
-            option(), { telnetpp::options::terminal_type::send })
+        telnetpp::element(telnetpp::subnegotiation(
+            option(), { telnetpp::options::terminal_type::send }))
     };
 }
 

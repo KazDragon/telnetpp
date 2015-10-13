@@ -2,7 +2,7 @@
 #define TELNETPP_CLIENT_OPTION
 
 #include "telnetpp/core.hpp"
-#include "telnetpp/token.hpp"
+#include "telnetpp/element.hpp"
 #include <boost/signals2.hpp>
 #include <vector>
 

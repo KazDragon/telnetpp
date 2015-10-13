@@ -1,5 +1,5 @@
 #include "telnetpp/parser.hpp"
-#include "expect_tokens.hpp"
+#include "expect_elements.hpp"
 #include <cppunit/TestFixture.h>
 #include <cppunit/extensions/HelperMacros.h>
 #include <vector>
@@ -36,7 +36,7 @@ public :
         CPPUNIT_TEST(sb_option_iac_se_parses_to_empty_subnegotiation);
         CPPUNIT_TEST(subnegotiation_with_content_parses_to_subnegotation);
         CPPUNIT_TEST(subnegotiation_with_iac_iac_parses_to_iac);
-        CPPUNIT_TEST(many_tokens_parses_to_many_tokens);
+        CPPUNIT_TEST(many_elements_parses_to_many_elements);
     CPPUNIT_TEST_SUITE_END();
 private :
     
@@ -68,7 +68,7 @@ private :
     void sb_option_iac_se_parses_to_empty_subnegotiation();
     void subnegotiation_with_content_parses_to_subnegotation();
     void subnegotiation_with_iac_iac_parses_to_iac();
-    void many_tokens_parses_to_many_tokens();
+    void many_elements_parses_to_many_elements();
 };
 
 CPPUNIT_TEST_SUITE_REGISTRATION(parser_test);
@@ -475,7 +475,7 @@ void parser_test::subnegotiation_with_iac_iac_parses_to_iac()
     CPPUNIT_ASSERT(begin == end);
 }
 
-void parser_test::many_tokens_parses_to_many_tokens()
+void parser_test::many_elements_parses_to_many_elements()
 {
     telnetpp::u8 data[] = {
         'a', 'b', 'c', 0xFF, 0xFF, // string: abc\xFF\xFF
@@ -496,7 +496,7 @@ void parser_test::many_tokens_parses_to_many_tokens()
     auto begin = std::begin(data);
     auto end   = std::end(data);
     
-    expect_tokens(
+    expect_elements(
         {
             std::string("abc\xFF"),
             telnetpp::command(telnetpp::nop),

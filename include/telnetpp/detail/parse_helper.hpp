@@ -2,8 +2,7 @@
 #define TELNETPP_DETAIL_PARSE_HELPER_HPP_
 
 #include "telnetpp/core.hpp"
-#include "telnetpp/token.hpp"
-#include <string>
+#include "telnetpp/element.hpp"
 
 namespace telnetpp { namespace detail {
 
@@ -19,11 +18,11 @@ enum class parse_state
 
 struct parse_temps
 {
-    std::vector<telnetpp::token> tokens;
-    std::vector<telnetpp::u8>    subnegotiation_content;
+    std::vector<telnetpp::element> elements;
+    std::vector<telnetpp::u8>      subnegotiation_content;
     
-    parse_state                  state = parse_state::idle;
-    u8                           id;
+    parse_state                    state = parse_state::idle;
+    u8                             id;
 };
 
 void parse_helper(

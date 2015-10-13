@@ -1,6 +1,6 @@
 #include "telnetpp/client_option.hpp"
 #include "telnetpp/protocol.hpp"
-#include "expect_tokens.hpp"
+#include "expect_elements.hpp"
 #include <cppunit/TestFixture.h>
 #include <cppunit/extensions/HelperMacros.h>
 
@@ -113,14 +113,13 @@ void client_option_test::deactivated_negotiate_will_responds_with_dont_no_signal
             return {};
         });
     
-    expect_tokens(
+    expect_elements(
         { telnetpp::negotiation(telnetpp::dont, 0xA5) },
         client.negotiate(telnetpp::will));
     
     CPPUNIT_ASSERT_EQUAL(false, client.is_active());
     CPPUNIT_ASSERT_EQUAL(false, called);
 }
-
 
 void client_option_test::deactivated_negotiate_wont_responds_with_dont_no_signal()
 {
@@ -134,7 +133,7 @@ void client_option_test::deactivated_negotiate_wont_responds_with_dont_no_signal
             return {};
         });
     
-    expect_tokens(
+    expect_elements(
         { telnetpp::negotiation(telnetpp::dont, 0xA5) },
         client.negotiate(telnetpp::wont));
     
@@ -154,7 +153,7 @@ void client_option_test::deactivated_activate_responds_with_do_no_signal()
             return {};
         });
     
-    expect_tokens(
+    expect_elements(
         { telnetpp::negotiation(telnetpp::do_, 0xA5) },
         client.activate());
     
@@ -174,7 +173,7 @@ void client_option_test::deactivated_deactivate_responds_with_nothing_with_signa
             return {};
         });
     
-    expect_tokens({}, client.deactivate());
+    expect_elements({}, client.deactivate());
     
     CPPUNIT_ASSERT_EQUAL(false, client.is_active());
     CPPUNIT_ASSERT_EQUAL(true, called);
@@ -193,7 +192,7 @@ void client_option_test::activatable_deactivated_negotiate_will_responds_with_do
             return {};
         });
     
-    expect_tokens(
+    expect_elements(
         { telnetpp::negotiation(telnetpp::do_, 0xA5) },
         client.negotiate(telnetpp::will));
     
@@ -214,7 +213,7 @@ void client_option_test::activatable_deactivated_negotiate_wont_responds_with_do
             return {};
         });
     
-    expect_tokens(
+    expect_elements(
         { telnetpp::negotiation(telnetpp::dont, 0xA5) }, 
         client.negotiate(telnetpp::wont));
     
@@ -235,7 +234,7 @@ void client_option_test::activating_negotiate_will_responds_with_nothing_is_acti
             return {};
         });
     
-    expect_tokens({}, client.negotiate(telnetpp::will));
+    expect_elements({}, client.negotiate(telnetpp::will));
     CPPUNIT_ASSERT_EQUAL(true, client.is_active());
     CPPUNIT_ASSERT_EQUAL(true, called);
 }
@@ -253,7 +252,7 @@ void client_option_test::activating_negotiate_wont_responds_with_nothing_is_inac
             return {};
         });
 
-    expect_tokens({}, client.negotiate(telnetpp::wont));
+    expect_elements({}, client.negotiate(telnetpp::wont));
     CPPUNIT_ASSERT_EQUAL(false, client.is_active());
     CPPUNIT_ASSERT_EQUAL(true, called);
 }
@@ -271,7 +270,7 @@ void client_option_test::activating_activate_responds_with_nothing_no_signal()
             return {};
         });
     
-    expect_tokens({}, client.activate());
+    expect_elements({}, client.activate());
     CPPUNIT_ASSERT_EQUAL(false, client.is_active());
     CPPUNIT_ASSERT_EQUAL(false, called);
 }
@@ -290,7 +289,7 @@ void client_option_test::activated_negotiate_will_responds_with_do_is_active_no_
             return {};
         });
     
-    expect_tokens(
+    expect_elements(
         { telnetpp::negotiation(telnetpp::do_, 0xA5) },
         client.negotiate(telnetpp::will));
     CPPUNIT_ASSERT_EQUAL(true, client.is_active());
@@ -311,7 +310,7 @@ void client_option_test::activated_negotiate_wont_responds_with_dont_is_inactive
             return {};
         });
 
-    expect_tokens(
+    expect_elements(
         { telnetpp::negotiation(telnetpp::dont, 0xA5) },
         client.negotiate(telnetpp::wont));
     CPPUNIT_ASSERT_EQUAL(false, client.is_active());
@@ -332,7 +331,7 @@ void client_option_test::activated_activate_responds_with_nothing_is_active_with
             return {};
         });
 
-    expect_tokens({}, client.activate());
+    expect_elements({}, client.activate());
     CPPUNIT_ASSERT_EQUAL(true, client.is_active());
     CPPUNIT_ASSERT_EQUAL(true, called);
 }
@@ -351,7 +350,7 @@ void client_option_test::activated_deactive_responds_with_dont_is_inactive_no_si
             return {};
         });
     
-    expect_tokens(
+    expect_elements(
         { telnetpp::negotiation(telnetpp::dont, 0xA5) },
         client.deactivate());
     CPPUNIT_ASSERT_EQUAL(false, client.is_active());
@@ -373,7 +372,7 @@ void client_option_test::deactivating_negotiate_will_responds_with_nothing_is_ac
             return {};
         });
     
-    expect_tokens({}, client.negotiate(telnetpp::will));
+    expect_elements({}, client.negotiate(telnetpp::will));
     CPPUNIT_ASSERT_EQUAL(true, client.is_active());
     CPPUNIT_ASSERT_EQUAL(true, called);
 }
@@ -393,7 +392,7 @@ void client_option_test::deactivating_negotiate_wont_responds_with_nothing_is_in
             return {};
         });
     
-    expect_tokens({}, client.negotiate(telnetpp::wont));
+    expect_elements({}, client.negotiate(telnetpp::wont));
     CPPUNIT_ASSERT_EQUAL(false, client.is_active());
     CPPUNIT_ASSERT_EQUAL(true, called);
 }
@@ -413,7 +412,7 @@ void client_option_test::deactivating_deactivate_responds_with_nothing_is_inacti
             return {};
         });
     
-    expect_tokens({}, client.deactivate());
+    expect_elements({}, client.deactivate());
     CPPUNIT_ASSERT_EQUAL(false, client.is_active());
     CPPUNIT_ASSERT_EQUAL(false, called);
 }
