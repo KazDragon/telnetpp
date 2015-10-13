@@ -41,7 +41,7 @@ struct tokens_match : boost::static_visitor<>
         CPPUNIT_ASSERT(expected_.type() == typeid(telnetpp::element));
         
         boost::apply_visitor(
-            elements_match(boost::get<telnetpp::element const &>(expected_)),
+            elements_match(boost::get<telnetpp::element>(expected_)),
             tok);
     }
     
@@ -87,7 +87,7 @@ void expect_elements(
     {
         boost::apply_visitor(
             elements_match(*current_expected),
-            boost::get<telnetpp::element const &>(*current_result));
+            boost::get<telnetpp::element>(*current_result));
     }
 }
 
