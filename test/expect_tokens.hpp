@@ -5,6 +5,10 @@
 #include <vector>
 
 void expect_tokens(
+    std::vector<telnetpp::token> const &expected,
+    std::vector<telnetpp::token> const &result);
+
+void expect_tokens(
     std::vector<telnetpp::token_pass> const &expected,
     std::vector<telnetpp::token_pass> const &result);
 
