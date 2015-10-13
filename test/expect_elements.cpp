@@ -1,12 +1,12 @@
-#include "expect_tokens.hpp"
+#include "expect_elements.hpp"
 #include <cppunit/TestAssert.h>
 
 namespace {
     
-struct tokens_match_impl : boost::static_visitor<>
+struct elements_match : boost::static_visitor<>
 {
 public :
-    tokens_match_impl(telnetpp::token const &expected)
+    elements_match(telnetpp::element const &expected)
       : expected_(expected)
     {
     }
@@ -18,12 +18,12 @@ public :
         CPPUNIT_ASSERT_EQUAL(boost::get<T>(expected_), value);
     }
     
-    telnetpp::token const &expected_;
+    telnetpp::element const &expected_;
 };
 
 struct tokens_match : boost::static_visitor<>
 {
-    tokens_match(telnetpp::token_pass const &expected)
+    tokens_match(telnetpp::token const &expected)
       : expected_(expected)
     {
     }
@@ -33,22 +33,23 @@ struct tokens_match : boost::static_visitor<>
         CPPUNIT_ASSERT(expected_.type() == typeid(boost::any));
     }
     
-    void operator()(telnetpp::token const &tok) const
+    void operator()(telnetpp::element const &tok) const
     {
-        CPPUNIT_ASSERT(expected_.type() == typeid(telnetpp::token));
+        CPPUNIT_ASSERT(expected_.type() == typeid(telnetpp::element));
+        
         boost::apply_visitor(
-            tokens_match_impl(boost::get<telnetpp::token const &>(expected_)),
+            elements_match(boost::get<telnetpp::element const &>(expected_)),
             tok);
     }
     
-    telnetpp::token_pass const &expected_;
+    telnetpp::token const &expected_;
 };
 
 }
 
-void expect_tokens(
-    std::vector<telnetpp::token> const &expected, 
-    std::vector<telnetpp::token> const &result)
+void expect_elements(
+    std::vector<telnetpp::element> const &expected, 
+    std::vector<telnetpp::element> const &result)
 {
     CPPUNIT_ASSERT_EQUAL(expected.size(), result.size());
     
@@ -59,14 +60,15 @@ void expect_tokens(
          ++current_expected,
          ++current_result)
     {
-        boost::apply_visitor(tokens_match_impl(
+        printf("\n");
+        boost::apply_visitor(elements_match(
             *current_expected), *current_result);
     }
 }
 
 void expect_tokens(
-    std::vector<telnetpp::token_pass> const &expected, 
-    std::vector<telnetpp::token_pass> const &result)
+    std::vector<telnetpp::token> const &expected, 
+    std::vector<telnetpp::token> const &result)
 {
     CPPUNIT_ASSERT_EQUAL(expected.size(), result.size());
     

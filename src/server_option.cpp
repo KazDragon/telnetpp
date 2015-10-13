@@ -32,12 +32,12 @@ void server_option::set_activatable()
 // ==========================================================================
 // ACTIVATE
 // ==========================================================================
-std::vector<telnetpp::token_pass> server_option::activate()
+std::vector<telnetpp::token> server_option::activate()
 {
     if (state_ == state::inactive)
     {
         state_ = state::activating;
-        return { telnetpp::token(
+        return { telnetpp::element(
             telnetpp::negotiation(telnetpp::will, option_) 
         )};
     }
@@ -57,7 +57,7 @@ std::vector<telnetpp::token_pass> server_option::activate()
 // ==========================================================================
 // DEACTIVATE
 // ==========================================================================
-std::vector<telnetpp::token_pass> server_option::deactivate()
+std::vector<telnetpp::token> server_option::deactivate()
 {
     if (state_ == state::inactive)
     {
@@ -67,7 +67,7 @@ std::vector<telnetpp::token_pass> server_option::deactivate()
     if (state_ == state::active)
     {
         state_ = state::deactivating;
-        return { telnetpp::token(
+        return { telnetpp::element(
             telnetpp::negotiation(telnetpp::wont, option_) 
         )};
     }
@@ -88,7 +88,7 @@ bool server_option::is_active() const
 // ==========================================================================
 // NEGOTIATE
 // ==========================================================================
-std::vector<telnetpp::token_pass> server_option::negotiate(telnetpp::u8 request)
+std::vector<telnetpp::token> server_option::negotiate(telnetpp::u8 request)
 {
     switch(state_)
     {
@@ -99,7 +99,7 @@ std::vector<telnetpp::token_pass> server_option::negotiate(telnetpp::u8 request)
                 auto response = on_state_changed();
                 response.insert(
                     response.begin(),
-                    { telnetpp::token(
+                    { telnetpp::element(
                         telnetpp::negotiation(telnetpp::will, option_)
                     )});
                 
@@ -107,7 +107,7 @@ std::vector<telnetpp::token_pass> server_option::negotiate(telnetpp::u8 request)
             }
             else
             {
-                return { telnetpp::token(
+                return { telnetpp::element(
                     telnetpp::negotiation(telnetpp::wont, option_) 
                 )};
             }
@@ -127,14 +127,14 @@ std::vector<telnetpp::token_pass> server_option::negotiate(telnetpp::u8 request)
         case state::active :
             if (request == telnetpp::do_)
             {
-                return { telnetpp::token(
+                return { telnetpp::element(
                     telnetpp::negotiation(telnetpp::will, option_) 
                 )};
             }
             else
             {
                 state_ = state::inactive;
-                return { telnetpp::token(
+                return { telnetpp::element(
                     telnetpp::negotiation(telnetpp::wont, option_) 
                 )};
             }
@@ -162,7 +162,7 @@ std::vector<telnetpp::token_pass> server_option::negotiate(telnetpp::u8 request)
 // ==========================================================================
 // SUBNEGOTIATE
 // ==========================================================================
-std::vector<telnetpp::token_pass> server_option::subnegotiate(
+std::vector<telnetpp::token> server_option::subnegotiate(
     std::vector<telnetpp::u8> const &content)
 {
     if (state_ == state::active)
@@ -178,7 +178,7 @@ std::vector<telnetpp::token_pass> server_option::subnegotiate(
 // ==========================================================================
 // HANDLE_SUBNEGOTIATION
 // ==========================================================================
-std::vector<telnetpp::token_pass> server_option::handle_subnegotiation(
+std::vector<telnetpp::token> server_option::handle_subnegotiation(
     std::vector<telnetpp::u8> const &)
 {
     // By default, do nothing.

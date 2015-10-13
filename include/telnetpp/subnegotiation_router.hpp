@@ -3,7 +3,7 @@
 
 #include "telnetpp/router.hpp"
 #include "telnetpp/subnegotiation.hpp"
-#include "telnetpp/token.hpp"
+#include "telnetpp/element.hpp"
 #include <vector>
 
 namespace telnetpp {
@@ -24,7 +24,7 @@ class subnegotiation_router
   : public router<
         u8,
         subnegotiation,
-        std::vector<token_pass>,
+        std::vector<token>,
         detail::subnegotiation_router_key_from_message_policy
     >
 {

@@ -39,14 +39,14 @@ void negotiation_router_test::message_with_registered_key_goes_to_registered_fun
     bool unregistered_route_called = false;
     
     router.register_route(expected, 
-        [&neg](auto &&new_negotiation) -> std::vector<telnetpp::token_pass>
+        [&neg](auto &&new_negotiation) -> std::vector<telnetpp::token>
         { 
             neg = new_negotiation;
             return {};
         });
     
     router.set_unregistered_route(
-        [&unregistered_route_called](auto &&) -> std::vector<telnetpp::token_pass>
+        [&unregistered_route_called](auto &&) -> std::vector<telnetpp::token>
         {
             unregistered_route_called = true;
             return {};
@@ -70,14 +70,14 @@ void negotiation_router_test::message_with_unregistered_key_goes_to_unregistered
     bool registered_route_called = false;
     
     router.register_route(unexpected, 
-        [&registered_route_called](auto &&) -> std::vector<telnetpp::token_pass>
+        [&registered_route_called](auto &&) -> std::vector<telnetpp::token>
         {
             registered_route_called = true;
             return {};
         });
     
     router.set_unregistered_route(
-        [&neg](auto &&new_negotiation) -> std::vector<telnetpp::token_pass>
+        [&neg](auto &&new_negotiation) -> std::vector<telnetpp::token>
         {
             neg = new_negotiation;
             return {};
@@ -107,5 +107,5 @@ void negotiation_router_test::activating_option_returns_activation_sequence()
     CPPUNIT_ASSERT_EQUAL(
         telnetpp::negotiation(telnetpp::wont, telnetpp::options::echo::option),
         boost::get<telnetpp::negotiation>(
-            boost::get<telnetpp::token>(result[0])));
+            boost::get<telnetpp::element>(result[0])));
 }

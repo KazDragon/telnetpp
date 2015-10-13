@@ -19,7 +19,7 @@ server::server()
 // ==========================================================================
 // SET_WINDOW_SIZE
 // ==========================================================================
-std::vector<telnetpp::token_pass> server::set_window_size(u16 width, u16 height)
+std::vector<telnetpp::token> server::set_window_size(u16 width, u16 height)
 {
     window_size_ = std::make_pair(width, height);
     return report_window_size();
@@ -28,7 +28,7 @@ std::vector<telnetpp::token_pass> server::set_window_size(u16 width, u16 height)
 // ==========================================================================
 // HANDLE_SUBNEGOTIATION
 // ==========================================================================
-std::vector<telnetpp::token_pass> server::handle_subnegotiation(
+std::vector<telnetpp::token> server::handle_subnegotiation(
     std::vector<telnetpp::u8> const &content)
 {
     return {};
@@ -37,13 +37,13 @@ std::vector<telnetpp::token_pass> server::handle_subnegotiation(
 // ==========================================================================
 // REPORT_WINDOW_SIZE
 // ==========================================================================
-std::vector<telnetpp::token_pass> server::report_window_size()
+std::vector<telnetpp::token> server::report_window_size()
 {
     if (is_active() && window_size_.is_initialized())
     {
         return 
         {
-            telnetpp::token(telnetpp::subnegotiation(
+            telnetpp::element(telnetpp::subnegotiation(
                 option(),
                 {
                     telnetpp::u8(window_size_->first >> 8),

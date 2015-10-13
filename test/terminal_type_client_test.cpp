@@ -1,7 +1,7 @@
 #include "telnetpp/options/terminal_type/client.hpp"
 #include "telnetpp/options/terminal_type.hpp"
 #include "telnetpp/protocol.hpp"
-#include "expect_tokens.hpp"
+#include "expect_elements.hpp"
 #include <cppunit/TestFixture.h>
 #include <cppunit/extensions/HelperMacros.h>
 
@@ -38,7 +38,7 @@ void terminal_type_client_test::requesting_terminal_type_sends_terminal_type_req
     
     expect_tokens(
         { 
-            telnetpp::token(telnetpp::subnegotiation(
+            telnetpp::element(telnetpp::subnegotiation(
                 telnetpp::options::terminal_type::option,
                 { telnetpp::options::terminal_type::send }))
         },
@@ -54,7 +54,7 @@ void terminal_type_client_test::receiving_terminal_type_reports_terminal_type()
     std::string terminal_type;
     client.on_terminal_type.connect(
         [&terminal_type, &client](std::string const &new_terminal_type)
-            -> std::vector<telnetpp::token_pass>
+            -> std::vector<telnetpp::token>
         {
             terminal_type = new_terminal_type;
             return client.request_terminal_type();
@@ -64,7 +64,7 @@ void terminal_type_client_test::receiving_terminal_type_reports_terminal_type()
     
     expect_tokens(
         {
-            telnetpp::token(telnetpp::subnegotiation(
+            telnetpp::element(telnetpp::subnegotiation(
                 telnetpp::options::terminal_type::option,
                 { telnetpp::options::terminal_type::send }))
         },

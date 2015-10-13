@@ -64,7 +64,7 @@ private :
 
 void generate_helper(
     std::vector<telnetpp::u8> &result, 
-    telnetpp::token const &token)
+    telnetpp::element const &token)
 {
     generator_token_visitor visitor(result);
     boost::apply_visitor(visitor, token);

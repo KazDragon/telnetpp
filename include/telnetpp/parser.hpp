@@ -5,7 +5,7 @@
 #include "telnetpp/negotiation.hpp"
 #include "telnetpp/protocol.hpp"
 #include "telnetpp/subnegotiation.hpp"
-#include "telnetpp/token.hpp"
+#include "telnetpp/element.hpp"
 #include "telnetpp/detail/parse_helper.hpp"
 #include <vector>
 
@@ -20,7 +20,7 @@ namespace telnetpp {
 /// \returns a collection of completely parsed tokens.
 //* =========================================================================
 template <class InputIterator1, class InputIterator2>
-std::vector<token> parse(InputIterator1 &begin, InputIterator2 end)
+std::vector<element> parse(InputIterator1 &begin, InputIterator2 end)
 {
     detail::parse_temps temps;
     
@@ -38,7 +38,7 @@ std::vector<token> parse(InputIterator1 &begin, InputIterator2 end)
         }
     }
     
-    return temps.tokens;
+    return temps.elements;
 }
 
 }

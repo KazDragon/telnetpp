@@ -16,8 +16,8 @@ public :
     client();
 
     boost::signals2::signal<
-        std::vector<telnetpp::token_pass> (telnetpp::u16, telnetpp::u16),
-        telnetpp::token_combiner<telnetpp::token_pass>
+        std::vector<telnetpp::token> (telnetpp::u16, telnetpp::u16),
+        telnetpp::token_combiner
     > on_window_size_changed;
 
 private :
@@ -25,7 +25,7 @@ private :
     /// \brief Handle a negotiation that has been received in the active
     /// state.
     //* =====================================================================
-    std::vector<telnetpp::token_pass> handle_subnegotiation(
+    std::vector<telnetpp::token> handle_subnegotiation(
         std::vector<telnetpp::u8> const &content) override;
 
 };

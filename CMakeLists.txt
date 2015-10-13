@@ -49,14 +49,14 @@ add_executable(telnetpp_tester
     test/client_option_test.cpp
     test/echo_client_test.cpp
     test/echo_server_test.cpp
-    test/expect_tokens.cpp
+    test/expect_elements.cpp
     test/generator_test.cpp
     test/main.cpp
     test/naws_client_test.cpp
     test/naws_server_test.cpp    
     test/negotiation_router_test.cpp
     test/parser_test.cpp
-    test/routing_visitor_test.cpp
+#    test/routing_visitor_test.cpp
     test/server_option_test.cpp
     test/subnegotiation_router_test.cpp
     test/suppress_ga_client_test.cpp

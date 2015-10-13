@@ -1,6 +1,6 @@
 #include "telnetpp/client_option.hpp"
 #include "telnetpp/protocol.hpp"
-#include "expect_tokens.hpp"
+#include "expect_elements.hpp"
 #include <cppunit/TestFixture.h>
 #include <cppunit/extensions/HelperMacros.h>
 
@@ -81,12 +81,12 @@ public :
     }
         
     boost::signals2::signal<
-        std::vector<telnetpp::token_pass> (std::vector<telnetpp::u8> const &content),
-        telnetpp::token_combiner<telnetpp::token_pass>
+        std::vector<telnetpp::token> (std::vector<telnetpp::u8> const &content),
+        telnetpp::token_combiner
     > on_subnegotiation;
         
 private :
-    std::vector<telnetpp::token_pass> handle_subnegotiation(
+    std::vector<telnetpp::token> handle_subnegotiation(
         std::vector<telnetpp::u8> const &content)
     {
         return on_subnegotiation(content);
@@ -107,14 +107,14 @@ void client_option_test::deactivated_negotiate_will_responds_with_dont_no_signal
     
     bool called = false;
     client.on_state_changed.connect(
-        [&called]() -> std::vector<telnetpp::token_pass>
+        [&called]() -> std::vector<telnetpp::token>
         {
             called = true;
             return {};
         });
     
     expect_tokens(
-        { telnetpp::token(telnetpp::negotiation(telnetpp::dont, 0xA5)) },
+        { telnetpp::element(telnetpp::negotiation(telnetpp::dont, 0xA5)) },
         client.negotiate(telnetpp::will));
     
     CPPUNIT_ASSERT_EQUAL(false, client.is_active());
@@ -127,14 +127,14 @@ void client_option_test::deactivated_negotiate_wont_responds_with_dont_no_signal
 
     bool called = false;
     client.on_state_changed.connect(
-        [&called]() -> std::vector<telnetpp::token_pass>
+        [&called]() -> std::vector<telnetpp::token>
         {
             called = true;
             return {};
         });
     
     expect_tokens(
-        { telnetpp::token(telnetpp::negotiation(telnetpp::dont, 0xA5)) },
+        { telnetpp::element(telnetpp::negotiation(telnetpp::dont, 0xA5)) },
         client.negotiate(telnetpp::wont));
     
     CPPUNIT_ASSERT_EQUAL(false, client.is_active());
@@ -147,14 +147,14 @@ void client_option_test::deactivated_activate_responds_with_do_no_signal()
 
     bool called = false;
     client.on_state_changed.connect(
-        [&called]() -> std::vector<telnetpp::token_pass>
+        [&called]() -> std::vector<telnetpp::token>
         {
             called = true;
             return {};
         });
     
     expect_tokens(
-        { telnetpp::token(telnetpp::negotiation(telnetpp::do_, 0xA5)) },
+        { telnetpp::element(telnetpp::negotiation(telnetpp::do_, 0xA5)) },
         client.activate());
     
     CPPUNIT_ASSERT_EQUAL(false, client.is_active());
@@ -167,7 +167,7 @@ void client_option_test::deactivated_deactivate_responds_with_nothing_with_signa
 
     bool called = false;
     client.on_state_changed.connect(
-        [&called]() -> std::vector<telnetpp::token_pass>
+        [&called]() -> std::vector<telnetpp::token>
         {
             called = true;
             return {};
@@ -186,14 +186,14 @@ void client_option_test::activatable_deactivated_negotiate_will_responds_with_do
     
     bool called = false;
     client.on_state_changed.connect(
-        [&called]() -> std::vector<telnetpp::token_pass>
+        [&called]() -> std::vector<telnetpp::token>
         {
             called = true;
             return {};
         });
     
     expect_tokens(
-        { telnetpp::token(telnetpp::negotiation(telnetpp::do_, 0xA5)) },
+        { telnetpp::element(telnetpp::negotiation(telnetpp::do_, 0xA5)) },
         client.negotiate(telnetpp::will));
     
     CPPUNIT_ASSERT_EQUAL(true, called);
@@ -207,14 +207,14 @@ void client_option_test::activatable_deactivated_negotiate_wont_responds_with_do
     
     bool called = false;
     client.on_state_changed.connect(
-        [&called]() -> std::vector<telnetpp::token_pass>
+        [&called]() -> std::vector<telnetpp::token>
         {
             called = true;
             return {};
         });
     
     expect_tokens(
-        { telnetpp::token(telnetpp::negotiation(telnetpp::dont, 0xA5)) }, 
+        { telnetpp::element(telnetpp::negotiation(telnetpp::dont, 0xA5)) }, 
         client.negotiate(telnetpp::wont));
     
     CPPUNIT_ASSERT_EQUAL(false, called);
@@ -228,7 +228,7 @@ void client_option_test::activating_negotiate_will_responds_with_nothing_is_acti
     
     bool called = false;
     client.on_state_changed.connect(
-        [&called]() -> std::vector<telnetpp::token_pass>
+        [&called]() -> std::vector<telnetpp::token>
         {
             called = true;
             return {};
@@ -246,7 +246,7 @@ void client_option_test::activating_negotiate_wont_responds_with_nothing_is_inac
     
     bool called = false;
     client.on_state_changed.connect(
-        [&called]() -> std::vector<telnetpp::token_pass>
+        [&called]() -> std::vector<telnetpp::token>
         {
             called = true;
             return {};
@@ -264,7 +264,7 @@ void client_option_test::activating_activate_responds_with_nothing_no_signal()
     
     bool called = false;
     client.on_state_changed.connect(
-        [&called]() -> std::vector<telnetpp::token_pass>
+        [&called]() -> std::vector<telnetpp::token>
         {
             called = true;
             return {};
@@ -283,14 +283,14 @@ void client_option_test::activated_negotiate_will_responds_with_do_is_active_no_
 
     bool called = false;
     client.on_state_changed.connect(
-        [&called]() -> std::vector<telnetpp::token_pass>
+        [&called]() -> std::vector<telnetpp::token>
         {
             called = true;
             return {};
         });
     
     expect_tokens(
-        { telnetpp::token(telnetpp::negotiation(telnetpp::do_, 0xA5)) },
+        { telnetpp::element(telnetpp::negotiation(telnetpp::do_, 0xA5)) },
         client.negotiate(telnetpp::will));
     CPPUNIT_ASSERT_EQUAL(true, client.is_active());
     CPPUNIT_ASSERT_EQUAL(false, called);
@@ -304,14 +304,14 @@ void client_option_test::activated_negotiate_wont_responds_with_dont_is_inactive
     
     bool called = false;
     client.on_state_changed.connect(
-        [&called]() -> std::vector<telnetpp::token_pass>
+        [&called]() -> std::vector<telnetpp::token>
         {
             called = true;
             return {};
         });
 
     expect_tokens(
-        { telnetpp::token(telnetpp::negotiation(telnetpp::dont, 0xA5)) },
+        { telnetpp::element(telnetpp::negotiation(telnetpp::dont, 0xA5)) },
         client.negotiate(telnetpp::wont));
     CPPUNIT_ASSERT_EQUAL(false, client.is_active());
     CPPUNIT_ASSERT_EQUAL(false, called);
@@ -325,7 +325,7 @@ void client_option_test::activated_activate_responds_with_nothing_is_active_with
     
     bool called = false;
     client.on_state_changed.connect(
-        [&called]() -> std::vector<telnetpp::token_pass>
+        [&called]() -> std::vector<telnetpp::token>
         {
             called = true;
             return {};
@@ -344,14 +344,14 @@ void client_option_test::activated_deactive_responds_with_dont_is_inactive_no_si
     
     bool called = false;
     client.on_state_changed.connect(
-        [&called]() -> std::vector<telnetpp::token_pass>
+        [&called]() -> std::vector<telnetpp::token>
         {
             called = true;
             return {};
         });
     
     expect_tokens(
-        { telnetpp::token(telnetpp::negotiation(telnetpp::dont, 0xA5)) },
+        { telnetpp::element(telnetpp::negotiation(telnetpp::dont, 0xA5)) },
         client.deactivate());
     CPPUNIT_ASSERT_EQUAL(false, client.is_active());
     CPPUNIT_ASSERT_EQUAL(false, called);
@@ -366,7 +366,7 @@ void client_option_test::deactivating_negotiate_will_responds_with_nothing_is_ac
     
     bool called = false;
     client.on_state_changed.connect(
-        [&called]() -> std::vector<telnetpp::token_pass>
+        [&called]() -> std::vector<telnetpp::token>
         {
             called = true;
             return {};
@@ -386,7 +386,7 @@ void client_option_test::deactivating_negotiate_wont_responds_with_nothing_is_in
     
     bool called = false;
     client.on_state_changed.connect(
-        [&called]() -> std::vector<telnetpp::token_pass>
+        [&called]() -> std::vector<telnetpp::token>
         {
             called = true;
             return {};
@@ -406,7 +406,7 @@ void client_option_test::deactivating_deactivate_responds_with_nothing_is_inacti
 
     bool called = false;
     client.on_state_changed.connect(
-        [&called]() -> std::vector<telnetpp::token_pass>
+        [&called]() -> std::vector<telnetpp::token>
         {
             called = true;
             return {};
@@ -423,7 +423,7 @@ void client_option_test::inactive_subnegotiation_is_ignored()
     
     bool called = false;
     client.on_subnegotiation.connect(
-        [&called](auto) -> std::vector<telnetpp::token_pass>
+        [&called](auto) -> std::vector<telnetpp::token>
         {
             called = true;
             return {};
@@ -445,7 +445,7 @@ void client_option_test::active_subnegotiation_is_handled()
     
     client.on_subnegotiation.connect(
         [&called, &content](std::vector<telnetpp::u8> const &new_content)
-            -> std::vector<telnetpp::token_pass>
+            -> std::vector<telnetpp::token>
         {
             called = true;
             content = new_content;

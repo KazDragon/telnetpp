@@ -3,7 +3,7 @@
 
 #include "telnetpp/router.hpp"
 #include "telnetpp/command.hpp"
-#include "telnetpp/token.hpp"
+#include "telnetpp/element.hpp"
 
 namespace telnetpp {
     
@@ -23,7 +23,7 @@ class command_router
   : public router<
         command,
         command,
-        std::vector<token_pass>,
+        std::vector<token>,
         detail::command_router_key_from_message_policy
     >
 {

@@ -20,20 +20,20 @@ public :
     //* =====================================================================
     /// \brief Sets the window size that this option will report.
     //* =====================================================================
-    std::vector<telnetpp::token_pass> set_window_size(u16 width, u16 height);
+    std::vector<telnetpp::token> set_window_size(u16 width, u16 height);
 
 private :
     //* =====================================================================
     /// \brief Handle a negotiation that has been received in the active
     /// state.
     //* =====================================================================
-    std::vector<telnetpp::token_pass> handle_subnegotiation(
+    std::vector<telnetpp::token> handle_subnegotiation(
         std::vector<telnetpp::u8> const &content) override;
 
     //* =====================================================================
     /// \brief Report the window size.
     //* =====================================================================
-    std::vector<telnetpp::token_pass> report_window_size();
+    std::vector<telnetpp::token> report_window_size();
     
     boost::optional<std::pair<telnetpp::u16, telnetpp::u16>> window_size_;
 };

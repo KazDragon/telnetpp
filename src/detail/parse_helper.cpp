@@ -7,12 +7,12 @@ namespace telnetpp { namespace detail {
 namespace {
  
 //* =========================================================================
-/// \brief Given a set of tokens, either appends or, if appropriate,
-/// merges the given token to the collection.
+/// \brief Given a set of elements, either appends or, if appropriate,
+/// merges the given element to the collection.
 //* =========================================================================
-void append_parsed_token(
-    std::vector<telnetpp::token> &tokens,
-    telnetpp::token const &token);
+void append_parsed_element(
+    std::vector<telnetpp::element> &elements,
+    telnetpp::element const &element);
     
 // ==========================================================================
 // PARSE_IDLE
@@ -27,7 +27,7 @@ void parse_idle(
     }
     else
     {
-        append_parsed_token(temps.tokens, std::string{char(byte)});
+        append_parsed_element(temps.elements, std::string{char(byte)});
     }
 }
 
@@ -40,7 +40,7 @@ void parse_iac(
 {
     if (byte == telnetpp::iac)
     {
-        append_parsed_token(temps.tokens, std::string{char(byte)});
+        append_parsed_element(temps.elements, std::string{char(byte)});
         temps.state = parse_state::idle;
     }
     else
@@ -60,7 +60,7 @@ void parse_iac(
                 break;
                 
             default :
-                append_parsed_token(temps.tokens, telnetpp::command(byte));
+                append_parsed_element(temps.elements, telnetpp::command(byte));
                 temps.state = parse_state::idle;
         }
     }
@@ -73,7 +73,7 @@ void parse_negotiation(
     parse_temps  &temps,
     telnetpp::u8  byte)
 {
-    append_parsed_token(temps.tokens, negotiation{temps.id, byte});
+    append_parsed_element(temps.elements, negotiation{temps.id, byte});
     temps.state = parse_state::idle;
 }
 
@@ -116,8 +116,8 @@ void parse_subnegotiation_content_iac(
 {
     if (byte == telnetpp::se)
     {
-        append_parsed_token(
-            temps.tokens,
+        append_parsed_element(
+            temps.elements,
             subnegotiation(temps.id, temps.subnegotiation_content));
         temps.state = parse_state::idle;
     }
@@ -129,15 +129,15 @@ void parse_subnegotiation_content_iac(
 }
 
 //* =========================================================================
-/// \brief A visitor that will append a token to a collection of tokens.
+/// \brief A visitor that will append a element to a collection of elements.
 //* =========================================================================
-struct parser_token_visitor : boost::static_visitor<>
+struct parser_element_visitor : boost::static_visitor<>
 {
     //* =====================================================================
     /// \brief Constructor
     //* =====================================================================
-    parser_token_visitor(std::vector<telnetpp::token> &tokens)
-      : tokens_(tokens)
+    parser_element_visitor(std::vector<telnetpp::element> &elements)
+      : elements_(elements)
     {
     }
       
@@ -147,13 +147,13 @@ struct parser_token_visitor : boost::static_visitor<>
     //* =====================================================================
     void operator()(std::string const &text)
     {
-        if (tokens_.empty() || tokens_.back().type() != typeid(std::string))
+        if (elements_.empty() || elements_.back().type() != typeid(std::string))
         {
-            tokens_.emplace_back(text);
+            elements_.emplace_back(text);
         }
         else
         {
-            boost::get<std::string>(tokens_.back()) += text;
+            boost::get<std::string>(elements_.back()) += text;
         }
     }
     
@@ -162,7 +162,7 @@ struct parser_token_visitor : boost::static_visitor<>
     //* =====================================================================
     void operator()(telnetpp::command const &cmd)
     {
-        tokens_.emplace_back(cmd);
+        elements_.emplace_back(cmd);
     }
     
     //* =====================================================================
@@ -170,7 +170,7 @@ struct parser_token_visitor : boost::static_visitor<>
     //* =====================================================================
     void operator()(telnetpp::negotiation const &neg)
     {
-        tokens_.emplace_back(neg);
+        elements_.emplace_back(neg);
     }
 
     //* =====================================================================
@@ -178,21 +178,21 @@ struct parser_token_visitor : boost::static_visitor<>
     //* =====================================================================
     void operator()(telnetpp::subnegotiation const &sub)
     {
-        tokens_.emplace_back(sub);
+        elements_.emplace_back(sub);
     }
     
-    std::vector<telnetpp::token> &tokens_;
+    std::vector<telnetpp::element> &elements_;
 };
 
 // ==========================================================================
-// APPEND_PARSED_TOKEN
+// APPEND_PARSED_ELEMENT
 // ==========================================================================
-void append_parsed_token(
-    std::vector<telnetpp::token> &tokens,
-    telnetpp::token const &token)
+void append_parsed_element(
+    std::vector<telnetpp::element> &elements,
+    telnetpp::element const &element)
 {
-    parser_token_visitor visitor(tokens);
-    boost::apply_visitor(visitor, token);
+    parser_element_visitor visitor(elements);
+    boost::apply_visitor(visitor, element);
 }
 
 }
@@ -229,7 +229,7 @@ void parse_helper(parse_temps &temps, telnetpp::u8 byte)
             break;
             
         default :
-            assert(!"Token parser in invalid state");
+            assert(!"element parser in invalid state");
             break;
     }
 }

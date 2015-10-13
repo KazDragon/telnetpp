@@ -16,7 +16,7 @@ public :
         CPPUNIT_TEST(empty_subnegotiation_generates_empty_subnegotiation);
         CPPUNIT_TEST(subnegotiation_with_content_generates_subnegotiation_with_content);
         CPPUNIT_TEST(subnegotiation_with_iac_content_generates_doubled_iac);
-        CPPUNIT_TEST(many_tokens_generates_many_tokens);
+        CPPUNIT_TEST(many_elements_generates_many_elements);
     CPPUNIT_TEST_SUITE_END();
     
 private  :
@@ -29,7 +29,7 @@ private  :
     void empty_subnegotiation_generates_empty_subnegotiation();
     void subnegotiation_with_content_generates_subnegotiation_with_content();
     void subnegotiation_with_iac_content_generates_doubled_iac();
-    void many_tokens_generates_many_tokens();
+    void many_elements_generates_many_elements();
 };
 
 CPPUNIT_TEST_SUITE_REGISTRATION(generator_test);
@@ -65,7 +65,7 @@ void expect(
 
 void generator_test::empty_array_generates_nothing()
 {
-    std::vector<telnetpp::token> data = {};
+    std::vector<telnetpp::element> data = {};
     std::vector<telnetpp::u8> expected = {};
     
     expect(data.begin(), data.end(), expected);
@@ -73,7 +73,7 @@ void generator_test::empty_array_generates_nothing()
 
 void generator_test::empty_string_generates_nothing()
 {
-    std::vector<telnetpp::token> data = { std::string("") };
+    std::vector<telnetpp::element> data = { std::string("") };
     std::vector<telnetpp::u8> expected = {};
     
     expect(data.begin(), data.end(), expected);
@@ -81,7 +81,7 @@ void generator_test::empty_string_generates_nothing()
 
 void generator_test::string_with_content_generates_string()
 {
-    std::vector<telnetpp::token> data = { std::string("abcde") };
+    std::vector<telnetpp::element> data = { std::string("abcde") };
     std::vector<telnetpp::u8> expected = { 'a', 'b', 'c', 'd', 'e' };
     
     expect(data.begin(), data.end(), expected);
@@ -89,7 +89,7 @@ void generator_test::string_with_content_generates_string()
 
 void generator_test::string_with_iac_content_generates_doubled_iac()
 {
-    std::vector<telnetpp::token> data = { std::string("ab\xFF""cd") };
+    std::vector<telnetpp::element> data = { std::string("ab\xFF""cd") };
     std::vector<telnetpp::u8> expected = { 'a', 'b', 0xFF, 0xFF, 'c', 'd' };
     
     expect(data.begin(), data.end(), expected);
@@ -97,7 +97,7 @@ void generator_test::string_with_iac_content_generates_doubled_iac()
 
 void generator_test::command_generates_command()
 {
-    std::vector<telnetpp::token> data = { telnetpp::command(telnetpp::nop) };
+    std::vector<telnetpp::element> data = { telnetpp::command(telnetpp::nop) };
     std::vector<telnetpp::u8> expected = { 0xFF, 0xF1 };
     
     expect(data.begin(), data.end(), expected);
@@ -105,7 +105,7 @@ void generator_test::command_generates_command()
 
 void generator_test::negotiation_generates_negotiation()
 {
-    std::vector<telnetpp::token> data = { 
+    std::vector<telnetpp::element> data = { 
         telnetpp::negotiation(telnetpp::will, 0xDE) 
     };
     
@@ -116,7 +116,7 @@ void generator_test::negotiation_generates_negotiation()
 
 void generator_test::empty_subnegotiation_generates_empty_subnegotiation()
 {
-    std::vector<telnetpp::token> data = {
+    std::vector<telnetpp::element> data = {
         telnetpp::subnegotiation(0xAB, {})
     };
     
@@ -127,7 +127,7 @@ void generator_test::empty_subnegotiation_generates_empty_subnegotiation()
 
 void generator_test::subnegotiation_with_content_generates_subnegotiation_with_content()
 {
-    std::vector<telnetpp::token> data = {
+    std::vector<telnetpp::element> data = {
         telnetpp::subnegotiation(0xCD, { 'a', 'b', 'c', 'd', 'e' })
     };
     
@@ -143,7 +143,7 @@ void generator_test::subnegotiation_with_content_generates_subnegotiation_with_c
 
 void generator_test::subnegotiation_with_iac_content_generates_doubled_iac()
 {
-    std::vector<telnetpp::token> data = {
+    std::vector<telnetpp::element> data = {
         telnetpp::subnegotiation(0x74, { 'a', 'b', 0xFF, 'c', 'd' })
     };
     
@@ -157,9 +157,9 @@ void generator_test::subnegotiation_with_iac_content_generates_doubled_iac()
     expect(data.begin(), data.end(), expected);
 }
 
-void generator_test::many_tokens_generates_many_tokens()
+void generator_test::many_elements_generates_many_elements()
 {
-    std::vector<telnetpp::token> data = {
+    std::vector<telnetpp::element> data = {
         std::string("abcd"),
         std::string("ef\xFFg"),
         telnetpp::negotiation(telnetpp::wont, 0xFF),

@@ -1,7 +1,7 @@
 #include "telnetpp/options/naws/server.hpp"
 #include "telnetpp/options/naws.hpp"
 #include "telnetpp/protocol.hpp"
-#include "expect_tokens.hpp"
+#include "expect_elements.hpp"
 #include <cppunit/TestFixture.h>
 #include <cppunit/extensions/HelperMacros.h>
 
@@ -63,7 +63,7 @@ void naws_server_test::activation_with_screen_size_sends_screen_size()
     CPPUNIT_ASSERT_EQUAL(
         expected, 
         boost::get<telnetpp::subnegotiation>(
-            boost::get<telnetpp::token>(result[0])));
+            boost::get<telnetpp::element>(result[0])));
 }
 
 void naws_server_test::setting_screen_size_when_activated_sends_screen_size()
@@ -80,5 +80,5 @@ void naws_server_test::setting_screen_size_when_activated_sends_screen_size()
     CPPUNIT_ASSERT_EQUAL(
         expected, 
         boost::get<telnetpp::subnegotiation>(
-            boost::get<telnetpp::token>(result[0])));
+            boost::get<telnetpp::element>(result[0])));
 }

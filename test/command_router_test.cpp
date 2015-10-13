@@ -35,14 +35,14 @@ void command_router_test::message_with_registered_key_goes_to_registered_functio
     bool unregistered_route_called = false;
     
     router.register_route(expected,
-        [&cmd](auto &&new_command) -> std::vector<telnetpp::token_pass>
+        [&cmd](auto &&new_command) -> std::vector<telnetpp::token>
         {
             cmd = new_command;
             return {};
         });
     
     router.set_unregistered_route(
-        [&unregistered_route_called](auto &&) -> std::vector<telnetpp::token_pass>
+        [&unregistered_route_called](auto &&) -> std::vector<telnetpp::token>
         {
             unregistered_route_called = true;
             return {};
@@ -64,14 +64,14 @@ void command_router_test::message_with_unregistered_key_goes_to_unregistered_fun
     bool registered_route_called = false;
     
     router.register_route(unexpected,
-        [&registered_route_called](auto &&) -> std::vector<telnetpp::token_pass>
+        [&registered_route_called](auto &&) -> std::vector<telnetpp::token>
         {
             registered_route_called = true;
             return {};
         });
     
     router.set_unregistered_route(
-        [&cmd](auto &&new_command) -> std::vector<telnetpp::token_pass>
+        [&cmd](auto &&new_command) -> std::vector<telnetpp::token>
         {
             cmd = new_command;
             return {};

@@ -32,12 +32,12 @@ void client_option::set_activatable()
 // ==========================================================================
 // ACTIVATE
 // ==========================================================================
-std::vector<telnetpp::token_pass> client_option::activate()
+std::vector<telnetpp::token> client_option::activate()
 {
     if (state_ == state::inactive)
     {
         state_ = state::activating;
-        return { telnetpp::token {
+        return { telnetpp::element {
             telnetpp::negotiation(telnetpp::do_, option_) }
         };
     }
@@ -57,7 +57,7 @@ std::vector<telnetpp::token_pass> client_option::activate()
 // ==========================================================================
 // DEACTIVATE
 // ==========================================================================
-std::vector<telnetpp::token_pass> client_option::deactivate()
+std::vector<telnetpp::token> client_option::deactivate()
 {
     if (state_ == state::inactive)
     {
@@ -67,7 +67,7 @@ std::vector<telnetpp::token_pass> client_option::deactivate()
     if (state_ == state::active)
     {
         state_ = state::deactivating;
-        return { telnetpp::token{ 
+        return { telnetpp::element {
             telnetpp::negotiation(telnetpp::dont, option_) } 
         };
     }
@@ -88,7 +88,7 @@ bool client_option::is_active() const
 // ==========================================================================
 // NEGOTIATE
 // ==========================================================================
-std::vector<telnetpp::token_pass> client_option::negotiate(telnetpp::u8 request)
+std::vector<telnetpp::token> client_option::negotiate(telnetpp::u8 request)
 {
     switch(state_)
     {
@@ -99,7 +99,7 @@ std::vector<telnetpp::token_pass> client_option::negotiate(telnetpp::u8 request)
                 auto response = on_state_changed();
                 response.insert(
                     response.begin(),
-                    { telnetpp::token {
+                    { telnetpp::element {
                         telnetpp::negotiation(telnetpp::do_, option_) } 
                     });
                 
@@ -107,7 +107,7 @@ std::vector<telnetpp::token_pass> client_option::negotiate(telnetpp::u8 request)
             }
             else
             {
-                return { telnetpp::token {
+                return { telnetpp::element {
                     telnetpp::negotiation(telnetpp::dont, option_) }
                 };
             }
@@ -129,14 +129,14 @@ std::vector<telnetpp::token_pass> client_option::negotiate(telnetpp::u8 request)
         case state::active :
             if (request == telnetpp::will)
             {
-                return { telnetpp::token {
+                return { telnetpp::element {
                     telnetpp::negotiation(telnetpp::do_, option_) }
                 };
             }
             else
             {
                 state_ = state::inactive;
-                return { telnetpp::token { 
+                return { telnetpp::element { 
                     telnetpp::negotiation(telnetpp::dont, option_) }
                 };
             }
@@ -164,7 +164,7 @@ std::vector<telnetpp::token_pass> client_option::negotiate(telnetpp::u8 request)
 // ==========================================================================
 // SUBNEGOTIATE
 // ==========================================================================
-std::vector<telnetpp::token_pass> client_option::subnegotiate(
+std::vector<telnetpp::token> client_option::subnegotiate(
     std::vector<telnetpp::u8> const &content)
 {
     if (state_ == state::active)
@@ -180,7 +180,7 @@ std::vector<telnetpp::token_pass> client_option::subnegotiate(
 // ==========================================================================
 // HANDLE_SUBNEGOTIATION
 // ==========================================================================
-std::vector<telnetpp::token_pass> client_option::handle_subnegotiation(
+std::vector<telnetpp::token> client_option::handle_subnegotiation(
     std::vector<telnetpp::u8> const&)
 {
     // By default, do nothing.   
