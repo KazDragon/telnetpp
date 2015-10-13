@@ -31,7 +31,7 @@ class negotiation_router
   : public router<
         negotiation, 
         negotiation,
-        std::vector<token>,
+        std::vector<token_pass>,
         detail::negotiation_router_key_from_message_policy
     >
 {

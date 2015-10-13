@@ -24,7 +24,7 @@ class subnegotiation_router
   : public router<
         u8,
         subnegotiation,
-        std::vector<token>,
+        std::vector<token_pass>,
         detail::subnegotiation_router_key_from_message_policy
     >
 {

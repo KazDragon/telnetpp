@@ -20,12 +20,12 @@ public :
     //* =====================================================================
     /// \brief Requests that the remote end send its terminal type.
     //* =====================================================================
-    std::vector<telnetpp::token> request_terminal_type();
+    std::vector<telnetpp::token_pass> request_terminal_type();
 
     boost::signals2::signal
     <
-        std::vector<telnetpp::token> (std::string const &),
-        telnetpp::token_combiner<token>
+        std::vector<telnetpp::token_pass> (std::string const &),
+        telnetpp::token_combiner<token_pass>
     > on_terminal_type;
     
 private :
@@ -33,7 +33,7 @@ private :
     /// \brief Handle a negotiation that has been received in the active
     /// state.
     //* =====================================================================
-    std::vector<telnetpp::token> handle_subnegotiation(
+    std::vector<telnetpp::token_pass> handle_subnegotiation(
         std::vector<telnetpp::u8> const &content) override;
 };
 

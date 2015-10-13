@@ -38,7 +38,7 @@ void naws_client_test::valid_subnegotiation_signals_window_size_change()
     
     client.on_window_size_changed.connect(
         [&width, &height](telnetpp::u16 new_width, telnetpp::u16 new_height)
-            -> std::vector<telnetpp::token>
+            -> std::vector<telnetpp::token_pass>
         {
             width = new_width;
             height = new_height;
@@ -62,7 +62,7 @@ void naws_client_test::short_subnegotiation_is_ignored()
     
     bool called = false;
     client.on_window_size_changed.connect(
-        [&called](auto &&, auto&&) -> std::vector<telnetpp::token> 
+        [&called](auto &&, auto&&) -> std::vector<telnetpp::token_pass> 
         {
             called = true;
             return {};

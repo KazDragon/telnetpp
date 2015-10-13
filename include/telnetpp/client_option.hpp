@@ -39,12 +39,12 @@ public :
     //* =====================================================================
     /// \brief Activates the option.
     //* =====================================================================
-    std::vector<telnetpp::token> activate();
+    std::vector<telnetpp::token_pass> activate();
     
     //* =====================================================================
     /// \brief Deactivates the option.
     //* =====================================================================
-    std::vector<telnetpp::token> deactivate();
+    std::vector<telnetpp::token_pass> deactivate();
 
     //* =====================================================================
     /// \brief Returns true iff the option is active.
@@ -54,17 +54,17 @@ public :
     //* =====================================================================
     /// \brief Makes a request of the option
     //* =====================================================================
-    std::vector<telnetpp::token> negotiate(telnetpp::u8 request);
+    std::vector<telnetpp::token_pass> negotiate(telnetpp::u8 request);
     
     //* =====================================================================
     /// \brief Send a subnegotiation to the option.
     //* =====================================================================
-    std::vector<telnetpp::token> subnegotiate(
+    std::vector<telnetpp::token_pass> subnegotiate(
         std::vector<telnetpp::u8> const &content);
 
     boost::signals2::signal<
-        std::vector<token> (),
-        token_combiner<token>
+        std::vector<token_pass> (),
+        token_combiner<token_pass>
     > on_state_changed;
     
 private :
@@ -72,7 +72,7 @@ private :
     /// \brief Handle a negotiation that has been received in the active
     /// state.
     //* =====================================================================
-    virtual std::vector<telnetpp::token> handle_subnegotiation(
+    virtual std::vector<telnetpp::token_pass> handle_subnegotiation(
         std::vector<telnetpp::u8> const &content);
 
     enum class state

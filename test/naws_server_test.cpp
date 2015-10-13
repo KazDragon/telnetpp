@@ -62,7 +62,8 @@ void naws_server_test::activation_with_screen_size_sends_screen_size()
     CPPUNIT_ASSERT_EQUAL(size_t{1}, result.size());
     CPPUNIT_ASSERT_EQUAL(
         expected, 
-        boost::get<telnetpp::subnegotiation>(result[0]));
+        boost::get<telnetpp::subnegotiation>(
+            boost::get<telnetpp::token>(result[0])));
 }
 
 void naws_server_test::setting_screen_size_when_activated_sends_screen_size()
@@ -78,5 +79,6 @@ void naws_server_test::setting_screen_size_when_activated_sends_screen_size()
     CPPUNIT_ASSERT_EQUAL(size_t{1}, result.size());
     CPPUNIT_ASSERT_EQUAL(
         expected, 
-        boost::get<telnetpp::subnegotiation>(result[0]));
+        boost::get<telnetpp::subnegotiation>(
+            boost::get<telnetpp::token>(result[0])));
 }

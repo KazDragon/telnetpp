@@ -23,7 +23,7 @@ class command_router
   : public router<
         command,
         command,
-        std::vector<token>,
+        std::vector<token_pass>,
         detail::command_router_key_from_message_policy
     >
 {

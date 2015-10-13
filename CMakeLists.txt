@@ -17,8 +17,8 @@ find_package(CppUnit)
 add_library(telnetpp
     src/client_option.cpp
     src/command.cpp
-    src/detail/generate_helper.cpp
-    src/detail/parse_helper.cpp
+#    src/detail/generate_helper.cpp
+#    src/detail/parse_helper.cpp
     src/negotiation.cpp
     src/options/echo/client.cpp
     src/options/echo/server.cpp
@@ -27,7 +27,7 @@ add_library(telnetpp
     src/options/terminal_type/client.cpp
     src/options/suppress_ga/client.cpp
     src/options/suppress_ga/server.cpp
-    src/routing_visitor.cpp
+#    src/routing_visitor.cpp
     src/server_option.cpp
     src/subnegotiation.cpp
 )
@@ -50,13 +50,13 @@ add_executable(telnetpp_tester
     test/echo_client_test.cpp
     test/echo_server_test.cpp
     test/expect_tokens.cpp
-    test/generator_test.cpp
+#    test/generator_test.cpp
     test/main.cpp
     test/naws_client_test.cpp
     test/naws_server_test.cpp    
     test/negotiation_router_test.cpp
-    test/parser_test.cpp
-    test/routing_visitor_test.cpp
+#    test/parser_test.cpp
+#    test/routing_visitor_test.cpp
     test/server_option_test.cpp
     test/subnegotiation_router_test.cpp
     test/suppress_ga_client_test.cpp

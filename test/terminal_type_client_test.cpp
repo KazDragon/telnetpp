@@ -38,9 +38,9 @@ void terminal_type_client_test::requesting_terminal_type_sends_terminal_type_req
     
     expect_tokens(
         { 
-            telnetpp::subnegotiation(
+            telnetpp::token(telnetpp::subnegotiation(
                 telnetpp::options::terminal_type::option,
-                { telnetpp::options::terminal_type::send })
+                { telnetpp::options::terminal_type::send }))
         },
         client.request_terminal_type());
 }
@@ -54,7 +54,7 @@ void terminal_type_client_test::receiving_terminal_type_reports_terminal_type()
     std::string terminal_type;
     client.on_terminal_type.connect(
         [&terminal_type, &client](std::string const &new_terminal_type)
-            -> std::vector<telnetpp::token>
+            -> std::vector<telnetpp::token_pass>
         {
             terminal_type = new_terminal_type;
             return client.request_terminal_type();
@@ -64,9 +64,9 @@ void terminal_type_client_test::receiving_terminal_type_reports_terminal_type()
     
     expect_tokens(
         {
-            telnetpp::subnegotiation(
+            telnetpp::token(telnetpp::subnegotiation(
                 telnetpp::options::terminal_type::option,
-                { telnetpp::options::terminal_type::send })
+                { telnetpp::options::terminal_type::send }))
         },
         client.subnegotiate({
             telnetpp::options::terminal_type::is,

@@ -39,14 +39,14 @@ void subnegotiation_router_test::message_with_registered_key_goes_to_registered_
     bool unregistered_route_called = false;
     
     router.register_route(expected.option(), 
-        [&sub](auto &&new_subnegotiation) -> std::vector<telnetpp::token>
+        [&sub](auto &&new_subnegotiation) -> std::vector<telnetpp::token_pass>
         { 
             sub = new_subnegotiation;
             return {};
         });
     
     router.set_unregistered_route(
-        [&unregistered_route_called](auto &&) -> std::vector<telnetpp::token>
+        [&unregistered_route_called](auto &&) -> std::vector<telnetpp::token_pass>
         {
             unregistered_route_called = true;
             return {};
@@ -70,14 +70,14 @@ void subnegotiation_router_test::message_with_unregistered_key_goes_to_unregiste
     bool registered_route_called = false;
     
     router.register_route(unexpected.option(), 
-        [&registered_route_called](auto &&) -> std::vector<telnetpp::token>
+        [&registered_route_called](auto &&) -> std::vector<telnetpp::token_pass>
         {
             registered_route_called = true;
             return {};
         });
     
     router.set_unregistered_route(
-        [&sub](auto &&new_subnegotiation) -> std::vector<telnetpp::token>
+        [&sub](auto &&new_subnegotiation) -> std::vector<telnetpp::token_pass>
         {
             sub = new_subnegotiation;
             return {};
@@ -103,7 +103,7 @@ void subnegotiation_router_test::routing_subnegotiation_returns_subnegotiation_r
     telnetpp::u16 height = 0;
     client.on_window_size_changed.connect(
         [&width, &height](auto new_width, auto new_height)
-            -> std::vector<telnetpp::token>
+            -> std::vector<telnetpp::token_pass>
         {
             width = new_width;
             height = new_height;

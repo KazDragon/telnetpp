@@ -14,19 +14,19 @@ client::client()
 // ==========================================================================
 // REQUEST_TERMINAL_TYPE
 // ==========================================================================
-std::vector<telnetpp::token> client::request_terminal_type()
+std::vector<telnetpp::token_pass> client::request_terminal_type()
 {
     return 
     { 
-        telnetpp::subnegotiation(
-            option(), { telnetpp::options::terminal_type::send })
+        telnetpp::token(telnetpp::subnegotiation(
+            option(), { telnetpp::options::terminal_type::send }))
     };
 }
 
 // ==========================================================================
 // HANDLE_SUBNEGOTIATION
 // ==========================================================================
-std::vector<telnetpp::token> client::handle_subnegotiation(
+std::vector<telnetpp::token_pass> client::handle_subnegotiation(
     std::vector<telnetpp::u8> const &content)
 {
     auto begin = content.begin();
