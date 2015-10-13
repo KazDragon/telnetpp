@@ -2,6 +2,7 @@
 #include "telnetpp/options/echo/server.hpp"
 #include "telnetpp/options/echo.hpp"
 #include "telnetpp/protocol.hpp"
+#include "expect_elements.hpp"
 #include <cppunit/TestFixture.h>
 #include <cppunit/extensions/HelperMacros.h>
 
@@ -99,13 +100,11 @@ void negotiation_router_test::activating_option_returns_activation_sequence()
         telnetpp::options::echo::option);
     
     register_route_from_negotiation_to_option(router, telnetpp::dont, server);
-    
-    auto result = router(telnetpp::negotiation(
-        telnetpp::dont, telnetpp::options::echo::option));
-    
-    CPPUNIT_ASSERT_EQUAL(size_t(1), result.size());
-    CPPUNIT_ASSERT_EQUAL(
-        telnetpp::negotiation(telnetpp::wont, telnetpp::options::echo::option),
-        boost::get<telnetpp::negotiation>(
-            boost::get<telnetpp::element>(result[0])));
+
+    expect_elements({
+        telnetpp::negotiation(
+            telnetpp::wont, telnetpp::options::echo::option)
+        },
+        router(telnetpp::negotiation(
+            telnetpp::dont, telnetpp::options::echo::option)));
 }

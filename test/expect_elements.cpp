@@ -28,9 +28,12 @@ struct tokens_match : boost::static_visitor<>
     {
     }
     
-    void operator()(boost::any const &) const
+    void operator()(boost::any const &any) const
     {
         CPPUNIT_ASSERT(expected_.type() == typeid(boost::any));
+        
+        // Unfortunately, we can't actually compare the anys, because we have
+        // no idea what they are by design.
     }
     
     void operator()(telnetpp::element const &tok) const
@@ -63,6 +66,28 @@ void expect_elements(
         printf("\n");
         boost::apply_visitor(elements_match(
             *current_expected), *current_result);
+    }
+}
+
+void expect_elements(
+    std::vector<telnetpp::element> const &expected,
+    std::vector<telnetpp::token> const &result)
+{
+    CPPUNIT_ASSERT_EQUAL(expected.size(), result.size());
+    
+    
+    auto &&current_expected = expected.begin();
+    auto &&current_result   = result.begin();
+    
+    for (;
+         current_expected != expected.end()
+      && current_result != result.end();
+         ++current_expected,
+         ++current_result)
+    {
+        boost::apply_visitor(
+            elements_match(*current_expected),
+            boost::get<telnetpp::element const &>(*current_result));
     }
 }
 

@@ -2,6 +2,7 @@
 #include "telnetpp/options/naws/client.hpp"
 #include "telnetpp/options/naws.hpp"
 #include "telnetpp/protocol.hpp"
+#include "expect_elements.hpp"
 #include <cppunit/TestFixture.h>
 #include <cppunit/extensions/HelperMacros.h>
 
@@ -43,6 +44,7 @@ void routing_visitor_test::text_routes_to_text_function()
             text = new_text;
             return {};
         },
+        nullptr,
         cmd_router,
         neg_router,
         sub_router);
@@ -61,11 +63,12 @@ void routing_visitor_test::text_does_not_route_to_null_function()
     
     telnetpp::routing_visitor visitor(
         nullptr,
+        nullptr,
         cmd_router,
         neg_router,
         sub_router);
         
-    telnetpp::token text_token("text token");
+    telnetpp::token text_token(telnetpp::element("text token"));
     boost::apply_visitor(visitor, text_token);
 }
 
@@ -90,6 +93,7 @@ void routing_visitor_test::command_routes_to_command_router()
         {
             return {};
         },
+        nullptr,
         cmd_router,
         neg_router,
         sub_router);
@@ -123,6 +127,7 @@ void routing_visitor_test::negotiation_routes_to_negotiation_router()
         {
             return {};
         },
+        nullptr,
         cmd_router,
         neg_router,
         sub_router);
@@ -165,6 +170,7 @@ void routing_visitor_test::subnegotiation_routes_to_subnegotiation_router()
         {
             return {};
         },
+        nullptr,
         cmd_router,
         neg_router,
         sub_router);
@@ -203,6 +209,7 @@ void routing_visitor_test::subnegotiation_accumulates_responses()
         {
             return {};
         },
+        nullptr,
         cmd_router,
         neg_router,
         sub_router);
@@ -210,24 +217,19 @@ void routing_visitor_test::subnegotiation_accumulates_responses()
     client.activate();
     telnetpp::element do_negotiation_token(
         telnetpp::negotiation(telnetpp::will, telnetpp::options::naws::option));
-    
-    CPPUNIT_ASSERT_EQUAL(
-        size_t{0},
-        boost::apply_visitor(visitor, do_negotiation_token).size());
+
+    expect_elements(
+        {},
+        boost::apply_visitor(visitor, do_negotiation_token));
     
     telnetpp::element sub_token(
         telnetpp::subnegotiation(
             telnetpp::options::naws::option,
             {0, 80, 0, 24}));
 
-    auto result = boost::apply_visitor(visitor, sub_token);
-
-    telnetpp::negotiation expected(
-        telnetpp::dont, telnetpp::options::naws::option);
-    
-    CPPUNIT_ASSERT_EQUAL(size_t(1), result.size());
-    CPPUNIT_ASSERT_EQUAL(
-        expected, 
-        boost::get<telnetpp::negotiation>(
-            boost::get<telnetpp::element>(result[0])));
+    expect_elements({
+        telnetpp::negotiation(
+            telnetpp::dont, telnetpp::options::naws::option)
+        },
+        boost::apply_visitor(visitor, sub_token));
 }
