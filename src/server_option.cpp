@@ -163,7 +163,7 @@ std::vector<telnetpp::token> server_option::negotiate(telnetpp::u8 request)
 // SUBNEGOTIATE
 // ==========================================================================
 std::vector<telnetpp::token> server_option::subnegotiate(
-    std::vector<telnetpp::u8> const &content)
+    u8stream const &content)
 {
     if (state_ == state::active)
     {
@@ -179,7 +179,7 @@ std::vector<telnetpp::token> server_option::subnegotiate(
 // HANDLE_SUBNEGOTIATION
 // ==========================================================================
 std::vector<telnetpp::token> server_option::handle_subnegotiation(
-    std::vector<telnetpp::u8> const &)
+    u8stream const &)
 {
     // By default, do nothing.
     return {};

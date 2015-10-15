@@ -60,7 +60,7 @@ public :
     /// \brief Send a subnegotiation to the option.
     //* =====================================================================
     std::vector<telnetpp::token> subnegotiate(
-        std::vector<telnetpp::u8> const &content);
+        u8stream const &content);
 
     boost::signals2::signal<
         std::vector<token> (),
