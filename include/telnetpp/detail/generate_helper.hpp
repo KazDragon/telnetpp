@@ -6,7 +6,7 @@
 namespace telnetpp { namespace detail {
 
 void generate_helper(
-    std::vector<telnetpp::u8> &result,
+    u8stream &result,
     telnetpp::element const &element);
 
 }}

@@ -73,7 +73,7 @@ private :
     /// state.
     //* =====================================================================
     virtual std::vector<telnetpp::token> handle_subnegotiation(
-        std::vector<telnetpp::u8> const &content);
+        u8stream const &content);
 
     enum class state
     {

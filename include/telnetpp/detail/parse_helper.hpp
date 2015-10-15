@@ -19,7 +19,7 @@ enum class parse_state
 struct parse_temps
 {
     std::vector<telnetpp::element> elements;
-    std::vector<telnetpp::u8>      subnegotiation_content;
+    u8stream                       subnegotiation_content;
     
     parse_state                    state = parse_state::idle;
     u8                             id;

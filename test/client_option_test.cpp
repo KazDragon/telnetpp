@@ -81,13 +81,13 @@ public :
     }
         
     boost::signals2::signal<
-        std::vector<telnetpp::token> (std::vector<telnetpp::u8> const &content),
+        std::vector<telnetpp::token> (telnetpp::u8stream const &content),
         telnetpp::token_combiner
     > on_subnegotiation;
         
 private :
     std::vector<telnetpp::token> handle_subnegotiation(
-        std::vector<telnetpp::u8> const &content)
+        telnetpp::u8stream const &content)
     {
         return on_subnegotiation(content);
     }
@@ -441,10 +441,10 @@ void client_option_test::active_subnegotiation_is_handled()
     client.negotiate(telnetpp::will);
     
     bool called = false;
-    std::vector<telnetpp::u8> content;
+    telnetpp::u8stream content;
     
     client.on_subnegotiation.connect(
-        [&called, &content](std::vector<telnetpp::u8> const &new_content)
+        [&called, &content](telnetpp::u8stream const &new_content)
             -> std::vector<telnetpp::token>
         {
             called = true;

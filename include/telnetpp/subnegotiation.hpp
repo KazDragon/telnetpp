@@ -7,8 +7,6 @@
 
 namespace telnetpp {
 
-typedef std::vector<u8> subnegotiation_content;
-
 //* =========================================================================
 /// \brief A class that encapsulates a Telnet subnegotiation.
 //* =========================================================================
@@ -18,7 +16,7 @@ public :
     //* =====================================================================
     /// \brief Constructor
     //* =====================================================================
-    subnegotiation(u8 option, subnegotiation_content content);
+    subnegotiation(u8 option, u8stream content);
     
     //* =====================================================================
     /// \brief Returns the option for this subnegotiation.
@@ -28,11 +26,11 @@ public :
     //* =====================================================================
     /// \brief Returns the content for this subnegotiation.
     //* =====================================================================
-    subnegotiation_content const &content() const;
+    u8stream const &content() const;
     
 private :
     u8 option_;
-    subnegotiation_content content_;
+    u8stream content_;
 };
 
 //* =========================================================================
