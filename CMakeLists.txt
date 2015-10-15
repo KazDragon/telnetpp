@@ -33,8 +33,16 @@ add_library(telnetpp
     src/subnegotiation.cpp
 )
 
+set_target_properties(telnetpp
+    PROPERTIES
+        VERSION 0.1
+        SOVERSION 0.1
+)
+
 target_include_directories(telnetpp
-    PUBLIC "${PROJECT_SOURCE_DIR}/include"
+    PUBLIC 
+        "${PROJECT_SOURCE_DIR}/include"
+        "${Boost_INCLUDE_DIRS}"   
 )
 
 target_compile_features(telnetpp
@@ -79,6 +87,8 @@ install(
     TARGETS
         telnetpp
     ARCHIVE DESTINATION
+        lib
+    LIBRARY DESTINATION
         lib
 )
 
