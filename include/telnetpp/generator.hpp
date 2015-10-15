@@ -4,7 +4,6 @@
 #include "telnetpp/detail/generate_helper.hpp"
 #include <algorithm>
 #include <iterator>
-#include <type_traits>
 #include <utility>
 
 namespace telnetpp {
@@ -17,23 +16,12 @@ namespace telnetpp {
 template <class InputIterator1, class InputIterator2>
 auto generate(InputIterator1 begin, InputIterator2 end)
 {
-    static_assert(std::is_same<
-        typename std::iterator_traits<InputIterator1>::value_type,
-        telnetpp::token
-    >::value, "Must pass a range of tokens into telnetpp::generate");
-    static_assert(std::is_same<
-        typename std::iterator_traits<InputIterator2>::value_type,
-        telnetpp::token
-    >::value, "Must pass a range of tokens into telnetpp::generate");
-        
     typedef boost::variant<std::vector<u8>, boost::any> result;
     std::vector<result> results;
-    
     std::vector<u8> stream;
 
     std::for_each(begin, end, [&results, &stream](auto &&token)
     {
-        printf("\nerror token type is %s", token.type().name());
         if (token.type() == typeid(element))
         {
             detail::generate_helper(
