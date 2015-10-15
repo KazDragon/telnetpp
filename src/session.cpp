@@ -1,0 +1,70 @@
+#include "telnetpp/session.hpp"
+#include "telnetpp/parser.hpp"
+
+namespace telnetpp {
+
+// ==========================================================================
+// CONSTRUCTOR    
+// ==========================================================================
+session::session(
+    std::function<std::vector<token> (std::string const &)> on_text)
+  : visitor_(
+        on_text,
+        nullptr,
+        command_router_,
+        negotiation_router_,
+        subnegotiation_router_)
+{
+}
+
+// ==========================================================================
+// INSTALL
+// ==========================================================================
+void session::install(client_option &option)
+{
+    register_client_option(
+        option, negotiation_router_, subnegotiation_router_);
+}
+
+// ==========================================================================
+// INSTALL
+// ==========================================================================
+void session::install(server_option &option)
+{
+    register_server_option(
+        option, negotiation_router_, subnegotiation_router_);
+}
+
+// ==========================================================================
+// RECEIVE
+// ==========================================================================
+std::vector<token> session::receive(const u8stream& stream)
+{
+    using std::begin;
+    using std::end;
+    
+    unparsed_buffer_.insert(
+        end(unparsed_buffer_),
+        begin(stream),
+        end(stream));
+    
+    auto it1 = begin(unparsed_buffer_);
+    auto it2 = end(unparsed_buffer_);
+    
+    auto parse_results = parse(it1, it2);
+
+    unparsed_buffer_.erase(begin(unparsed_buffer_), it1);
+
+    std::vector<token> results;
+    
+    for (auto &&parse_result : parse_results)
+    {
+        auto result = boost::apply_visitor(visitor_, parse_result);
+        
+        results.insert(end(results), begin(result), end(result));
+    }
+    
+    return results;
+}
+
+}

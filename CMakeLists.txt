@@ -30,6 +30,7 @@ add_library(telnetpp
     src/options/suppress_ga/server.cpp
     src/routing_visitor.cpp
     src/server_option.cpp
+    src/session.cpp
     src/subnegotiation.cpp
 )
 
@@ -68,6 +69,7 @@ add_executable(telnetpp_tester
     test/pass_through_test.cpp
     test/routing_visitor_test.cpp
     test/server_option_test.cpp
+    test/session_test.cpp
     test/subnegotiation_router_test.cpp
     test/suppress_ga_client_test.cpp
     test/suppress_ga_server_test.cpp
