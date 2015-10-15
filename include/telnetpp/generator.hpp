@@ -4,6 +4,7 @@
 #include "telnetpp/detail/generate_helper.hpp"
 #include <algorithm>
 #include <iterator>
+#include <type_traits>
 #include <utility>
 
 namespace telnetpp {
@@ -14,16 +15,49 @@ namespace telnetpp {
 /// \param end an iterator to one past the end of the series.
 //* =========================================================================
 template <class InputIterator1, class InputIterator2>
-std::vector<u8> generate(InputIterator1 begin, InputIterator2 end)
+auto generate(InputIterator1 begin, InputIterator2 end)
 {
-    std::vector<u8> result;
+    static_assert(std::is_same<
+        typename std::iterator_traits<InputIterator1>::value_type,
+        telnetpp::token
+    >::value, "Must pass a range of tokens into telnetpp::generate");
+    static_assert(std::is_same<
+        typename std::iterator_traits<InputIterator2>::value_type,
+        telnetpp::token
+    >::value, "Must pass a range of tokens into telnetpp::generate");
+        
+    typedef boost::variant<std::vector<u8>, boost::any> result;
+    std::vector<result> results;
     
-    std::for_each(begin, end, [&result](auto &&token)
+    std::vector<u8> stream;
+
+    std::for_each(begin, end, [&results, &stream](auto &&token)
     {
-        detail::generate_helper(result, token);
+        printf("\nerror token type is %s", token.type().name());
+        if (token.type() == typeid(element))
+        {
+            detail::generate_helper(
+                stream, 
+                boost::get<element>(token));
+        }
+        else
+        {
+            if (!stream.empty())
+            {
+                results.push_back(result(stream));
+                stream.clear();
+            }
+            
+            results.push_back(result(boost::get<boost::any>(token)));
+        }
     });
     
-    return result;
+    if (!stream.empty())
+    {
+        results.push_back(result(stream));
+    }
+    
+    return results;
 }
 
 //* =========================================================================
@@ -31,7 +65,7 @@ std::vector<u8> generate(InputIterator1 begin, InputIterator2 end)
 /// \param collection the collection containing the tokens.
 //* =========================================================================
 template <class Collection>
-std::vector<u8> generate(Collection &&collection)
+auto generate(Collection &&collection)
 {
     using std::begin;
     using std::end;
