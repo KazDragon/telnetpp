@@ -2,7 +2,7 @@
 #define TELNETPP_TYPES_HPP_
 
 #include <boost/cstdint.hpp>
-#include <vector>
+#include <string>
 
 namespace telnetpp {
 
@@ -16,7 +16,15 @@ using u16 = boost::uint16_t;
 using u32 = boost::uint32_t;
 using u64 = boost::uint64_t;
 
-using u8stream = std::vector<u8>;
+// Originally, Telnet++ used std::vector<u8> as its stream type.
+// However, most Telnet packets tend to be small, and this means that
+// it's philosophically possible to use the Small Buffer Optimization.
+// std::vector<> is specified such that it's impossible to implement the
+// SBO, whereas std::string has the SBO for most implementations.
+
+// This may change in future to some other type, but it will always be
+// something that models the basic standard Container concept.
+using u8stream = std::basic_string<u8>;
 
 }
 
