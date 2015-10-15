@@ -38,7 +38,7 @@ template <class InputIterator>
 void expect(
     InputIterator begin, 
     InputIterator end,
-    std::vector<telnetpp::u8> const &expectation)
+    telnetpp::u8stream const &expectation)
 {
     auto result = telnetpp::generate(begin, end);
     
@@ -48,8 +48,7 @@ void expect(
     }
     else
     {
-        auto stream = boost::get<std::vector<telnetpp::u8>>(
-            result[0]);
+        auto stream = boost::get<telnetpp::u8stream>(result[0]);
             
         CPPUNIT_ASSERT_EQUAL(expectation.size(), stream.size());
         
@@ -63,7 +62,7 @@ void expect(
 template <class Collection>
 void expect(
     Collection &&collection,
-    std::vector<telnetpp::u8> const &expectation)
+    telnetpp::u8stream const &expectation)
 {
     auto result = telnetpp::generate(std::forward<Collection>(collection));
     
@@ -73,7 +72,7 @@ void expect(
     }
     else
     {
-        auto stream = boost::get<std::vector<telnetpp::u8>>(
+        auto stream = boost::get<telnetpp::u8stream>(
             result[0]);
 
         CPPUNIT_ASSERT_EQUAL(expectation.size(), stream.size());
@@ -88,7 +87,7 @@ void expect(
 void generator_test::empty_array_generates_nothing()
 {
     std::vector<telnetpp::token> data = {};
-    std::vector<telnetpp::u8> expected = {};
+    telnetpp::u8stream expected = {};
     
     expect(data.begin(), data.end(), expected);
 }
@@ -99,7 +98,7 @@ void generator_test::empty_string_generates_nothing()
         telnetpp::element(std::string(""))
     };
     
-    std::vector<telnetpp::u8> expected = {};
+    telnetpp::u8stream expected = {};
     
     expect(data.begin(), data.end(), expected);
 }
@@ -110,7 +109,7 @@ void generator_test::string_with_content_generates_string()
         telnetpp::element(std::string("abcde"))
     };
     
-    std::vector<telnetpp::u8> expected = { 'a', 'b', 'c', 'd', 'e' };
+    telnetpp::u8stream expected = { 'a', 'b', 'c', 'd', 'e' };
     
     expect(data.begin(), data.end(), expected);
 }
@@ -121,7 +120,7 @@ void generator_test::string_with_iac_content_generates_doubled_iac()
         telnetpp::element(std::string("ab\xFF""cd"))
     };
     
-    std::vector<telnetpp::u8> expected = { 'a', 'b', 0xFF, 0xFF, 'c', 'd' };
+    telnetpp::u8stream expected = { 'a', 'b', 0xFF, 0xFF, 'c', 'd' };
     
     expect(data.begin(), data.end(), expected);
 }
@@ -132,7 +131,7 @@ void generator_test::command_generates_command()
         telnetpp::element(telnetpp::command(telnetpp::nop))
     };
     
-    std::vector<telnetpp::u8> expected = { 0xFF, 0xF1 };
+    telnetpp::u8stream expected = { 0xFF, 0xF1 };
     
     expect(data.begin(), data.end(), expected);
 }
@@ -143,7 +142,7 @@ void generator_test::negotiation_generates_negotiation()
         telnetpp::element(telnetpp::negotiation(telnetpp::will, 0xDE))
     };
     
-    std::vector<telnetpp::u8> expected = { 0xFF, 0xFB, 0xDE };
+    telnetpp::u8stream expected = { 0xFF, 0xFB, 0xDE };
     
     expect(data.begin(), data.end(), expected);
 }
@@ -154,7 +153,7 @@ void generator_test::empty_subnegotiation_generates_empty_subnegotiation()
         telnetpp::element(telnetpp::subnegotiation(0xAB, {}))
     };
     
-    std::vector<telnetpp::u8> expected = { 0xFF, 0xFA, 0xAB, 0xFF, 0xF0 };
+    telnetpp::u8stream expected = { 0xFF, 0xFA, 0xAB, 0xFF, 0xF0 };
     
     expect(data.begin(), data.end(), expected);
 }
@@ -165,7 +164,7 @@ void generator_test::subnegotiation_with_content_generates_subnegotiation_with_c
         telnetpp::element(telnetpp::subnegotiation(0xCD, { 'a', 'b', 'c', 'd', 'e' }))
     };
     
-    std::vector<telnetpp::u8> expected = {
+    telnetpp::u8stream expected = {
         0xFF, 0xFA,
         0xCD,
         'a', 'b', 'c', 'd', 'e',
@@ -181,7 +180,7 @@ void generator_test::subnegotiation_with_iac_content_generates_doubled_iac()
         telnetpp::element(telnetpp::subnegotiation(0x74, { 'a', 'b', 0xFF, 'c', 'd' }))
     };
     
-    std::vector<telnetpp::u8> expected = {
+    telnetpp::u8stream expected = {
         0xFF, 0xFA,
         0x74,
         'a', 'b', 0xFF, 0xFF, 'c', 'd',
@@ -200,7 +199,7 @@ void generator_test::many_elements_generates_many_elements()
         telnetpp::element(telnetpp::subnegotiation(0xFF, { 0xFF }))
     };
     
-    std::vector<telnetpp::u8> expected = {
+    telnetpp::u8stream expected = {
         'a', 'b', 'c', 'd', 
         'e', 'f', 0xFF, 0xFF, 'g',
         0xFF, 0xFC, 0xFF,

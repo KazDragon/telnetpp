@@ -15,7 +15,7 @@ client::client()
 // HANDLE_SUBNEGOTIATION
 // ==========================================================================
 std::vector<telnetpp::token> client::handle_subnegotiation(
-    std::vector<telnetpp::u8> const &content)
+    u8stream const &content)
 {
     if (content.size() == sizeof(telnetpp::u16) + sizeof(telnetpp::u16))
     {

@@ -7,7 +7,7 @@ namespace telnetpp {
 // ==========================================================================    
 // CONSTRUCTOR
 // ==========================================================================
-subnegotiation::subnegotiation(u8 option, subnegotiation_content content)
+subnegotiation::subnegotiation(u8 option, u8stream content)
   : option_(std::move(option)),
     content_(std::move(content))
 {
@@ -24,7 +24,7 @@ u8 subnegotiation::option() const
 // ==========================================================================    
 // CONTENT
 // ==========================================================================
-subnegotiation_content const &subnegotiation::content() const
+u8stream const &subnegotiation::content() const
 {
     return content_;
 }

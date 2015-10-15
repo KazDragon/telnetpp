@@ -29,7 +29,7 @@ std::vector<telnetpp::token> server::set_window_size(u16 width, u16 height)
 // HANDLE_SUBNEGOTIATION
 // ==========================================================================
 std::vector<telnetpp::token> server::handle_subnegotiation(
-    std::vector<telnetpp::u8> const &content)
+    u8stream const &content)
 {
     return {};
 }

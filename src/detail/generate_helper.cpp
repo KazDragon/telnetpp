@@ -7,7 +7,7 @@ namespace {
 
 struct generator_token_visitor : boost::static_visitor<>
 {
-    generator_token_visitor(std::vector<telnetpp::u8> &result)
+    generator_token_visitor(u8stream &result)
       : result_(result)
     {
     }
@@ -40,7 +40,7 @@ struct generator_token_visitor : boost::static_visitor<>
         result_.push_back(telnetpp::se);
     }
     
-    std::vector<telnetpp::u8> &result_;
+    u8stream &result_;
     
 private :
     template <class InputIterator1, class InputIterator2>
@@ -63,7 +63,7 @@ private :
 }
 
 void generate_helper(
-    std::vector<telnetpp::u8> &result, 
+    u8stream &result, 
     telnetpp::element const &token)
 {
     generator_token_visitor visitor(result);

@@ -16,9 +16,9 @@ namespace telnetpp {
 template <class InputIterator1, class InputIterator2>
 auto generate(InputIterator1 begin, InputIterator2 end)
 {
-    typedef boost::variant<std::vector<u8>, boost::any> result;
+    typedef boost::variant<u8stream, boost::any> result;
     std::vector<result> results;
-    std::vector<u8> stream;
+    u8stream stream;
 
     std::for_each(begin, end, [&results, &stream](auto &&token)
     {
