@@ -47,7 +47,9 @@ public :
 
     //* =====================================================================
     /// \brief "Sends" a stream of tokens by converting them to a stream of
-    /// bytes.  Any non-element tokens are passed through unchanged.
+    /// bytes.  Any non-element tokens are passed through unchanged.  This
+    /// allows the result of receive() to be passed straight back to
+    /// generate for immediate transmission.
     //* =====================================================================
     std::vector<boost::variant<u8stream, boost::any>> send(
         std::vector<token> const &tokens);
