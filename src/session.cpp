@@ -17,6 +17,13 @@ session::session(
 {
 }
 
+void session::install(
+    command const &cmd,
+    std::function<std::vector<token> (command const &)> const &on_command)
+{
+    command_router_.register_route(cmd, on_command);
+}
+
 // ==========================================================================
 // INSTALL
 // ==========================================================================

@@ -20,7 +20,11 @@ public :
     //* =====================================================================
     session(
         std::function<std::vector<token> (std::string const&)> on_text);
-    
+
+    void install(
+        command const &cmd, 
+        std::function<std::vector<token> (command const &)> const &on_command);
+        
     //* =====================================================================
     /// \brief Installs a client option.
     //* =====================================================================
