@@ -1,4 +1,5 @@
 #include "telnetpp/session.hpp"
+#include "telnetpp/generator.hpp"
 #include "telnetpp/parser.hpp"
 
 namespace telnetpp {
@@ -72,6 +73,18 @@ std::vector<token> session::receive(const u8stream& stream)
     }
     
     return results;
+}
+
+// ==========================================================================
+// SEND
+// ==========================================================================
+std::vector<boost::variant<u8stream, boost::any>> session::send(
+    std::vector<token> const &tokens)
+{
+    using std::begin;
+    using std::end;
+    
+    return generate(tokens);
 }
 
 }

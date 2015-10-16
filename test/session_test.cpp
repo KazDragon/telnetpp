@@ -15,6 +15,7 @@ public :
         CPPUNIT_TEST(reception_of_negotiation_routes_to_installed_client_option);
         CPPUNIT_TEST(reception_of_negotiation_routes_to_installed_server_option);
         CPPUNIT_TEST(reception_of_command_routes_to_installed_command_function);
+        CPPUNIT_TEST(sending_element_converts_element_to_bytes);
     CPPUNIT_TEST_SUITE_END();
     
 private :
@@ -22,9 +23,52 @@ private :
     void reception_of_negotiation_routes_to_installed_client_option();
     void reception_of_negotiation_routes_to_installed_server_option();
     void reception_of_command_routes_to_installed_command_function();
+    void sending_element_converts_element_to_bytes();
 };
 
 CPPUNIT_TEST_SUITE_REGISTRATION(session_test);
+
+namespace {
+    
+struct stream_match : boost::static_visitor<>
+{
+    stream_match(
+        boost::variant<telnetpp::u8stream, boost::any> const &expected)
+      : expected_(expected)
+    {
+    }
+    
+    void operator()(boost::any const &) const
+    {
+    }
+    
+    void operator()(telnetpp::u8stream const &) const
+    {
+    }
+    
+    boost::variant<telnetpp::u8stream, boost::any> expected_;
+};
+
+static void expect_result(
+    std::vector<boost::variant<telnetpp::u8stream, boost::any>> const &expected,
+    std::vector<boost::variant<telnetpp::u8stream, boost::any>> const &result)
+{
+    CPPUNIT_ASSERT_EQUAL(expected.size(), result.size());
+    
+    auto current_expected = expected.begin();
+    auto current_result   = result.begin();
+    
+    for (;
+         current_expected != expected.end()
+      && current_result != result.end();
+         ++current_expected,
+         ++current_result)
+    {
+        boost::apply_visitor(stream_match(*current_expected), *current_result);
+    }
+}
+
+}
 
 void session_test::reception_of_text_routes_to_user_supplied_function()
 {
@@ -102,4 +146,22 @@ void session_test::reception_of_command_routes_to_installed_command_function()
     });
     
     CPPUNIT_ASSERT_EQUAL(expected, result);
+}
+
+void session_test::sending_element_converts_element_to_bytes()
+{
+    telnetpp::session               session(nullptr);
+    telnetpp::options::echo::server echo_server;
+    
+    session.install(echo_server);
+    
+    std::vector<boost::variant<telnetpp::u8stream, boost::any>> expected = {
+        telnetpp::u8stream {
+            telnetpp::iac,
+            telnetpp::will,
+            telnetpp::options::echo::option
+        }
+    };
+    
+    expect_result(expected, session.send(echo_server.activate()));
 }

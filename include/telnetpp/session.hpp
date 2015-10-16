@@ -21,6 +21,9 @@ public :
     session(
         std::function<std::vector<token> (std::string const&)> on_text);
 
+    //* =====================================================================
+    /// \brief Installs a handler for the given command.
+    //* =====================================================================
     void install(
         command const &cmd, 
         std::function<std::vector<token> (command const &)> const &on_command);
@@ -41,6 +44,13 @@ public :
     ///          stream.
     //* =====================================================================
     std::vector<token> receive(u8stream const &stream);
+
+    //* =====================================================================
+    /// \brief "Sends" a stream of tokens by converting them to a stream of
+    /// bytes.  Any non-element tokens are passed through unchanged.
+    //* =====================================================================
+    std::vector<boost::variant<u8stream, boost::any>> send(
+        std::vector<token> const &tokens);
     
 private :
     u8stream              unparsed_buffer_;
