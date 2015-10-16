@@ -9,10 +9,9 @@
 // protocol are.
 #include "telnetpp/protocol.hpp"
 
-// With the addition of the parser and generator, the client need then only
+// With the addition of the session object, the client need then only
 // include the specific required options in order to have a complete Telnet
 // layer.
-#include "telnetpp/parser.hpp"
-#include "telnetpp/generator.hpp"
+#include "telnetpp/session.hpp"
 
 #endif
