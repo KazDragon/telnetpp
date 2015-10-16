@@ -11,7 +11,6 @@ session::session(
     std::function<std::vector<token> (std::string const &)> on_text)
   : visitor_(
         on_text,
-        nullptr,
         command_router_,
         negotiation_router_,
         subnegotiation_router_)

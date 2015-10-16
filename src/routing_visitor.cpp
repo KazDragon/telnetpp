@@ -7,12 +7,10 @@ namespace telnetpp {
 // ==========================================================================
 routing_visitor::routing_visitor(
     std::function<std::vector<token> (std::string const &)> on_text,
-    std::function<std::vector<token> (boost::any const &)> on_any,
     command_router &cmd_router,
     negotiation_router &neg_router,
     subnegotiation_router &sub_router)
   : on_text_(std::move(on_text)),
-    on_any_(std::move(on_any)),
     command_router_(cmd_router),
     negotiation_router_(neg_router),
     subnegotiation_router_(sub_router)
@@ -27,21 +25,6 @@ std::vector<token> routing_visitor::operator()(std::string const &text)
     if (on_text_)
     {
         return on_text_(text);
-    }
-    else
-    {
-        return {};
-    }
-}
-
-// ==========================================================================
-// OPERATOR()
-// ==========================================================================
-std::vector<token> routing_visitor::operator()(boost::any const &any)
-{
-    if (on_any_)
-    {
-        return on_any_(any);
     }
     else
     {

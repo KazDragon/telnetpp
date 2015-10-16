@@ -16,7 +16,6 @@ public :
         CPPUNIT_TEST(negotiation_routes_to_negotiation_router);
         CPPUNIT_TEST(subnegotiation_routes_to_subnegotiation_router);
         CPPUNIT_TEST(subnegotiation_accumulates_responses);
-        CPPUNIT_TEST(arbitrary_object_routes_to_pass_through);
     CPPUNIT_TEST_SUITE_END();
 
 private :
@@ -26,7 +25,6 @@ private :
     void negotiation_routes_to_negotiation_router();
     void subnegotiation_routes_to_subnegotiation_router();
     void subnegotiation_accumulates_responses();
-    void arbitrary_object_routes_to_pass_through();
 };
 
 CPPUNIT_TEST_SUITE_REGISTRATION(routing_visitor_test);
@@ -46,7 +44,6 @@ void routing_visitor_test::text_routes_to_text_function()
             text = new_text;
             return {};
         },
-        nullptr,
         cmd_router,
         neg_router,
         sub_router);
@@ -65,12 +62,11 @@ void routing_visitor_test::text_does_not_route_to_null_function()
     
     telnetpp::routing_visitor visitor(
         nullptr,
-        nullptr,
         cmd_router,
         neg_router,
         sub_router);
         
-    telnetpp::token text_token(telnetpp::element("text token"));
+    telnetpp::element text_token(telnetpp::element("text token"));
     boost::apply_visitor(visitor, text_token);
 }
 
@@ -95,7 +91,6 @@ void routing_visitor_test::command_routes_to_command_router()
         {
             return {};
         },
-        nullptr,
         cmd_router,
         neg_router,
         sub_router);
@@ -129,7 +124,6 @@ void routing_visitor_test::negotiation_routes_to_negotiation_router()
         {
             return {};
         },
-        nullptr,
         cmd_router,
         neg_router,
         sub_router);
@@ -172,7 +166,6 @@ void routing_visitor_test::subnegotiation_routes_to_subnegotiation_router()
         {
             return {};
         },
-        nullptr,
         cmd_router,
         neg_router,
         sub_router);
@@ -211,7 +204,6 @@ void routing_visitor_test::subnegotiation_accumulates_responses()
         {
             return {};
         },
-        nullptr,
         cmd_router,
         neg_router,
         sub_router);
@@ -234,32 +226,4 @@ void routing_visitor_test::subnegotiation_accumulates_responses()
             telnetpp::dont, telnetpp::options::naws::option)
         },
         boost::apply_visitor(visitor, sub_token));
-}
-
-void routing_visitor_test::arbitrary_object_routes_to_pass_through()
-{
-    telnetpp::command_router cmd_router;
-    telnetpp::negotiation_router neg_router;
-    telnetpp::subnegotiation_router sub_router;
-    telnetpp::options::naws::client client;
-    
-    boost::any any;
-    telnetpp::routing_visitor visitor(
-        nullptr,
-        [&any](auto &&object) -> std::vector<telnetpp::token>
-        {
-            any = object;
-            return {};
-        },
-        cmd_router,
-        neg_router,
-        sub_router);
-        
-    std::string test_string = "TEST";
-    telnetpp::token test_token(boost::any{test_string});
-    
-    boost::apply_visitor(visitor, test_token);
-    
-    CPPUNIT_ASSERT_EQUAL(
-        test_string, boost::any_cast<std::string const&>(any));
 }
