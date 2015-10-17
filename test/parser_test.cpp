@@ -1,4 +1,4 @@
-#include "telnetpp/parser.hpp"
+#include "telnetpp/detail/parser.hpp"
 #include "expect_elements.hpp"
 #include <cppunit/TestFixture.h>
 #include <cppunit/extensions/HelperMacros.h>
@@ -80,7 +80,7 @@ void parser_test::empty_range_parses_to_nothing()
     auto begin = data.begin();
     auto end   = data.end();
     
-    auto result = telnetpp::parse(begin, end);
+    auto result = telnetpp::detail::parse(begin, end);
     
     CPPUNIT_ASSERT_EQUAL(size_t{0}, result.size());
     CPPUNIT_ASSERT(begin == end);
@@ -94,7 +94,7 @@ void parser_test::normal_character_parses_to_string()
     auto begin = data.begin();
     auto end   = data.end();
     
-    auto result = telnetpp::parse(begin, end);
+    auto result = telnetpp::detail::parse(begin, end);
     
     CPPUNIT_ASSERT_EQUAL(size_t{1}, result.size());
     CPPUNIT_ASSERT(begin == end);
@@ -112,7 +112,7 @@ void parser_test::two_normal_characters_parse_to_string()
     auto begin = data.begin();
     auto end   = data.end();
     
-    auto result = telnetpp::parse(begin, end);
+    auto result = telnetpp::detail::parse(begin, end);
     
     CPPUNIT_ASSERT_EQUAL(size_t{1}, result.size());
     CPPUNIT_ASSERT(begin == end);
@@ -129,7 +129,7 @@ void parser_test::lone_iac_parses_to_nothing()
     auto begin = data.begin();
     auto end   = data.end();
     
-    auto result = telnetpp::parse(begin, end);
+    auto result = telnetpp::detail::parse(begin, end);
     CPPUNIT_ASSERT_EQUAL(size_t{0}, result.size());
     CPPUNIT_ASSERT(begin == data.begin());
 }
@@ -142,7 +142,7 @@ void parser_test::double_iac_parses_to_iac()
     auto begin = data.begin();
     auto end   = data.end();
     
-    auto result = telnetpp::parse(begin, end);
+    auto result = telnetpp::detail::parse(begin, end);
     CPPUNIT_ASSERT_EQUAL(size_t{1}, result.size());
     CPPUNIT_ASSERT_EQUAL(expected, boost::get<std::string>(result[0]));
     CPPUNIT_ASSERT(begin == end);
@@ -156,7 +156,7 @@ void parser_test::iac_nop_parses_to_command()
     auto begin = data.begin();
     auto end   = data.end();
     
-    auto result = telnetpp::parse(begin, end);
+    auto result = telnetpp::detail::parse(begin, end);
     CPPUNIT_ASSERT_EQUAL(size_t{1}, result.size());
     CPPUNIT_ASSERT_EQUAL(expected, boost::get<telnetpp::command>(result[0]));
     CPPUNIT_ASSERT(begin == end);
@@ -170,7 +170,7 @@ void parser_test::iac_dm_parses_to_command()
     auto begin = data.begin();
     auto end   = data.end();
     
-    auto result = telnetpp::parse(begin, end);
+    auto result = telnetpp::detail::parse(begin, end);
     CPPUNIT_ASSERT_EQUAL(size_t{1}, result.size());
     CPPUNIT_ASSERT_EQUAL(expected, boost::get<telnetpp::command>(result[0]));
     CPPUNIT_ASSERT(begin == end);
@@ -184,7 +184,7 @@ void parser_test::iac_brk_parses_to_command()
     auto begin = data.begin();
     auto end   = data.end();
     
-    auto result = telnetpp::parse(begin, end);
+    auto result = telnetpp::detail::parse(begin, end);
     CPPUNIT_ASSERT_EQUAL(size_t{1}, result.size());
     CPPUNIT_ASSERT_EQUAL(expected, boost::get<telnetpp::command>(result[0]));
     CPPUNIT_ASSERT(begin == end);
@@ -198,7 +198,7 @@ void parser_test::iac_ip_parses_to_command()
     auto begin = data.begin();
     auto end   = data.end();
     
-    auto result = telnetpp::parse(begin, end);
+    auto result = telnetpp::detail::parse(begin, end);
     CPPUNIT_ASSERT_EQUAL(size_t{1}, result.size());
     CPPUNIT_ASSERT_EQUAL(expected, boost::get<telnetpp::command>(result[0]));
     CPPUNIT_ASSERT(begin == end);
@@ -212,7 +212,7 @@ void parser_test::iac_ao_parses_to_command()
     auto begin = data.begin();
     auto end   = data.end();
     
-    auto result = telnetpp::parse(begin, end);
+    auto result = telnetpp::detail::parse(begin, end);
     CPPUNIT_ASSERT_EQUAL(size_t{1}, result.size());
     CPPUNIT_ASSERT_EQUAL(expected, boost::get<telnetpp::command>(result[0]));
     CPPUNIT_ASSERT(begin == end);
@@ -226,7 +226,7 @@ void parser_test::iac_ayt_parses_to_command()
     auto begin = data.begin();
     auto end   = data.end();
     
-    auto result = telnetpp::parse(begin, end);
+    auto result = telnetpp::detail::parse(begin, end);
     CPPUNIT_ASSERT_EQUAL(size_t{1}, result.size());
     CPPUNIT_ASSERT_EQUAL(expected, boost::get<telnetpp::command>(result[0]));
     CPPUNIT_ASSERT(begin == end);
@@ -240,7 +240,7 @@ void parser_test::iac_ec_parses_to_command()
     auto begin = data.begin();
     auto end   = data.end();
     
-    auto result = telnetpp::parse(begin, end);
+    auto result = telnetpp::detail::parse(begin, end);
     CPPUNIT_ASSERT_EQUAL(size_t{1}, result.size());
     CPPUNIT_ASSERT_EQUAL(expected, boost::get<telnetpp::command>(result[0]));
     CPPUNIT_ASSERT(begin == end);
@@ -254,7 +254,7 @@ void parser_test::iac_el_parses_to_command()
     auto begin = data.begin();
     auto end   = data.end();
     
-    auto result = telnetpp::parse(begin, end);
+    auto result = telnetpp::detail::parse(begin, end);
     CPPUNIT_ASSERT_EQUAL(size_t{1}, result.size());
     CPPUNIT_ASSERT_EQUAL(expected, boost::get<telnetpp::command>(result[0]));
     CPPUNIT_ASSERT(begin == end);
@@ -268,7 +268,7 @@ void parser_test::iac_ga_parses_to_command()
     auto begin = data.begin();
     auto end   = data.end();
     
-    auto result = telnetpp::parse(begin, end);
+    auto result = telnetpp::detail::parse(begin, end);
     CPPUNIT_ASSERT_EQUAL(size_t{1}, result.size());
     CPPUNIT_ASSERT_EQUAL(expected, boost::get<telnetpp::command>(result[0]));
     CPPUNIT_ASSERT(begin == end);
@@ -281,7 +281,7 @@ void parser_test::iac_sb_parses_to_nothing()
     auto begin = data.begin();
     auto end   = data.end();
     
-    auto result = telnetpp::parse(begin, end);
+    auto result = telnetpp::detail::parse(begin, end);
     CPPUNIT_ASSERT_EQUAL(size_t{0}, result.size());
     CPPUNIT_ASSERT(begin == data.begin());
 }
@@ -293,7 +293,7 @@ void parser_test::iac_will_parses_to_nothing()
     auto begin = data.begin();
     auto end   = data.end();
     
-    auto result = telnetpp::parse(begin, end);
+    auto result = telnetpp::detail::parse(begin, end);
     CPPUNIT_ASSERT_EQUAL(size_t{0}, result.size());
     CPPUNIT_ASSERT(begin == data.begin());
 }
@@ -305,7 +305,7 @@ void parser_test::iac_wont_parses_to_nothing()
     auto begin = data.begin();
     auto end   = data.end();
     
-    auto result = telnetpp::parse(begin, end);
+    auto result = telnetpp::detail::parse(begin, end);
     CPPUNIT_ASSERT_EQUAL(size_t{0}, result.size());
     CPPUNIT_ASSERT(begin == data.begin());
 }
@@ -317,7 +317,7 @@ void parser_test::iac_do_parses_to_nothing()
     auto begin = data.begin();
     auto end   = data.end();
     
-    auto result = telnetpp::parse(begin, end);
+    auto result = telnetpp::detail::parse(begin, end);
     CPPUNIT_ASSERT_EQUAL(size_t{0}, result.size());
     CPPUNIT_ASSERT(begin == data.begin());
 
@@ -330,7 +330,7 @@ void parser_test::iac_dont_parses_to_nothing()
     auto begin = data.begin();
     auto end   = data.end();
     
-    auto result = telnetpp::parse(begin, end);
+    auto result = telnetpp::detail::parse(begin, end);
     CPPUNIT_ASSERT_EQUAL(size_t{0}, result.size());
     CPPUNIT_ASSERT(begin == data.begin());
 }
@@ -343,7 +343,7 @@ void parser_test::will_negotiation_parses_to_negotiation()
     auto begin = data.begin();
     auto end   = data.end();
     
-    auto result = telnetpp::parse(begin, end);
+    auto result = telnetpp::detail::parse(begin, end);
     CPPUNIT_ASSERT_EQUAL(size_t{1}, result.size());
     CPPUNIT_ASSERT_EQUAL(
         expected, boost::get<telnetpp::negotiation>(result[0]));
@@ -358,7 +358,7 @@ void parser_test::wont_negotiation_parses_to_negotiation()
     auto begin = data.begin();
     auto end   = data.end();
     
-    auto result = telnetpp::parse(begin, end);
+    auto result = telnetpp::detail::parse(begin, end);
     CPPUNIT_ASSERT_EQUAL(size_t{1}, result.size());
     CPPUNIT_ASSERT_EQUAL(
         expected, boost::get<telnetpp::negotiation>(result[0]));
@@ -373,7 +373,7 @@ void parser_test::do_negotiation_parses_to_negotiation()
     auto begin = data.begin();
     auto end   = data.end();
     
-    auto result = telnetpp::parse(begin, end);
+    auto result = telnetpp::detail::parse(begin, end);
     CPPUNIT_ASSERT_EQUAL(size_t{1}, result.size());
     CPPUNIT_ASSERT_EQUAL(
         expected, boost::get<telnetpp::negotiation>(result[0]));
@@ -388,7 +388,7 @@ void parser_test::dont_negotiation_parses_to_negotiation()
     auto begin = data.begin();
     auto end   = data.end();
     
-    auto result = telnetpp::parse(begin, end);
+    auto result = telnetpp::detail::parse(begin, end);
     CPPUNIT_ASSERT_EQUAL(size_t{1}, result.size());
     CPPUNIT_ASSERT_EQUAL(
         expected, boost::get<telnetpp::negotiation>(result[0]));
@@ -402,7 +402,7 @@ void parser_test::sb_option_parses_to_nothing()
     auto begin = data.begin();
     auto end   = data.end();
     
-    auto result = telnetpp::parse(begin, end);
+    auto result = telnetpp::detail::parse(begin, end);
     CPPUNIT_ASSERT_EQUAL(size_t{0}, result.size());
     CPPUNIT_ASSERT(begin == data.begin());
 }
@@ -414,7 +414,7 @@ void parser_test::sb_option_iac_parses_to_nothing()
     auto begin = data.begin();
     auto end   = data.end();
     
-    auto result = telnetpp::parse(begin, end);
+    auto result = telnetpp::detail::parse(begin, end);
     CPPUNIT_ASSERT_EQUAL(size_t{0}, result.size());
     CPPUNIT_ASSERT(begin == data.begin());
 }
@@ -429,7 +429,7 @@ void parser_test::sb_option_iac_se_parses_to_empty_subnegotiation()
     auto begin = data.begin();
     auto end   = data.end();
     
-    auto result = telnetpp::parse(begin, end);
+    auto result = telnetpp::detail::parse(begin, end);
     CPPUNIT_ASSERT_EQUAL(size_t{1}, result.size());
     CPPUNIT_ASSERT_EQUAL(
         expected, 
@@ -448,7 +448,7 @@ void parser_test::subnegotiation_with_content_parses_to_subnegotation()
     auto begin = data.begin();
     auto end   = data.end();
     
-    auto result = telnetpp::parse(begin, end);
+    auto result = telnetpp::detail::parse(begin, end);
     CPPUNIT_ASSERT_EQUAL(size_t{1}, result.size());
     CPPUNIT_ASSERT_EQUAL(
         expected, 
@@ -467,7 +467,7 @@ void parser_test::subnegotiation_with_iac_iac_parses_to_iac()
     auto begin = data.begin();
     auto end   = data.end();
     
-    auto result = telnetpp::parse(begin, end);
+    auto result = telnetpp::detail::parse(begin, end);
     CPPUNIT_ASSERT_EQUAL(size_t{1}, result.size());
     CPPUNIT_ASSERT_EQUAL(
         expected, 
@@ -510,7 +510,7 @@ void parser_test::many_elements_parses_to_many_elements()
             telnetpp::negotiation(telnetpp::wont, 0xFF),
             std::string("\xFF\xFFi") 
         },
-        telnetpp::parse(begin, end));
+        telnetpp::detail::parse(begin, end));
     
     CPPUNIT_ASSERT(begin == end);
 }

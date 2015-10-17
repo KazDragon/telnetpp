@@ -1,7 +1,8 @@
-#include "telnetpp/negotiation_router.hpp"
+#include "telnetpp/detail/negotiation_router.hpp"
 #include "telnetpp/options/echo/server.hpp"
 #include "telnetpp/options/echo.hpp"
 #include "telnetpp/protocol.hpp"
+#include "telnetpp/detail/registration.hpp"
 #include "expect_elements.hpp"
 #include <cppunit/TestFixture.h>
 #include <cppunit/extensions/HelperMacros.h>
@@ -27,13 +28,13 @@ CPPUNIT_TEST_SUITE_REGISTRATION(negotiation_router_test);
 
 void negotiation_router_test::when_nothing_is_registered_router_sinks_data()
 {
-    telnetpp::negotiation_router router;
+    telnetpp::detail::negotiation_router router;
     router(telnetpp::negotiation(telnetpp::will, 0x00));
 }
 
 void negotiation_router_test::message_with_registered_key_goes_to_registered_function()
 {
-    telnetpp::negotiation_router router;
+    telnetpp::detail::negotiation_router router;
     
     telnetpp::negotiation neg(0x00, 0x00);
     telnetpp::negotiation expected(telnetpp::dont, 0x01);
@@ -62,7 +63,7 @@ void negotiation_router_test::message_with_registered_key_goes_to_registered_fun
 
 void negotiation_router_test::message_with_unregistered_key_goes_to_unregistered_function()
 {
-    telnetpp::negotiation_router router;
+    telnetpp::detail::negotiation_router router;
     
     telnetpp::negotiation neg(0x00, 0x00);
     telnetpp::negotiation expected(telnetpp::will, 0x02);
@@ -93,13 +94,14 @@ void negotiation_router_test::message_with_unregistered_key_goes_to_unregistered
 
 void negotiation_router_test::activating_option_returns_activation_sequence()
 {
-    telnetpp::negotiation_router router;
+    telnetpp::detail::negotiation_router router;
     telnetpp::options::echo::server server;
     telnetpp::negotiation expected(
         telnetpp::dont, 
         telnetpp::options::echo::option);
     
-    register_route_from_negotiation_to_option(router, telnetpp::dont, server);
+    telnetpp::detail::register_route_from_negotiation_to_option(
+        router, telnetpp::dont, server);
 
     expect_elements({
         telnetpp::negotiation(

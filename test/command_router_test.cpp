@@ -1,4 +1,4 @@
-#include "telnetpp/command_router.hpp"
+#include "telnetpp/detail/command_router.hpp"
 #include "telnetpp/protocol.hpp"
 #include <cppunit/TestFixture.h>
 #include <cppunit/extensions/HelperMacros.h>
@@ -22,13 +22,13 @@ CPPUNIT_TEST_SUITE_REGISTRATION(command_router_test);
 
 void command_router_test::when_nothing_is_registered_router_sinks_data()
 {
-    telnetpp::command_router router;
+    telnetpp::detail::command_router router;
     router(telnetpp::command(telnetpp::ayt));
 }
 
 void command_router_test::message_with_registered_key_goes_to_registered_function()
 {
-    telnetpp::command_router router;
+    telnetpp::detail::command_router router;
     
     telnetpp::command cmd(0x00);
     telnetpp::command expected(telnetpp::ayt);
@@ -56,7 +56,7 @@ void command_router_test::message_with_registered_key_goes_to_registered_functio
 
 void command_router_test::message_with_unregistered_key_goes_to_unregistered_function()
 {
-    telnetpp::command_router router;
+    telnetpp::detail::command_router router;
     telnetpp::command cmd(0x00);
     telnetpp::command expected(telnetpp::dm);
     telnetpp::command unexpected(telnetpp::ao);

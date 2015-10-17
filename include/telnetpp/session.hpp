@@ -3,7 +3,7 @@
 
 #include "telnetpp/client_option.hpp"
 #include "telnetpp/server_option.hpp"
-#include "telnetpp/routing_visitor.hpp"
+#include "telnetpp/detail/routing_visitor.hpp"
 #include <functional>
 
 namespace telnetpp {
@@ -55,11 +55,11 @@ public :
         std::vector<token> const &tokens);
     
 private :
-    u8stream              unparsed_buffer_;
-    command_router        command_router_;
-    negotiation_router    negotiation_router_;
-    subnegotiation_router subnegotiation_router_;
-    routing_visitor       visitor_;
+    u8stream                                unparsed_buffer_;
+    telnetpp::detail::command_router        command_router_;
+    telnetpp::detail::negotiation_router    negotiation_router_;
+    telnetpp::detail::subnegotiation_router subnegotiation_router_;
+    telnetpp::detail::routing_visitor       visitor_;
     
 };
 

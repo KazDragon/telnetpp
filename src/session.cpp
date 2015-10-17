@@ -1,6 +1,7 @@
 #include "telnetpp/session.hpp"
-#include "telnetpp/generator.hpp"
-#include "telnetpp/parser.hpp"
+#include "telnetpp/detail/generator.hpp"
+#include "telnetpp/detail/parser.hpp"
+#include "telnetpp/detail/registration.hpp"
 
 namespace telnetpp {
 
@@ -29,7 +30,7 @@ void session::install(
 // ==========================================================================
 void session::install(client_option &option)
 {
-    register_client_option(
+    detail::register_client_option(
         option, negotiation_router_, subnegotiation_router_);
 }
 
@@ -38,7 +39,7 @@ void session::install(client_option &option)
 // ==========================================================================
 void session::install(server_option &option)
 {
-    register_server_option(
+    detail::register_server_option(
         option, negotiation_router_, subnegotiation_router_);
 }
 
@@ -58,7 +59,7 @@ std::vector<token> session::receive(const u8stream& stream)
     auto it1 = begin(unparsed_buffer_);
     auto it2 = end(unparsed_buffer_);
     
-    auto parse_results = parse(it1, it2);
+    auto parse_results = telnetpp::detail::parse(it1, it2);
 
     unparsed_buffer_.erase(begin(unparsed_buffer_), it1);
 
@@ -83,7 +84,7 @@ std::vector<boost::variant<u8stream, boost::any>> session::send(
     using std::begin;
     using std::end;
     
-    return generate(tokens);
+    return detail::generate(tokens);
 }
 
 }

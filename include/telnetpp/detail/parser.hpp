@@ -1,5 +1,5 @@
-#ifndef TELNETPP_PARSER_HPP_
-#define TELNETPP_PARSER_HPP_
+#ifndef TELNETPP_DETAIL_PARSER_HPP_
+#define TELNETPP_DETAIL_PARSER_HPP_
 
 #include "telnetpp/command.hpp"
 #include "telnetpp/negotiation.hpp"
@@ -9,7 +9,7 @@
 #include "telnetpp/detail/parse_helper.hpp"
 #include <vector>
 
-namespace telnetpp {
+namespace telnetpp { namespace detail {
     
 //* =========================================================================
 /// \brief Parse a series of bytes into a stream of Telnet tokens
@@ -41,6 +41,6 @@ std::vector<element> parse(InputIterator1 &begin, InputIterator2 end)
     return temps.elements;
 }
 
-}
+}}
 
 #endif

@@ -1,7 +1,5 @@
 #include "telnetpp/client_option.hpp"
-#include "telnetpp/negotiation_router.hpp"
 #include "telnetpp/protocol.hpp"
-#include "telnetpp/subnegotiation_router.hpp"
 
 namespace telnetpp {
 
@@ -187,20 +185,4 @@ std::vector<telnetpp::token> client_option::handle_subnegotiation(
     return {};
 }
         
-// ==========================================================================
-// REGISTER_CLIENT_OPTION
-// ==========================================================================
-void register_client_option(
-    client_option &option, 
-    negotiation_router &neg_router, 
-    subnegotiation_router &sub_router)
-{
-    register_route_from_negotiation_to_option(
-        neg_router, telnetpp::will, option);
-    register_route_from_negotiation_to_option(
-        neg_router, telnetpp::wont, option);
-    register_route_from_subnegotiation_to_option(
-        sub_router, option);
-}
-
 }

@@ -1,12 +1,12 @@
-#ifndef TELNETPP_GENERATOR_HPP_
-#define TELNETPP_GENERATOR_HPP_
+#ifndef TELNETPP_DETAIL_GENERATOR_HPP_
+#define TELNETPP_DETAIL_GENERATOR_HPP_
 
 #include "telnetpp/detail/generate_helper.hpp"
 #include <algorithm>
 #include <iterator>
 #include <utility>
 
-namespace telnetpp {
+namespace telnetpp { namespace detail {
  
 //* =========================================================================
 /// \brief Parse a series of Telnet tokens into a stream of bytes.
@@ -61,6 +61,6 @@ auto generate(Collection &&collection)
     return generate(begin(collection), end(collection));
 }
 
-}
+}}
 
 #endif

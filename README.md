@@ -23,6 +23,8 @@ A C++ library for interacting with Telnet streams
   * [x] Echo
   * [x] NAWS
   * [x] Terminal Type
+4. [x] Structures to hide the complexity of the layer (e.g. routers, parsers, generators).
+  * [x] Session class that understands all of the helper structures and how to convert to and from a stream of bytes.
 
 # Status
 Telnet++ is automatically tested on:
@@ -38,81 +40,43 @@ Telnet++ is a completely datasource-agnostic.  It doesn't know whether you're at
 
 Telnet++ is designed to be called in a read-write loop that follows this basic pattern:
 
-## Parsing
+## Session Set-Up / Initialization
 
-Incoming data received in bytes is arranged into a std::vector<telnetpp::u8>.  telnetpp::parse() is then used to translate this into a std::vector<telnetpp::token>.  A token is a variant of std::string, to represent data that is not parsed into any special structure and can be passed onto a higher layer; telnetpp::command; telnetpp::negotiation; and telnetpp::subnegotiation.
-
-```
-std::vector<telnetpp::u8> unparsed_bytes;
-
-// ...
-
-auto bytes_in = datastream.read(); // for example
-unparsed_bytes.insert(unparsed_bytes.end(), bytes_in.begin(), bytes_in.end());
-
-auto begin = unparsed_bytes.begin();
-auto end = unparsed_bytes.end();
-
-auto tokens = telnetpp::parse(begin, end);
-    // Note: begin is modified here so that [begin, end) is the unparsed data.
-unparsed_bytes.erase(unparsed_bytes.begin(), begin);
-    // and so the parsed bytes can be discarded.
-    
-// We now have a vector of tokens to use somehow.
-```
-
-## Routing
-
-Telnet++ comes with a set of "routers" for each Telnet++ datatype.  These can be used to automatically route tokens to registered targets.  A routing_visitor is supplied to aid in this process:
+A Telnet Session object is created, and handlers are installed for the various plug-ins that support the various client and server options, and handlers for commands are installed:
 
 ```
-std::function<std::vector<telnetpp::token> (std::string const &)> on_text = // ...
-    // on_text is set to point to your higher layer.  Don't forget to return any tokens
-    // resulting from your higher layer's call to the telnet layer.
-telnetpp::command_router command_router;
-telnetpp::negotiation_router negotiation_router;
-telnetpp::subnegotiation_router subnegotiation_router;
+telnetpp::session session;
+telnetpp::options::echo::server echo_server;
 
-// Various targets register with the routers, including text and command handlers,
-// and server and client options.  For example...
-telnetpp::options::naws::server naws_server;
-naws_server.on_window_size_changed.connect(
-    [](telnetpp::u16 width, telnetpp::u16 height) -> std::vector<telnetpp::token>
+session.install(echo_server);
+session.install(telnetpp::command(telnetpp::ayt)),
+    [&result](telnetpp::command const &cmd) -> std::vector<telnetpp::token>
     {
-        // call my function that knows about screen size changes, return
-        // whatever result is appropriate.
+        // Handle the Are You There command.
+        return {}; // Or whatever tokens you want...
     });
-    
-// This function registers the naws_server's desired messages with the routers above.
-telnetpp::register_server_option(naws_server, negotiation_router, subnegotiation_router);
+```
 
-// Create a visitor that can take streams of incoming tokens and ship them off to the
-// correct routers.
-telnetpp::routing_visitor visitor(
-    on_text,
-    command_router,
-    negotiation_router,
-    subnegotiation_router);
+## Session Use
 
-// ... somewhere, the parsing of incoming bytes happened and we have the vector of tokens.
+Incoming data received in bytes is arranged into a u8stream (which is some type that models the standard Container concept.  This can be passed into the session's receive() function.  This converts the bytes into Telnet tokens (commands, negotiations, subnegotiations), and these are routed appropriately to whichever settings are installed.
 
-std::vector<telnetpp::token> responses;
+The result of this operation is a sequence of tokens that represent the responses from the settings.  These tokens may also include user-defined datastructures, as long as they are wrapped in a boost::any.  This can be used to communicate from layers above the Telnet session to the layers below.
 
-for (auto &&tok : tokens)
+The response of the session's receive() function should be sent immediately to the session's send() function.  This function transforms the Telnet structures in the response into a byte stream.  Any boost::any objects remain as they are unchanged.  This can then be passed onto the lower layer.
+
+```
+void my_lower_layer_send(vector<variant<telnetpp::u8stream, any>> const &);
+
+void my_layer_receive(telnetpp::u8stream const &stream)
 {
-    // Ship each token off to the correct router for whatever the token was.
-    auto response = boost::apply visitor(visitor, tok);
-    
-    // Add the response to the container of responses.
-    responses.insert(responses.end(), response.begin(), response.end());
+    my_lower_layer_send(session.receive(stream));
 }
-```
-
-## Generation
-
-Finally, we have a container of responses that have been accumulated from the operations called by the incoming data.  These can be translated into a std::vector<telnetpp::u8> by using telnetpp::generate.  This can then be sent to the datastream.
 
 ```
-auto bytes_out = telnetpp::generate(responses);
-datastream.write(bytes_out); // for example
+
+A session's send() function can also be used to communicate directly with options.  For example,
+
+```
+session.send(echo_server.activate());
 ```

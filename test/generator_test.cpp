@@ -1,4 +1,4 @@
-#include "telnetpp/generator.hpp"
+#include "telnetpp/detail/generator.hpp"
 #include "telnetpp/protocol.hpp"
 #include <cppunit/TestFixture.h>
 #include <cppunit/extensions/HelperMacros.h>
@@ -40,7 +40,7 @@ void expect(
     InputIterator end,
     telnetpp::u8stream const &expectation)
 {
-    auto result = telnetpp::generate(begin, end);
+    auto result = telnetpp::detail::generate(begin, end);
     
     if (expectation.empty())
     {
@@ -64,7 +64,7 @@ void expect(
     Collection &&collection,
     telnetpp::u8stream const &expectation)
 {
-    auto result = telnetpp::generate(std::forward<Collection>(collection));
+    auto result = telnetpp::detail::generate(std::forward<Collection>(collection));
     
     if (expectation.empty())
     {
