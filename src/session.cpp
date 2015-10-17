@@ -1,6 +1,6 @@
 #include "telnetpp/session.hpp"
-#include "telnetpp/generator.hpp"
-#include "telnetpp/parser.hpp"
+#include "telnetpp/detail/generator.hpp"
+#include "telnetpp/detail/parser.hpp"
 #include "telnetpp/detail/registration.hpp"
 
 namespace telnetpp {
@@ -59,7 +59,7 @@ std::vector<token> session::receive(const u8stream& stream)
     auto it1 = begin(unparsed_buffer_);
     auto it2 = end(unparsed_buffer_);
     
-    auto parse_results = parse(it1, it2);
+    auto parse_results = telnetpp::detail::parse(it1, it2);
 
     unparsed_buffer_.erase(begin(unparsed_buffer_), it1);
 
@@ -84,7 +84,7 @@ std::vector<boost::variant<u8stream, boost::any>> session::send(
     using std::begin;
     using std::end;
     
-    return generate(tokens);
+    return detail::generate(tokens);
 }
 
 }
