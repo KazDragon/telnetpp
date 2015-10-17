@@ -16,6 +16,11 @@ public :
         CPPUNIT_TEST(reception_of_negotiation_routes_to_installed_server_option);
         CPPUNIT_TEST(reception_of_command_routes_to_installed_command_function);
         CPPUNIT_TEST(sending_element_converts_element_to_bytes);
+        
+        CPPUNIT_TEST(unrouted_will_results_in_dont);
+        CPPUNIT_TEST(unrouted_wont_results_in_dont);
+        CPPUNIT_TEST(unrouted_dont_results_in_wont);
+        CPPUNIT_TEST(unrouted_do_results_in_wont);
     CPPUNIT_TEST_SUITE_END();
     
 private :
@@ -24,6 +29,11 @@ private :
     void reception_of_negotiation_routes_to_installed_server_option();
     void reception_of_command_routes_to_installed_command_function();
     void sending_element_converts_element_to_bytes();
+    
+    void unrouted_will_results_in_dont();
+    void unrouted_wont_results_in_dont();
+    void unrouted_do_results_in_wont();
+    void unrouted_dont_results_in_wont();
 };
 
 CPPUNIT_TEST_SUITE_REGISTRATION(session_test);
@@ -164,4 +174,60 @@ void session_test::sending_element_converts_element_to_bytes()
     };
     
     expect_result(expected, session.send(echo_server.activate()));
+}
+
+void session_test::unrouted_will_results_in_dont()
+{
+    telnetpp::session session(nullptr);
+
+    expect_tokens( {
+            telnetpp::element { telnetpp::negotiation(telnetpp::dont, 0xA0) }
+        },
+        session.receive( {
+            telnetpp::iac,
+            telnetpp::will,
+            0xA0
+        }));
+}
+
+void session_test::unrouted_wont_results_in_dont()
+{
+    telnetpp::session session(nullptr);
+
+    expect_tokens( {
+            telnetpp::element { telnetpp::negotiation(telnetpp::dont, 0xA0) }
+        },
+        session.receive( {
+            telnetpp::iac,
+            telnetpp::wont,
+            0xA0
+        }));
+}
+
+void session_test::unrouted_do_results_in_wont()
+{
+    telnetpp::session session(nullptr);
+
+    expect_tokens( {
+            telnetpp::element { telnetpp::negotiation(telnetpp::wont, 0xA0) }
+        },
+        session.receive( {
+            telnetpp::iac,
+            telnetpp::do_,
+            0xA0
+        }));
+}
+
+void session_test::unrouted_dont_results_in_wont()
+{
+    telnetpp::session session(nullptr);
+
+    expect_tokens( {
+            telnetpp::element { telnetpp::negotiation(telnetpp::wont, 0xA0) }
+        },
+        session.receive( {
+            telnetpp::iac,
+            telnetpp::dont,
+            0xA0
+        }));
 }
