@@ -1,7 +1,8 @@
-#include "telnetpp/subnegotiation_router.hpp"
+#include "telnetpp/detail/subnegotiation_router.hpp"
 #include "telnetpp/options/naws/client.hpp"
 #include "telnetpp/options/naws.hpp"
 #include "telnetpp/protocol.hpp"
+#include "telnetpp/detail/registration.hpp"
 #include <cppunit/TestFixture.h>
 #include <cppunit/extensions/HelperMacros.h>
 
@@ -26,13 +27,13 @@ CPPUNIT_TEST_SUITE_REGISTRATION(subnegotiation_router_test);
 
 void subnegotiation_router_test::when_nothing_is_registered_router_sinks_data()
 {
-    telnetpp::subnegotiation_router router;
+    telnetpp::detail::subnegotiation_router router;
     router(telnetpp::subnegotiation(telnetpp::options::naws::option, {}));
 }
 
 void subnegotiation_router_test::message_with_registered_key_goes_to_registered_function()
 {
-    telnetpp::subnegotiation_router router;
+    telnetpp::detail::subnegotiation_router router;
     
     telnetpp::subnegotiation sub(0x00, {});
     telnetpp::subnegotiation expected(0x01, {0x02});
@@ -61,7 +62,7 @@ void subnegotiation_router_test::message_with_registered_key_goes_to_registered_
 
 void subnegotiation_router_test::message_with_unregistered_key_goes_to_unregistered_function()
 {
-    telnetpp::subnegotiation_router router;
+    telnetpp::detail::subnegotiation_router router;
     
     telnetpp::subnegotiation sub(0x00, {});
     telnetpp::subnegotiation expected(0x01, {0x02});
@@ -92,12 +93,12 @@ void subnegotiation_router_test::message_with_unregistered_key_goes_to_unregiste
 
 void subnegotiation_router_test::routing_subnegotiation_returns_subnegotiation_result()
 {
-    telnetpp::subnegotiation_router router;
+    telnetpp::detail::subnegotiation_router router;
     telnetpp::options::naws::client client;
     client.activate();
     client.negotiate(telnetpp::will);
     
-    register_route_from_subnegotiation_to_option(router, client);
+    telnetpp::detail::register_route_from_subnegotiation_to_option(router, client);
     
     telnetpp::u16 width = 0;
     telnetpp::u16 height = 0;

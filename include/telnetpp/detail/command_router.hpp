@@ -1,13 +1,11 @@
-#ifndef TELNETPP_COMMAND_ROUTER_HPP_
-#define TELNETPP_COMMAND_ROUTER_HPP_
+#ifndef TELNETPP_DETAIL_COMMAND_ROUTER_HPP_
+#define TELNETPP_DETAIL_COMMAND_ROUTER_HPP_
 
-#include "telnetpp/router.hpp"
+#include "telnetpp/detail/router.hpp"
 #include "telnetpp/command.hpp"
 #include "telnetpp/element.hpp"
 
-namespace telnetpp {
-    
-namespace detail {
+namespace telnetpp { namespace detail {
     
 struct command_router_key_from_message_policy
 {
@@ -16,8 +14,6 @@ struct command_router_key_from_message_policy
         return cmd;
     }
 };
-
-}
 
 class command_router
   : public router<
@@ -29,7 +25,6 @@ class command_router
 {
 };
 
-}
-
+}}
 
 #endif

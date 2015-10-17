@@ -20,6 +20,8 @@ add_library(telnetpp
     src/command.cpp
     src/detail/generate_helper.cpp
     src/detail/parse_helper.cpp
+    src/detail/registration.cpp
+    src/detail/routing_visitor.cpp
     src/negotiation.cpp
     src/options/echo/client.cpp
     src/options/echo/server.cpp
@@ -28,7 +30,6 @@ add_library(telnetpp
     src/options/terminal_type/client.cpp
     src/options/suppress_ga/client.cpp
     src/options/suppress_ga/server.cpp
-    src/routing_visitor.cpp
     src/server_option.cpp
     src/session.cpp
     src/subnegotiation.cpp

@@ -1,5 +1,5 @@
-#ifndef TELNETPP_ROUTER_HPP_
-#define TELNETPP_ROUTER_HPP_
+#ifndef TELNETPP_DETAIL_ROUTER_HPP_
+#define TELNETPP_DETAIL_ROUTER_HPP_
 
 #include "telnetpp/detail/return_default.hpp"
 #include <functional>
@@ -7,7 +7,7 @@
 #include <type_traits>
 #include <utility>
 
-namespace telnetpp {
+namespace telnetpp { namespace detail {
 
 //* =========================================================================
 /// \class router
@@ -137,6 +137,6 @@ private :
     function_type                 unregistered_route_;
 };
 
-}
+}}
 
 #endif

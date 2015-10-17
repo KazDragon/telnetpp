@@ -1,6 +1,7 @@
 #include "telnetpp/session.hpp"
 #include "telnetpp/generator.hpp"
 #include "telnetpp/parser.hpp"
+#include "telnetpp/detail/registration.hpp"
 
 namespace telnetpp {
 
@@ -29,7 +30,7 @@ void session::install(
 // ==========================================================================
 void session::install(client_option &option)
 {
-    register_client_option(
+    detail::register_client_option(
         option, negotiation_router_, subnegotiation_router_);
 }
 
@@ -38,7 +39,7 @@ void session::install(client_option &option)
 // ==========================================================================
 void session::install(server_option &option)
 {
-    register_server_option(
+    detail::register_server_option(
         option, negotiation_router_, subnegotiation_router_);
 }
 

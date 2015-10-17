@@ -1,6 +1,6 @@
-#include "telnetpp/routing_visitor.hpp"
+#include "telnetpp/detail/routing_visitor.hpp"
 
-namespace telnetpp {
+namespace telnetpp { namespace detail {
     
 // ==========================================================================
 // CONSTRUCTOR
@@ -56,4 +56,4 @@ std::vector<token> routing_visitor::operator()(subnegotiation const &sub)
     return subnegotiation_router_(sub);
 }
 
-}
+}}

@@ -88,17 +88,6 @@ private :
     u8    option_;
 };
 
-class negotiation_router;
-class subnegotiation_router;
-
-//* =========================================================================
-/// \brief Registers an option with negotiation and subnegotiation routers.
-//* =========================================================================
-void register_client_option(
-    client_option &option,
-    negotiation_router &neg_router,
-    subnegotiation_router &sub_router);
-
 }
 
 #endif

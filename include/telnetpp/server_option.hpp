@@ -1,7 +1,6 @@
 #ifndef TELNETPP_SERVER_OPTION
 #define TELNETPP_SERVER_OPTION
 
-#include "telnetpp/core.hpp"
 #include "telnetpp/element.hpp"
 #include <boost/signals2.hpp>
 #include <vector>
@@ -87,17 +86,6 @@ private :
     bool  activatable_ = false;
     u8    option_;
 };
-
-class negotiation_router;
-class subnegotiation_router;
-
-//* =========================================================================
-/// \brief Registers an option with negotiation and subnegotiation routers.
-//* =========================================================================
-void register_server_option(
-    server_option &option,
-    negotiation_router &neg_router,
-    subnegotiation_router &sub_router);
 
 }
 
