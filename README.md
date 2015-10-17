@@ -23,7 +23,7 @@ A C++ library for interacting with Telnet streams
   * [x] Echo
   * [x] NAWS
   * [x] Terminal Type
-4.
+4. [x] Structures to hide the complexity of the layer (e.g. routers, parsers, generators).
   * [x] Session class that understands all of the helper structures and how to convert to and from a stream of bytes.
 
 # Status
