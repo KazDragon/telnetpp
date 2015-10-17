@@ -132,7 +132,6 @@ public :
     }
 
 private :
-    
     registered_functions_map_type registered_functions_;
     function_type                 unregistered_route_;
 };
