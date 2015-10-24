@@ -5,10 +5,10 @@ compiler:
   - clang
   
 env:
-  - CONFIG=Release BUILD_SHARED_LIBS=1
-  - CONFIG=Release BUILD_SHARED_LIBS=0
-  - CONFIG=Debug BUILD_SHARED_LIBS=1
-  - CONFIG=Debug BUILD_SHARED_LIBS=0
+  - CONFIG=Release SHARED=1
+  - CONFIG=Release SHARED=0
+  - CONFIG=Debug SHARED=1
+  - CONFIG=Debug SHARED=0
   
 addons:
   apt:
@@ -37,7 +37,7 @@ before_install:
 before_script:
   - mkdir build
   - cd build
-  - ../cmake-3.2.3-Linux-x86_64/bin/cmake -DCMAKE_BUILD_TYPE=$CONFIG ..
+  - ../cmake-3.2.3-Linux-x86_64/bin/cmake -DCMAKE_BUILD_TYPE=$CONFIG -DBUILD_SHARED_LIBS=$SHARED ..
 
 script:
   - make -j2 VERBOSE=1
