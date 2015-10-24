@@ -10,7 +10,7 @@ namespace telnetpp {
 //* =========================================================================
 /// \brief A class that encapsulates the value of a Telnet command.
 //* =========================================================================
-class command
+class TELNETPP_EXPORT command
 {
 public :
     //* =====================================================================
@@ -52,6 +52,7 @@ constexpr bool operator<(command const &lhs, command const &rhs)
 //* =========================================================================
 /// \brief Stream output for commands
 //* =========================================================================
+TELNETPP_EXPORT
 std::ostream &operator<<(std::ostream &out, command const &cmd);
 
 }

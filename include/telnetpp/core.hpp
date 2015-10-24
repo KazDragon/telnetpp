@@ -1,6 +1,7 @@
 #ifndef TELNETPP_TYPES_HPP_
 #define TELNETPP_TYPES_HPP_
 
+#include "telnetpp/detail/export.hpp"
 #include <boost/cstdint.hpp>
 #include <string>
 

@@ -8,7 +8,7 @@ namespace telnetpp { namespace options { namespace suppress_ga {
 //* =========================================================================
 /// \brief An implementation of the server side of the Telnet echo option.
 //* =========================================================================
-class server : public telnetpp::server_option {
+class TELNETPP_EXPORT server : public telnetpp::server_option {
 public :
     //* =====================================================================
     /// CONSTRUCTOR
