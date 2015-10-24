@@ -5,8 +5,10 @@ compiler:
   - clang
   
 env:
-  - CONFIG=Release
-  - CONFIG=Debug
+  - CONFIG=Release BUILD_SHARED_LIBS=1
+  - CONFIG=Release BUILD_SHARED_LIBS=0
+  - CONFIG=Debug BUILD_SHARED_LIBS=1
+  - CONFIG=Debug BUILD_SHARED_LIBS=0
   
 addons:
   apt:
