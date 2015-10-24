@@ -9,7 +9,7 @@ namespace telnetpp { namespace options { namespace terminal_type {
 /// \brief An implementation of the client side of the Telnet Terminal
 /// Type option.
 //* =========================================================================
-class client : public telnetpp::client_option {
+class TELNETPP_EXPORT client : public telnetpp::client_option {
 public :
     //* =====================================================================
     /// CONSTRUCTOR

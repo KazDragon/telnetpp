@@ -19,7 +19,7 @@ namespace telnetpp {
 /// server and what is a client is not rigorously applies throughout the
 /// RFCs, so consider this merely an implementation detail of this library.
 //* =========================================================================
-class client_option {
+class TELNETPP_EXPORT client_option {
 public :
     //* =====================================================================
     /// \brief Constructor

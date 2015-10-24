@@ -10,7 +10,7 @@ namespace telnetpp {
 //* =========================================================================
 /// \brief A class that encapsulates a Telnet negotiation.
 //* =========================================================================
-class negotiation
+class TELNETPP_EXPORT negotiation
 {
 public :
     //* =====================================================================
@@ -65,6 +65,7 @@ constexpr bool operator<(negotiation const &lhs, negotiation const &rhs)
 //* =========================================================================
 /// \brief Stream output for negotiations
 //* =========================================================================
+TELNETPP_EXPORT 
 std::ostream &operator<<(std::ostream &out, negotiation const &cmd);
 
 }

@@ -10,18 +10,19 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${PROJECT_SOURCE_DIR}/cmake/Modules"
 include(FindBoost)
 find_package(Boost 1.39.0 REQUIRED)
 
+# When building shared objects, etc., we only want to export certain symbols.
+# Therefore, we need to generate a header suitable for declaring which
+# symbols should be included.
+include (GenerateExportHeader)
+
 # Optionally, Telnet++ support CppUnit for its unit tests.  These will be built
 # and a target added automatically if it is installed in the current 
 # environment.
 find_package(CppUnit)
 
-add_library(telnetpp
+set (telnetpp_public_src
     src/client_option.cpp
     src/command.cpp
-    src/detail/generate_helper.cpp
-    src/detail/parse_helper.cpp
-    src/detail/registration.cpp
-    src/detail/routing_visitor.cpp
     src/negotiation.cpp
     src/options/echo/client.cpp
     src/options/echo/server.cpp
@@ -35,8 +36,21 @@ add_library(telnetpp
     src/subnegotiation.cpp
 )
 
+set (telnetpp_private_src
+    src/detail/generate_helper.cpp
+    src/detail/parse_helper.cpp
+    src/detail/registration.cpp
+    src/detail/routing_visitor.cpp
+)
+
+add_library(telnetpp
+    ${telnetpp_public_src}
+    ${telnetpp_private_src}
+)
+
 set_target_properties(telnetpp
     PROPERTIES
+        CXX_VISIBILITY_PRESET hidden
         VERSION 0.1
         SOVERSION 0.1
 )
@@ -53,28 +67,55 @@ target_compile_features(telnetpp
         cxx_relaxed_constexpr
 )
 
+generate_export_header(telnetpp
+    EXPORT_FILE_NAME "${PROJECT_SOURCE_DIR}/include/telnetpp/detail/export.hpp"
+)
+    
+
 enable_testing()
 
-add_executable(telnetpp_tester 
+set (telnetpp_tester_external_tests
     test/command_router_test.cpp
     test/client_option_test.cpp
     test/echo_client_test.cpp
     test/echo_server_test.cpp
-    test/expect_elements.cpp
-    test/generator_test.cpp
-    test/main.cpp
     test/naws_client_test.cpp
     test/naws_server_test.cpp    
     test/negotiation_router_test.cpp
-    test/parser_test.cpp
     test/pass_through_test.cpp
-    test/routing_visitor_test.cpp
     test/server_option_test.cpp
     test/session_test.cpp
     test/subnegotiation_router_test.cpp
     test/suppress_ga_client_test.cpp
     test/suppress_ga_server_test.cpp
     test/terminal_type_client_test.cpp
+)
+
+set (telnetpp_tester_internal_tests
+    test/parser_test.cpp
+    test/generator_test.cpp
+    test/routing_visitor_test.cpp
+)
+
+# If we are building shared libraries, then we wont be able to test any of
+# the modules in the detail directory since they're not visible (this is ok,
+# since all those are tested indirectly via other parts of the API anyway.)
+# For a normal archive, all symbols are visible, so they can be tested directly.
+if (BUILD_SHARED_LIBS)
+    set(telnetpp_tester_tests
+        ${telnetpp_tester_external_tests}
+    )
+else()
+    set(telnetpp_tester_tests
+        ${telnetpp_tester_internal_tests}
+        ${telnetpp_tester_external_tests}
+    )
+endif()
+
+add_executable(telnetpp_tester 
+    ${telnetpp_tester_tests}
+    test/expect_elements.cpp
+    test/main.cpp
 )
 
 target_compile_features(telnetpp_tester
