@@ -6,7 +6,7 @@
 
 
 # Telnet++
-A C++ library for interacting with Telnet streams
+A C++ library that impelements a Telnet session application layer.
 
 # Features / Roadmap / Progress
 
@@ -31,6 +31,26 @@ Telnet++ is automatically tested on:
 * Clang 3.4 [![Build Status](https://travis-ci.org/KazDragon/telnetpp.svg?branch=master)](https://travis-ci.org/KazDragon/telnetpp)
 
 For further information, visit the [Waffle board](https://waffle.io/KazDragon/telnetpp)
+
+# About
+
+Telnet is a Session Layer protocol that is used primarily to negotiate a feature set between a client and server, the former of which is usually some kind of text-based terminal,  Commonly used terminals include Xterm, PuTTY, and a whole host of Telnet-enabled MUD clients .  The protocol has three basic elements, all of which are accessed by using the 0xFF character called "Interpret As Command", or IAC.
+
+## Commands
+
+Without needing to negotiate any capabilities, Telnet offers some out-of-the-box commands.  These include Are You There, which is usually sent by the client to provoke a response from an otherwise-busy server; Erase Line, which could be used in interative applications to cancel a set of input, and several other commands used for negotiations between options.
+
+Commands are represented by the telnetpp::command class.
+
+## Negotiations
+
+The Telnet protocol describes a model whereby the client and server maintain separate lists of features, called "options", which can be enabled or disabled by the remote side.  Individual options may each be described as "server" or "client" options, and server and client options may be mixed on each side of the connection.  It is even possible in some cases that both sides of the connection can be both client and server for the same option.  These options are negotiated by using the commands DO, DONT, WILL and WONT, and although the option specifications are not consistent in the usage, for the purposes of this library, the server is considered as the side of the connection that does the thing, and the client is the side of the connection that wants the thing.  That is, the server reacts to DO and DONT and sends WILL and WONT, and the client reacts to WILL and WONT and sends DO and DONT.
+
+Negotiations are represented by the telnetpp::negotiation class.
+
+## Subnegotiations
+
+After an option has been negotiated, a new channel opens up to be able to communicate in an option-specific way to the remote terminal.  These are called subnegotiations, and each protocol defines its own sub-protocol.  For example, the NAWS (Negotiate About Window Size) sends five bytes when reporting window size, the first of which represents an "IS" token, and the following four bytes represent two two-byte pairs that are the window extends.
 
 # Architecture
 
