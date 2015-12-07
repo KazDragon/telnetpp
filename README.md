@@ -6,7 +6,7 @@
 
 
 # Telnet++
-A C++ library that impelements a Telnet session application layer.
+Telnet++ is an implementation of the Telnet Session Layer protocol that is used primarily to negotiate a feature set between a client and server, the former of which is usually some kind of text-based terminal,  Commonly used terminals include Xterm, PuTTY, and a whole host of Telnet-enabled MUD clients including Tintin++, MushClient, and more.
 
 # Requirements
 
@@ -34,13 +34,9 @@ Telnet++ requires a C++14 compiler and the Boost Libraries.  It also uses CppUni
 Telnet++ is automatically tested on:
 * Clang 3.4 [![Build Status](https://travis-ci.org/KazDragon/telnetpp.svg?branch=master)](https://travis-ci.org/KazDragon/telnetpp)
 
-For further information, visit the [Waffle board](https://waffle.io/KazDragon/telnetpp)
+For further information about the working status of Telnet++, to report any bugs, or to make any feature requests, visit the [Waffle board](https://waffle.io/KazDragon/telnetpp)
 
-# About
-
-Telnet is a Session Layer protocol that is used primarily to negotiate a feature set between a client and server, the former of which is usually some kind of text-based terminal,  Commonly used terminals include Xterm, PuTTY, and a whole host of Telnet-enabled MUD clients including Tintin++, MushClient, and more.
-
-# Implementation
+# The Basics
 
 The protocol has three basic elements, all of which are accessed by using the 0xFF character called "Interpret As Command", or IAC.
 
