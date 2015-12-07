@@ -92,7 +92,7 @@ telnetpp::session session;
 // An echo server (provided with Telnet++) is used to control whether a server responds to input from
 // a client by transmitting the same text back to the client.  By default, this does not happen, and
 // clients print out locally whatever is typed in.  By activating this option, the client no longer
-// locally echos input, and the server is totall in control of what appears on the screen.
+// locally echos input, and the server is totally in control of what appears on the screen.
 telnetpp::options::echo::server echo_server;
 
 // This allows the client to tell the server to perform the echo.
