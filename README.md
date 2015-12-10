@@ -31,8 +31,8 @@ Telnet++ requires a C++14 compiler and the Boost Libraries.  It also uses CppUni
   * [x] Session class that understands all of the helper structures and how to convert to and from a stream of bytes.
 
 # Status
-Telnet++ is automatically tested on:
-* Clang 3.4 [![Build Status](https://travis-ci.org/KazDragon/telnetpp.svg?branch=master)](https://travis-ci.org/KazDragon/telnetpp)
+[![Build Status](https://travis-ci.org/KazDragon/telnetpp.svg?branch=master)](https://travis-ci.org/KazDragon/telnetpp)
+Telnet++ is automatically tested with Clang and G++ 5.2.
 
 For further information about the working status of Telnet++, to report any bugs, or to make any feature requests, visit the [Waffle board](https://waffle.io/KazDragon/telnetpp)
 
