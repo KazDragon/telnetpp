@@ -17,8 +17,8 @@ public :
     /// \brief Constructor
     //* =====================================================================
     constexpr negotiation(u8 request, u8 option)
-      : request_(std::move(request)),
-        option_(std::move(option))
+      : request_(request),
+        option_(option)
     {
     }
 
@@ -58,8 +58,9 @@ constexpr bool operator==(negotiation const &lhs, negotiation const &rhs)
 //* =========================================================================
 constexpr bool operator<(negotiation const &lhs, negotiation const &rhs)
 {
-    return std::make_pair(lhs.request(), lhs.option())
-         < std::make_pair(rhs.request(), rhs.option());
+    return lhs.request() < rhs.request()
+         ? true
+         : lhs.option() < rhs.option();
 }
 
 //* =========================================================================
