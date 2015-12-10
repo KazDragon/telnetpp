@@ -59,8 +59,7 @@ constexpr bool operator==(negotiation const &lhs, negotiation const &rhs)
 constexpr bool operator<(negotiation const &lhs, negotiation const &rhs)
 {
     return lhs.request() < rhs.request()
-         ? true
-         : lhs.option() < rhs.option();
+        || (!(rhs.request() < lhs.request()) && lhs.option() < rhs.option());
 }
 
 //* =========================================================================
