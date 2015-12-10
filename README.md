@@ -32,6 +32,7 @@ Telnet++ requires a C++14 compiler and the Boost Libraries.  It also uses CppUni
 
 # Status
 [![Build Status](https://travis-ci.org/KazDragon/telnetpp.svg?branch=master)](https://travis-ci.org/KazDragon/telnetpp)
+
 Telnet++ is automatically tested with Clang and G++ 5.2.
 
 For further information about the working status of Telnet++, to report any bugs, or to make any feature requests, visit the [Waffle board](https://waffle.io/KazDragon/telnetpp)
