@@ -77,7 +77,7 @@ matrix:
 cache:
   - apt: true
   - directories:
-    - cmake-3.2.3-Linux-x86_64
+    - cmake-3.4.0-Linux-x86_64
     
 before_install:
 # workaround for not having CMake 3.4
