@@ -124,8 +124,11 @@ add_executable(telnetpp_tester
 
 target_compile_features(telnetpp_tester
     PUBLIC
+        cxx_auto_type
+        cxx_generic_lambdas
         cxx_strong_enums
-        cxx_relaxed_constexpr)
+        cxx_uniform_initialization
+)
 
 target_link_libraries(telnetpp_tester telnetpp cppunit)
 
