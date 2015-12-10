@@ -3,7 +3,6 @@
 
 #include "telnetpp/core.hpp"
 #include <iosfwd>
-#include <utility>
 
 namespace telnetpp {
     
@@ -17,7 +16,7 @@ public :
     /// \brief Constructor
     //* =====================================================================
     explicit constexpr command(u8 command)
-      : command_(std::move(command))
+      : command_(command)
     {
     }
     

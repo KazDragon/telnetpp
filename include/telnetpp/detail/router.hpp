@@ -121,7 +121,7 @@ public :
         {
             return iter->second(message);
         }
-        else if (unregistered_route_ != NULL)
+        else if (unregistered_route_ != nullptr)
         {
             return unregistered_route_(message);
         }
