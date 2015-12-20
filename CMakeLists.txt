@@ -67,8 +67,9 @@ target_include_directories(telnetpp
 
 target_compile_features(telnetpp
     PUBLIC
+        cxx_auto_type
+        cxx_generic_lambdas
         cxx_strong_enums
-        cxx_relaxed_constexpr
 )
 
 generate_export_header(telnetpp
