@@ -1,32 +1,14 @@
 #include "telnetpp/detail/command_router.hpp"
 #include "telnetpp/protocol.hpp"
-#include <cppunit/TestFixture.h>
-#include <cppunit/extensions/HelperMacros.h>
+#include <gtest/gtest.h>
 
-class command_router_test : public CppUnit::TestFixture
-{
-public :
-    CPPUNIT_TEST_SUITE(command_router_test);
-        CPPUNIT_TEST(when_nothing_is_registered_router_sinks_data);
-        CPPUNIT_TEST(message_with_registered_key_goes_to_registered_function);
-        CPPUNIT_TEST(message_with_unregistered_key_goes_to_unregistered_function);
-    CPPUNIT_TEST_SUITE_END();
-    
-private :
-    void when_nothing_is_registered_router_sinks_data();
-    void message_with_registered_key_goes_to_registered_function();
-    void message_with_unregistered_key_goes_to_unregistered_function();
-};
-
-CPPUNIT_TEST_SUITE_REGISTRATION(command_router_test);
-
-void command_router_test::when_nothing_is_registered_router_sinks_data()
+TEST(command_router_test, when_nothing_is_registered_router_sinks_data)
 {
     telnetpp::detail::command_router router;
     router(telnetpp::command(telnetpp::ayt));
 }
 
-void command_router_test::message_with_registered_key_goes_to_registered_function()
+TEST(command_router_test, message_with_registered_key_goes_to_registered_function)
 {
     telnetpp::detail::command_router router;
     
@@ -50,11 +32,11 @@ void command_router_test::message_with_registered_key_goes_to_registered_functio
     
     router(expected);
     
-    CPPUNIT_ASSERT_EQUAL(expected, cmd);
-    CPPUNIT_ASSERT_EQUAL(false, unregistered_route_called);
+    ASSERT_EQ(expected, cmd);
+    ASSERT_EQ(false, unregistered_route_called);
 }
 
-void command_router_test::message_with_unregistered_key_goes_to_unregistered_function()
+TEST(command_router_test, message_with_unregistered_key_goes_to_unregistered_function)
 {
     telnetpp::detail::command_router router;
     telnetpp::command cmd(0x00);
@@ -79,6 +61,6 @@ void command_router_test::message_with_unregistered_key_goes_to_unregistered_fun
     
     router(expected);
     
-    CPPUNIT_ASSERT_EQUAL(false, registered_route_called);
-    CPPUNIT_ASSERT_EQUAL(expected, cmd);
+    ASSERT_EQ(false, registered_route_called);
+    ASSERT_EQ(expected, cmd);
 }

@@ -1,33 +1,15 @@
 #include "telnetpp/options/naws/client.hpp"
 #include "telnetpp/options/naws.hpp"
 #include "telnetpp/protocol.hpp"
-#include <cppunit/TestFixture.h>
-#include <cppunit/extensions/HelperMacros.h>
+#include <gtest/gtest.h>
 
-class naws_client_test : public CppUnit::TestFixture
-{
-public :
-    CPPUNIT_TEST_SUITE(naws_client_test);
-        CPPUNIT_TEST(option_is_naws);
-        CPPUNIT_TEST(valid_subnegotiation_signals_window_size_change);
-        CPPUNIT_TEST(short_subnegotiation_is_ignored);
-    CPPUNIT_TEST_SUITE_END();
-    
-private :
-    void option_is_naws();
-    void valid_subnegotiation_signals_window_size_change();
-    void short_subnegotiation_is_ignored();
-};
-
-CPPUNIT_TEST_SUITE_REGISTRATION(naws_client_test);
-
-void naws_client_test::option_is_naws()
+TEST(naws_client_test, option_is_naws)
 {
     telnetpp::options::naws::client client;
-    CPPUNIT_ASSERT_EQUAL(telnetpp::options::naws::option, client.option());
+    ASSERT_EQ(telnetpp::options::naws::option, client.option());
 }
 
-void naws_client_test::valid_subnegotiation_signals_window_size_change()
+TEST(naws_client_test, valid_subnegotiation_signals_window_size_change)
 {
     telnetpp::options::naws::client client;
     client.activate();
@@ -49,11 +31,11 @@ void naws_client_test::valid_subnegotiation_signals_window_size_change()
     telnetpp::u16 const expected_width  = 0x01 << 8 | 0x02;
     telnetpp::u16 const expected_height = 0x03 << 8 | 0x04;
     
-    CPPUNIT_ASSERT_EQUAL(expected_width, width);
-    CPPUNIT_ASSERT_EQUAL(expected_height, height);
+    ASSERT_EQ(expected_width, width);
+    ASSERT_EQ(expected_height, height);
 }
 
-void naws_client_test::short_subnegotiation_is_ignored()
+TEST(naws_client_test, short_subnegotiation_is_ignored)
 {
     telnetpp::options::naws::client client;
     client.activate();
@@ -69,5 +51,5 @@ void naws_client_test::short_subnegotiation_is_ignored()
    
    client.subnegotiate({0x01, 0x02, 0x03});
    
-   CPPUNIT_ASSERT_EQUAL(false, called);
+   ASSERT_EQ(false, called);
 }

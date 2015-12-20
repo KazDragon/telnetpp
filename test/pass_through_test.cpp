@@ -1,21 +1,7 @@
 #include "telnetpp/client_option.hpp"
 #include "telnetpp/protocol.hpp"
 #include "expect_elements.hpp"
-#include <cppunit/TestFixture.h>
-#include <cppunit/extensions/HelperMacros.h>
-
-class pass_through_test : public CppUnit::TestFixture
-{
-public :
-    CPPUNIT_TEST_SUITE(pass_through_test);
-        CPPUNIT_TEST(can_pass_arbitrary_object_as_result_of_negotiation);
-    CPPUNIT_TEST_SUITE_END();
-    
-private :
-    void can_pass_arbitrary_object_as_result_of_negotiation();
-};
-
-CPPUNIT_TEST_SUITE_REGISTRATION(pass_through_test);
+#include <gtest/gtest.h>
 
 namespace {
 
@@ -38,7 +24,7 @@ public :
 
 }
 
-void pass_through_test::can_pass_arbitrary_object_as_result_of_negotiation()
+TEST(pass_through_test, can_pass_arbitrary_object_as_result_of_negotiation)
 {
     pass_through_option option;
     option.set_activatable();

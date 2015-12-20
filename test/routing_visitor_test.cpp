@@ -4,33 +4,9 @@
 #include "telnetpp/protocol.hpp"
 #include "telnetpp/detail/registration.hpp"
 #include "expect_elements.hpp"
-#include <cppunit/TestFixture.h>
-#include <cppunit/extensions/HelperMacros.h>
+#include <gtest/gtest.h>
 
-class routing_visitor_test : public CppUnit::TestFixture
-{
-public :
-    CPPUNIT_TEST_SUITE(routing_visitor_test);
-        CPPUNIT_TEST(text_routes_to_text_function);
-        CPPUNIT_TEST(text_does_not_route_to_null_function);
-        CPPUNIT_TEST(command_routes_to_command_router);
-        CPPUNIT_TEST(negotiation_routes_to_negotiation_router);
-        CPPUNIT_TEST(subnegotiation_routes_to_subnegotiation_router);
-        CPPUNIT_TEST(subnegotiation_accumulates_responses);
-    CPPUNIT_TEST_SUITE_END();
-
-private :
-    void text_routes_to_text_function();
-    void text_does_not_route_to_null_function();
-    void command_routes_to_command_router();
-    void negotiation_routes_to_negotiation_router();
-    void subnegotiation_routes_to_subnegotiation_router();
-    void subnegotiation_accumulates_responses();
-};
-
-CPPUNIT_TEST_SUITE_REGISTRATION(routing_visitor_test);
-
-void routing_visitor_test::text_routes_to_text_function()
+TEST(routing_visitor_test, text_routes_to_text_function)
 {
     telnetpp::detail::command_router cmd_router;
     telnetpp::detail::negotiation_router neg_router;
@@ -52,10 +28,10 @@ void routing_visitor_test::text_routes_to_text_function()
     telnetpp::element text_token(expected_text);
     boost::apply_visitor(visitor, text_token);
     
-    CPPUNIT_ASSERT_EQUAL(expected_text, text);
+    ASSERT_EQ(expected_text, text);
 }
 
-void routing_visitor_test::text_does_not_route_to_null_function()
+TEST(routing_visitor_test, text_does_not_route_to_null_function)
 {
     telnetpp::detail::command_router cmd_router;
     telnetpp::detail::negotiation_router neg_router;
@@ -71,7 +47,7 @@ void routing_visitor_test::text_does_not_route_to_null_function()
     boost::apply_visitor(visitor, text_token);
 }
 
-void routing_visitor_test::command_routes_to_command_router()
+TEST(routing_visitor_test, command_routes_to_command_router)
 {
     telnetpp::detail::command_router cmd_router;
     telnetpp::detail::negotiation_router neg_router;
@@ -99,10 +75,10 @@ void routing_visitor_test::command_routes_to_command_router()
     telnetpp::element cmd_token(expected_command);
     boost::apply_visitor(visitor, cmd_token);
     
-    CPPUNIT_ASSERT_EQUAL(expected_command, cmd);
+    ASSERT_EQ(expected_command, cmd);
 }
 
-void routing_visitor_test::negotiation_routes_to_negotiation_router()
+TEST(routing_visitor_test, negotiation_routes_to_negotiation_router)
 {
     telnetpp::detail::command_router cmd_router;
     telnetpp::detail::negotiation_router neg_router;
@@ -135,11 +111,11 @@ void routing_visitor_test::negotiation_routes_to_negotiation_router()
 
     boost::apply_visitor(visitor, neg_token);
     
-    CPPUNIT_ASSERT_EQUAL(true, state_changed);
-    CPPUNIT_ASSERT_EQUAL(true, client.is_active());
+    ASSERT_EQ(true, state_changed);
+    ASSERT_EQ(true, client.is_active());
 }
 
-void routing_visitor_test::subnegotiation_routes_to_subnegotiation_router()
+TEST(routing_visitor_test, subnegotiation_routes_to_subnegotiation_router)
 {
     telnetpp::detail::command_router cmd_router;
     telnetpp::detail::negotiation_router neg_router;
@@ -181,11 +157,11 @@ void routing_visitor_test::subnegotiation_routes_to_subnegotiation_router()
     telnetpp::u16 expected_width = 80;
     telnetpp::u16 expected_height = 24;
     
-    CPPUNIT_ASSERT_EQUAL(expected_width, width);
-    CPPUNIT_ASSERT_EQUAL(expected_height, height);
+    ASSERT_EQ(expected_width, width);
+    ASSERT_EQ(expected_height, height);
 }
 
-void routing_visitor_test::subnegotiation_accumulates_responses()
+TEST(routing_visitor_test, subnegotiation_accumulates_responses)
 {
     telnetpp::detail::command_router cmd_router;
     telnetpp::detail::negotiation_router neg_router;
