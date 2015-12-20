@@ -26,7 +26,8 @@ include(GenerateExportHeader)
 #  mkdir gtest
 #  cd gtest
 #  cmake /usr/src/gtest && make
-set(GTEST_ROOT gtest)
+#  export GTEST_ROOT=$PWD
+#  cd ..
 find_package(GTest)
 
 # For GTest, it is necessary to link with the appropriate local threading 
@@ -100,64 +101,66 @@ install(
         include
 )
 
-enable_testing()
+if (GTEST_FOUND)
+    enable_testing()
 
-set (telnetpp_tester_external_tests
-    test/client_option_test.cpp
-    test/command_router_test.cpp
-    test/echo_client_test.cpp
-    test/echo_server_test.cpp
-    test/naws_client_test.cpp
-    test/naws_server_test.cpp
-    test/negotiation_router_test.cpp
-    test/pass_through_test.cpp
-    test/server_option_test.cpp
-    test/session_test.cpp
-    test/subnegotiation_router_test.cpp
-    test/suppress_ga_client_test.cpp
-    test/suppress_ga_server_test.cpp
-    test/terminal_type_client_test.cpp
-)
-
-set (telnetpp_tester_internal_tests
-    test/parser_test.cpp
-    test/generator_test.cpp
-    test/routing_visitor_test.cpp
-)
-
-# If we are building shared libraries, then we wont be able to test any of
-# the modules in the detail directory since they're not visible (this is ok,
-# since all those are tested indirectly via other parts of the API anyway.)
-# For a normal archive, all symbols are visible, so they can be tested directly.
-if (BUILD_SHARED_LIBS)
-    set(telnetpp_tester_tests
-        ${telnetpp_tester_external_tests}
+    set (telnetpp_tester_external_tests
+        test/client_option_test.cpp
+        test/command_router_test.cpp
+        test/echo_client_test.cpp
+        test/echo_server_test.cpp
+        test/naws_client_test.cpp
+        test/naws_server_test.cpp
+        test/negotiation_router_test.cpp
+        test/pass_through_test.cpp
+        test/server_option_test.cpp
+        test/session_test.cpp
+        test/subnegotiation_router_test.cpp
+        test/suppress_ga_client_test.cpp
+        test/suppress_ga_server_test.cpp
+        test/terminal_type_client_test.cpp
     )
-else()
-    set(telnetpp_tester_tests
-        ${telnetpp_tester_internal_tests}
-        ${telnetpp_tester_external_tests}
+
+    set (telnetpp_tester_internal_tests
+        test/parser_test.cpp
+        test/generator_test.cpp
+        test/routing_visitor_test.cpp
     )
+
+    # If we are building shared libraries, then we wont be able to test any of
+    # the modules in the detail directory since they're not visible (this is ok,
+    # since all those are tested indirectly via other parts of the API anyway.)
+    # For a normal archive, all symbols are visible, so they can be tested directly.
+    if (BUILD_SHARED_LIBS)
+        set(telnetpp_tester_tests
+            ${telnetpp_tester_external_tests}
+        )
+    else()
+        set(telnetpp_tester_tests
+            ${telnetpp_tester_internal_tests}
+            ${telnetpp_tester_external_tests}
+        )
+    endif()
+
+    add_executable(telnetpp_tester 
+        ${telnetpp_tester_tests}
+        test/expect_elements.cpp
+    )
+
+    target_compile_features(telnetpp_tester
+        PUBLIC
+            cxx_auto_type
+            cxx_generic_lambdas
+            cxx_strong_enums
+            cxx_uniform_initialization
+    )
+
+    target_link_libraries(telnetpp_tester 
+        telnetpp 
+        ${GTEST_LIBRARY}
+        ${GTEST_MAIN_LIBRARY}
+        ${CMAKE_THREAD_LIBS_INIT}
+    )
+
+    add_test(telnetpp_test telnetpp_tester)
 endif()
-
-add_executable(telnetpp_tester 
-    ${telnetpp_tester_tests}
-    test/expect_elements.cpp
-)
-
-target_compile_features(telnetpp_tester
-    PUBLIC
-        cxx_auto_type
-        cxx_generic_lambdas
-        cxx_strong_enums
-        cxx_uniform_initialization
-)
-
-target_link_libraries(telnetpp_tester 
-    telnetpp 
-    ${GTEST_LIBRARY}
-    ${GTEST_MAIN_LIBRARY}
-    ${CMAKE_THREAD_LIBS_INIT}
-)
-
-add_test(telnetpp_test telnetpp_tester)

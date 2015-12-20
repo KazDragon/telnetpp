@@ -89,7 +89,9 @@ before_install:
 # workaround for gtest not providing its own libraries (sigh)
   - mkdir gtest
   - cd gtest
-  - CC=$CCOMPILE CXX=$ $CMAKE /usr/src/gtest && make
+  - CC=$CCOMPILE CXX=$CXXCOMPILE $CMAKE /usr/src/gtest && make
+  - export GTEST_ROOT=$PWD
+  - cd ..
 
 before_script:
   - mkdir build
