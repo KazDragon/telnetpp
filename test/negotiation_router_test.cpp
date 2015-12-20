@@ -4,35 +4,15 @@
 #include "telnetpp/protocol.hpp"
 #include "telnetpp/detail/registration.hpp"
 #include "expect_elements.hpp"
-#include <cppunit/TestFixture.h>
-#include <cppunit/extensions/HelperMacros.h>
+#include <gtest/gtest.h>
 
-class negotiation_router_test : public CppUnit::TestFixture
-{
-public :
-    CPPUNIT_TEST_SUITE(negotiation_router_test);
-        CPPUNIT_TEST(when_nothing_is_registered_router_sinks_data);
-        CPPUNIT_TEST(message_with_registered_key_goes_to_registered_function);
-        CPPUNIT_TEST(message_with_unregistered_key_goes_to_unregistered_function);
-        CPPUNIT_TEST(activating_option_returns_activation_sequence);
-    CPPUNIT_TEST_SUITE_END();
-    
-private :
-    void when_nothing_is_registered_router_sinks_data();
-    void message_with_registered_key_goes_to_registered_function();
-    void message_with_unregistered_key_goes_to_unregistered_function();
-    void activating_option_returns_activation_sequence();
-};
-
-CPPUNIT_TEST_SUITE_REGISTRATION(negotiation_router_test);
-
-void negotiation_router_test::when_nothing_is_registered_router_sinks_data()
+TEST(negotiation_router_test, when_nothing_is_registered_router_sinks_data)
 {
     telnetpp::detail::negotiation_router router;
     router(telnetpp::negotiation(telnetpp::will, 0x00));
 }
 
-void negotiation_router_test::message_with_registered_key_goes_to_registered_function()
+TEST(negotiation_router_test, message_with_registered_key_goes_to_registered_function)
 {
     telnetpp::detail::negotiation_router router;
     
@@ -57,11 +37,11 @@ void negotiation_router_test::message_with_registered_key_goes_to_registered_fun
     
     router(expected);
 
-    CPPUNIT_ASSERT_EQUAL(expected, neg);
-    CPPUNIT_ASSERT_EQUAL(false, unregistered_route_called);
+    ASSERT_EQ(expected, neg);
+    ASSERT_EQ(false, unregistered_route_called);
 }
 
-void negotiation_router_test::message_with_unregistered_key_goes_to_unregistered_function()
+TEST(negotiation_router_test, message_with_unregistered_key_goes_to_unregistered_function)
 {
     telnetpp::detail::negotiation_router router;
     
@@ -88,11 +68,11 @@ void negotiation_router_test::message_with_unregistered_key_goes_to_unregistered
     
     router(expected);
     
-    CPPUNIT_ASSERT_EQUAL(false, registered_route_called);
-    CPPUNIT_ASSERT_EQUAL(expected, neg);
+    ASSERT_EQ(false, registered_route_called);
+    ASSERT_EQ(expected, neg);
 }
 
-void negotiation_router_test::activating_option_returns_activation_sequence()
+TEST(negotiation_router_test, activating_option_returns_activation_sequence)
 {
     telnetpp::detail::negotiation_router router;
     telnetpp::options::echo::server server;

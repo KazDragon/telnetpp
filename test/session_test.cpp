@@ -4,39 +4,7 @@
 #include "telnetpp/options/echo/server.hpp"
 #include "telnetpp/protocol.hpp"
 #include "expect_elements.hpp"
-#include <cppunit/TestFixture.h>
-#include <cppunit/extensions/HelperMacros.h>
-
-class session_test : public CppUnit::TestFixture
-{
-public :
-    CPPUNIT_TEST_SUITE(session_test);
-        CPPUNIT_TEST(reception_of_text_routes_to_user_supplied_function);
-        CPPUNIT_TEST(reception_of_negotiation_routes_to_installed_client_option);
-        CPPUNIT_TEST(reception_of_negotiation_routes_to_installed_server_option);
-        CPPUNIT_TEST(reception_of_command_routes_to_installed_command_function);
-        CPPUNIT_TEST(sending_element_converts_element_to_bytes);
-        
-        CPPUNIT_TEST(unrouted_will_results_in_dont);
-        CPPUNIT_TEST(unrouted_wont_results_in_dont);
-        CPPUNIT_TEST(unrouted_dont_results_in_wont);
-        CPPUNIT_TEST(unrouted_do_results_in_wont);
-    CPPUNIT_TEST_SUITE_END();
-    
-private :
-    void reception_of_text_routes_to_user_supplied_function();
-    void reception_of_negotiation_routes_to_installed_client_option();
-    void reception_of_negotiation_routes_to_installed_server_option();
-    void reception_of_command_routes_to_installed_command_function();
-    void sending_element_converts_element_to_bytes();
-    
-    void unrouted_will_results_in_dont();
-    void unrouted_wont_results_in_dont();
-    void unrouted_do_results_in_wont();
-    void unrouted_dont_results_in_wont();
-};
-
-CPPUNIT_TEST_SUITE_REGISTRATION(session_test);
+#include <gtest/gtest.h>
 
 namespace {
     
@@ -63,7 +31,7 @@ static void expect_result(
     std::vector<boost::variant<telnetpp::u8stream, boost::any>> const &expected,
     std::vector<boost::variant<telnetpp::u8stream, boost::any>> const &result)
 {
-    CPPUNIT_ASSERT_EQUAL(expected.size(), result.size());
+    ASSERT_EQ(expected.size(), result.size());
     
     auto current_expected = expected.begin();
     auto current_result   = result.begin();
@@ -80,7 +48,7 @@ static void expect_result(
 
 }
 
-void session_test::reception_of_text_routes_to_user_supplied_function()
+TEST(session_test, reception_of_text_routes_to_user_supplied_function)
 {
     std::string result;
     telnetpp::session session(
@@ -93,10 +61,10 @@ void session_test::reception_of_text_routes_to_user_supplied_function()
     std::string expected = "TEST STRING";
     session.receive(telnetpp::u8stream{expected.begin(), expected.end()});
     
-    CPPUNIT_ASSERT_EQUAL(expected, result);
+    ASSERT_EQ(expected, result);
 }
 
-void session_test::reception_of_negotiation_routes_to_installed_client_option()
+TEST(session_test, reception_of_negotiation_routes_to_installed_client_option)
 {
     telnetpp::session session(nullptr);
     telnetpp::options::echo::client echo_client;
@@ -117,7 +85,7 @@ void session_test::reception_of_negotiation_routes_to_installed_client_option()
         }));
 }
 
-void session_test::reception_of_negotiation_routes_to_installed_server_option()
+TEST(session_test, reception_of_negotiation_routes_to_installed_server_option)
 {
     telnetpp::session session(nullptr);
     telnetpp::options::echo::server echo_server;
@@ -137,7 +105,7 @@ void session_test::reception_of_negotiation_routes_to_installed_server_option()
         }));
 }
 
-void session_test::reception_of_command_routes_to_installed_command_function()
+TEST(session_test, reception_of_command_routes_to_installed_command_function)
 {
     telnetpp::command expected(telnetpp::ayt);
     telnetpp::command result(0x00);
@@ -155,10 +123,10 @@ void session_test::reception_of_command_routes_to_installed_command_function()
         expected.value()
     });
     
-    CPPUNIT_ASSERT_EQUAL(expected, result);
+    ASSERT_EQ(expected, result);
 }
 
-void session_test::sending_element_converts_element_to_bytes()
+TEST(session_test, sending_element_converts_element_to_bytes)
 {
     telnetpp::session               session(nullptr);
     telnetpp::options::echo::server echo_server;
@@ -176,7 +144,7 @@ void session_test::sending_element_converts_element_to_bytes()
     expect_result(expected, session.send(echo_server.activate()));
 }
 
-void session_test::unrouted_will_results_in_dont()
+TEST(session_test, unrouted_will_results_in_dont)
 {
     telnetpp::session session(nullptr);
 
@@ -190,7 +158,7 @@ void session_test::unrouted_will_results_in_dont()
         }));
 }
 
-void session_test::unrouted_wont_results_in_dont()
+TEST(session_test, unrouted_wont_results_in_dont)
 {
     telnetpp::session session(nullptr);
 
@@ -204,7 +172,7 @@ void session_test::unrouted_wont_results_in_dont()
         }));
 }
 
-void session_test::unrouted_do_results_in_wont()
+TEST(session_test, unrouted_do_results_in_wont)
 {
     telnetpp::session session(nullptr);
 
@@ -218,7 +186,7 @@ void session_test::unrouted_do_results_in_wont()
         }));
 }
 
-void session_test::unrouted_dont_results_in_wont()
+TEST(session_test, unrouted_dont_results_in_wont)
 {
     telnetpp::session session(nullptr);
 

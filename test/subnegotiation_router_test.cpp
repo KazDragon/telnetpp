@@ -3,35 +3,15 @@
 #include "telnetpp/options/naws.hpp"
 #include "telnetpp/protocol.hpp"
 #include "telnetpp/detail/registration.hpp"
-#include <cppunit/TestFixture.h>
-#include <cppunit/extensions/HelperMacros.h>
+#include <gtest/gtest.h>
 
-class subnegotiation_router_test : public CppUnit::TestFixture
-{
-public :
-    CPPUNIT_TEST_SUITE(subnegotiation_router_test);
-        CPPUNIT_TEST(when_nothing_is_registered_router_sinks_data);
-        CPPUNIT_TEST(message_with_registered_key_goes_to_registered_function);
-        CPPUNIT_TEST(message_with_unregistered_key_goes_to_unregistered_function);
-        CPPUNIT_TEST(routing_subnegotiation_returns_subnegotiation_result);
-    CPPUNIT_TEST_SUITE_END();
-    
-private :
-    void when_nothing_is_registered_router_sinks_data();
-    void message_with_registered_key_goes_to_registered_function();
-    void message_with_unregistered_key_goes_to_unregistered_function();
-    void routing_subnegotiation_returns_subnegotiation_result();
-};
-
-CPPUNIT_TEST_SUITE_REGISTRATION(subnegotiation_router_test);
-
-void subnegotiation_router_test::when_nothing_is_registered_router_sinks_data()
+TEST(subnegotiation_router_test, when_nothing_is_registered_router_sinks_data)
 {
     telnetpp::detail::subnegotiation_router router;
     router(telnetpp::subnegotiation(telnetpp::options::naws::option, {}));
 }
 
-void subnegotiation_router_test::message_with_registered_key_goes_to_registered_function()
+TEST(subnegotiation_router_test, message_with_registered_key_goes_to_registered_function)
 {
     telnetpp::detail::subnegotiation_router router;
     
@@ -56,11 +36,11 @@ void subnegotiation_router_test::message_with_registered_key_goes_to_registered_
     
     router(expected);
 
-    CPPUNIT_ASSERT_EQUAL(expected, sub);
-    CPPUNIT_ASSERT_EQUAL(false, unregistered_route_called);
+    ASSERT_EQ(expected, sub);
+    ASSERT_EQ(false, unregistered_route_called);
 }
 
-void subnegotiation_router_test::message_with_unregistered_key_goes_to_unregistered_function()
+TEST(subnegotiation_router_test, message_with_unregistered_key_goes_to_unregistered_function)
 {
     telnetpp::detail::subnegotiation_router router;
     
@@ -87,11 +67,11 @@ void subnegotiation_router_test::message_with_unregistered_key_goes_to_unregiste
     
     router(expected);
     
-    CPPUNIT_ASSERT_EQUAL(false, registered_route_called);
-    CPPUNIT_ASSERT_EQUAL(expected, sub);
+    ASSERT_EQ(false, registered_route_called);
+    ASSERT_EQ(expected, sub);
 }
 
-void subnegotiation_router_test::routing_subnegotiation_returns_subnegotiation_result()
+TEST(subnegotiation_router_test, routing_subnegotiation_returns_subnegotiation_result)
 {
     telnetpp::detail::subnegotiation_router router;
     telnetpp::options::naws::client client;
@@ -118,6 +98,6 @@ void subnegotiation_router_test::routing_subnegotiation_returns_subnegotiation_r
     telnetpp::u16 expected_width = 80;
     telnetpp::u16 expected_height = 24;
     
-    CPPUNIT_ASSERT_EQUAL(expected_width, width);
-    CPPUNIT_ASSERT_EQUAL(expected_height, height);
+    ASSERT_EQ(expected_width, width);
+    ASSERT_EQ(expected_height, height);
 }

@@ -1,5 +1,5 @@
 #include "expect_elements.hpp"
-#include <cppunit/TestAssert.h>
+#include <gtest/gtest.h>
 
 namespace {
     
@@ -14,8 +14,8 @@ public :
     template <class T>
     void operator()(T const &value) const
     {
-        CPPUNIT_ASSERT(expected_.type() == typeid(value));
-        CPPUNIT_ASSERT_EQUAL(boost::get<T>(expected_), value);
+        ASSERT_TRUE(expected_.type() == typeid(value));
+        ASSERT_EQ(boost::get<T>(expected_), value);
     }
     
     telnetpp::element const &expected_;
@@ -30,7 +30,7 @@ struct tokens_match : boost::static_visitor<>
     
     void operator()(boost::any const &any) const
     {
-        CPPUNIT_ASSERT(expected_.type() == typeid(boost::any));
+        ASSERT_TRUE(expected_.type() == typeid(boost::any));
         
         // Unfortunately, we can't actually compare the anys, because we have
         // no idea what they are by design.
@@ -38,7 +38,7 @@ struct tokens_match : boost::static_visitor<>
     
     void operator()(telnetpp::element const &tok) const
     {
-        CPPUNIT_ASSERT(expected_.type() == typeid(telnetpp::element));
+        ASSERT_TRUE(expected_.type() == typeid(telnetpp::element));
         
         boost::apply_visitor(
             elements_match(boost::get<telnetpp::element>(expected_)),
@@ -54,7 +54,7 @@ void expect_elements(
     std::vector<telnetpp::element> const &expected, 
     std::vector<telnetpp::element> const &result)
 {
-    CPPUNIT_ASSERT_EQUAL(expected.size(), result.size());
+    ASSERT_EQ(expected.size(), result.size());
     
     for (auto &&current_expected = expected.begin(),
               &&current_result   = result.begin();
@@ -63,7 +63,6 @@ void expect_elements(
          ++current_expected,
          ++current_result)
     {
-        printf("\n");
         boost::apply_visitor(elements_match(
             *current_expected), *current_result);
     }
@@ -73,7 +72,7 @@ void expect_elements(
     std::vector<telnetpp::element> const &expected,
     std::vector<telnetpp::token> const &result)
 {
-    CPPUNIT_ASSERT_EQUAL(expected.size(), result.size());
+    ASSERT_EQ(expected.size(), result.size());
     
     
     auto &&current_expected = expected.begin();
@@ -95,7 +94,7 @@ void expect_tokens(
     std::vector<telnetpp::token> const &expected, 
     std::vector<telnetpp::token> const &result)
 {
-    CPPUNIT_ASSERT_EQUAL(expected.size(), result.size());
+    ASSERT_EQ(expected.size(), result.size());
     
     for (auto &&current_expected = expected.begin(),
               &&current_result   = result.begin();

@@ -19,7 +19,6 @@ addons:
       - clang
       - gcc-4.8
       - g++-4.8
-      - libcppunit-dev
       - libboost1.55-all-dev
 
 matrix:
@@ -35,7 +34,6 @@ matrix:
             - clang
             - gcc-5
             - g++-5
-            - libcppunit-dev
             - libboost1.55-all-dev
 
     - compiler: g++
@@ -47,7 +45,6 @@ matrix:
             - clang
             - gcc-5
             - g++-5
-            - libcppunit-dev
             - libboost1.55-all-dev
 
     - compiler: g++
@@ -59,7 +56,6 @@ matrix:
             - clang
             - gcc-5
             - g++-5
-            - libcppunit-dev
             - libboost1.55-all-dev
 
     - compiler: g++
@@ -71,7 +67,6 @@ matrix:
             - clang
             - gcc-5
             - g++-5
-            - libcppunit-dev
             - libboost1.55-all-dev
       
 cache:
