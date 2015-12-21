@@ -10,7 +10,7 @@ Telnet++ is an implementation of the Telnet Session Layer protocol that is used 
 
 # Requirements
 
-Telnet++ requires a C++14 compiler and the Boost Libraries.  It also uses CppUnit for its testing suite, which is compiled optionally.
+Telnet++ requires a C++14 compiler and the Boost Libraries.  It also uses Google Test for its testing suite, which is compiled optionally.
 
 # Features / Roadmap / Progress
 
@@ -146,3 +146,15 @@ The code above: the session set-up, and the send/receive functions, are all that
 The Mud Client Compression Protocol v2 (http://tintin.sourceforge.net/mccp/) is a unique protocol in that activating it also changes the way the Telnet Protocol is carried, since it too is compressed.  This requires precise timing in order to work.  If the MCCP server has sent WILL MCCP, then it must not compress immediately, since it may be declined by a DONT MCCP response.  However, when the server then receives DO MCCP, it must compress from the very next output byte.  Another part of this is that, after either the server or client have sent a negotiation, it must not send any non-Telnet-specific data until the response is heard.  Otherwise, the remote connection may hear compressed/uncompressed data when it expects compressed/uncompressed data respectively.
 
 Without hooking into a datastream API in any way, it is next to impossible to guarantee the timing of this data flow.  However, by embedding objects in the datastream representing these state changes, it becomes possible for precisely placed timing marks to be sent from the MCCP option implementation and received by a compression layer that is sitting below the session.
+
+# Appendix: Testing
+
+Unit testing is implemented with Google Test, but this requires a separate compilation.  The easiest way I've found of doing this is roughly equivalent to this script (which is mirrored in .travis.yml):
+
+    sudo apt-get install libgtest-dev
+    mkdir gtest
+    cd gtest
+    cmake /usr/src/gtest && make
+    export GTEST_ROOT=$PWD
+
+After this, re-running cmake with Telnet++ should pick up both the Google Test includes in /usr/include and also the binary which was just built.
