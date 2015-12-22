@@ -34,9 +34,6 @@ find_package(GTest)
 # library.
 find_package(Threads)
 
-set (CMAKE_CXX_FLAGS "-fprofile-arcs -fno-omit-frame-pointer ${CMAKE_CXX_FLAGS}")
-set (CMAKE_EXE_LINKER_FLAGS "-fprofile-arcs -fno-omit-frame-pointer ${CMAKE_EXE_LINKER_FLAGS}")
-
 set (telnetpp_public_src
     src/client_option.cpp
     src/command.cpp
