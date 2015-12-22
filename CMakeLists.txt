@@ -34,6 +34,9 @@ find_package(GTest)
 # library.
 find_package(Threads)
 
+set (CMAKE_CXX_FLAGS "-fprofile-arcs -fno-omit-frame-pointer ${CMAKE_CXX_FLAGS}")
+set (CMAKE_EXE_LINKER_FLAGS "-fprofile-arcs -fno-omit-frame-pointer ${CMAKE_EXE_LINKER_FLAGS}")
+
 set (telnetpp_public_src
     src/client_option.cpp
     src/command.cpp
@@ -42,6 +45,7 @@ set (telnetpp_public_src
     src/options/echo/server.cpp
     src/options/naws/client.cpp
     src/options/naws/server.cpp
+    src/options/new_environ/server.cpp
     src/options/terminal_type/client.cpp
     src/options/suppress_ga/client.cpp
     src/options/suppress_ga/server.cpp
@@ -112,6 +116,7 @@ if (GTEST_FOUND)
         test/echo_server_test.cpp
         test/naws_client_test.cpp
         test/naws_server_test.cpp
+        test/new_environ_server_test.cpp
         test/negotiation_router_test.cpp
         test/pass_through_test.cpp
         test/server_option_test.cpp
