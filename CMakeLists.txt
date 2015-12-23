@@ -42,6 +42,7 @@ set (telnetpp_public_src
     src/options/echo/server.cpp
     src/options/naws/client.cpp
     src/options/naws/server.cpp
+    src/options/new_environ/server.cpp
     src/options/terminal_type/client.cpp
     src/options/suppress_ga/client.cpp
     src/options/suppress_ga/server.cpp
@@ -112,6 +113,7 @@ if (GTEST_FOUND)
         test/echo_server_test.cpp
         test/naws_client_test.cpp
         test/naws_server_test.cpp
+        test/new_environ_server_test.cpp
         test/negotiation_router_test.cpp
         test/pass_through_test.cpp
         test/server_option_test.cpp
