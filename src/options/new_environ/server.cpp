@@ -15,7 +15,8 @@ server::server()
 // ==========================================================================
 // REQUEST
 // ==========================================================================
-std::vector<token> server::request_variables(std::vector<request> const &requests)
+std::vector<token> server::request_variables(
+    std::vector<request> const &requests)
 {
     telnetpp::u8stream content;
     content.push_back(telnetpp::options::new_environ::send);
@@ -28,9 +29,9 @@ std::vector<token> server::request_variables(std::vector<request> const &request
         {
             switch (ch)
             {
-                case telnetpp::options::new_environ::var : // Fall-through
+                case telnetpp::options::new_environ::var :   // Fall-through
                 case telnetpp::options::new_environ::value : // Fall-through
-                case telnetpp::options::new_environ::esc : // Fall-through
+                case telnetpp::options::new_environ::esc :   // Fall-through
                 case telnetpp::options::new_environ::uservar :
                     // Fall-through
                     content.push_back(telnetpp::options::new_environ::esc);
@@ -68,7 +69,7 @@ std::vector<token> server::handle_subnegotiation(u8stream const &stream)
     {
         case parse_state::is_or_info :
             resp.name = "";
-            resp.value = {};
+            resp.value = boost::none;
             state = parse_state::type;
             break;
             
@@ -84,7 +85,7 @@ std::vector<token> server::handle_subnegotiation(u8stream const &stream)
                 on_variable_changed(resp);
                 resp.type = ch;
                 resp.name = "";
-                resp.value = {};
+                resp.value = boost::none;
                 state = parse_state::name;
             }
             else if (ch == telnetpp::options::new_environ::value)
@@ -105,7 +106,7 @@ std::vector<token> server::handle_subnegotiation(u8stream const &stream)
                 on_variable_changed(resp);
                 resp.type = ch;
                 resp.name = "";
-                resp.value = {};
+                resp.value = boost::none;
                 state = parse_state::name;
             }
             else
