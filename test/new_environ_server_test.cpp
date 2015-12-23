@@ -457,3 +457,133 @@ TEST(new_environ_server_test, receiving_info_for_multiple_variables_reports_mult
     ASSERT_EQ(std::string("TEST1"), responses[2].name);
     ASSERT_EQ(std::string("VALUE"), *responses[2].value);
 }
+
+TEST(new_environ_server_test, receiving_uservar_with_escaped_var_in_name_reports_variable_correctly)
+{
+    telnetpp::options::new_environ::server server;
+    server.activate();
+    server.negotiate(telnetpp::do_);
+
+    telnetpp::options::new_environ::response response;
+    
+    server.on_variable_changed.connect(
+        [&response](auto const &resp) -> std::vector<telnetpp::token>
+        {
+            response = resp;
+            return {};
+        });
+
+    server.subnegotiate({
+        0x00,
+        0x03, 'T', 'E', 0x02, 0x00, 'S', 'T',
+        0x01, 'V', 'A', 'L', 'U', 'E'
+    });
+    
+    ASSERT_EQ(telnetpp::options::new_environ::uservar, response.type);
+    ASSERT_EQ(std::string("TE\x00ST", 5), response.name);
+    ASSERT_EQ(std::string("VALUE"), response.value);
+}
+
+TEST(new_environ_server_test, receiving_uservar_with_escaped_uservar_in_name_reports_variable_correctly)
+{
+    telnetpp::options::new_environ::server server;
+    server.activate();
+    server.negotiate(telnetpp::do_);
+
+    telnetpp::options::new_environ::response response;
+    
+    server.on_variable_changed.connect(
+        [&response](auto const &resp) -> std::vector<telnetpp::token>
+        {
+            response = resp;
+            return {};
+        });
+
+    server.subnegotiate({
+        0x00,
+        0x03, 'T', 'E', 0x02, 0x03, 'S', 'T',
+        0x01, 'V', 'A', 'L', 'U', 'E'
+    });
+    
+    ASSERT_EQ(telnetpp::options::new_environ::uservar, response.type);
+    ASSERT_EQ(std::string("TE\x03ST", 5), response.name);
+    ASSERT_EQ(std::string("VALUE"), response.value);
+}
+
+TEST(new_environ_server_test, receiving_uservar_with_escaped_value_in_name_reports_variable_correctly)
+{
+    telnetpp::options::new_environ::server server;
+    server.activate();
+    server.negotiate(telnetpp::do_);
+
+    telnetpp::options::new_environ::response response;
+    
+    server.on_variable_changed.connect(
+        [&response](auto const &resp) -> std::vector<telnetpp::token>
+        {
+            response = resp;
+            return {};
+        });
+
+    server.subnegotiate({
+        0x00,
+        0x03, 'T', 'E', 0x02, 0x01, 'S', 'T',
+        0x01, 'V', 'A', 'L', 'U', 'E'
+    });
+    
+    ASSERT_EQ(telnetpp::options::new_environ::uservar, response.type);
+    ASSERT_EQ(std::string("TE\x01ST", 5), response.name);
+    ASSERT_EQ(std::string("VALUE"), response.value);
+}
+
+TEST(new_environ_server_test, receiving_uservar_with_escaped_var_in_value_reports_variable_correctly)
+{
+    telnetpp::options::new_environ::server server;
+    server.activate();
+    server.negotiate(telnetpp::do_);
+
+    telnetpp::options::new_environ::response response;
+    
+    server.on_variable_changed.connect(
+        [&response](auto const &resp) -> std::vector<telnetpp::token>
+        {
+            response = resp;
+            return {};
+        });
+
+    server.subnegotiate({
+        0x00,
+        0x03, 'T', 'E', 'S', 'T',
+        0x01, 'V', 'A', 0x02, 0x00, 'L', 'U', 'E'
+    });
+    
+    ASSERT_EQ(telnetpp::options::new_environ::uservar, response.type);
+    ASSERT_EQ(std::string("TEST"), response.name);
+    ASSERT_EQ(std::string("VA\x00LUE", 6), response.value);
+}
+
+TEST(new_environ_server_test, receiving_uservar_with_escaped_uservar_in_value_reports_variable_correctly)
+{
+    telnetpp::options::new_environ::server server;
+    server.activate();
+    server.negotiate(telnetpp::do_);
+
+    telnetpp::options::new_environ::response response;
+    
+    server.on_variable_changed.connect(
+        [&response](auto const &resp) -> std::vector<telnetpp::token>
+        {
+            response = resp;
+            return {};
+        });
+
+    server.subnegotiate({
+        0x00,
+        0x03, 'T', 'E', 'S', 'T',
+        0x01, 'V', 'A', 0x02, 0x03, 'L', 'U', 'E'
+    });
+    
+    ASSERT_EQ(telnetpp::options::new_environ::uservar, response.type);
+    ASSERT_EQ(std::string("TEST"), response.name);
+    ASSERT_EQ(std::string("VA\x03LUE", 6), response.value);
+}

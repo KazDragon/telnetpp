@@ -10,8 +10,22 @@ enum class parse_state
     is_or_info,
     type,
     name,
+    name_esc,
     value,
+    value_esc,
 };
+
+// ==========================================================================
+// PARSE_VALUE_ESC
+// ==========================================================================
+boost::optional<response> parse_value_esc(
+    parse_state &state, response &temp, u8 data)
+{
+    temp.value->push_back(data);
+    state = parse_state::value;
+
+    return {};
+}
 
 // ==========================================================================
 // PARSE_VALUE
@@ -21,8 +35,12 @@ boost::optional<response> parse_value(
 {
     boost::optional<response> resp;
     
-    if (data == telnetpp::options::new_environ::var
-     || data == telnetpp::options::new_environ::uservar)
+    if (data == telnetpp::options::new_environ::esc)
+    {
+        state = parse_state::value_esc;
+    }
+    else if (data == telnetpp::options::new_environ::var
+          || data == telnetpp::options::new_environ::uservar)
     {
         resp = temp;
         
@@ -40,6 +58,18 @@ boost::optional<response> parse_value(
 }
 
 // ==========================================================================
+// PARSE_NAME_ESC
+// ==========================================================================
+boost::optional<response> parse_name_esc(
+    parse_state &state, response &temp, u8 data)
+{
+    temp.name.push_back(char(data));
+    state = parse_state::name;
+    
+    return {};
+}
+
+// ==========================================================================
 // PARSE_NAME
 // ==========================================================================
 boost::optional<response> parse_name(
@@ -47,8 +77,12 @@ boost::optional<response> parse_name(
 {
     boost::optional<response> resp;
     
-    if (data == telnetpp::options::new_environ::var
-     || data == telnetpp::options::new_environ::uservar)
+    if (data == telnetpp::options::new_environ::esc)
+    {
+        state = parse_state::name_esc;
+    }
+    else if (data == telnetpp::options::new_environ::var
+          || data == telnetpp::options::new_environ::uservar)
     {
         resp = temp;
 
@@ -113,8 +147,16 @@ boost::optional<response> parse_data(
             resp = parse_name(state, temp, data);
             break;
             
+        case parse_state::name_esc :
+            resp = parse_name_esc(state, temp, data);
+            break;
+            
         case parse_state::value :
             resp = parse_value(state, temp, data);
+            break;
+            
+        case parse_state::value_esc :
+            resp = parse_value_esc(state, temp, data);
             break;
 
         default :
