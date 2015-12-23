@@ -48,4 +48,84 @@ std::vector<token> server::request_variables(std::vector<request> const &request
     };
 }
 
+// ==========================================================================
+// HANDLE_SUBNEGOTIATION
+// ==========================================================================
+std::vector<token> server::handle_subnegotiation(u8stream const &stream)
+{
+    enum class parse_state
+    {
+        is_or_info,
+        type,
+        name,
+        value,
+    };
+    
+    parse_state state = parse_state::is_or_info;
+    u8 type;
+    std::string name;
+    boost::optional<std::string> value;
+        
+    for (auto ch : stream) switch (state)
+    {
+        case parse_state::is_or_info :
+            name = "";
+            value = {};
+            state = parse_state::type;
+            break;
+            
+        case parse_state::type  :
+            type = ch;
+            state = parse_state::name;
+            break;
+            
+        case parse_state::name :
+            if (ch == telnetpp::options::new_environ::var
+             || ch == telnetpp::options::new_environ::uservar)
+            {
+                on_variable_changed(type, name, value);
+                type = ch;
+                name = "";
+                value = {};
+                state = parse_state::name;
+            }
+            else if (ch == telnetpp::options::new_environ::value)
+            {
+                value = "";
+                state = parse_state::value;   
+            }
+            else
+            {
+                name.push_back(char(ch));
+            }
+            break;
+            
+        case parse_state::value :
+            if (ch == telnetpp::options::new_environ::var
+             || ch == telnetpp::options::new_environ::uservar)
+            {
+                on_variable_changed(type, name, value);
+                type = ch;
+                name = "";
+                value = {};
+                state = parse_state::name;
+            }
+            else
+            {
+                value->push_back(ch);
+            }
+            break;
+
+        default :
+            break;
+    }
+    
+    if (!name.empty())
+    {
+        on_variable_changed(type, name, value);
+    }
+    
+    return {};    
+}
+
 }}}
