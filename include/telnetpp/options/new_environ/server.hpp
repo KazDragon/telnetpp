@@ -1,18 +1,12 @@
 #ifndef TELNETPP_OPTIONS_NEW_ENVIRON_SERVER_HPP_
 #define TELNETPP_OPTIONS_NEW_ENVIRON_SERVER_HPP_
 
+#include "telnetpp/options/new_environ.hpp"
 #include "telnetpp/server_option.hpp"
-#include <boost/optional.hpp>
 #include <boost/signals2/signal.hpp>
 #include <vector>
 
 namespace telnetpp { namespace options { namespace new_environ {
-
-struct request
-{
-    telnetpp::u8 type;
-    std::string  name;
-};
 
 //* =========================================================================
 /// \brief An implementation of the server side of the Telnet New-Environ
@@ -40,10 +34,7 @@ public :
     ///        it being undefined.
     //* =====================================================================
     boost::signals2::signal<
-        std::vector<token> (
-            u8                                  type,
-            std::string                  const &name,
-            boost::optional<std::string> const &value)
+        std::vector<token> (response const &res)
     > on_variable_changed; 
 
 private :

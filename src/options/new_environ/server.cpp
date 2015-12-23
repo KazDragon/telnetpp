@@ -2,7 +2,7 @@
 #include "telnetpp/options/new_environ.hpp"
 
 namespace telnetpp { namespace options { namespace new_environ {
-    
+
 // ==========================================================================
 // CONSTRUCTOR
 // ==========================================================================
@@ -62,20 +62,18 @@ std::vector<token> server::handle_subnegotiation(u8stream const &stream)
     };
     
     parse_state state = parse_state::is_or_info;
-    u8 type;
-    std::string name;
-    boost::optional<std::string> value;
-        
+    response resp;
+
     for (auto ch : stream) switch (state)
     {
         case parse_state::is_or_info :
-            name = "";
-            value = {};
+            resp.name = "";
+            resp.value = {};
             state = parse_state::type;
             break;
             
         case parse_state::type  :
-            type = ch;
+            resp.type = ch;
             state = parse_state::name;
             break;
             
@@ -83,20 +81,20 @@ std::vector<token> server::handle_subnegotiation(u8stream const &stream)
             if (ch == telnetpp::options::new_environ::var
              || ch == telnetpp::options::new_environ::uservar)
             {
-                on_variable_changed(type, name, value);
-                type = ch;
-                name = "";
-                value = {};
+                on_variable_changed(resp);
+                resp.type = ch;
+                resp.name = "";
+                resp.value = {};
                 state = parse_state::name;
             }
             else if (ch == telnetpp::options::new_environ::value)
             {
-                value = "";
+                resp.value = "";
                 state = parse_state::value;   
             }
             else
             {
-                name.push_back(char(ch));
+                resp.name.push_back(char(ch));
             }
             break;
             
@@ -104,15 +102,15 @@ std::vector<token> server::handle_subnegotiation(u8stream const &stream)
             if (ch == telnetpp::options::new_environ::var
              || ch == telnetpp::options::new_environ::uservar)
             {
-                on_variable_changed(type, name, value);
-                type = ch;
-                name = "";
-                value = {};
+                on_variable_changed(resp);
+                resp.type = ch;
+                resp.name = "";
+                resp.value = {};
                 state = parse_state::name;
             }
             else
             {
-                value->push_back(ch);
+                resp.value->push_back(ch);
             }
             break;
 
@@ -120,9 +118,9 @@ std::vector<token> server::handle_subnegotiation(u8stream const &stream)
             break;
     }
     
-    if (!name.empty())
+    if (!resp.name.empty())
     {
-        on_variable_changed(type, name, value);
+        on_variable_changed(resp);
     }
     
     return {};    

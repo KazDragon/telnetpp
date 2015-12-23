@@ -192,7 +192,7 @@ TEST(new_environ_server_test, receiving_empty_response_does_nothing)
 
     bool called = false;
     server.on_variable_changed.connect(
-        [&called](auto const &, auto const &, auto const &)
+        [&called](auto const &)
             -> std::vector<telnetpp::token>
         {
             called = true;
@@ -212,7 +212,7 @@ TEST(new_environ_server_test, receiving_empty_list_does_nothing)
 
     bool called = false;
     server.on_variable_changed.connect(
-        [&called](auto const &, auto const &, auto const &)
+        [&called](auto const &)
             -> std::vector<telnetpp::token>
         {
             called = true;
@@ -230,20 +230,12 @@ TEST(new_environ_server_test, receiving_var_and_no_value_reports_undefined_var)
     server.activate();
     server.negotiate(telnetpp::do_);
 
-    telnetpp::u8                 type;
-    std::string                  name;
-    boost::optional<std::string> value;
+    telnetpp::options::new_environ::response response;
     
     server.on_variable_changed.connect(
-        [&type, &name, &value](
-            auto const &var_type, 
-            auto const &var_name, 
-            auto const &var_value)
-            -> std::vector<telnetpp::token>
+        [&response](auto const &resp) -> std::vector<telnetpp::token>
         {
-            type = var_type;
-            name = var_name;
-            value = var_value;
+            response = resp;
             return {};
         });
         
@@ -252,9 +244,9 @@ TEST(new_environ_server_test, receiving_var_and_no_value_reports_undefined_var)
         0x00, 'U', 'S', 'E', 'R'
     });
     
-    ASSERT_EQ(telnetpp::options::new_environ::var, type);
-    ASSERT_EQ(std::string("USER"), name);
-    ASSERT_FALSE(value.is_initialized());
+    ASSERT_EQ(telnetpp::options::new_environ::var, response.type);
+    ASSERT_EQ(std::string("USER"), response.name);
+    ASSERT_FALSE(response.value.is_initialized());
 }
 
 TEST(new_environ_server_test, receiving_uservar_and_no_value_reports_undefined_uservar)
@@ -263,20 +255,12 @@ TEST(new_environ_server_test, receiving_uservar_and_no_value_reports_undefined_u
     server.activate();
     server.negotiate(telnetpp::do_);
 
-    telnetpp::u8                 type;
-    std::string                  name;
-    boost::optional<std::string> value;
+    telnetpp::options::new_environ::response response;
     
     server.on_variable_changed.connect(
-        [&type, &name, &value](
-            auto const &var_type, 
-            auto const &var_name, 
-            auto const &var_value)
-            -> std::vector<telnetpp::token>
+        [&response](auto const &resp) -> std::vector<telnetpp::token>
         {
-            type = var_type;
-            name = var_name;
-            value = var_value;
+            response = resp;
             return {};
         });
         
@@ -285,9 +269,9 @@ TEST(new_environ_server_test, receiving_uservar_and_no_value_reports_undefined_u
         0x03, 'T', 'E', 'S', 'T'
     });
     
-    ASSERT_EQ(telnetpp::options::new_environ::uservar, type);
-    ASSERT_EQ(std::string("TEST"), name);
-    ASSERT_FALSE(value.is_initialized());
+    ASSERT_EQ(telnetpp::options::new_environ::uservar, response.type);
+    ASSERT_EQ(std::string("TEST"), response.name);
+    ASSERT_FALSE(response.value.is_initialized());
 }
 
 TEST(new_environ_server_test, receiving_var_and_empty_value_reports_empty_var)
@@ -296,20 +280,12 @@ TEST(new_environ_server_test, receiving_var_and_empty_value_reports_empty_var)
     server.activate();
     server.negotiate(telnetpp::do_);
 
-    telnetpp::u8                 type;
-    std::string                  name;
-    boost::optional<std::string> value;
+    telnetpp::options::new_environ::response response;
     
     server.on_variable_changed.connect(
-        [&type, &name, &value](
-            auto const &var_type, 
-            auto const &var_name, 
-            auto const &var_value)
-            -> std::vector<telnetpp::token>
+        [&response](auto const &resp) -> std::vector<telnetpp::token>
         {
-            type = var_type;
-            name = var_name;
-            value = var_value;
+            response = resp;
             return {};
         });
         
@@ -319,9 +295,9 @@ TEST(new_environ_server_test, receiving_var_and_empty_value_reports_empty_var)
         0x01,
     });
     
-    ASSERT_EQ(telnetpp::options::new_environ::var, type);
-    ASSERT_EQ(std::string("USER"), name);
-    ASSERT_EQ(std::string(""), value);
+    ASSERT_EQ(telnetpp::options::new_environ::var, response.type);
+    ASSERT_EQ(std::string("USER"), response.name);
+    ASSERT_EQ(std::string(""), response.value);
 }
 
 TEST(new_environ_server_test, receiving_uservar_and_empty_value_reports_empty_var)
@@ -330,20 +306,12 @@ TEST(new_environ_server_test, receiving_uservar_and_empty_value_reports_empty_va
     server.activate();
     server.negotiate(telnetpp::do_);
 
-    telnetpp::u8                 type;
-    std::string                  name;
-    boost::optional<std::string> value;
+    telnetpp::options::new_environ::response response;
     
     server.on_variable_changed.connect(
-        [&type, &name, &value](
-            auto const &var_type, 
-            auto const &var_name, 
-            auto const &var_value)
-            -> std::vector<telnetpp::token>
+        [&response](auto const &resp) -> std::vector<telnetpp::token>
         {
-            type = var_type;
-            name = var_name;
-            value = var_value;
+            response = resp;
             return {};
         });
         
@@ -353,9 +321,9 @@ TEST(new_environ_server_test, receiving_uservar_and_empty_value_reports_empty_va
         0x01,
     });
     
-    ASSERT_EQ(telnetpp::options::new_environ::uservar, type);
-    ASSERT_EQ(std::string("TEST"), name);
-    ASSERT_EQ(std::string(""), value);
+    ASSERT_EQ(telnetpp::options::new_environ::uservar, response.type);
+    ASSERT_EQ(std::string("TEST"), response.name);
+    ASSERT_EQ(std::string(""), response.value);
 }
 
 TEST(new_environ_server_test, receiving_var_and_value_reports_var_and_value)
@@ -364,20 +332,12 @@ TEST(new_environ_server_test, receiving_var_and_value_reports_var_and_value)
     server.activate();
     server.negotiate(telnetpp::do_);
 
-    telnetpp::u8                 type;
-    std::string                  name;
-    boost::optional<std::string> value;
+    telnetpp::options::new_environ::response response;
     
     server.on_variable_changed.connect(
-        [&type, &name, &value](
-            auto const &var_type, 
-            auto const &var_name, 
-            auto const &var_value)
-            -> std::vector<telnetpp::token>
+        [&response](auto const &resp) -> std::vector<telnetpp::token>
         {
-            type = var_type;
-            name = var_name;
-            value = var_value;
+            response = resp;
             return {};
         });
         
@@ -387,9 +347,9 @@ TEST(new_environ_server_test, receiving_var_and_value_reports_var_and_value)
         0x01, 'B', 'O', 'B'
     });
     
-    ASSERT_EQ(telnetpp::options::new_environ::var, type);
-    ASSERT_EQ(std::string("USER"), name);
-    ASSERT_EQ(std::string("BOB"), value);
+    ASSERT_EQ(telnetpp::options::new_environ::var, response.type);
+    ASSERT_EQ(std::string("USER"), response.name);
+    ASSERT_EQ(std::string("BOB"), response.value);
 }
 
 TEST(new_environ_server_test, receiving_uservar_and_value_reports_var_and_value)
@@ -398,20 +358,12 @@ TEST(new_environ_server_test, receiving_uservar_and_value_reports_var_and_value)
     server.activate();
     server.negotiate(telnetpp::do_);
 
-    telnetpp::u8                 type;
-    std::string                  name;
-    boost::optional<std::string> value;
+    telnetpp::options::new_environ::response response;
     
     server.on_variable_changed.connect(
-        [&type, &name, &value](
-            auto const &var_type, 
-            auto const &var_name, 
-            auto const &var_value)
-            -> std::vector<telnetpp::token>
+        [&response](auto const &resp) -> std::vector<telnetpp::token>
         {
-            type = var_type;
-            name = var_name;
-            value = var_value;
+            response = resp;
             return {};
         });
         
@@ -421,9 +373,9 @@ TEST(new_environ_server_test, receiving_uservar_and_value_reports_var_and_value)
         0x01, 'V', 'A', 'L', 'U', 'E'
     });
     
-    ASSERT_EQ(telnetpp::options::new_environ::uservar, type);
-    ASSERT_EQ(std::string("TEST"), name);
-    ASSERT_EQ(std::string("VALUE"), value);
+    ASSERT_EQ(telnetpp::options::new_environ::uservar, response.type);
+    ASSERT_EQ(std::string("TEST"), response.name);
+    ASSERT_EQ(std::string("VALUE"), response.value);
 }
 
 TEST(new_environ_server_test, receiving_multiple_variables_reports_multiple_variables)
@@ -432,20 +384,12 @@ TEST(new_environ_server_test, receiving_multiple_variables_reports_multiple_vari
     server.activate();
     server.negotiate(telnetpp::do_);
 
-    std::vector<std::tuple<
-        telnetpp::u8,
-        std::string,
-        boost::optional<std::string>
-    >> variables;
-
+    std::vector<telnetpp::options::new_environ::response> responses;
+    
     server.on_variable_changed.connect(
-        [&variables](
-            auto const &var_type, 
-            auto const &var_name, 
-            auto const &var_value)
-            -> std::vector<telnetpp::token>
+        [&responses](auto const &resp) -> std::vector<telnetpp::token>
         {
-            variables.push_back(std::tie(var_type, var_name, var_value));
+            responses.push_back(resp);
             return {};
         });
         
@@ -458,20 +402,20 @@ TEST(new_environ_server_test, receiving_multiple_variables_reports_multiple_vari
         0x01, 'V', 'A', 'L', 'U', 'E'
     });
     
-    ASSERT_EQ(std::size_t{3}, variables.size());
+    ASSERT_EQ(std::size_t{3}, responses.size());
     
-    ASSERT_EQ(telnetpp::options::new_environ::var, std::get<0>(variables[0]));
-    ASSERT_EQ(std::string("USER"), std::get<1>(variables[0]));
-    ASSERT_EQ(std::string("BOB"), *std::get<2>(variables[0]));
+    ASSERT_EQ(telnetpp::options::new_environ::var, responses[0].type);
+    ASSERT_EQ(std::string("USER"), responses[0].name);
+    ASSERT_EQ(std::string("BOB"), *responses[0].value);
     
-    ASSERT_EQ(telnetpp::options::new_environ::uservar, std::get<0>(variables[1]));
-    ASSERT_EQ(std::string("TEST0"), std::get<1>(variables[1]));
-    ASSERT_FALSE((std::get<2>(variables[1])).is_initialized());
+    ASSERT_EQ(telnetpp::options::new_environ::uservar, responses[1].type);
+    ASSERT_EQ(std::string("TEST0"), responses[1].name);
+    ASSERT_FALSE(responses[1].value.is_initialized());
     
     
-    ASSERT_EQ(telnetpp::options::new_environ::uservar, std::get<0>(variables[2]));
-    ASSERT_EQ(std::string("TEST1"), std::get<1>(variables[2]));
-    ASSERT_EQ(std::string("VALUE"), *std::get<2>(variables[2]));
+    ASSERT_EQ(telnetpp::options::new_environ::uservar, responses[2].type);
+    ASSERT_EQ(std::string("TEST1"), responses[2].name);
+    ASSERT_EQ(std::string("VALUE"), *responses[2].value);
 }
 
 TEST(new_environ_server_test, receiving_info_for_multiple_variables_reports_multiple_variables)
@@ -480,20 +424,12 @@ TEST(new_environ_server_test, receiving_info_for_multiple_variables_reports_mult
     server.activate();
     server.negotiate(telnetpp::do_);
 
-    std::vector<std::tuple<
-        telnetpp::u8,
-        std::string,
-        boost::optional<std::string>
-    >> variables;
-
+    std::vector<telnetpp::options::new_environ::response> responses;
+    
     server.on_variable_changed.connect(
-        [&variables](
-            auto const &var_type, 
-            auto const &var_name, 
-            auto const &var_value)
-            -> std::vector<telnetpp::token>
+        [&responses](auto const &resp) -> std::vector<telnetpp::token>
         {
-            variables.push_back(std::tie(var_type, var_name, var_value));
+            responses.push_back(resp);
             return {};
         });
         
@@ -506,18 +442,18 @@ TEST(new_environ_server_test, receiving_info_for_multiple_variables_reports_mult
         0x01, 'V', 'A', 'L', 'U', 'E'
     });
     
-    ASSERT_EQ(std::size_t{3}, variables.size());
+    ASSERT_EQ(std::size_t{3}, responses.size());
     
-    ASSERT_EQ(telnetpp::options::new_environ::var, std::get<0>(variables[0]));
-    ASSERT_EQ(std::string("USER"), std::get<1>(variables[0]));
-    ASSERT_EQ(std::string("BOB"), *std::get<2>(variables[0]));
+    ASSERT_EQ(telnetpp::options::new_environ::var, responses[0].type);
+    ASSERT_EQ(std::string("USER"), responses[0].name);
+    ASSERT_EQ(std::string("BOB"), *responses[0].value);
     
-    ASSERT_EQ(telnetpp::options::new_environ::uservar, std::get<0>(variables[1]));
-    ASSERT_EQ(std::string("TEST0"), std::get<1>(variables[1]));
-    ASSERT_FALSE((std::get<2>(variables[1])).is_initialized());
+    ASSERT_EQ(telnetpp::options::new_environ::uservar, responses[1].type);
+    ASSERT_EQ(std::string("TEST0"), responses[1].name);
+    ASSERT_FALSE(responses[1].value.is_initialized());
     
     
-    ASSERT_EQ(telnetpp::options::new_environ::uservar, std::get<0>(variables[2]));
-    ASSERT_EQ(std::string("TEST1"), std::get<1>(variables[2]));
-    ASSERT_EQ(std::string("VALUE"), *std::get<2>(variables[2]));
+    ASSERT_EQ(telnetpp::options::new_environ::uservar, responses[2].type);
+    ASSERT_EQ(std::string("TEST1"), responses[2].name);
+    ASSERT_EQ(std::string("VALUE"), *responses[2].value);
 }
