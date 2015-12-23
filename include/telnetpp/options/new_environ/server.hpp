@@ -34,7 +34,8 @@ public :
     ///        it being undefined.
     //* =====================================================================
     boost::signals2::signal<
-        std::vector<token> (response const &res)
+        std::vector<token> (response const &res),
+        telnetpp::token_combiner
     > on_variable_changed; 
 
 private :
