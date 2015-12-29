@@ -27,6 +27,7 @@ Telnet++ requires a C++14 compiler and the Boost Libraries.  It also uses Google
   * [x] Echo
   * [x] NAWS
   * [x] Terminal Type
+  * [x] New Environ
 4. [x] Structures to hide the complexity of the layer (e.g. routers, parsers, generators).
   * [x] Session class that understands all of the helper structures and how to convert to and from a stream of bytes.
 
