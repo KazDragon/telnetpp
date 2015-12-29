@@ -1,10 +1,112 @@
 #include "telnetpp/options/new_environ/client.hpp"
 #include "telnetpp/options/new_environ.hpp"
-#include <algorithm>
 
 namespace telnetpp { namespace options { namespace new_environ {
 
 namespace {
+
+// ==========================================================================
+// PARSE_REQUESTS
+// ==========================================================================
+std::vector<request> parse_requests(u8stream const &data)
+{
+    std::vector<request> requests;
+    request current_request;
+    
+    enum class state
+    {
+        send,
+        var_or_uservar,
+        name,
+        name_esc
+    };
+    
+    state current_state = state::send;
+    
+    for (auto &byte : data)
+    {
+        switch (current_state)
+        {
+            case state::send :
+                if (byte != send)
+                {
+                    return {};
+                }
+                
+                current_state = state::var_or_uservar;
+                break;
+                
+            case state::var_or_uservar :
+                if (byte == var || byte == uservar)
+                {
+                    current_request.type = byte;
+                    current_state = state::name;
+                }
+                else
+                {
+                    return {};
+                }
+                break;
+                
+            case state::name :
+                if (byte == var || byte == uservar)
+                {
+                    requests.push_back(current_request);
+                    current_request.name  = "";
+                    current_request.type  = byte;
+                }
+                else if (byte == esc)
+                {
+                    current_state = state::name_esc;
+                }
+                else
+                {
+                    current_request.name.push_back(byte);
+                }
+                break;
+                
+            case state::name_esc :
+                current_request.name.push_back(byte);
+                current_state = state::name;
+                break;
+                
+            default :
+                return {};
+        }
+    }
+    
+    if (!current_request.name.empty())
+    {
+        requests.push_back(current_request);
+    }
+    
+    return requests;
+}
+
+// ==========================================================================
+// VARIABLE_WAS_REQUESTED
+// ==========================================================================
+bool variable_was_requested(
+    std::vector<request>                      const &requests,
+    telnetpp::u8                                     variable_type,
+    std::pair<std::string const, std::string> const &variable)
+{
+    if (requests.empty())
+    {
+        return true;
+    }
+    
+    for (auto const &request : requests)
+    {
+        if (request.type == variable_type
+         && request.name == variable.first)
+        {
+            return true;
+        }
+    }
+    
+    return false;
+}
 
 // ==========================================================================
 // APPEND_STRING
@@ -13,7 +115,22 @@ u8stream &append_string(
     u8stream          &stream,
     std::string const &text)
 {
-    std::copy(text.begin(), text.end(), back_inserter(stream));
+    for (auto ch : text)
+    {
+        switch (ch)
+        {
+            case var     : // Fall-through
+            case value   : // Fall-through
+            case esc     : // Fall-through
+            case uservar : // Fall-through
+                stream.push_back(esc);
+                // Fall-through
+            default :
+                stream.push_back(ch);
+                break;
+        }
+    }
+
     return stream;
 }
 
@@ -35,9 +152,8 @@ u8stream &append_variable(
     
     return stream;    
 }
-
-}    
-
+   
+}   
 
 // ==========================================================================
 // CONSTRUCTOR
@@ -116,16 +232,24 @@ std::vector<telnetpp::token> client::delete_user_variable(
 std::vector<telnetpp::token> client::handle_subnegotiation(
     u8stream const &content)
 {
+    auto const &requests = parse_requests(content);
+    
     u8stream result = { is };
     
     for (auto &variable : variables_)
     {
-        append_variable(result, var, variable);
+        if (variable_was_requested(requests, var, variable))
+        {
+            append_variable(result, var, variable);
+        }
     }
 
     for (auto &variable : user_variables_)
     {
-        append_variable(result, uservar, variable);
+        if (variable_was_requested(requests, uservar, variable))
+        {
+            append_variable(result, uservar, variable);
+        }
     }
     
     return { telnetpp::element{
