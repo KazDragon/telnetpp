@@ -7,6 +7,17 @@ namespace telnetpp { namespace options { namespace new_environ {
 namespace {
 
 // ==========================================================================
+// APPEND_STRING
+// ==========================================================================
+u8stream &append_string(
+    u8stream          &stream,
+    std::string const &text)
+{
+    std::copy(text.begin(), text.end(), back_inserter(stream));
+    return stream;
+}
+
+// ==========================================================================
 // APPEND_VARIABLE
 // ==========================================================================
 u8stream &append_variable(
@@ -18,9 +29,9 @@ u8stream &append_variable(
     std::string const &val  = variable.second;
     
     stream.push_back(type);
-    std::copy(name.begin(), name.end(), back_inserter(stream));
+    append_string(stream, name);
     stream.push_back(value);
-    std::copy(val.begin(), val.end(), back_inserter(stream));
+    append_string(stream, val);
     
     return stream;    
 }
@@ -39,34 +50,64 @@ client::client()
 // ==========================================================================
 // SET_VARIABLE
 // ==========================================================================
-void client::set_variable(std::string const &name, std::string const &value)
+std::vector<telnetpp::token> client::set_variable(
+    std::string const &name, std::string const &value)
 {
     variables_[name] = value;
+
+    u8stream result = { info };
+    append_variable(result, var, {name, value});
+    
+    return { telnetpp::element{ 
+        telnetpp::subnegotiation(option(), result) 
+    }};
 }
 
 // ==========================================================================
 // DELETE_VARIABLE
 // ==========================================================================
-void client::delete_variable(std::string const &name)
+std::vector<telnetpp::token> client::delete_variable(std::string const &name)
 {
     variables_.erase(name);
+    
+    u8stream result = { info, var };
+    append_string(result, name);
+    
+    return { telnetpp::element{
+        telnetpp::subnegotiation(option(), result)
+    }};
 }
 
 // ==========================================================================
 // SET_USER_VARIABLE
 // ==========================================================================
-void client::set_user_variable(
+std::vector<telnetpp::token> client::set_user_variable(
     std::string const &name, std::string const &value)
 {
     user_variables_[name] = value;
+    
+    u8stream result = { info };
+    append_variable(result, uservar, {name, value});
+    
+    return { telnetpp::element{
+        telnetpp::subnegotiation(option(), result)
+    }};
 }
 
 // ==========================================================================
 // DELETE_USER_VARIABLE
 // ==========================================================================
-void client::delete_user_variable(std::string const &name)
+std::vector<telnetpp::token> client::delete_user_variable(
+    std::string const &name)
 {
     user_variables_.erase(name);
+    
+    u8stream result = { info, uservar };
+    append_string(result, name);
+    
+    return { telnetpp::element{
+        telnetpp::subnegotiation(option(), result)
+    }};
 }
 
 // ==========================================================================

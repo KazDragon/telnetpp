@@ -139,3 +139,77 @@ TEST(new_environ_client_test, receiving_request_with_no_content_and_multiple_cac
         },
         client.subnegotiate({0x01}));
 }
+
+TEST(new_environ_client_test, modifying_a_variable_with_active_client_returns_variable_modification)
+{
+    telnetpp::options::new_environ::client client;
+    client.set_variable("USER", "TEST");
+    client.activate();
+    client.negotiate(telnetpp::will);
+    
+    expect_elements(
+        {
+            telnetpp::subnegotiation(
+                telnetpp::options::new_environ::option,
+                { 0x02,
+                  0x00, 'U', 'S', 'E', 'R',
+                  0x01, 'F', 'R', 'E', 'D'
+                })
+        },
+        client.set_variable("USER", "FRED"));
+}
+
+TEST(new_environ_client_test, deleting_a_variable_with_active_client_returns_variable_deletion)
+{
+    telnetpp::options::new_environ::client client;
+    client.set_variable("USER", "TEST");
+    client.activate();
+    client.negotiate(telnetpp::will);
+    
+    expect_elements(
+        {
+            telnetpp::subnegotiation(
+                telnetpp::options::new_environ::option,
+                { 0x02,
+                  0x00, 'U', 'S', 'E', 'R'
+                })
+        },
+        client.delete_variable("USER"));
+}
+
+TEST(new_environ_client_test, modifying_a_user_variable_with_active_client_returns_variable_modification)
+{
+    telnetpp::options::new_environ::client client;
+    client.set_variable("TEST", "VALUE");
+    client.activate();
+    client.negotiate(telnetpp::will);
+    
+    expect_elements(
+        {
+            telnetpp::subnegotiation(
+                telnetpp::options::new_environ::option,
+                { 0x02,
+                  0x03, 'T', 'E', 'S', 'T',
+                  0x01, 'R', 'E', 'S', 'U', 'L', 'T'
+                })
+        },
+        client.set_user_variable("TEST", "RESULT"));
+}
+
+TEST(new_environ_client_test, deleting_a_user_variable_with_active_client_returns_variable_deletion)
+{
+    telnetpp::options::new_environ::client client;
+    client.set_variable("TEST", "VALUE");
+    client.activate();
+    client.negotiate(telnetpp::will);
+    
+    expect_elements(
+        {
+            telnetpp::subnegotiation(
+                telnetpp::options::new_environ::option,
+                { 0x02,
+                  0x03, 'T', 'E', 'S', 'T'
+                })
+        },
+        client.delete_user_variable("TEST"));
+}

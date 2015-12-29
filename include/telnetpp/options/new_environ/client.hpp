@@ -22,22 +22,24 @@ public :
     //* =====================================================================
     /// \brief Sets a "VAR" type variable in the environment.
     //* =====================================================================
-    void set_variable(std::string const &name, std::string const &value);
+    std::vector<telnetpp::token> set_variable(
+        std::string const &name, std::string const &value);
     
     //* =====================================================================
     /// \brief Deletes a "VAR" type variable from the environment.
     //* =====================================================================
-    void delete_variable(std::string const &name);
+    std::vector<telnetpp::token> delete_variable(std::string const &name);
 
     //* =====================================================================
     /// \brief Sets a "USERVAR" type variable in the environment.
     //* =====================================================================
-    void set_user_variable(std::string const &name, std::string const &value);
+    std::vector<telnetpp::token> set_user_variable(
+        std::string const &name, std::string const &value);
 
     //* =====================================================================
     /// \brief Deletes a "USERVAR" type variable from the environment.
     //* =====================================================================
-    void delete_user_variable(std::string const &name);
+    std::vector<telnetpp::token> delete_user_variable(std::string const &name);
 
 private :
     //* =====================================================================
