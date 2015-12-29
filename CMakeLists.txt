@@ -53,6 +53,9 @@ set (telnetpp_public_src
 )
 
 set (telnetpp_private_src
+    src/options/new_environ/detail/request_parser.cpp
+    src/options/new_environ/detail/response_parser.cpp
+    src/options/new_environ/detail/stream.cpp
     src/detail/generate_helper.cpp
     src/detail/parse_helper.cpp
     src/detail/registration.cpp
