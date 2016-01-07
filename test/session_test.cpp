@@ -16,12 +16,17 @@ struct stream_match : boost::static_visitor<>
     {
     }
     
-    void operator()(boost::any const &) const
+    void operator()(boost::any const &any) const
     {
+        boost::get<boost::any&>(expected_);
     }
     
-    void operator()(telnetpp::u8stream const &) const
+    void operator()(telnetpp::u8stream const &stream) const
     {
+        auto const &expected_stream = 
+            boost::get<telnetpp::u8stream>(expected_);
+
+        ASSERT_EQ(expected_stream, stream);
     }
     
     boost::variant<telnetpp::u8stream, boost::any> expected_;
