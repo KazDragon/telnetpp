@@ -79,18 +79,20 @@ std::vector<token> session::receive(const u8stream& stream)
     auto it1 = begin(unparsed_buffer_);
     auto it2 = end(unparsed_buffer_);
     
-    auto parse_results = telnetpp::detail::parse(it1, it2);
+    auto const &parse_results = telnetpp::detail::parse(it1, it2);
 
     unparsed_buffer_.erase(begin(unparsed_buffer_), it1);
 
-    std::vector<token> results;
-    
-    for (auto &&parse_result : parse_results)
-    {
-        auto result = boost::apply_visitor(visitor_, parse_result);
-        
-        results.insert(end(results), begin(result), end(result));
-    }
+    auto const &results = std::accumulate(
+        parse_results.begin(),
+        parse_results.end(),
+        std::vector<token>{},
+        [this](auto &results, auto const &parse_result)
+        {
+            auto const &result = boost::apply_visitor(visitor_, parse_result);
+            results.insert(end(results), begin(result), end(result));
+            return results;
+        });
     
     return results;
 }
@@ -101,9 +103,6 @@ std::vector<token> session::receive(const u8stream& stream)
 std::vector<boost::variant<u8stream, boost::any>> session::send(
     std::vector<token> const &tokens)
 {
-    using std::begin;
-    using std::end;
-    
     return detail::generate(tokens);
 }
 
