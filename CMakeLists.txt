@@ -40,6 +40,7 @@ set (telnetpp_public_src
     src/negotiation.cpp
     src/options/echo/client.cpp
     src/options/echo/server.cpp
+    src/options/msdp/server.cpp
     src/options/naws/client.cpp
     src/options/naws/server.cpp
     src/options/new_environ/client.cpp
@@ -53,6 +54,7 @@ set (telnetpp_public_src
 )
 
 set (telnetpp_private_src
+    src/options/msdp/detail/encoder.cpp
     src/options/new_environ/detail/request_parser.cpp
     src/options/new_environ/detail/response_parser.cpp
     src/options/new_environ/detail/stream.cpp
@@ -115,6 +117,7 @@ if (GTEST_FOUND)
         test/command_router_test.cpp
         test/echo_client_test.cpp
         test/echo_server_test.cpp
+        test/msdp_server_test.cpp
         test/naws_client_test.cpp
         test/naws_server_test.cpp
         test/new_environ_client_test.cpp
