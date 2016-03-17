@@ -38,6 +38,7 @@ set (telnetpp_public_src
     src/client_option.cpp
     src/command.cpp
     src/negotiation.cpp
+    src/options/msdp.cpp
     src/options/echo/client.cpp
     src/options/echo/server.cpp
     src/options/msdp/server.cpp
