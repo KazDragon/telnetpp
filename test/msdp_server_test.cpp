@@ -38,7 +38,7 @@ TEST(msdp_server_test, send_with_array_sends_array_variable)
     
     auto variable = telnetpp::options::msdp::variable{
         "var",
-        telnetpp::options::msdp::make_value({ "val0", "val1" })
+        { "val0", "val1" }
     };
     
     expect_elements(
@@ -65,10 +65,10 @@ TEST(msdp_server_test, send_with_table_sends_table_variable)
     
     auto variable = telnetpp::options::msdp::variable{
         "var",
-        telnetpp::options::msdp::make_value({{
+        {{
             "tbl", 
-            telnetpp::options::msdp::make_value({ "val0", "val1" })
-        }})
+            { "val0", "val1" }
+        }}
     };
     
     expect_elements(
@@ -98,15 +98,15 @@ TEST(msdp_server_test, send_with_many_items_sends_many_items)
     auto variable0 = telnetpp::options::msdp::variable{"svar", "sval"};
 
     auto variable1 = telnetpp::options::msdp::variable{
-        "avar", telnetpp::options::msdp::make_value({ "aval0", "aval1" })
+        "avar", { "aval0", "aval1" }
     };
 
     auto variable2 = telnetpp::options::msdp::variable{
         "var",
-        telnetpp::options::msdp::make_value({{
+        {{
             "tbl", 
-            telnetpp::options::msdp::make_value({ "val0", "val1" })
-        }})
+            { "val0", "val1" }
+        }}
     };
  
     expect_elements(

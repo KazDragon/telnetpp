@@ -1,20 +1,27 @@
 #include "telnetpp/options/msdp.hpp"
 
 namespace telnetpp { namespace options { namespace msdp {
+
+variable::variable(std::string const &name, value_type const &value)
+  : name(name),
+    value(value)
+{
+}
+
+variable::variable(
+    std::string const &name,
+    std::initializer_list<std::string> const &il)
+  : name(name),
+    value(il)
+{
+}
+
+variable::variable(
+    std::string const &name,
+    std::initializer_list<variable> const &il)
+  : name(name),
+    value(il)
+{
+}
     
-value_type make_value(std::string const &value)
-{
-    return value;
-}
-
-value_type make_value(std::initializer_list<std::string> const &il)
-{
-    return std::vector<std::string>(il);
-}
-
-value_type make_value(std::initializer_list<variable> const &il)
-{
-    return value_type(std::vector<variable>(il));
-}
-
 }}}

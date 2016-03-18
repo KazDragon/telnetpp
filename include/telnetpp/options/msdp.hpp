@@ -26,20 +26,23 @@ using value_type = boost::variant<
     boost::recursive_wrapper<std::vector<variable>>
 >;
 
-struct variable 
+struct TELNETPP_EXPORT variable 
 {
+    variable(
+        std::string const &name,
+        value_type const &value);
+        
+    variable(
+        std::string const &name, 
+        std::initializer_list<std::string> const &array_values);
+        
+    variable(
+        std::string const &name,
+        std::initializer_list<variable> const &table_values);
+
     std::string name;
     value_type  value;
 };
-
-TELNETPP_EXPORT
-value_type make_value(std::string const &var);
-
-TELNETPP_EXPORT
-value_type make_value(std::initializer_list<std::string> const &array);
-
-TELNETPP_EXPORT
-value_type make_value(std::initializer_list<variable> const &table);
 
 }}}
 
