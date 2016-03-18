@@ -11,8 +11,12 @@ class TELNETPP_EXPORT server : public telnetpp::server_option
 public :
     server();
     
-    std::vector<telnetpp::token> send(
-        std::vector<telnetpp::options::msdp::variable> const &variables);
+    std::vector<telnetpp::token> send(std::vector<variable> const &variables);
+        
+    boost::signals2::signal<
+        std::vector<telnetpp::token> (std::vector<variable> const &),
+        telnetpp::token_combiner
+    > on_receive;
 };
 
 }}}

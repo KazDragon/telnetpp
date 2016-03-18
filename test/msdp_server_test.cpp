@@ -131,5 +131,24 @@ TEST(msdp_server_test, send_with_many_items_sends_many_items)
             }
         },
         server.send({ variable0, variable1, variable2 }));
-   
+}
+
+TEST(msdp_server_test, receiving_no_variables_does_nothing)
+{
+    telnetpp::options::msdp::server server;
+    
+    bool called = false;
+    server.on_receive.connect(
+        [&called](auto const &) -> std::vector<telnetpp::token>
+        {
+            called = true;
+            return {};
+        });
+            
+    server.activate();
+    server.negotiate(telnetpp::do_);
+
+    server.subnegotiate({});    
+    
+    ASSERT_FALSE(called);
 }
