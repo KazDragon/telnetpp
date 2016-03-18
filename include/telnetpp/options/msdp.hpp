@@ -18,7 +18,13 @@ static constexpr telnetpp::u8 table_close = 4;
 static constexpr telnetpp::u8 array_open  = 5;
 static constexpr telnetpp::u8 array_close = 6;
 
-using value_type = boost::variant<std::string, std::vector<std::string>>;
+struct variable;
+
+using value_type = boost::variant<
+    std::string, 
+    std::vector<std::string>,
+    boost::recursive_wrapper<std::vector<variable>>
+>;
 
 struct variable 
 {
@@ -27,7 +33,13 @@ struct variable
 };
 
 TELNETPP_EXPORT
-value_type make_value(std::initializer_list<std::string> const &il);
+value_type make_value(std::string const &var);
+
+TELNETPP_EXPORT
+value_type make_value(std::initializer_list<std::string> const &array);
+
+TELNETPP_EXPORT
+value_type make_value(std::initializer_list<variable> const &table);
 
 }}}
 
