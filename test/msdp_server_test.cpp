@@ -208,3 +208,128 @@ TEST(msdp_server_test, receiving_two_variables_reports_an_array_of_two_variable)
     ASSERT_EQ(expected0, variables[0]);
     ASSERT_EQ(expected1, variables[1]);
 }
+
+TEST(msdp_server_test, receiving_empty_array_variable_reports_empty_array)
+{
+    telnetpp::options::msdp::server server;
+
+    std::vector<telnetpp::options::msdp::variable> variables;
+    server.on_receive.connect(
+        [&variables](auto const &vars) -> std::vector<telnetpp::token>
+        {
+            variables = vars;
+            return {};
+        });
+
+    server.activate();
+    server.negotiate(telnetpp::do_);
+
+    server.subnegotiate({
+        1, 'a', 'r', 'r',
+        2, 5,
+           6,
+    });
+
+    telnetpp::options::msdp::variable expected{
+        "arr",
+        std::vector<std::string>{}};
+
+    ASSERT_EQ(size_t{1}, variables.size());
+    ASSERT_EQ(expected, variables[0]);
+}
+
+TEST(msdp_server_test, receiving_array_variable_with_one_element_reports_array)
+{
+    telnetpp::options::msdp::server server;
+
+    std::vector<telnetpp::options::msdp::variable> variables;
+    server.on_receive.connect(
+        [&variables](auto const &vars) -> std::vector<telnetpp::token>
+        {
+            variables = vars;
+            return {};
+        });
+
+    server.activate();
+    server.negotiate(telnetpp::do_);
+
+    server.subnegotiate({
+        1, 'a', 'r', 'r',
+        2, 5,
+              2, 'v', 'a', 'l',
+           6,
+    });
+
+    telnetpp::options::msdp::variable expected{
+        "arr",
+        std::vector<std::string>{"val"}};
+
+    ASSERT_EQ(size_t{1}, variables.size());
+    ASSERT_EQ(expected, variables[0]);
+}
+
+TEST(msdp_server_test, receiving_array_variable_with_two_elements_reports_array)
+{
+    telnetpp::options::msdp::server server;
+
+    std::vector<telnetpp::options::msdp::variable> variables;
+    server.on_receive.connect(
+        [&variables](auto const &vars) -> std::vector<telnetpp::token>
+        {
+            variables = vars;
+            return {};
+        });
+
+    server.activate();
+    server.negotiate(telnetpp::do_);
+
+    server.subnegotiate({
+        1, 'a', 'r', 'r',
+        2, 5,
+              2, 'v', 'a', 'l', '0',
+              2, 'v', 'a', 'l', '1',
+           6,
+    });
+
+    telnetpp::options::msdp::variable expected{
+        "arr",
+        std::vector<std::string>{"val0", "val1"}};
+
+    ASSERT_EQ(size_t{1}, variables.size());
+    ASSERT_EQ(expected, variables[0]);
+}
+
+TEST(msdp_server_test, receiving_array_variable_then_string_reports_array_and_string)
+{
+    telnetpp::options::msdp::server server;
+
+    std::vector<telnetpp::options::msdp::variable> variables;
+    server.on_receive.connect(
+        [&variables](auto const &vars) -> std::vector<telnetpp::token>
+        {
+            variables = vars;
+            return {};
+        });
+
+    server.activate();
+    server.negotiate(telnetpp::do_);
+
+    server.subnegotiate({
+        1, 'a', 'r', 'r',
+        2, 5,
+              2, 'v', 'a', 'l', '0',
+              2, 'v', 'a', 'l', '1',
+           6,
+        1, 'v', 'a', 'r',
+        2, 'v', 'a', 'l',
+    });
+
+    telnetpp::options::msdp::variable expected0{
+        "arr",
+        std::vector<std::string>{"val0", "val1"}};
+    telnetpp::options::msdp::variable expected1{"var", "val"};
+
+    ASSERT_EQ(size_t{2}, variables.size());
+    ASSERT_EQ(expected0, variables[0]);
+    ASSERT_EQ(expected1, variables[1]);
+}

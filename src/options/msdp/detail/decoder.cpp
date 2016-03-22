@@ -25,6 +25,10 @@ public :
                 parse_value(byte);
                 break;
 
+            case state::array:
+                parse_array(byte);
+                break;
+
             default:
                 assert(!"invalid state");
                 break;
@@ -65,14 +69,41 @@ private :
     {
         assert(!result_.empty());
 
-        if (byte == telnetpp::options::msdp::var)
+        switch(byte)
         {
-            result_.push_back({});
-            state_ = state::name;
+            case telnetpp::options::msdp::var :
+                result_.push_back({});
+                state_ = state::name;
+                break;
+
+            case telnetpp::options::msdp::array_open :
+                result_.back().value = std::vector<std::string>{};
+                state_ = state::array;
+                break;
+
+            default :
+                boost::get<std::string>(result_.back().value) += char(byte);
+                break;
         }
-        else
+    }
+
+    void parse_array(u8 byte)
+    {
+        switch(byte)
         {
-            boost::get<std::string>(result_.back().value) += char(byte);
+            case telnetpp::options::msdp::array_close :
+                state_ = state::idle;
+                break;
+
+            case telnetpp::options::msdp::val :
+                boost::get<std::vector<std::string>>(result_.back().value)
+                    .push_back({});
+                break;
+
+            default :
+                boost::get<std::vector<std::string>>(result_.back().value)
+                    .back() += char(byte);
+                break;
         }
     }
 
@@ -80,7 +111,8 @@ private :
     {
         idle,
         name,
-        value
+        value,
+        array,
     };
 
     std::vector<telnetpp::options::msdp::variable> result_;
