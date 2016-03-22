@@ -129,11 +129,7 @@ std::vector<telnetpp::options::msdp::variable> decode(
 
     parser parse;
 
-    std::for_each(begin(stream), end(stream),
-        [&parse](auto const &byte)
-        {
-            parse(byte);
-        });
+    std::for_each(begin(stream), end(stream), std::ref(parse));
 
     return parse.result();
 }
