@@ -65,7 +65,15 @@ private :
     {
         assert(!result_.empty());
 
-        boost::get<std::string>(result_.back().value) += char(byte);
+        if (byte == telnetpp::options::msdp::var)
+        {
+            result_.push_back({});
+            state_ = state::name;
+        }
+        else
+        {
+            boost::get<std::string>(result_.back().value) += char(byte);
+        }
     }
 
     enum class state
