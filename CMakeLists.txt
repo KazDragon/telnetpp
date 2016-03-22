@@ -8,7 +8,7 @@ endif()
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${PROJECT_SOURCE_DIR}/cmake/Modules")
 
-# Boost is required as we used Boost.Variant, Boost.Optional, and 
+# Boost is required as we used Boost.Variant, Boost.Optional, and
 # Boost.Signals2.  All of these are header-only libraries, so no subcomponents
 # are required.
 include(FindBoost)
@@ -30,7 +30,7 @@ include(GenerateExportHeader)
 #  cd ..
 find_package(GTest)
 
-# For GTest, it is necessary to link with the appropriate local threading 
+# For GTest, it is necessary to link with the appropriate local threading
 # library.
 find_package(Threads)
 
@@ -55,6 +55,7 @@ set (telnetpp_public_src
 )
 
 set (telnetpp_private_src
+    src/options/msdp/detail/decoder.cpp
     src/options/msdp/detail/encoder.cpp
     src/options/new_environ/detail/request_parser.cpp
     src/options/new_environ/detail/response_parser.cpp
@@ -78,9 +79,9 @@ set_target_properties(telnetpp
 )
 
 target_include_directories(telnetpp
-    PUBLIC 
+    PUBLIC
         "${PROJECT_SOURCE_DIR}/include"
-        "${Boost_INCLUDE_DIRS}"   
+        "${Boost_INCLUDE_DIRS}"
 )
 
 target_compile_features(telnetpp
@@ -154,7 +155,7 @@ if (GTEST_FOUND)
         )
     endif()
 
-    add_executable(telnetpp_tester 
+    add_executable(telnetpp_tester
         ${telnetpp_tester_tests}
         test/expect_elements.cpp
     )
@@ -167,8 +168,8 @@ if (GTEST_FOUND)
             cxx_uniform_initialization
     )
 
-    target_link_libraries(telnetpp_tester 
-        telnetpp 
+    target_link_libraries(telnetpp_tester
+        telnetpp
         ${GTEST_LIBRARY}
         ${GTEST_MAIN_LIBRARY}
         ${CMAKE_THREAD_LIBS_INIT}

@@ -8,7 +8,7 @@
 #include <vector>
 
 namespace telnetpp { namespace options { namespace msdp {
-   
+
 static constexpr telnetpp::u8 option = 69;
 
 static constexpr telnetpp::u8 var         = 1;
@@ -21,21 +21,23 @@ static constexpr telnetpp::u8 array_close = 6;
 struct variable;
 
 using value_type = boost::variant<
-    std::string, 
+    std::string,
     std::vector<std::string>,
     boost::recursive_wrapper<std::vector<variable>>
 >;
 
-struct TELNETPP_EXPORT variable 
+struct TELNETPP_EXPORT variable
 {
+    variable();
+    
     variable(
         std::string const &name,
         value_type const &value);
-        
+
     variable(
-        std::string const &name, 
+        std::string const &name,
         std::initializer_list<std::string> const &array_values);
-        
+
     variable(
         std::string const &name,
         std::initializer_list<variable> const &table_values);
@@ -43,6 +45,12 @@ struct TELNETPP_EXPORT variable
     std::string name;
     value_type  value;
 };
+
+TELNETPP_EXPORT
+bool operator==(variable const &lhs, variable const &rhs);
+
+TELNETPP_EXPORT
+bool operator!=(variable const &lhs, variable const &rhs);
 
 }}}
 

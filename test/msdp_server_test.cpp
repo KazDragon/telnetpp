@@ -136,7 +136,7 @@ TEST(msdp_server_test, send_with_many_items_sends_many_items)
 TEST(msdp_server_test, receiving_no_variables_does_nothing)
 {
     telnetpp::options::msdp::server server;
-    
+
     bool called = false;
     server.on_receive.connect(
         [&called](auto const &) -> std::vector<telnetpp::token>
@@ -151,4 +151,30 @@ TEST(msdp_server_test, receiving_no_variables_does_nothing)
     server.subnegotiate({});    
     
     ASSERT_FALSE(called);
+}
+
+TEST(msdp_server_test, receiving_a_variable_reports_an_array_of_one_variable)
+{
+    telnetpp::options::msdp::server server;
+    
+    std::vector<telnetpp::options::msdp::variable> variables;
+    server.on_receive.connect(
+        [&variables](auto const &vars) -> std::vector<telnetpp::token>
+        {
+            variables = vars;
+            return {};
+        });
+        
+    server.activate();
+    server.negotiate(telnetpp::do_);
+
+    server.subnegotiate({
+        1, 'v', 'a', 'r',
+        2, 'v', 'a', 'l'
+    });
+    
+    telnetpp::options::msdp::variable expected{"var", "val"};
+    
+    ASSERT_EQ(size_t{1}, variables.size());
+    ASSERT_EQ(expected, variables[0]);
 }
