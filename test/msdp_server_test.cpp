@@ -3,11 +3,32 @@
 #include "expect_elements.hpp"
 #include <gtest/gtest.h>
 
+namespace {
+
+static void activate_msdp_server(telnetpp::options::msdp::server &server)
+{
+    server.activate();
+    server.negotiate(telnetpp::do_);
+}
+
+static void register_msdp_server_variable_reception(
+    telnetpp::options::msdp::server &server,
+    std::vector<telnetpp::options::msdp::variable> &variables)
+{
+    server.on_receive.connect(
+        [&variables](auto const &vars) -> std::vector<telnetpp::token>
+        {
+            variables = vars;
+            return {};
+        });
+}
+
+}
+
 TEST(msdp_server_test, send_with_empty_list_sends_nothing)
 {
     telnetpp::options::msdp::server server;
-    server.activate();
-    server.negotiate(telnetpp::do_);
+    activate_msdp_server(server);
 
     expect_elements(
         {},
@@ -17,8 +38,7 @@ TEST(msdp_server_test, send_with_empty_list_sends_nothing)
 TEST(msdp_server_test, send_with_variable_sends_simple_variable)
 {
     telnetpp::options::msdp::server server;
-    server.activate();
-    server.negotiate(telnetpp::do_);
+    activate_msdp_server(server);
 
     expect_elements(
         {
@@ -33,8 +53,7 @@ TEST(msdp_server_test, send_with_variable_sends_simple_variable)
 TEST(msdp_server_test, send_with_array_sends_array_variable)
 {
     telnetpp::options::msdp::server server;
-    server.activate();
-    server.negotiate(telnetpp::do_);
+    activate_msdp_server(server);
 
     auto variable = telnetpp::options::msdp::variable{
         "var",
@@ -60,8 +79,7 @@ TEST(msdp_server_test, send_with_array_sends_array_variable)
 TEST(msdp_server_test, send_with_table_sends_table_variable)
 {
     telnetpp::options::msdp::server server;
-    server.activate();
-    server.negotiate(telnetpp::do_);
+    activate_msdp_server(server);
 
     auto variable = telnetpp::options::msdp::variable{
         "var",
@@ -92,8 +110,7 @@ TEST(msdp_server_test, send_with_table_sends_table_variable)
 TEST(msdp_server_test, send_with_many_items_sends_many_items)
 {
     telnetpp::options::msdp::server server;
-    server.activate();
-    server.negotiate(telnetpp::do_);
+    activate_msdp_server(server);
 
     auto variable0 = telnetpp::options::msdp::variable{"svar", "sval"};
 
@@ -145,8 +162,7 @@ TEST(msdp_server_test, receiving_no_variables_does_nothing)
             return {};
         });
 
-    server.activate();
-    server.negotiate(telnetpp::do_);
+    activate_msdp_server(server);
 
     server.subnegotiate({});
 
@@ -156,17 +172,10 @@ TEST(msdp_server_test, receiving_no_variables_does_nothing)
 TEST(msdp_server_test, receiving_a_variable_reports_an_array_of_one_variable)
 {
     telnetpp::options::msdp::server server;
-
     std::vector<telnetpp::options::msdp::variable> variables;
-    server.on_receive.connect(
-        [&variables](auto const &vars) -> std::vector<telnetpp::token>
-        {
-            variables = vars;
-            return {};
-        });
 
-    server.activate();
-    server.negotiate(telnetpp::do_);
+    register_msdp_server_variable_reception(server, variables);
+    activate_msdp_server(server);
 
     server.subnegotiate({
         1, 'v', 'a', 'r',
@@ -182,17 +191,10 @@ TEST(msdp_server_test, receiving_a_variable_reports_an_array_of_one_variable)
 TEST(msdp_server_test, receiving_two_variables_reports_an_array_of_two_variable)
 {
     telnetpp::options::msdp::server server;
-
     std::vector<telnetpp::options::msdp::variable> variables;
-    server.on_receive.connect(
-        [&variables](auto const &vars) -> std::vector<telnetpp::token>
-        {
-            variables = vars;
-            return {};
-        });
 
-    server.activate();
-    server.negotiate(telnetpp::do_);
+    register_msdp_server_variable_reception(server, variables);
+    activate_msdp_server(server);
 
     server.subnegotiate({
         1, 'v', 'a', 'r', '0',
@@ -212,17 +214,10 @@ TEST(msdp_server_test, receiving_two_variables_reports_an_array_of_two_variable)
 TEST(msdp_server_test, receiving_empty_array_variable_reports_empty_array)
 {
     telnetpp::options::msdp::server server;
-
     std::vector<telnetpp::options::msdp::variable> variables;
-    server.on_receive.connect(
-        [&variables](auto const &vars) -> std::vector<telnetpp::token>
-        {
-            variables = vars;
-            return {};
-        });
 
-    server.activate();
-    server.negotiate(telnetpp::do_);
+    register_msdp_server_variable_reception(server, variables);
+    activate_msdp_server(server);
 
     server.subnegotiate({
         1, 'a', 'r', 'r',
@@ -241,17 +236,10 @@ TEST(msdp_server_test, receiving_empty_array_variable_reports_empty_array)
 TEST(msdp_server_test, receiving_array_variable_with_one_element_reports_array)
 {
     telnetpp::options::msdp::server server;
-
     std::vector<telnetpp::options::msdp::variable> variables;
-    server.on_receive.connect(
-        [&variables](auto const &vars) -> std::vector<telnetpp::token>
-        {
-            variables = vars;
-            return {};
-        });
 
-    server.activate();
-    server.negotiate(telnetpp::do_);
+    register_msdp_server_variable_reception(server, variables);
+    activate_msdp_server(server);
 
     server.subnegotiate({
         1, 'a', 'r', 'r',
@@ -271,17 +259,10 @@ TEST(msdp_server_test, receiving_array_variable_with_one_element_reports_array)
 TEST(msdp_server_test, receiving_array_variable_with_two_elements_reports_array)
 {
     telnetpp::options::msdp::server server;
-
     std::vector<telnetpp::options::msdp::variable> variables;
-    server.on_receive.connect(
-        [&variables](auto const &vars) -> std::vector<telnetpp::token>
-        {
-            variables = vars;
-            return {};
-        });
 
-    server.activate();
-    server.negotiate(telnetpp::do_);
+    register_msdp_server_variable_reception(server, variables);
+    activate_msdp_server(server);
 
     server.subnegotiate({
         1, 'a', 'r', 'r',
@@ -302,17 +283,10 @@ TEST(msdp_server_test, receiving_array_variable_with_two_elements_reports_array)
 TEST(msdp_server_test, receiving_array_variable_then_string_reports_array_and_string)
 {
     telnetpp::options::msdp::server server;
-
     std::vector<telnetpp::options::msdp::variable> variables;
-    server.on_receive.connect(
-        [&variables](auto const &vars) -> std::vector<telnetpp::token>
-        {
-            variables = vars;
-            return {};
-        });
 
-    server.activate();
-    server.negotiate(telnetpp::do_);
+    register_msdp_server_variable_reception(server, variables);
+    activate_msdp_server(server);
 
     server.subnegotiate({
         1, 'a', 'r', 'r',
@@ -337,17 +311,10 @@ TEST(msdp_server_test, receiving_array_variable_then_string_reports_array_and_st
 TEST(msdp_server_test, receiving_empty_table_reports_empty_table)
 {
     telnetpp::options::msdp::server server;
-
     std::vector<telnetpp::options::msdp::variable> variables;
-    server.on_receive.connect(
-        [&variables](auto const &vars) -> std::vector<telnetpp::token>
-        {
-            variables = vars;
-            return {};
-        });
 
-    server.activate();
-    server.negotiate(telnetpp::do_);
+    register_msdp_server_variable_reception(server, variables);
+    activate_msdp_server(server);
 
     server.subnegotiate({
         1, 't', 'b', 'l',
@@ -365,17 +332,10 @@ TEST(msdp_server_test, receiving_empty_table_reports_empty_table)
 TEST(msdp_server_test, receiving_table_with_one_value_returns_table_with_value)
 {
     telnetpp::options::msdp::server server;
-
     std::vector<telnetpp::options::msdp::variable> variables;
-    server.on_receive.connect(
-        [&variables](auto const &vars) -> std::vector<telnetpp::token>
-        {
-            variables = vars;
-            return {};
-        });
 
-    server.activate();
-    server.negotiate(telnetpp::do_);
+    register_msdp_server_variable_reception(server, variables);
+    activate_msdp_server(server);
 
     server.subnegotiate({
         1, 't', 'b', 'l',
@@ -398,17 +358,10 @@ TEST(msdp_server_test, receiving_table_with_one_value_returns_table_with_value)
 TEST(msdp_server_test, receiving_table_with_one_array_value_returns_table_with_value)
 {
     telnetpp::options::msdp::server server;
-
     std::vector<telnetpp::options::msdp::variable> variables;
-    server.on_receive.connect(
-        [&variables](auto const &vars) -> std::vector<telnetpp::token>
-        {
-            variables = vars;
-            return {};
-        });
 
-    server.activate();
-    server.negotiate(telnetpp::do_);
+    register_msdp_server_variable_reception(server, variables);
+    activate_msdp_server(server);
 
     server.subnegotiate({
         1, 't', 'b', 'l',
@@ -433,17 +386,10 @@ TEST(msdp_server_test, receiving_table_with_one_array_value_returns_table_with_v
 TEST(msdp_server_test, receiving_table_with_one_table_value_returns_table_with_value)
 {
     telnetpp::options::msdp::server server;
-
     std::vector<telnetpp::options::msdp::variable> variables;
-    server.on_receive.connect(
-        [&variables](auto const &vars) -> std::vector<telnetpp::token>
-        {
-            variables = vars;
-            return {};
-        });
 
-    server.activate();
-    server.negotiate(telnetpp::do_);
+    register_msdp_server_variable_reception(server, variables);
+    activate_msdp_server(server);
 
     server.subnegotiate({
         1, 't', 'b', 'l',
@@ -473,17 +419,10 @@ TEST(msdp_server_test, receiving_table_with_one_table_value_returns_table_with_v
 TEST(msdp_server_test, receiving_table_with_many_values_returns_table_with_values)
 {
     telnetpp::options::msdp::server server;
-
     std::vector<telnetpp::options::msdp::variable> variables;
-    server.on_receive.connect(
-        [&variables](auto const &vars) -> std::vector<telnetpp::token>
-        {
-            variables = vars;
-            return {};
-        });
 
-    server.activate();
-    server.negotiate(telnetpp::do_);
+    register_msdp_server_variable_reception(server, variables);
+    activate_msdp_server(server);
 
     /*
      { "tbl" : {
@@ -531,17 +470,10 @@ TEST(msdp_server_test, receiving_table_with_many_values_returns_table_with_value
 TEST(msdp_server_test, receiving_many_table_values_returns_many_tables)
 {
     telnetpp::options::msdp::server server;
-
     std::vector<telnetpp::options::msdp::variable> variables;
-    server.on_receive.connect(
-        [&variables](auto const &vars) -> std::vector<telnetpp::token>
-        {
-            variables = vars;
-            return {};
-        });
 
-    server.activate();
-    server.negotiate(telnetpp::do_);
+    register_msdp_server_variable_reception(server, variables);
+    activate_msdp_server(server);
 
     server.subnegotiate({
         1, 't', 'b', 'l', '0',
