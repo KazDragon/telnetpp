@@ -333,3 +333,241 @@ TEST(msdp_server_test, receiving_array_variable_then_string_reports_array_and_st
     ASSERT_EQ(expected0, variables[0]);
     ASSERT_EQ(expected1, variables[1]);
 }
+
+TEST(msdp_server_test, receiving_empty_table_reports_empty_table)
+{
+    telnetpp::options::msdp::server server;
+
+    std::vector<telnetpp::options::msdp::variable> variables;
+    server.on_receive.connect(
+        [&variables](auto const &vars) -> std::vector<telnetpp::token>
+        {
+            variables = vars;
+            return {};
+        });
+
+    server.activate();
+    server.negotiate(telnetpp::do_);
+
+    server.subnegotiate({
+        1, 't', 'b', 'l',
+        2, 3, 4
+    });
+
+    telnetpp::options::msdp::variable expected(
+        "tbl",
+        std::vector<telnetpp::options::msdp::variable>{});
+
+    ASSERT_EQ(size_t{1}, variables.size());
+    ASSERT_EQ(expected, variables[0]);
+}
+
+TEST(msdp_server_test, receiving_table_with_one_value_returns_table_with_value)
+{
+    telnetpp::options::msdp::server server;
+
+    std::vector<telnetpp::options::msdp::variable> variables;
+    server.on_receive.connect(
+        [&variables](auto const &vars) -> std::vector<telnetpp::token>
+        {
+            variables = vars;
+            return {};
+        });
+
+    server.activate();
+    server.negotiate(telnetpp::do_);
+
+    server.subnegotiate({
+        1, 't', 'b', 'l',
+        2, 3,
+               1, 'v', 'a', 'r',
+               2, 'v', 'a', 'l',
+           4
+    });
+
+    telnetpp::options::msdp::variable expected(
+        "tbl",
+        std::vector<telnetpp::options::msdp::variable>{
+            { "var", "val" }
+        });
+
+    ASSERT_EQ(size_t{1}, variables.size());
+    ASSERT_EQ(expected, variables[0]);
+}
+
+TEST(msdp_server_test, receiving_table_with_one_array_value_returns_table_with_value)
+{
+    telnetpp::options::msdp::server server;
+
+    std::vector<telnetpp::options::msdp::variable> variables;
+    server.on_receive.connect(
+        [&variables](auto const &vars) -> std::vector<telnetpp::token>
+        {
+            variables = vars;
+            return {};
+        });
+
+    server.activate();
+    server.negotiate(telnetpp::do_);
+
+    server.subnegotiate({
+        1, 't', 'b', 'l',
+        2, 3,
+               1, 'v', 'a', 'r',
+               2, 5, 2, 'v', 'a', 'l', '0',
+                     2, 'v', 'a', 'l', '1',
+                  6,
+           4
+    });
+
+    telnetpp::options::msdp::variable expected(
+        "tbl",
+        std::vector<telnetpp::options::msdp::variable>{
+            { "var", std::vector<std::string>{ "val0", "val1" } }
+        });
+
+    ASSERT_EQ(size_t{1}, variables.size());
+    ASSERT_EQ(expected, variables[0]);
+}
+
+TEST(msdp_server_test, receiving_table_with_one_table_value_returns_table_with_value)
+{
+    telnetpp::options::msdp::server server;
+
+    std::vector<telnetpp::options::msdp::variable> variables;
+    server.on_receive.connect(
+        [&variables](auto const &vars) -> std::vector<telnetpp::token>
+        {
+            variables = vars;
+            return {};
+        });
+
+    server.activate();
+    server.negotiate(telnetpp::do_);
+
+    server.subnegotiate({
+        1, 't', 'b', 'l',
+        2, 3,
+               1, 'v', 'a', 'r',
+               2, 3,
+                     1, 'i', 'n',
+                     2, 5, 2, 'v', 'a', 'l', '0',
+                           2, 'v', 'a', 'l', '1',
+                        6,
+                  4,
+           4
+    });
+
+    telnetpp::options::msdp::variable expected(
+        "tbl",
+        std::vector<telnetpp::options::msdp::variable>{
+            { "var", std::vector<telnetpp::options::msdp::variable>{
+                { "in", std::vector<std::string>{ "val0", "val1" } }
+            }}
+        });
+
+    ASSERT_EQ(size_t{1}, variables.size());
+    ASSERT_EQ(expected, variables[0]);
+}
+
+TEST(msdp_server_test, receiving_table_with_many_values_returns_table_with_values)
+{
+    telnetpp::options::msdp::server server;
+
+    std::vector<telnetpp::options::msdp::variable> variables;
+    server.on_receive.connect(
+        [&variables](auto const &vars) -> std::vector<telnetpp::token>
+        {
+            variables = vars;
+            return {};
+        });
+
+    server.activate();
+    server.negotiate(telnetpp::do_);
+
+    /*
+     { "tbl" : {
+         "var0" : {
+             "in" : [ "val0", "val1" ],
+             "var1" : "val1",
+             "var2" : [ "arr0", "arr1" ]
+         }
+     }}
+    */
+
+    server.subnegotiate({
+        1, 't', 'b', 'l',
+        2, 3,
+               1, 'v', 'a', 'r', '0',
+               2, 3,
+                     1, 'i', 'n',
+                     2, 5, 2, 'v', 'a', 'l', '0',
+                           2, 'v', 'a', 'l', '1',
+                        6,
+                  4,
+               1, 'v', 'a', 'r', '1',
+               2, 'v', 'a', 'l', '1',
+               1, 'v', 'a', 'r', '2',
+               2, 5, 2, 'a', 'r', 'r', '0',
+                     2, 'a', 'r', 'r', '1',
+                  6,
+           4
+    });
+
+    telnetpp::options::msdp::variable expected(
+        "tbl",
+        std::vector<telnetpp::options::msdp::variable>{
+            { "var0", std::vector<telnetpp::options::msdp::variable>{
+                { "in", std::vector<std::string>{ "val0", "val1" } },
+                { "var1", "val1" },
+                { "var2", std::vector<std::string>{ "arr0", "arr1" }}
+            }}
+        });
+
+    ASSERT_EQ(size_t{1}, variables.size());
+    ASSERT_EQ(expected, variables[0]);
+}
+
+TEST(msdp_server_test, receiving_many_table_values_returns_many_tables)
+{
+    telnetpp::options::msdp::server server;
+
+    std::vector<telnetpp::options::msdp::variable> variables;
+    server.on_receive.connect(
+        [&variables](auto const &vars) -> std::vector<telnetpp::token>
+        {
+            variables = vars;
+            return {};
+        });
+
+    server.activate();
+    server.negotiate(telnetpp::do_);
+
+    server.subnegotiate({
+        1, 't', 'b', 'l', '0',
+        2, 3,
+              1, 'v', 'a', 'r', '0',
+              2, 'v', 'a', 'l', '0',
+           4,
+        1, 't', 'b', 'l', '1',
+        2, 3,
+              1, 'v', 'a', 'r', '1',
+              2, 'v', 'a', 'l', '1',
+           4
+    });
+
+    telnetpp::options::msdp::variable expected0(
+        "tbl0",
+        std::vector<telnetpp::options::msdp::variable>{
+            { "var0", "val0" }
+        });
+    telnetpp::options::msdp::variable expected1(
+        "tbl1",
+        std::vector<telnetpp::options::msdp::variable>{
+            { "var1", "val1" }
+        });
+
+    ASSERT_EQ(size_t{2}, variables.size());
+    ASSERT_EQ(expected0, variables[0]);
+    ASSERT_EQ(expected1, variables[1]);
+}
