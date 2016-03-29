@@ -120,6 +120,7 @@ if (GTEST_FOUND)
         test/echo_client_test.cpp
         test/echo_server_test.cpp
         test/msdp_server_test.cpp
+        test/msdp_server_robustness_test.cpp
         test/naws_client_test.cpp
         test/naws_server_test.cpp
         test/new_environ_client_test.cpp
