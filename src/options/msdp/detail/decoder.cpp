@@ -98,7 +98,11 @@ private :
                 break;
 
             case telnetpp::options::msdp::table_close :
-                stack_.pop_back();
+                // Never pop the root of the stack.
+                if (stack_.size() > 1)
+                {
+                    stack_.pop_back();
+                }
                 state_ = state::idle;
                 break;
 
