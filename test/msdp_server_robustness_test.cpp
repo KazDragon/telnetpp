@@ -76,6 +76,7 @@ TEST(msdp_server_robustness_test, extra_table_close_is_ignored)
         1, 'v', 'a', 'r', '0',
         2,
             4, // Note: extra table close.
+        'u', 'n', 'p', 'a', 'r', 's', 'e', 'd',
         1, 'v', 'a', 'r', '1',
         2, 'v', 'a', 'l'
     });
