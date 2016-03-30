@@ -4,11 +4,17 @@
 
 namespace telnetpp { namespace options { namespace msdp {
 
+// ==========================================================================
+// CONSTRUCTOR
+// ==========================================================================
 server::server()
   : telnetpp::server_option(telnetpp::options::msdp::option)
 {
 }
 
+// ==========================================================================
+// SEND
+// ==========================================================================
 std::vector<telnetpp::token> server::send(
     std::vector<telnetpp::options::msdp::variable> const &variables)
 {
@@ -22,6 +28,9 @@ std::vector<telnetpp::token> server::send(
     return { telnetpp::element{ telnetpp::subnegotiation(option(), result) } };
 }
 
+// ==========================================================================
+// HANDLE_SUBNEGOTIATION
+// ==========================================================================
 std::vector<telnetpp::token> server::handle_subnegotiation(
     u8stream const &content)
 {

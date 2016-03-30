@@ -6,13 +6,27 @@
 
 namespace telnetpp { namespace options { namespace msdp {
 
+//* =========================================================================
+/// \brief An implementation of the server side of an MSDP Telnet option.
+//* =========================================================================
 class TELNETPP_EXPORT server : public telnetpp::server_option
 {
 public :
+    //* =====================================================================
+    /// \brief Constructor
+    //* =====================================================================
     server();
 
+    //* =====================================================================
+    /// \brief Send a list of variables to the remote client.
+    //* =====================================================================
     std::vector<telnetpp::token> send(std::vector<variable> const &variables);
 
+    //* =====================================================================
+    /// \fn on_receive
+    /// \brief Register for a signal whenever a list of variables is received
+    /// from the remote client.
+    //* =====================================================================
     boost::signals2::signal<
         std::vector<telnetpp::token> (std::vector<variable> const &),
         telnetpp::token_combiner

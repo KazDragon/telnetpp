@@ -26,18 +26,34 @@ using value_type = boost::variant<
     boost::recursive_wrapper<std::vector<variable>>
 >;
 
+//* =========================================================================
+/// \brief A structure that represents a named MSDP variable whose value is
+/// either a string, an array of strings, or an array of MSDP variables.
+//* =========================================================================
 struct TELNETPP_EXPORT variable
 {
+    //* =====================================================================
+    /// \brief Constructor
+    //* =====================================================================
     variable();
-    
+
+    //* =====================================================================
+    /// \brief Constructor
+    //* =====================================================================
     variable(
         std::string const &name,
         value_type const &value);
 
+    //* =====================================================================
+    /// \brief Constructor
+    //* =====================================================================
     variable(
         std::string const &name,
         std::initializer_list<std::string> const &array_values);
 
+    //* =====================================================================
+    /// \brief Constructor
+    //* =====================================================================
     variable(
         std::string const &name,
         std::initializer_list<variable> const &table_values);
