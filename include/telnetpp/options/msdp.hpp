@@ -62,9 +62,15 @@ struct TELNETPP_EXPORT variable
     value_type  value;
 };
 
+//* =========================================================================
+/// \brief Equality operator.
+//* =========================================================================
 TELNETPP_EXPORT
 bool operator==(variable const &lhs, variable const &rhs);
 
+//* =========================================================================
+/// \brief Inequality operator.
+//* =========================================================================
 TELNETPP_EXPORT
 bool operator!=(variable const &lhs, variable const &rhs);
 
