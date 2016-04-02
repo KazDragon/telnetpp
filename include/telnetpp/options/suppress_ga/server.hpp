@@ -1,20 +1,14 @@
 #ifndef TELNETPP_OPTIONS_SUPPRESS_GA_SERVER_HPP_
 #define TELNETPP_OPTIONS_SUPPRESS_GA_SERVER_HPP_
 
-#include "telnetpp/server_option.hpp"
+#include "telnetpp/options/subnegotiationless_server.hpp"
+#include "telnetpp/options/suppress_ga.hpp"
 
 namespace telnetpp { namespace options { namespace suppress_ga {
 
-//* =========================================================================
-/// \brief An implementation of the server side of the Telnet echo option.
-//* =========================================================================
-class TELNETPP_EXPORT server : public telnetpp::server_option {
-public :
-    //* =====================================================================
-    /// CONSTRUCTOR
-    //* =====================================================================
-    server();
-};
+using server = telnetpp::options::subnegotiationless_server<
+    telnetpp::options::suppress_ga::option
+>;
 
 }}}
 

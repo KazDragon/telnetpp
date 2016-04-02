@@ -1,20 +1,14 @@
 #ifndef TELNETPP_OPTIONS_ECHO_SERVER
 #define TELNETPP_OPTIONS_ECHO_SERVER
 
-#include "telnetpp/server_option.hpp"
+#include "telnetpp/options/subnegotiationless_server.hpp"
+#include "telnetpp/options/echo.hpp"
 
 namespace telnetpp { namespace options { namespace echo {
 
-//* =========================================================================
-/// \brief An implementation of the server side of the Telnet echo option.
-//* =========================================================================
-class TELNETPP_EXPORT server : public telnetpp::server_option {
-public :
-    //* =====================================================================
-    /// CONSTRUCTOR
-    //* =====================================================================
-    server();
-};
+using server = telnetpp::options::subnegotiationless_server<
+    telnetpp::options::echo::option
+>;
 
 }}}
 
