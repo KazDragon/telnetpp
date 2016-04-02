@@ -39,16 +39,12 @@ set (telnetpp_public_src
     src/command.cpp
     src/negotiation.cpp
     src/options/msdp.cpp
-    src/options/echo/client.cpp
-    src/options/echo/server.cpp
     src/options/msdp/server.cpp
     src/options/naws/client.cpp
     src/options/naws/server.cpp
     src/options/new_environ/client.cpp
     src/options/new_environ/server.cpp
     src/options/terminal_type/client.cpp
-    src/options/suppress_ga/client.cpp
-    src/options/suppress_ga/server.cpp
     src/server_option.cpp
     src/session.cpp
     src/subnegotiation.cpp
