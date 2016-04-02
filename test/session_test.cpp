@@ -18,7 +18,7 @@ struct stream_match : boost::static_visitor<>
     
     void operator()(boost::any const &any) const
     {
-        boost::get<boost::any&>(expected_);
+        boost::get<boost::any>(expected_);
     }
     
     void operator()(telnetpp::u8stream const &stream) const
