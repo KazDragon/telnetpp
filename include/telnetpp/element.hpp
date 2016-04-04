@@ -1,5 +1,4 @@
-#ifndef TELNETPP_ELEMENT_HPP_
-#define TELNETPP_ELEMENT_HPP_
+#pragma once
 
 #include "telnetpp/command.hpp"
 #include "telnetpp/negotiation.hpp"
@@ -11,7 +10,7 @@
 #include <vector>
 
 namespace telnetpp {
-    
+
 //* =========================================================================
 /// \brief A common type that can contain any Telnet operation.
 //* =========================================================================
@@ -36,12 +35,12 @@ typedef boost::variant<element, boost::any> token;
 struct token_combiner
 {
     typedef std::vector<token> result_type;
-    
+
     template <class InputIterator1, class InputIterator2>
     std::vector<token> operator()(InputIterator1 begin, InputIterator2 end) const
     {
         return std::accumulate(
-            begin, 
+            begin,
             end,
             std::vector<token>{},
             [](auto &&lhs, auto &&rhs)
@@ -53,5 +52,3 @@ struct token_combiner
 };
 
 }
-
-#endif

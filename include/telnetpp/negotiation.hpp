@@ -1,12 +1,11 @@
-#ifndef TELNETPP_NEGOTIATION_HPP_
-#define TELNETPP_NEGOTIATION_HPP_
+#pragma once
 
 #include "telnetpp/core.hpp"
 #include <iosfwd>
 #include <utility>
 
 namespace telnetpp {
-    
+
 //* =========================================================================
 /// \brief A class that encapsulates a Telnet negotiation.
 //* =========================================================================
@@ -23,14 +22,14 @@ public :
     }
 
     //* =====================================================================
-    /// \brief Returns the request (will, wont, do, dont) of this 
+    /// \brief Returns the request (will, wont, do, dont) of this
     /// negotiation.
     //* =====================================================================
     constexpr u8 request() const
     {
         return request_;
     }
-    
+
     //* =====================================================================
     /// \brief Returns the option (e.g. echo, naws) of this negotiation
     //* =====================================================================
@@ -38,7 +37,7 @@ public :
     {
         return option_;
     }
-    
+
 private :
     u8 request_;
     u8 option_;
@@ -65,9 +64,7 @@ constexpr bool operator<(negotiation const &lhs, negotiation const &rhs)
 //* =========================================================================
 /// \brief Stream output for negotiations
 //* =========================================================================
-TELNETPP_EXPORT 
+TELNETPP_EXPORT
 std::ostream &operator<<(std::ostream &out, negotiation const &cmd);
 
 }
-
-#endif

@@ -1,14 +1,9 @@
-#ifndef TELNETPP_DETAIL_GENERATE_HELPER_HPP_
-#define TELNETPP_DETAIL_GENERATE_HELPER_HPP_
+#pragma once
 
 #include "telnetpp/element.hpp"
 
 namespace telnetpp { namespace detail {
 
-void generate_helper(
-    u8stream &result,
-    telnetpp::element const &element);
+void generate_helper(u8stream &result, telnetpp::element const &element);
 
 }}
-
-#endif

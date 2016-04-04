@@ -1,5 +1,4 @@
-#ifndef TELNETPP_DETAIL_REGISTRATION_HPP_
-#define TELNETPP_DETAIL_REGISTRATION_HPP_
+#pragma once
 
 #include "telnetpp/detail/negotiation_router.hpp"
 #include "telnetpp/detail/subnegotiation_router.hpp"
@@ -34,7 +33,7 @@ void register_route_from_negotiation_to_option(
     u8                  request,
     NegotiableOption   &option)
 {
-    route.register_route(negotiation(request, option.option()), 
+    route.register_route(negotiation(request, option.option()),
         [&option, request](auto &&neg)
         {
             return option.negotiate(request);
@@ -49,7 +48,7 @@ void register_route_from_subnegotiation_to_option(
     subnegotiation_router &route,
     SubnegotiableOption   &option)
 {
-    route.register_route(option.option(), 
+    route.register_route(option.option(),
         [&option](auto &&sub)
         {
             return option.subnegotiate(sub.content());
@@ -57,5 +56,3 @@ void register_route_from_subnegotiation_to_option(
 }
 
 }}
-
-#endif

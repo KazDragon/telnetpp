@@ -1,5 +1,4 @@
-#ifndef TELNETPP_OPTIONS_NAWS_SERVER
-#define TELNETPP_OPTIONS_NAWS_SERVER
+#pragma once
 
 #include "telnetpp/client_option.hpp"
 
@@ -31,5 +30,3 @@ private :
 };
 
 }}}
-
-#endif

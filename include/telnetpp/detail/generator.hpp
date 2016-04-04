@@ -1,5 +1,4 @@
-#ifndef TELNETPP_DETAIL_GENERATOR_HPP_
-#define TELNETPP_DETAIL_GENERATOR_HPP_
+#pragma once
 
 #include "telnetpp/detail/generate_helper.hpp"
 #include <algorithm>
@@ -7,7 +6,7 @@
 #include <utility>
 
 namespace telnetpp { namespace detail {
- 
+
 //* =========================================================================
 /// \brief Parse a series of Telnet tokens into a stream of bytes.
 /// \param begin an iterator to the start of the series.
@@ -25,7 +24,7 @@ auto generate(InputIterator1 begin, InputIterator2 end)
         if (token.type() == typeid(element))
         {
             detail::generate_helper(
-                stream, 
+                stream,
                 boost::get<element>(token));
         }
         else
@@ -35,16 +34,16 @@ auto generate(InputIterator1 begin, InputIterator2 end)
                 results.push_back(result(stream));
                 stream.clear();
             }
-            
+
             results.push_back(result(boost::get<boost::any>(token)));
         }
     });
-    
+
     if (!stream.empty())
     {
         results.push_back(result(stream));
     }
-    
+
     return results;
 }
 
@@ -57,10 +56,8 @@ auto generate(Collection &&collection)
 {
     using std::begin;
     using std::end;
-    
+
     return generate(begin(collection), end(collection));
 }
 
 }}
-
-#endif

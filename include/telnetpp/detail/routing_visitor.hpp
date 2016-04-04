@@ -1,21 +1,19 @@
-#ifndef TELNETPP_ROUTING_VISITOR_HPP_
-#define TELNETPP_ROUTING_VISITOR_HPP_
+#pragma once
 
 #include "telnetpp/detail/command_router.hpp"
 #include "telnetpp/detail/negotiation_router.hpp"
 #include "telnetpp/detail/subnegotiation_router.hpp"
 #include "telnetpp/element.hpp"
-#include <boost/any.hpp>
 #include <functional>
 #include <string>
 
 namespace telnetpp { namespace detail {
-    
+
 //* =========================================================================
 /// \brief A structure that can be used to distribute incoming Telnet tokens
 /// amongst known routers.
 //* =========================================================================
-class routing_visitor 
+class routing_visitor
   : public boost::static_visitor<std::vector<telnetpp::token>>
 {
 public :
@@ -24,12 +22,12 @@ public :
         command_router &cmd_router,
         negotiation_router &neg_router,
         subnegotiation_router &sub_router);
-        
+
     std::vector<telnetpp::token> operator()(std::string const &text);
     std::vector<telnetpp::token> operator()(command const &cmd);
     std::vector<telnetpp::token> operator()(negotiation const &neg);
     std::vector<telnetpp::token> operator()(subnegotiation const &sub);
-    
+
 private :
     std::function<std::vector<telnetpp::token> (std::string const &)> on_text_;
     command_router &command_router_;
@@ -38,5 +36,3 @@ private :
 };
 
 }}
-
-#endif

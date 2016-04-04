@@ -1,5 +1,4 @@
-#ifndef TELNETPP_OPTIONS_NAWS_CLIENT
-#define TELNETPP_OPTIONS_NAWS_CLIENT
+#pragma once
 
 #include "telnetpp/server_option.hpp"
 #include <boost/optional.hpp>
@@ -34,10 +33,8 @@ private :
     /// \brief Report the window size.
     //* =====================================================================
     std::vector<telnetpp::token> report_window_size();
-    
+
     boost::optional<std::pair<telnetpp::u16, telnetpp::u16>> window_size_;
 };
 
 }}}
-
-#endif

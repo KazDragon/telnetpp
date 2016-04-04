@@ -1,5 +1,4 @@
-#ifndef TELNETPP_TYPES_HPP_
-#define TELNETPP_TYPES_HPP_
+#pragma once
 
 #include "telnetpp/detail/export.hpp"
 #include <boost/cstdint.hpp>
@@ -28,6 +27,3 @@ using u64 = boost::uint64_t;
 using u8stream = std::basic_string<u8>;
 
 }
-
-#endif
-

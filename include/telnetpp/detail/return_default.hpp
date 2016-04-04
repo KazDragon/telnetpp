@@ -1,8 +1,7 @@
-#ifndef TELNETPP_DETAIL_RETURN_DEFAULT_HPP_
-#define TELNETPP_DETAIL_RETURN_DEFAULT_HPP_
+#pragma once
 
 namespace telnetpp { namespace detail {
-    
+
 template <class T>
 struct return_default_constructed;
 
@@ -24,5 +23,3 @@ struct return_default_constructed<void>
 };
 
 }}
-
-#endif

@@ -1,5 +1,4 @@
-#ifndef TELNETPP_SUBNEGOTIATION_ROUTER_HPP_
-#define TELNETPP_SUBNEGOTIATION_ROUTER_HPP_
+#pragma once
 
 #include "telnetpp/detail/router.hpp"
 #include "telnetpp/subnegotiation.hpp"
@@ -27,5 +26,3 @@ class subnegotiation_router
 };
 
 }}
-
-#endif

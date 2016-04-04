@@ -1,5 +1,4 @@
-#ifndef TELNETPP_SUBNEGOTIATION_HPP_
-#define TELNETPP_SUBNEGOTIATION_HPP_
+#pragma once
 
 #include "telnetpp/core.hpp"
 #include <iosfwd>
@@ -17,7 +16,7 @@ public :
     /// \brief Constructor
     //* =====================================================================
     subnegotiation(u8 option, u8stream content);
-    
+
     //* =====================================================================
     /// \brief Returns the option for this subnegotiation.
     //* =====================================================================
@@ -27,7 +26,7 @@ public :
     /// \brief Returns the content for this subnegotiation.
     //* =====================================================================
     u8stream const &content() const;
-    
+
 private :
     u8 option_;
     u8stream content_;
@@ -46,5 +45,3 @@ TELNETPP_EXPORT
 std::ostream &operator<<(std::ostream &out, subnegotiation const &cmd);
 
 }
-
-#endif

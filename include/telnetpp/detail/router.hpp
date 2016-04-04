@@ -1,5 +1,4 @@
-#ifndef TELNETPP_DETAIL_ROUTER_HPP_
-#define TELNETPP_DETAIL_ROUTER_HPP_
+#pragma once
 
 #include "telnetpp/detail/return_default.hpp"
 #include <functional>
@@ -125,7 +124,7 @@ public :
         {
             return unregistered_route_(message);
         }
-        
+
         // This garbage is just to return either a default-constructed Result,
         // or void if Result is void.
         return detail::return_default_constructed<Result>{}();
@@ -137,5 +136,3 @@ private :
 };
 
 }}
-
-#endif
