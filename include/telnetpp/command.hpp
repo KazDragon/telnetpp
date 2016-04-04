@@ -1,11 +1,10 @@
-#ifndef TELNETPP_COMMAND_HPP_
-#define TELNETPP_COMMAND_HPP_
+#pragma once
 
 #include "telnetpp/core.hpp"
 #include <iosfwd>
 
 namespace telnetpp {
-    
+
 //* =========================================================================
 /// \brief A class that encapsulates the value of a Telnet command.
 //* =========================================================================
@@ -19,7 +18,7 @@ public :
       : command_(command)
     {
     }
-    
+
     //* =====================================================================
     /// \brief Returns the value of the command.
     //* =====================================================================
@@ -27,7 +26,7 @@ public :
     {
         return command_;
     }
-    
+
 private :
     u8 command_;
 };
@@ -55,5 +54,3 @@ TELNETPP_EXPORT
 std::ostream &operator<<(std::ostream &out, command const &cmd);
 
 }
-
-#endif

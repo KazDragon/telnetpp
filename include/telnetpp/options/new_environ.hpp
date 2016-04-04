@@ -1,12 +1,11 @@
-#ifndef TELNETPP_OPTIONS_NEW_ENVIRON_HPP_
-#define TELNETPP_OPTIONS_NEW_ENVIRON_HPP_
+#pragma once
 
 #include "telnetpp/core.hpp"
 #include <boost/optional.hpp>
 #include <string>
 
 namespace telnetpp { namespace options { namespace new_environ {
-   
+
 static constexpr telnetpp::u8 option  = 39;
 
 static constexpr telnetpp::u8 is      = 0;
@@ -32,5 +31,3 @@ struct response
 };
 
 }}}
-
-#endif

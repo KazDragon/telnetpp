@@ -1,5 +1,4 @@
-#ifndef TELNETPP_DETAIL_NEGOTIATION_ROUTER_HPP_
-#define TELNETPP_DETAIL_NEGOTIATION_ROUTER_HPP_
+#pragma once
 
 #include "telnetpp/detail/router.hpp"
 #include "telnetpp/negotiation.hpp"
@@ -7,7 +6,7 @@
 #include <vector>
 
 namespace telnetpp { namespace detail {
-    
+
 struct negotiation_router_key_from_message_policy
 {
     static negotiation key_from_message(negotiation const &neg)
@@ -17,15 +16,15 @@ struct negotiation_router_key_from_message_policy
 };
 
 //* =========================================================================
-/// \brief A structure that can route incoming negotiations to their 
-/// associated options.  
+/// \brief A structure that can route incoming negotiations to their
+/// associated options.
 ///
 /// This can be used as a multiplexer between incoming
 /// negotiations and the set of supported client and server options.
 /// =========================================================================
 class negotiation_router
   : public router<
-        negotiation, 
+        negotiation,
         negotiation,
         std::vector<telnetpp::token>,
         detail::negotiation_router_key_from_message_policy
@@ -34,5 +33,3 @@ class negotiation_router
 };
 
 }}
-
-#endif

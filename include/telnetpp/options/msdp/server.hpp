@@ -1,5 +1,4 @@
-#ifndef TELNETPP_OPTIONS_MSDP_SERVER_HPP_
-#define TELNETPP_OPTIONS_MSDP_SERVER_HPP_
+#pragma once
 
 #include "telnetpp/options/msdp.hpp"
 #include "telnetpp/server_option.hpp"
@@ -42,5 +41,3 @@ private :
 };
 
 }}}
-
-#endif

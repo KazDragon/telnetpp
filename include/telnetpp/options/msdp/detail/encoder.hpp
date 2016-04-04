@@ -1,5 +1,4 @@
-#ifndef TELNETPP_OPTIONS_MSDP_DETAIL_ENCODER_HPP_
-#define TELNETPP_OPTIONS_MSDP_DETAIL_ENCODER_HPP_
+#pragma once
 
 #include "telnetpp/options/msdp.hpp"
 
@@ -12,5 +11,3 @@ telnetpp::u8stream encode(
     std::vector<telnetpp::options::msdp::variable> const &variables);
 
 }}}}
-
-#endif

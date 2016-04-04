@@ -1,5 +1,4 @@
-#ifndef TELNETPP_SUBNEGOTIATIONLESS_SERVER_OPTION_HPP_
-#define TELNETPP_SUBNEGOTIATIONLESS_SERVER_OPTION_HPP_
+#pragma once
 
 #include "telnetpp/server_option.hpp"
 
@@ -21,10 +20,6 @@ public :
       : server_option(Option)
     {
     }
-    
-private :
 };
 
 }}
-
-#endif

@@ -1,5 +1,4 @@
-#ifndef TELNETPP_SUBNEGOTIATIONLESS_CLIENT_OPTION_HPP_
-#define TELNETPP_SUBNEGOTIATIONLESS_CLIENT_OPTION_HPP_
+#pragma once
 
 #include "telnetpp/client_option.hpp"
 
@@ -21,10 +20,6 @@ public :
       : client_option(Option)
     {
     }
-    
-private :
 };
 
 }}
-
-#endif

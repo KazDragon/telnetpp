@@ -1,5 +1,4 @@
-#ifndef TELNETPP_OPTIONS_NEW_ENVIRON_server_HPP_
-#define TELNETPP_OPTIONS_NEW_ENVIRON_server_HPP_
+#pragma once
 
 #include "telnetpp/server_option.hpp"
 #include <boost/optional.hpp>
@@ -24,7 +23,7 @@ public :
     //* =====================================================================
     std::vector<telnetpp::token> set_variable(
         std::string const &name, std::string const &value);
-    
+
     //* =====================================================================
     /// \brief Deletes a "VAR" type variable from the environment.
     //* =====================================================================
@@ -53,5 +52,3 @@ private :
 };
 
 }}}
-
-#endif

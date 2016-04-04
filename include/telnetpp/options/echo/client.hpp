@@ -1,5 +1,4 @@
-#ifndef TELNETPP_OPTIONS_ECHO_CLIENT
-#define TELNETPP_OPTIONS_ECHO_CLIENT
+#pragma once
 
 #include "telnetpp/options/subnegotiationless_client.hpp"
 #include "telnetpp/options/echo.hpp"
@@ -11,5 +10,3 @@ using client = telnetpp::options::subnegotiationless_client<
 >;
 
 }}}
-
-#endif

@@ -1,5 +1,4 @@
-#ifndef TELNETPP_OPTIONS_ECHO_SERVER
-#define TELNETPP_OPTIONS_ECHO_SERVER
+#pragma once
 
 #include "telnetpp/options/subnegotiationless_server.hpp"
 #include "telnetpp/options/echo.hpp"
@@ -11,5 +10,3 @@ using server = telnetpp::options::subnegotiationless_server<
 >;
 
 }}}
-
-#endif

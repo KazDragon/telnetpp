@@ -1,5 +1,4 @@
-#ifndef TELNETPP_OPTIONS_NEW_ENVIRON_client_HPP_
-#define TELNETPP_OPTIONS_NEW_ENVIRON_client_HPP_
+#pragma once
 
 #include "telnetpp/options/new_environ.hpp"
 #include "telnetpp/client_option.hpp"
@@ -19,7 +18,7 @@ public :
     /// CONSTRUCTOR
     //* =====================================================================
     client();
-    
+
     //* =====================================================================
     /// \brief Requests that a particular set of environment variables be
     /// transmitted by the client.
@@ -36,7 +35,7 @@ public :
     boost::signals2::signal<
         std::vector<token> (response const &res),
         telnetpp::token_combiner
-    > on_variable_changed; 
+    > on_variable_changed;
 
 private :
     //* =====================================================================
@@ -46,7 +45,5 @@ private :
     std::vector<telnetpp::token> handle_subnegotiation(u8stream const &content);
 
 };
-    
-}}}
 
-#endif
+}}}

@@ -1,5 +1,4 @@
-#ifndef TELNETPP_OPTIONS_SUPPRESS_GA_CLIENT
-#define TELNETPP_OPTIONS_SUPPRESS_GA_CLIENT
+#pragma once
 
 #include "telnetpp/options/subnegotiationless_client.hpp"
 #include "telnetpp/options/suppress_ga.hpp"
@@ -11,5 +10,3 @@ using client = telnetpp::options::subnegotiationless_client<
 >;
 
 }}}
-
-#endif

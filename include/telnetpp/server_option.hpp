@@ -1,5 +1,4 @@
-#ifndef TELNETPP_SERVER_OPTION
-#define TELNETPP_SERVER_OPTION
+#pragma once
 
 #include "telnetpp/element.hpp"
 #include <boost/signals2.hpp>
@@ -11,7 +10,7 @@ namespace telnetpp {
 /// \brief A class that represents a Telnet option's server side.  That is,
 /// the side that received DO and DONT negotiations and sends WILL and WONT
 /// negotiations.
-/// 
+///
 /// \par
 /// Note that the usage of server in this context may disagree with a
 /// particular option's RFC specification.  The determination of what is a
@@ -24,12 +23,12 @@ public :
     /// \brief Constructor
     //* =====================================================================
     server_option(telnetpp::u8 option);
-    
+
     //* =====================================================================
     /// \brief Returns the option code.
     //* =====================================================================
     telnetpp::u8 option() const;
-    
+
     //* =====================================================================
     /// \brief Allows the option to be activated by the remote end.
     //* =====================================================================
@@ -39,7 +38,7 @@ public :
     /// \brief Activates the option.
     //* =====================================================================
     std::vector<telnetpp::token> activate();
-    
+
     //* =====================================================================
     /// \brief Deactivates the option.
     //* =====================================================================
@@ -54,7 +53,7 @@ public :
     /// \brief Makes a request of the option
     //* =====================================================================
     std::vector<telnetpp::token> negotiate(telnetpp::u8 request);
-    
+
     //* =====================================================================
     /// \brief Send a subnegotiation to the option.
     //* =====================================================================
@@ -65,7 +64,7 @@ public :
         std::vector<telnetpp::token> (),
         token_combiner
     > on_state_changed;
-    
+
 private :
     //* =====================================================================
     /// \brief Handle a negotiation that has been received in the active
@@ -81,12 +80,10 @@ private :
         active,
         deactivating,
     };
-    
+
     state state_       = state::inactive;
     bool  activatable_ = false;
     u8    option_;
 };
 
 }
-
-#endif

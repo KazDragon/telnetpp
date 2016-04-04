@@ -1,5 +1,4 @@
-#ifndef TELNETPP_TELNETPP_HPP_
-#define TELNETPP_TELNETPP_HPP_
+#pragma once
 
 // For sending commands, it's necessary to know what the commands in the
 // protocol are.
@@ -9,5 +8,3 @@
 // include the specific required options in order to have a complete Telnet
 // layer.
 #include "telnetpp/session.hpp"
-
-#endif

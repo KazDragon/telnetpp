@@ -1,5 +1,4 @@
-#ifndef TELNETPP_OPTIONS_MSDP_HPP_
-#define TELNETPP_OPTIONS_MSDP_HPP_
+#pragma once
 
 #include "telnetpp/core.hpp"
 #include <boost/variant.hpp>
@@ -75,5 +74,3 @@ TELNETPP_EXPORT
 bool operator!=(variable const &lhs, variable const &rhs);
 
 }}}
-
-#endif

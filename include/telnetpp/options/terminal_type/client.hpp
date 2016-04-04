@@ -1,5 +1,4 @@
-#ifndef TELNETPP_OPTIONS_TERMINAL_TYPE_CLIENT
-#define TELNETPP_OPTIONS_TERMINAL_TYPE_CLIENT
+#pragma once
 
 #include "telnetpp/client_option.hpp"
 
@@ -26,7 +25,7 @@ public :
         std::vector<telnetpp::token> (std::string const &),
         telnetpp::token_combiner
     > on_terminal_type;
-    
+
 private :
     //* =====================================================================
     /// \brief Handle a negotiation that has been received in the active
@@ -37,5 +36,3 @@ private :
 };
 
 }}}
-
-#endif

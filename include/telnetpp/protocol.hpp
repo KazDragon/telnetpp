@@ -1,10 +1,9 @@
-#ifndef TELNETPP_PROTOCOL_HPP_
-#define TELNETPP_PROTOCOL_HPP_
+#pragma once
 
 #include "telnetpp/core.hpp"
 
 namespace telnetpp {
- 
+
 // TELNET Commands
 static constexpr u8 const se   = 240; // Subnegotiation End
 static constexpr u8 const nop  = 241; // No Operation
@@ -24,5 +23,3 @@ static constexpr u8 const dont = 254;
 static constexpr u8 const iac  = 255; // Interpret As Command
 
 }
-
-#endif

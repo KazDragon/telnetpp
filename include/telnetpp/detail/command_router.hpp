@@ -1,12 +1,11 @@
-#ifndef TELNETPP_DETAIL_COMMAND_ROUTER_HPP_
-#define TELNETPP_DETAIL_COMMAND_ROUTER_HPP_
+#pragma once
 
 #include "telnetpp/detail/router.hpp"
 #include "telnetpp/command.hpp"
 #include "telnetpp/element.hpp"
 
 namespace telnetpp { namespace detail {
-    
+
 struct command_router_key_from_message_policy
 {
     static command key_from_message(command const &cmd)
@@ -26,5 +25,3 @@ class command_router
 };
 
 }}
-
-#endif
