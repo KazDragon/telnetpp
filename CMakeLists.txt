@@ -39,6 +39,7 @@ set (telnetpp_public_src
     src/command.cpp
     src/negotiation.cpp
     src/options/msdp.cpp
+    src/options/msdp/client.cpp
     src/options/msdp/server.cpp
     src/options/naws/client.cpp
     src/options/naws/server.cpp
@@ -115,6 +116,7 @@ if (GTEST_FOUND)
         test/command_router_test.cpp
         test/echo_client_test.cpp
         test/echo_server_test.cpp
+        test/msdp_client_test.cpp
         test/msdp_server_test.cpp
         test/msdp_server_robustness_test.cpp
         test/naws_client_test.cpp
