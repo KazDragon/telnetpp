@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.2 FATAL_ERROR)
 cmake_policy(VERSION 3.2)
 
 if (POLICY CMP0063)
-    cmake_policy(SET CMP0063 NEW) # Allow hidden visibility for static libs
+    cmake_policy(SET CMP0063 OLD) # Do not allow hidden visibility for static libs
 endif()
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${PROJECT_SOURCE_DIR}/cmake/Modules")
@@ -39,7 +39,6 @@ set (telnetpp_public_src
     src/command.cpp
     src/negotiation.cpp
     src/options/msdp.cpp
-    src/options/msdp/client.cpp
     src/options/msdp/server.cpp
     src/options/naws/client.cpp
     src/options/naws/server.cpp
@@ -116,7 +115,6 @@ if (GTEST_FOUND)
         test/command_router_test.cpp
         test/echo_client_test.cpp
         test/echo_server_test.cpp
-        test/msdp_client_test.cpp
         test/msdp_server_test.cpp
         test/msdp_server_robustness_test.cpp
         test/naws_client_test.cpp
