@@ -1,5 +1,5 @@
 #include "telnetpp/options/naws/client.hpp"
-#include "telnetpp/options/naws.hpp"
+#include "telnetpp/options/naws/detail/naws.hpp"
 
 namespace telnetpp { namespace options { namespace naws {
 
@@ -7,7 +7,7 @@ namespace telnetpp { namespace options { namespace naws {
 // CONSTRUCTOR
 // ==========================================================================
 client::client()
-  : client_option(telnetpp::options::naws::option)
+  : client_option(telnetpp::options::naws::detail::option)
 {
 }
 
@@ -21,7 +21,7 @@ std::vector<telnetpp::token> client::handle_subnegotiation(
     {
         telnetpp::u16 width  = content[0] << 8 | content[1];
         telnetpp::u16 height = content[2] << 8 | content[3];
-    
+
         return on_window_size_changed(width, height);
     }
     else
