@@ -1,7 +1,7 @@
 #include "telnetpp/options/new_environ/server.hpp"
+#include "telnetpp/options/new_environ/detail/protocol.hpp"
 #include "telnetpp/options/new_environ/detail/request_parser.hpp"
 #include "telnetpp/options/new_environ/detail/stream.hpp"
-#include "telnetpp/options/new_environ.hpp"
 
 namespace telnetpp { namespace options { namespace new_environ {
 
@@ -12,23 +12,22 @@ namespace {
 // ==========================================================================
 bool variable_was_requested(
     std::vector<request> const &requests,
-    telnetpp::u8                variable_type,
+    variable_type        const &type,
     std::string          const &name)
 {
     if (requests.empty())
     {
         return true;
     }
-    
+
     for (auto const &request : requests)
     {
-        if (request.type == variable_type
-         && request.name == name)
+        if (request.type == type && request.name == name)
         {
             return true;
         }
     }
-    
+
     return false;
 }
 
@@ -42,22 +41,22 @@ u8stream &append_variable(
 {
     std::string const &name = variable.first;
     std::string const &val  = variable.second;
-    
+
     stream.push_back(type);
     detail::append_escaped(stream, name);
-    stream.push_back(value);
+    stream.push_back(detail::value);
     detail::append_escaped(stream, val);
-    
-    return stream;    
+
+    return stream;
 }
-   
-}   
+
+}
 
 // ==========================================================================
 // CONSTRUCTOR
 // ==========================================================================
 server::server()
-  : telnetpp::server_option(telnetpp::options::new_environ::option)
+  : telnetpp::server_option(telnetpp::options::new_environ::detail::option)
 {
 }
 
@@ -69,11 +68,11 @@ std::vector<telnetpp::token> server::set_variable(
 {
     variables_[name] = value;
 
-    u8stream result = { info };
-    append_variable(result, var, {name, value});
-    
-    return { telnetpp::element{ 
-        telnetpp::subnegotiation(option(), result) 
+    u8stream result = { detail::info };
+    append_variable(result, detail::var, {name, value});
+
+    return { telnetpp::element{
+        telnetpp::subnegotiation(option(), result)
     }};
 }
 
@@ -83,10 +82,10 @@ std::vector<telnetpp::token> server::set_variable(
 std::vector<telnetpp::token> server::delete_variable(std::string const &name)
 {
     variables_.erase(name);
-    
-    u8stream result = { info, var };
+
+    u8stream result = { detail::info, detail::var };
     detail::append_escaped(result, name);
-    
+
     return { telnetpp::element{
         telnetpp::subnegotiation(option(), result)
     }};
@@ -99,10 +98,10 @@ std::vector<telnetpp::token> server::set_user_variable(
     std::string const &name, std::string const &value)
 {
     user_variables_[name] = value;
-    
-    u8stream result = { info };
-    append_variable(result, uservar, {name, value});
-    
+
+    u8stream result = { detail::info };
+    append_variable(result, detail::uservar, {name, value});
+
     return { telnetpp::element{
         telnetpp::subnegotiation(option(), result)
     }};
@@ -115,10 +114,10 @@ std::vector<telnetpp::token> server::delete_user_variable(
     std::string const &name)
 {
     user_variables_.erase(name);
-    
-    u8stream result = { info, uservar };
+
+    u8stream result = { detail::info, detail::uservar };
     detail::append_escaped(result, name);
-    
+
     return { telnetpp::element{
         telnetpp::subnegotiation(option(), result)
     }};
@@ -131,28 +130,30 @@ std::vector<telnetpp::token> server::handle_subnegotiation(
     u8stream const &content)
 {
     auto const &requests = detail::parse_requests(content);
-    
-    u8stream result = { is };
-    
+
+    u8stream result = { detail::is };
+
     for (auto &variable : variables_)
     {
-        if (variable_was_requested(requests, var, variable.first))
+        if (variable_was_requested(
+            requests, variable_type::var, variable.first))
         {
-            append_variable(result, var, variable);
+            append_variable(result, detail::var, variable);
         }
     }
 
     for (auto &variable : user_variables_)
     {
-        if (variable_was_requested(requests, uservar, variable.first))
+        if (variable_was_requested(
+            requests, variable_type::uservar, variable.first))
         {
-            append_variable(result, uservar, variable);
+            append_variable(result, detail::uservar, variable);
         }
     }
-    
+
     return { telnetpp::element{
         telnetpp::subnegotiation{option(), result}
-    }};    
+    }};
 }
 
 

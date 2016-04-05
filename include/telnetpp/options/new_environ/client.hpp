@@ -1,11 +1,38 @@
 #pragma once
 
-#include "telnetpp/options/new_environ.hpp"
 #include "telnetpp/client_option.hpp"
 #include <boost/signals2/signal.hpp>
 #include <vector>
 
 namespace telnetpp { namespace options { namespace new_environ {
+
+//* =========================================================================
+/// \brief An enumeration of the type of variables that NEW_ENVIRON handles.
+//* =========================================================================
+enum class variable_type
+{
+    var,
+    uservar
+};
+
+//* =========================================================================
+/// \brief A request that is made of the remote server.
+//* =========================================================================
+struct request
+{
+    variable_type type;
+    std::string   name;
+};
+
+//* =========================================================================
+/// \brief A response that is received from the remote server.
+//* =========================================================================
+struct response
+{
+    variable_type                type;
+    std::string                  name;
+    boost::optional<std::string> value;
+};
 
 //* =========================================================================
 /// \brief An implementation of the client side of the Telnet New-Environ

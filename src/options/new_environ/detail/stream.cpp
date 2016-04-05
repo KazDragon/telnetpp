@@ -1,5 +1,5 @@
 #include "telnetpp/options/new_environ/detail/stream.hpp"
-#include "telnetpp/options/new_environ.hpp"
+#include "telnetpp/options/new_environ/detail/protocol.hpp"
 
 namespace telnetpp { namespace options { namespace new_environ {
     namespace detail {
@@ -14,17 +14,17 @@ void append_escaped(
     {
         switch (ch)
         {
-            case telnetpp::options::new_environ::var :   // Fall-through
-            case telnetpp::options::new_environ::value : // Fall-through
-            case telnetpp::options::new_environ::esc :   // Fall-through
-            case telnetpp::options::new_environ::uservar :
+            case telnetpp::options::new_environ::detail::var :   // Fall-through
+            case telnetpp::options::new_environ::detail::value : // Fall-through
+            case telnetpp::options::new_environ::detail::esc :   // Fall-through
+            case telnetpp::options::new_environ::detail::uservar :
                 // Fall-through
-                stream.push_back(telnetpp::options::new_environ::esc);
+                stream.push_back(telnetpp::options::new_environ::detail::esc);
             default :
                 stream.push_back(ch);
                 break;
         }
-    }                
+    }
 }
 
 }}}}

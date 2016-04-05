@@ -1,20 +1,23 @@
 #include "telnetpp/options/new_environ/server.hpp"
-#include "telnetpp/options/new_environ.hpp"
 #include "telnetpp/protocol.hpp"
 #include "expect_elements.hpp"
 #include <gtest/gtest.h>
+
+TEST(new_environ_server_test, option_is_new_environ)
+{
+    telnetpp::options::new_environ::server server;
+    ASSERT_EQ(39, server.option());
+}
 
 TEST(new_environ_server_test, receiving_request_with_no_content_and_no_cached_variables_returns_empty_list)
 {
     telnetpp::options::new_environ::server server;
     server.activate();
     server.negotiate(telnetpp::do_);
-    
+
     expect_elements(
         {
-            telnetpp::subnegotiation(
-                telnetpp::options::new_environ::option,
-                { 0x00 })
+            telnetpp::subnegotiation(server.option(), { 0x00 })
         },
         server.subnegotiate({0x01}));
 }
@@ -25,14 +28,14 @@ TEST(new_environ_server_test, receiving_request_with_no_content_and_one_cached_v
     server.set_variable("USER", "TEST");
     server.activate();
     server.negotiate(telnetpp::do_);
-    
+
     expect_elements(
         {
             telnetpp::subnegotiation(
-                telnetpp::options::new_environ::option,
-                { 0x00, 
+                server.option(),
+                { 0x00,
                   0x00, 'U', 'S', 'E', 'R',
-                  0x01, 'T', 'E', 'S', 'T' 
+                  0x01, 'T', 'E', 'S', 'T'
                 })
         },
         server.subnegotiate({0x01}));
@@ -44,11 +47,11 @@ TEST(new_environ_server_test, receiving_request_with_no_content_and_one_cached_u
     server.set_user_variable("TEST", "VALUE");
     server.activate();
     server.negotiate(telnetpp::do_);
-    
+
     expect_elements(
         {
             telnetpp::subnegotiation(
-                telnetpp::options::new_environ::option,
+                server.option(),
                 { 0x00,
                   0x03, 'T', 'E', 'S', 'T',
                   0x01, 'V', 'A', 'L', 'U', 'E'
@@ -63,12 +66,12 @@ TEST(new_environ_server_test, receiving_request_with_no_content_and_one_cached_v
     server.set_variable("USER", "");
     server.activate();
     server.negotiate(telnetpp::do_);
-    
+
     expect_elements(
         {
             telnetpp::subnegotiation(
-                telnetpp::options::new_environ::option,
-                { 0x00, 
+                server.option(),
+                { 0x00,
                   0x00, 'U', 'S', 'E', 'R',
                   0x01
                 })
@@ -83,12 +86,12 @@ TEST(new_environ_server_test, receiving_request_with_no_content_and_one_deleted_
     server.delete_variable("USER");
     server.activate();
     server.negotiate(telnetpp::do_);
-    
+
     expect_elements(
         {
             telnetpp::subnegotiation(
-                telnetpp::options::new_environ::option,
-                { 0x00, 
+                server.option(),
+                { 0x00,
                 })
         },
         server.subnegotiate({0x01}));
@@ -101,12 +104,12 @@ TEST(new_environ_server_test, receiving_request_with_no_content_and_one_deleted_
     server.delete_user_variable("TTYPE");
     server.activate();
     server.negotiate(telnetpp::do_);
-    
+
     expect_elements(
         {
             telnetpp::subnegotiation(
-                telnetpp::options::new_environ::option,
-                { 0x00, 
+                server.option(),
+                { 0x00,
                 })
         },
         server.subnegotiate({0x01}));
@@ -121,11 +124,11 @@ TEST(new_environ_server_test, receiving_request_with_no_content_and_multiple_cac
     server.set_user_variable("TTYPE", "XTERM");
     server.activate();
     server.negotiate(telnetpp::do_);
-    
+
     expect_elements(
         {
             telnetpp::subnegotiation(
-                telnetpp::options::new_environ::option,
+                server.option(),
                 { 0x00,
                   0x00, 'P', 'R', 'I', 'N', 'T', 'E', 'R',
                   0x01, 'L', 'P', 'T', '1',
@@ -146,11 +149,11 @@ TEST(new_environ_server_test, modifying_a_variable_with_active_server_returns_va
     server.set_variable("USER", "TEST");
     server.activate();
     server.negotiate(telnetpp::do_);
-    
+
     expect_elements(
         {
             telnetpp::subnegotiation(
-                telnetpp::options::new_environ::option,
+                server.option(),
                 { 0x02,
                   0x00, 'U', 'S', 'E', 'R',
                   0x01, 'F', 'R', 'E', 'D'
@@ -165,11 +168,11 @@ TEST(new_environ_server_test, deleting_a_variable_with_active_server_returns_var
     server.set_variable("USER", "TEST");
     server.activate();
     server.negotiate(telnetpp::do_);
-    
+
     expect_elements(
         {
             telnetpp::subnegotiation(
-                telnetpp::options::new_environ::option,
+                server.option(),
                 { 0x02,
                   0x00, 'U', 'S', 'E', 'R'
                 })
@@ -183,11 +186,11 @@ TEST(new_environ_server_test, modifying_a_user_variable_with_active_server_retur
     server.set_variable("TEST", "VALUE");
     server.activate();
     server.negotiate(telnetpp::do_);
-    
+
     expect_elements(
         {
             telnetpp::subnegotiation(
-                telnetpp::options::new_environ::option,
+                server.option(),
                 { 0x02,
                   0x03, 'T', 'E', 'S', 'T',
                   0x01, 'R', 'E', 'S', 'U', 'L', 'T'
@@ -202,11 +205,11 @@ TEST(new_environ_server_test, deleting_a_user_variable_with_active_server_return
     server.set_variable("TEST", "VALUE");
     server.activate();
     server.negotiate(telnetpp::do_);
-    
+
     expect_elements(
         {
             telnetpp::subnegotiation(
-                telnetpp::options::new_environ::option,
+                server.option(),
                 { 0x02,
                   0x03, 'T', 'E', 'S', 'T'
                 })
@@ -220,11 +223,11 @@ TEST(new_environ_server_test, requesting_nonexistent_variable_rturns_empty_resul
     server.set_user_variable("TEST", "VALUE");
     server.activate();
     server.negotiate(telnetpp::do_);
-    
+
     expect_elements(
         {
             telnetpp::subnegotiation(
-                telnetpp::options::new_environ::option,
+                server.option(),
                 { 0x00
                 })
         },
@@ -240,11 +243,11 @@ TEST(new_environ_server_test, requesting_existent_variables_returns_variables)
     server.set_user_variable("FOO", "BAR");
     server.activate();
     server.negotiate(telnetpp::do_);
-    
+
     expect_elements(
         {
             telnetpp::subnegotiation(
-                telnetpp::options::new_environ::option,
+                server.option(),
                 { 0x00,
                   0x00, 'U', 'S', 'E', 'R',
                   0x01, 'T', 'E', 'S', 'T',
@@ -253,7 +256,7 @@ TEST(new_environ_server_test, requesting_existent_variables_returns_variables)
                 })
         },
         server.subnegotiate(
-            { 0x01, 
+            { 0x01,
               0x03, 'T', 'E', 'S', 'T',
               0x00, 'U', 'S', 'E', 'R'
             }));
@@ -266,11 +269,11 @@ TEST(new_environ_server_test, names_and_values_with_control_characters_are_escap
     server.set_user_variable(std::string("\x00""DEF", 4), "\x02""GHI");
     server.activate();
     server.negotiate(telnetpp::do_);
-    
+
     expect_elements(
         {
             telnetpp::subnegotiation(
-                telnetpp::options::new_environ::option,
+                server.option(),
                 {
                     0x00,
                     0x00, 'U', 'S', 'E', 'R',
@@ -288,11 +291,11 @@ TEST(new_environ_server_test, requests_with_escaped_control_characters_are_handl
     server.set_user_variable(std::string("\x00\x01\x02\x03", 4), "GOOD");
     server.activate();
     server.negotiate(telnetpp::do_);
-    
+
     expect_elements(
         {
             telnetpp::subnegotiation(
-                telnetpp::options::new_environ::option,
+                server.option(),
                 {
                     0x00,
                     0x03, 0x02, 0x00, 0x02, 0x01, 0x02, 0x02, 0x02, 0x03,
@@ -303,5 +306,5 @@ TEST(new_environ_server_test, requests_with_escaped_control_characters_are_handl
             { 0x01,
               0x03, 0x02, 0x00, 0x02, 0x01, 0x02, 0x02, 0x02, 0x03
             }));
-    
+
 }
