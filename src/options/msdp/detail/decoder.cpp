@@ -1,4 +1,5 @@
 #include "telnetpp/options/msdp/detail/decoder.hpp"
+#include "telnetpp/options/msdp/detail/protocol.hpp"
 #include <algorithm>
 #include <cassert>
 
@@ -114,7 +115,7 @@ private :
     // ======================================================================
     void parse_idle(u8 byte)
     {
-        if (byte == telnetpp::options::msdp::var)
+        if (byte == telnetpp::options::msdp::detail::var)
         {
             top().push_back({});
             state_ = state::name;
@@ -128,7 +129,7 @@ private :
     {
         assert(!result_.empty());
 
-        if (byte == telnetpp::options::msdp::val)
+        if (byte == telnetpp::options::msdp::detail::val)
         {
             state_ = state::value;
             value() = std::string{};
@@ -148,18 +149,18 @@ private :
 
         switch(byte)
         {
-            case telnetpp::options::msdp::var :
+            case telnetpp::options::msdp::detail::var :
                 top().push_back({});
                 state_ = state::name;
                 break;
 
-            case telnetpp::options::msdp::table_open :
+            case telnetpp::options::msdp::detail::table_open :
                 value() = std::vector<variable>{};
                 stack_.push_back(&value_as_table());
                 state_ = state::idle;
                 break;
 
-            case telnetpp::options::msdp::table_close :
+            case telnetpp::options::msdp::detail::table_close :
                 // Never pop the root of the stack.
                 if (stack_.size() > 1)
                 {
@@ -168,7 +169,7 @@ private :
                 state_ = state::idle;
                 break;
 
-            case telnetpp::options::msdp::array_open :
+            case telnetpp::options::msdp::detail::array_open :
                 value() = std::vector<std::string>{};
                 state_ = state::array;
                 break;
@@ -186,11 +187,11 @@ private :
     {
         switch(byte)
         {
-            case telnetpp::options::msdp::array_close :
+            case telnetpp::options::msdp::detail::array_close :
                 state_ = state::idle;
                 break;
 
-            case telnetpp::options::msdp::val :
+            case telnetpp::options::msdp::detail::val :
                 value_as_array().push_back({});
                 break;
 
@@ -218,8 +219,7 @@ private :
 // ==========================================================================
 // DECODE
 // ==========================================================================
-std::vector<telnetpp::options::msdp::variable> decode(
-    telnetpp::u8stream const &stream)
+std::vector<variable> decode(telnetpp::u8stream const &stream)
 {
     using std::begin;
     using std::end;

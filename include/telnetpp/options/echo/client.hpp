@@ -1,12 +1,12 @@
 #pragma once
 
 #include "telnetpp/options/subnegotiationless_client.hpp"
-#include "telnetpp/options/echo.hpp"
+#include "telnetpp/options/echo/detail/protocol.hpp"
 
 namespace telnetpp { namespace options { namespace echo {
 
 using client = telnetpp::options::subnegotiationless_client<
-    telnetpp::options::echo::option
+    telnetpp::options::echo::detail::option
 >;
 
 }}}

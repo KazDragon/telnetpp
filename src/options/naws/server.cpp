@@ -1,5 +1,5 @@
 #include "telnetpp/options/naws/server.hpp"
-#include "telnetpp/options/naws.hpp"
+#include "telnetpp/options/naws/detail/protocol.hpp"
 
 namespace telnetpp { namespace options { namespace naws {
 
@@ -7,7 +7,7 @@ namespace telnetpp { namespace options { namespace naws {
 // CONSTRUCTOR
 // ==========================================================================
 server::server()
-  : server_option(telnetpp::options::naws::option)
+  : server_option(telnetpp::options::naws::detail::option)
 {
     on_state_changed.connect(
         [this]()
@@ -41,7 +41,7 @@ std::vector<telnetpp::token> server::report_window_size()
 {
     if (is_active() && window_size_.is_initialized())
     {
-        return 
+        return
         {
             telnetpp::element(telnetpp::subnegotiation(
                 option(),

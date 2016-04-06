@@ -1,5 +1,4 @@
 #include "telnetpp/session.hpp"
-#include "telnetpp/options/echo.hpp"
 #include "telnetpp/options/echo/client.hpp"
 #include "telnetpp/options/echo/server.hpp"
 #include "telnetpp/protocol.hpp"
@@ -7,7 +6,7 @@
 #include <gtest/gtest.h>
 
 namespace {
-    
+
 struct stream_match : boost::static_visitor<>
 {
     stream_match(
@@ -15,20 +14,20 @@ struct stream_match : boost::static_visitor<>
       : expected_(expected)
     {
     }
-    
+
     void operator()(boost::any const &any) const
     {
         boost::get<boost::any>(expected_);
     }
-    
+
     void operator()(telnetpp::u8stream const &stream) const
     {
-        auto const &expected_stream = 
+        auto const &expected_stream =
             boost::get<telnetpp::u8stream>(expected_);
 
         ASSERT_EQ(expected_stream, stream);
     }
-    
+
     boost::variant<telnetpp::u8stream, boost::any> expected_;
 };
 
@@ -37,10 +36,10 @@ static void expect_result(
     std::vector<boost::variant<telnetpp::u8stream, boost::any>> const &result)
 {
     ASSERT_EQ(expected.size(), result.size());
-    
+
     auto current_expected = expected.begin();
     auto current_result   = result.begin();
-    
+
     for (;
          current_expected != expected.end()
       && current_result != result.end();
@@ -62,51 +61,47 @@ TEST(session_test, reception_of_text_routes_to_user_supplied_function)
             result = text;
             return {};
         });
-    
+
     std::string expected = "TEST STRING";
     session.receive(telnetpp::u8stream{expected.begin(), expected.end()});
-    
+
     ASSERT_EQ(expected, result);
 }
 
 TEST(session_test, reception_of_negotiation_routes_to_installed_client_option)
 {
     telnetpp::session session(nullptr);
-    telnetpp::options::echo::client echo_client;
-    
-    echo_client.set_activatable();
-    session.install(echo_client);
-    
+    telnetpp::options::echo::client client;
+
+    client.set_activatable();
+    session.install(client);
+
     expect_tokens(
         { telnetpp::element(
-            telnetpp::negotiation(
-                telnetpp::do_, 
-                telnetpp::options::echo::option)) 
+            telnetpp::negotiation(telnetpp::do_, client.option()))
         },
-        session.receive({ 
-            telnetpp::iac, 
-            telnetpp::will, 
-            telnetpp::options::echo::option 
+        session.receive({
+            telnetpp::iac,
+            telnetpp::will,
+            client.option()
         }));
 }
 
 TEST(session_test, reception_of_negotiation_routes_to_installed_server_option)
 {
     telnetpp::session session(nullptr);
-    telnetpp::options::echo::server echo_server;
-    
-    echo_server.set_activatable();
-    session.install(echo_server);
-    
+    telnetpp::options::echo::server server;
+
+    server.set_activatable();
+    session.install(server);
+
     expect_tokens(
         { telnetpp::element(
-            telnetpp::negotiation(
-                telnetpp::will, 
-                telnetpp::options::echo::option)) },
+            telnetpp::negotiation(telnetpp::will, server.option())) },
         session.receive({
-            telnetpp::iac, 
-            telnetpp::do_, 
-            telnetpp::options::echo::option
+            telnetpp::iac,
+            telnetpp::do_,
+            server.option()
         }));
 }
 
@@ -116,37 +111,37 @@ TEST(session_test, reception_of_command_routes_to_installed_command_function)
     telnetpp::command result(0x00);
     telnetpp::session session(nullptr);
 
-    session.install(expected, 
+    session.install(expected,
         [&result](telnetpp::command const &cmd) -> std::vector<telnetpp::token>
         {
             result = cmd;
             return {};
         });
-        
+
     session.receive({
         telnetpp::iac,
         expected.value()
     });
-    
+
     ASSERT_EQ(expected, result);
 }
 
 TEST(session_test, sending_element_converts_element_to_bytes)
 {
     telnetpp::session               session(nullptr);
-    telnetpp::options::echo::server echo_server;
-    
-    session.install(echo_server);
-    
+    telnetpp::options::echo::server server;
+
+    session.install(server);
+
     std::vector<boost::variant<telnetpp::u8stream, boost::any>> expected = {
         telnetpp::u8stream {
             telnetpp::iac,
             telnetpp::will,
-            telnetpp::options::echo::option
+            server.option()
         }
     };
-    
-    expect_result(expected, session.send(echo_server.activate()));
+
+    expect_result(expected, session.send(server.activate()));
 }
 
 TEST(session_test, unrouted_will_results_in_dont)

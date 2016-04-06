@@ -1,6 +1,6 @@
 #pragma once
 
-#include "telnetpp/options/msdp.hpp"
+#include "telnetpp/options/msdp/variable.hpp"
 #include "telnetpp/client_option.hpp"
 
 namespace telnetpp { namespace options { namespace msdp {

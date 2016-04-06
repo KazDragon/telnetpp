@@ -1,6 +1,7 @@
 #include "telnetpp/options/msdp/client.hpp"
 #include "telnetpp/options/msdp/detail/decoder.hpp"
 #include "telnetpp/options/msdp/detail/encoder.hpp"
+#include "telnetpp/options/msdp/detail/protocol.hpp"
 
 namespace telnetpp { namespace options { namespace msdp {
 
@@ -8,7 +9,7 @@ namespace telnetpp { namespace options { namespace msdp {
 // CONSTRUCTOR
 // ==========================================================================
 client::client()
-  : telnetpp::client_option(telnetpp::options::msdp::option)
+  : telnetpp::client_option(telnetpp::options::msdp::detail::option)
 {
 }
 

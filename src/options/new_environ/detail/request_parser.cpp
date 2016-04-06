@@ -1,10 +1,11 @@
 #include "telnetpp/options/new_environ/detail/request_parser.hpp"
+#include "telnetpp/options/new_environ/detail/protocol.hpp"
 
 namespace telnetpp { namespace options { namespace new_environ {
     namespace detail {
 
 namespace {
-    
+
 enum class parse_state
 {
     send,
@@ -12,6 +13,16 @@ enum class parse_state
     name,
     name_esc,
 };
+
+
+static telnetpp::options::new_environ::variable_type u8_to_type(
+    telnetpp::u8 value)
+{
+    return value == telnetpp::options::new_environ::detail::var
+         ? telnetpp::options::new_environ::variable_type::var
+         : telnetpp::options::new_environ::variable_type::uservar;
+}
+
 
 // ==========================================================================
 // PARSE_NAME_ESC
@@ -21,7 +32,7 @@ boost::optional<request> parse_name_esc(
 {
     temp.name.push_back(char(data));
     state = parse_state::name;
-    
+
     return {};
 }
 
@@ -32,17 +43,17 @@ boost::optional<request> parse_name(
     parse_state &state, request &temp, u8 data)
 {
     boost::optional<request> resp;
-    
-    if (data == telnetpp::options::new_environ::esc)
+
+    if (data == telnetpp::options::new_environ::detail::esc)
     {
         state = parse_state::name_esc;
     }
-    else if (data == telnetpp::options::new_environ::var
-          || data == telnetpp::options::new_environ::uservar)
+    else if (data == telnetpp::options::new_environ::detail::var
+          || data == telnetpp::options::new_environ::detail::uservar)
     {
         resp = temp;
 
-        temp.type = data;
+        temp.type = u8_to_type(data);
         temp.name = "";
         state = parse_state::name;
     }
@@ -50,7 +61,7 @@ boost::optional<request> parse_name(
     {
         temp.name.push_back(char(data));
     }
-    
+
     return resp;
 }
 
@@ -60,7 +71,7 @@ boost::optional<request> parse_name(
 boost::optional<request> parse_type(
     parse_state &state, request &temp, u8 data)
 {
-    temp.type = data;
+    temp.type = u8_to_type(data);
     state = parse_state::name;
     return {};
 }
@@ -82,7 +93,7 @@ boost::optional<request> parse_data(
     parse_state &state, request &temp, u8 data)
 {
     boost::optional<request> req;
-    
+
     switch (state)
     {
         case parse_state::send :
@@ -92,20 +103,20 @@ boost::optional<request> parse_data(
         case parse_state::type :
             req = parse_type(state, temp, data);
             break;
-            
+
         case parse_state::name :
             req = parse_name(state, temp, data);
             break;
-            
+
         case parse_state::name_esc :
             req = parse_name_esc(state, temp, data);
             break;
-            
+
         default :
             return {};
             break;
     }
-    
+
     return req;
 }
 
@@ -118,26 +129,26 @@ std::vector<request> parse_requests(telnetpp::u8stream const &stream)
 {
     std::vector<request> requests;
     parse_state state = parse_state::send;
-    
+
     request temp;
     boost::optional<request> resp;
-    
+
     for (auto data : stream)
     {
         resp = parse_data(state, temp, data);
-        
+
         if (resp)
         {
             requests.push_back(*resp);
         }
     }
-    
+
     if (!temp.name.empty())
     {
-        requests.push_back(temp);    
+        requests.push_back(temp);
     }
 
-    return requests;    
+    return requests;
 }
-        
+
 }}}}
