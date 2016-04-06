@@ -25,6 +25,13 @@ static void register_msdp_server_variable_reception(
 
 }
 
+TEST(msdp_server_test, option_is_msdp)
+{
+    telnetpp::options::msdp::server server;
+
+    ASSERT_EQ(69, server.option());
+}
+
 TEST(msdp_server_test, send_with_empty_list_sends_nothing)
 {
     telnetpp::options::msdp::server server;
@@ -43,7 +50,7 @@ TEST(msdp_server_test, send_with_variable_sends_simple_variable)
     expect_elements(
         {
             telnetpp::subnegotiation{
-                telnetpp::options::msdp::option,
+                server.option(),
                 { 1, 'v', 'a', 'r', 2, 'v', 'a', 'l' }
             }
         },
@@ -63,7 +70,7 @@ TEST(msdp_server_test, send_with_array_sends_array_variable)
     expect_elements(
         {
             telnetpp::subnegotiation{
-                telnetpp::options::msdp::option,
+                server.option(),
                 { 1, 'v', 'a', 'r',
                   2,
                       5,
@@ -92,7 +99,7 @@ TEST(msdp_server_test, send_with_table_sends_table_variable)
     expect_elements(
         {
             telnetpp::subnegotiation{
-                telnetpp::options::msdp::option,
+                server.option(),
                 { 1, 'v', 'a', 'r',
                   2,  3,
                           1, 't', 'b', 'l',
@@ -129,7 +136,7 @@ TEST(msdp_server_test, send_with_many_items_sends_many_items)
     expect_elements(
         {
             telnetpp::subnegotiation{
-                telnetpp::options::msdp::option,
+                server.option(),
                 { 1, 's', 'v', 'a', 'r',
                   2, 's', 'v', 'a', 'l',
                   1, 'a', 'v', 'a', 'r',
