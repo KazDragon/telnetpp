@@ -1,7 +1,7 @@
 #pragma once
 
 #include "telnetpp/options/subnegotiationless_client.hpp"
-#include "telnetpp/options/echo/detail/echo.hpp"
+#include "telnetpp/options/echo/detail/protocol.hpp"
 
 namespace telnetpp { namespace options { namespace echo {
 
