@@ -1,5 +1,5 @@
 #include "telnetpp/options/terminal_type/client.hpp"
-#include "telnetpp/options/terminal_type.hpp"
+#include "telnetpp/options/terminal_type/detail/protocol.hpp"
 
 namespace telnetpp { namespace options { namespace terminal_type {
 
@@ -7,7 +7,7 @@ namespace telnetpp { namespace options { namespace terminal_type {
 // CONSTRUCTOR
 // ==========================================================================
 client::client()
-  : client_option(telnetpp::options::terminal_type::option)
+  : client_option(telnetpp::options::terminal_type::detail::option)
 {
 }
 
@@ -16,10 +16,10 @@ client::client()
 // ==========================================================================
 std::vector<telnetpp::token> client::request_terminal_type()
 {
-    return 
-    { 
-        telnetpp::element(telnetpp::subnegotiation(
-            option(), { telnetpp::options::terminal_type::send }))
+    return
+    {
+        telnetpp::element(
+            telnetpp::subnegotiation(option(), { detail::send }))
     };
 }
 
@@ -31,15 +31,15 @@ std::vector<telnetpp::token> client::handle_subnegotiation(
 {
     auto begin = content.begin();
     auto end   = content.end();
-    
+
     if (begin != end)
     {
-        if (*begin++ == telnetpp::options::terminal_type::is)
+        if (*begin++ == detail::is)
         {
             return on_terminal_type({begin, end});
         }
     }
-    
+
     return {};
 }
 
