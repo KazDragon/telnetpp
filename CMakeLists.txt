@@ -38,6 +38,7 @@ set (telnetpp_public_src
     src/client_option.cpp
     src/command.cpp
     src/negotiation.cpp
+    src/options/mccp/server.cpp
     src/options/msdp/client.cpp
     src/options/msdp/server.cpp
     src/options/msdp/variable.cpp
@@ -116,6 +117,7 @@ if (GTEST_FOUND)
         test/command_router_test.cpp
         test/echo_client_test.cpp
         test/echo_server_test.cpp
+        test/mccp_server_test.cpp
         test/msdp_client_test.cpp
         test/msdp_server_test.cpp
         test/msdp_server_robustness_test.cpp
