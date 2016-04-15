@@ -236,17 +236,20 @@ TEST(server_option_test, activated_negotiate_do_responds_with_will_is_active_no_
     ASSERT_EQ(false, called);
 }
 
-TEST(server_option_test, activated_negotiate_dont_responds_with_wont_is_inactive_no_signal)
+TEST(server_option_test, activated_negotiate_dont_responds_with_wont_is_inactive_with_signal)
 {
     fake_server_option server(0xA5);
     server.activate();
     server.negotiate(telnetpp::do_);
 
+    auto state = telnetpp::server_option::state::inactive;
     bool called = false;
     server.on_state_changed.connect(
-        [&called](telnetpp::server_option::state) -> std::vector<telnetpp::token>
+        [&called, &state](telnetpp::server_option::state new_state)
+            -> std::vector<telnetpp::token>
         {
             called = true;
+            state = new_state;
             return {};
         });
 
@@ -254,7 +257,8 @@ TEST(server_option_test, activated_negotiate_dont_responds_with_wont_is_inactive
         { telnetpp::element(telnetpp::negotiation(telnetpp::wont, 0xA5)) },
         server.negotiate(telnetpp::dont));
     ASSERT_EQ(false, server.is_active());
-    ASSERT_EQ(false, called);
+    ASSERT_EQ(true, called);
+    ASSERT_EQ(telnetpp::server_option::state::inactive, state);
 }
 
 TEST(server_option_test, activated_activate_responds_with_nothing_is_active_with_signal)
@@ -276,17 +280,20 @@ TEST(server_option_test, activated_activate_responds_with_nothing_is_active_with
     ASSERT_EQ(true, called);
 }
 
-TEST(server_option_test, activated_deactive_responds_with_wont_is_inactive_no_signal)
+TEST(server_option_test, activated_deactive_responds_with_wont_is_inactive_with_signal)
 {
     fake_server_option server(0xA5);
     server.activate();
     server.negotiate(telnetpp::do_);
 
+    auto state = telnetpp::server_option::state::inactive;
     bool called = false;
     server.on_state_changed.connect(
-        [&called](telnetpp::server_option::state) -> std::vector<telnetpp::token>
+        [&called, &state](telnetpp::server_option::state new_state)
+            -> std::vector<telnetpp::token>
         {
             called = true;
+            state = new_state;
             return {};
         });
 
@@ -294,7 +301,8 @@ TEST(server_option_test, activated_deactive_responds_with_wont_is_inactive_no_si
         { telnetpp::element(telnetpp::negotiation(telnetpp::wont, 0xA5)) },
         server.deactivate());
     ASSERT_EQ(false, server.is_active());
-    ASSERT_EQ(false, called);
+    ASSERT_EQ(true, called);
+    ASSERT_EQ(telnetpp::server_option::state::deactivating, state);
 }
 
 TEST(server_option_test, deactivating_negotiate_do_responds_with_nothing_is_active_with_signal)
