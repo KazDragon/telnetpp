@@ -10,7 +10,7 @@ server::server()
   : server_option(telnetpp::options::naws::detail::option)
 {
     on_state_changed.connect(
-        [this]()
+        [this](server_option::state)
         {
             return report_window_size();
         });
