@@ -14,6 +14,10 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${PROJECT_SOURCE_DIR}/cmake/Modules"
 include(FindBoost)
 find_package(Boost 1.39.0 REQUIRED)
 
+# ZLib is required for the MCCP options.
+include(FindZLIB)
+find_package(ZLIB REQUIRED)
+
 # When building shared objects, etc., we only want to export certain symbols.
 # Therefore, we need to generate a header suitable for declaring which
 # symbols should be included.
@@ -38,6 +42,7 @@ set (telnetpp_public_src
     src/client_option.cpp
     src/command.cpp
     src/negotiation.cpp
+    src/options/mccp/codec.cpp
     src/options/mccp/server.cpp
     src/options/msdp/client.cpp
     src/options/msdp/server.cpp
@@ -117,6 +122,7 @@ if (GTEST_FOUND)
         test/command_router_test.cpp
         test/echo_client_test.cpp
         test/echo_server_test.cpp
+        test/mccp_codec_test.cpp
         test/mccp_server_test.cpp
         test/msdp_client_test.cpp
         test/msdp_server_test.cpp
@@ -174,6 +180,7 @@ if (GTEST_FOUND)
         ${GTEST_LIBRARY}
         ${GTEST_MAIN_LIBRARY}
         ${CMAKE_THREAD_LIBS_INIT}
+        ${ZLIB_LIBRARIES}
     )
 
     add_test(telnetpp_test telnetpp_tester)
