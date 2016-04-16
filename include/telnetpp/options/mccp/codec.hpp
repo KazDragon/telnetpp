@@ -5,7 +5,7 @@
 
 namespace telnetpp { namespace options { namespace mccp {
 
-class codec
+class TELNETPP_EXPORT codec
 {
 public :
     std::vector<telnetpp::token> send(
