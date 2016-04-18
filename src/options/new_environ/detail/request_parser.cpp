@@ -44,22 +44,24 @@ boost::optional<request> parse_name(
 {
     boost::optional<request> resp;
 
-    if (data == telnetpp::options::new_environ::detail::esc)
+    switch (data)
     {
-        state = parse_state::name_esc;
-    }
-    else if (data == telnetpp::options::new_environ::detail::var
-          || data == telnetpp::options::new_environ::detail::uservar)
-    {
-        resp = temp;
+        case detail::esc :
+            state = parse_state::name_esc;
+            break;
 
-        temp.type = u8_to_type(data);
-        temp.name = "";
-        state = parse_state::name;
-    }
-    else
-    {
-        temp.name.push_back(char(data));
+        case detail::var : // Fall-through
+        case detail::uservar :
+            resp = temp;
+
+            temp.type = u8_to_type(data);
+            temp.name = "";
+            state = parse_state::name;
+            break;
+
+        default :
+            temp.name.push_back(char(data));
+            break;
     }
 
     return resp;

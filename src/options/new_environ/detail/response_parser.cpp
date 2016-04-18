@@ -46,23 +46,25 @@ boost::optional<response> parse_value(
 {
     boost::optional<response> resp;
 
-    if (data == telnetpp::options::new_environ::detail::esc)
+    switch (data)
     {
-        state = parse_state::value_esc;
-    }
-    else if (data == telnetpp::options::new_environ::detail::var
-          || data == telnetpp::options::new_environ::detail::uservar)
-    {
-        resp = temp;
+        case detail::esc :
+            state = parse_state::value_esc;
+            break;
 
-        temp.type = u8_to_type(data);
-        temp.name = "";
-        temp.value = boost::none;
-        state = parse_state::name;
-    }
-    else
-    {
-        temp.value->push_back(data);
+        case detail::var : // Fall-through
+        case detail::uservar :
+            resp = temp;
+
+            temp.type = u8_to_type(data);
+            temp.name = "";
+            temp.value = boost::none;
+            state = parse_state::name;
+            break;
+
+        default :
+            temp.value->push_back(data);
+            break;
     }
 
     return resp;
@@ -88,28 +90,30 @@ boost::optional<response> parse_name(
 {
     boost::optional<response> resp;
 
-    if (data == telnetpp::options::new_environ::detail::esc)
+    switch (data)
     {
-        state = parse_state::name_esc;
-    }
-    else if (data == telnetpp::options::new_environ::detail::var
-          || data == telnetpp::options::new_environ::detail::uservar)
-    {
-        resp = temp;
+        case detail::esc :
+            state = parse_state::name_esc;
+            break;
 
-        temp.type = u8_to_type(data);
-        temp.name = "";
-        temp.value = boost::none;
-        state = parse_state::name;
-    }
-    else if (data == telnetpp::options::new_environ::detail::value)
-    {
-        temp.value = "";
-        state = parse_state::value;
-    }
-    else
-    {
-        temp.name.push_back(char(data));
+        case detail::var : // Fall-through
+        case detail::uservar :
+            resp = temp;
+
+            temp.type = u8_to_type(data);
+            temp.name = "";
+            temp.value = boost::none;
+            state = parse_state::name;
+            break;
+
+        case detail::value :
+            temp.value = "";
+            state = parse_state::value;
+            break;
+
+        default :
+            temp.name.push_back(char(data));
+            break;
     }
 
     return resp;
@@ -191,7 +195,7 @@ std::vector<response> parse_responses(telnetpp::u8stream const &stream)
     response temp;
     boost::optional<response> resp;
 
-    for (auto data : stream)
+    for (auto const &data : stream)
     {
         resp = parse_data(state, temp, data);
 
