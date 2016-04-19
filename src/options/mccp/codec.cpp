@@ -11,18 +11,18 @@ struct codec::impl
     {
         deflateInit(&deflate_stream_, Z_DEFAULT_COMPRESSION);
     }
-    
+
     ~impl()
     {
         deflateEnd(&deflate_stream_);
     }
-    
+
     std::vector<telnetpp::stream_token> buffer_;
     z_stream                            deflate_stream_ = {};
     bool                                blocked_ = false;
     bool                                compressed_ = false;
 };
-    
+
 namespace {
 
 static bool is_block_token(boost::any const &any)
@@ -104,46 +104,46 @@ private :
         result.insert(
             result.end(), impl_.buffer_.begin(), impl_.buffer_.end());
     }
-    
+
     void compress_stream(telnetpp::u8stream &stream)
     {
         telnetpp::u8 compress_buffer[1023];
-        
-        // Note: const_cast is correct, since ZLib doesn't change the 
+
+        // Note: const_cast is correct, since ZLib doesn't change the
         // content of the input stream.
         impl_.deflate_stream_.avail_in = stream.size();
-        impl_.deflate_stream_.next_in = 
+        impl_.deflate_stream_.next_in =
             const_cast<telnetpp::u8 *>(stream.data());
-        
+
         impl_.deflate_stream_.avail_out = sizeof(compress_buffer);
         impl_.deflate_stream_.next_out = compress_buffer;
-        
+
         // TODO: test deflating input stream that results in output stream
         // larger than buffer size.
         // TODO: robustness for error codes.
         auto result = deflate(&impl_.deflate_stream_, Z_SYNC_FLUSH);
         assert(result == Z_OK);
-        
+
         auto compress_buffer_end =
             compress_buffer
             + (sizeof(compress_buffer) - impl_.deflate_stream_.avail_out);
-            
+
         stream = telnetpp::u8stream(compress_buffer, compress_buffer_end);
     }
-    
+
     void compress_buffer()
     {
-        
+
         for (auto &token : impl_.buffer_)
         {
             auto *stream = boost::get<telnetpp::u8stream>(&token);
             // TODO: test pass-through tokens.
             assert(stream != nullptr);
-    
+
             compress_stream(*stream);
         }
     }
-    
+
     void clear_buffer()
     {
         impl_.buffer_.clear();
@@ -173,6 +173,19 @@ std::vector<stream_token> codec::send(std::vector<stream_token> const &tokens)
     }
 
     return visitor.result;
+}
+
+boost::optional<std::vector<stream_token>> codec::receive(
+    std::vector<stream_token> const &tokens)
+{
+    if (tokens.empty())
+    {
+        return {};
+    }
+    else
+    {
+        return tokens;
+    }
 }
 
 }}}
