@@ -17,9 +17,6 @@ public :
     std::vector<telnetpp::stream_token> send(
         std::vector<telnetpp::stream_token> const &tokens);
 
-    boost::optional<std::vector<telnetpp::stream_token>> receive(
-        std::vector<telnetpp::stream_token> const &tokens);
-
     struct impl;
 
 private :

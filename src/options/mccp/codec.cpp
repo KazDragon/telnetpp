@@ -7,16 +7,6 @@ namespace telnetpp { namespace options { namespace mccp {
 
 struct codec::impl
 {
-    impl()
-    {
-        deflateInit(&deflate_stream_, Z_DEFAULT_COMPRESSION);
-    }
-
-    ~impl()
-    {
-        deflateEnd(&deflate_stream_);
-    }
-
     std::vector<telnetpp::stream_token> buffer_;
     z_stream                            deflate_stream_ = {};
     bool                                blocked_ = false;
@@ -78,12 +68,23 @@ public :
         }
         else if (is_resume_uncompressed_token(any))
         {
+            if (impl_.compressed_)
+            {
+                deflateEnd(&impl_.deflate_stream_);
+            }
+
             impl_.blocked_ = false;
+            impl_.compressed_ = false;
             append_buffer_to_result();
             clear_buffer();
         }
         else if (is_resume_compressed_token(any))
         {
+            if (!impl_.compressed_)
+            {
+                deflateInit(&impl_.deflate_stream_, Z_DEFAULT_COMPRESSION);
+            }
+
             impl_.blocked_ = false;
             impl_.compressed_ = true;
             compress_buffer();
@@ -173,19 +174,6 @@ std::vector<stream_token> codec::send(std::vector<stream_token> const &tokens)
     }
 
     return visitor.result;
-}
-
-boost::optional<std::vector<stream_token>> codec::receive(
-    std::vector<stream_token> const &tokens)
-{
-    if (tokens.empty())
-    {
-        return {};
-    }
-    else
-    {
-        return tokens;
-    }
 }
 
 }}}

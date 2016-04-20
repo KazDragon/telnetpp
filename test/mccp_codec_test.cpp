@@ -194,32 +194,64 @@ TEST(mccp_codec_test, compressed_block_blocks_data)
     expect_tokens(expected, codec.send(tokens));
 }
 
-TEST(mccp_codec_test, uncompressed_receive_empty_data_returns_empty_data)
-{
-    telnetpp::options::mccp::codec codec;
-
-    auto tokens = std::vector<telnetpp::stream_token> {};
-
-    auto result = codec.receive(tokens);
-
-    ASSERT_FALSE(result.is_initialized());
-}
-
-TEST(mccp_codec_test, uncompressed_receive_data_returns_data)
+TEST(mccp_codec_test, restarting_compressed_stream_sends_new_compressed_data)
 {
     telnetpp::options::mccp::codec codec;
 
     auto tokens = std::vector<telnetpp::stream_token> {
-        telnetpp::u8stream{ reinterpret_cast<telnetpp::u8 const *>("data") }
+        boost::any(telnetpp::options::mccp::resume_compressed_token{}),
+        telnetpp::u8stream{ reinterpret_cast<telnetpp::u8 const *>("data0") },
+        boost::any(telnetpp::options::mccp::resume_uncompressed_token{})
     };
 
-    auto expected = std::vector<telnetpp::stream_token> {
-        telnetpp::u8stream{ reinterpret_cast<telnetpp::u8 const *>("data") }
+    auto response = codec.send(tokens);
+    auto data = boost::get<telnetpp::u8stream>(response[0]);
+
+    z_stream stream = {};
+    int result = inflateInit(&stream);
+    assert(result == Z_OK);
+
+    telnetpp::u8 bytes[1024] = {};
+    std::copy(data.begin(), data.end(), bytes);
+    telnetpp::u8 output[1024] = {};
+
+    stream.avail_in = data.size();
+    stream.next_in = bytes;
+    stream.avail_out = sizeof(output);
+    stream.next_out = output;
+
+    result = inflate(&stream, Z_SYNC_FLUSH);
+    assert(result ==  Z_OK);
+    inflateEnd(&stream);
+
+    tokens = std::vector<telnetpp::stream_token> {
+        boost::any(telnetpp::options::mccp::resume_compressed_token{}),
+        telnetpp::u8stream{ reinterpret_cast<telnetpp::u8 const *>("data1") },
     };
 
-    auto result = codec.receive(tokens);
+    response = codec.send(tokens);
+    data = boost::get<telnetpp::u8stream>(response[0]);
 
-    ASSERT_TRUE(result.is_initialized());
+    stream = {};
+    result = inflateInit(&stream);
+    assert(result == Z_OK);
 
-    expect_tokens(expected, *result);
+    std::copy(data.begin(), data.end(), bytes);
+
+    stream.avail_in = data.size();
+    stream.next_in = bytes;
+    stream.avail_out = sizeof(output);
+    stream.next_out = output;
+
+    result = inflate(&stream, Z_SYNC_FLUSH);
+    ASSERT_EQ(Z_OK, result);
+
+    auto expected =
+        telnetpp::u8stream{ reinterpret_cast<telnetpp::u8 const*>("data1") };
+
+    auto output_end = output + (sizeof(output) - stream.avail_out);
+    telnetpp::u8stream actual(output, output_end);
+    ASSERT_EQ(expected, actual);
+
+
 }
