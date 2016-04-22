@@ -2,8 +2,7 @@
 #include <telnetpp/options/mccp/codec.hpp>
 #include <telnetpp/options/mccp/mccp.hpp>
 #include "expect_elements.hpp"
-#include <boost/random.hpp>
-#include <boost/random/random_device.hpp>
+#include <random>
 #include <zlib.h>
 
 TEST(mccp_codec_test, sending_empty_tokens_returns_empty_tokens)
@@ -263,11 +262,9 @@ TEST(mccp_codec_test, compressed_large_stream_sent_correctly)
     // chunk size is 1023 bytes.  Therefore, to test this, we attempt
     // to compress a batch of random (and thus not easily compressible)
     // data that should compress to much more than that.
-    boost::random_device rdev;
-    boost::mt19937 rng{rdev()};
-    boost::uniform_int<> distribution(0, 255);
-    boost::variate_generator<boost::mt19937&, boost::uniform_int<>> generator(
-        rng, distribution);
+    std::random_device rdev;
+    std::mt19937 rng{rdev()};
+    std::uniform_int_distribution<> distribution(0, 255);
 
     size_t const stream_size{64000};
 
@@ -276,7 +273,7 @@ TEST(mccp_codec_test, compressed_large_stream_sent_correctly)
 
     for (auto &ch : stream)
     {
-        ch = generator();
+        ch = distribution(rng);
     }
 
     telnetpp::options::mccp::codec codec;
