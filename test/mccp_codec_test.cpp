@@ -287,6 +287,12 @@ TEST(mccp_codec_test, compressed_large_stream_sent_correctly)
     ASSERT_EQ(size_t{1}, response.size());
     auto compressed_stream = boost::get<telnetpp::u8stream>(response[0]);
 
+    // The compressed stream must be greater than this, or otherwise we haven't
+    // actually tested the use case.
+    // Note: When measured, this actually "compressed" to 64027 bytes.  So
+    // it looks like random numbers is a *really* good test.
+    assert(compressed_stream.size() > 1023u);
+
     // Now inflate the stream to ensure that it was completely compressed.
     z_stream inflate_stream = {};
     int result = inflateInit(&inflate_stream);
