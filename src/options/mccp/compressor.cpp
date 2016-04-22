@@ -1,11 +1,11 @@
-#include "telnetpp/options/mccp/codec.hpp"
+#include "telnetpp/options/mccp/compressor.hpp"
 #include "telnetpp/options/mccp/mccp.hpp"
 #include <vector>
 #include <zlib.h>
 
 namespace telnetpp { namespace options { namespace mccp {
 
-struct codec::impl
+struct compressor::impl
 {
     ~impl()
     {
@@ -41,7 +41,7 @@ static bool is_resume_compressed_token(boost::any const &any)
 struct token_visitor : public boost::static_visitor<>
 {
 public :
-    token_visitor(codec::impl &impl)
+    token_visitor(compressor::impl &impl)
       : impl_(impl)
     {
     }
@@ -161,21 +161,21 @@ private :
         impl_.buffer_.clear();
     }
 
-    codec::impl &impl_;
+    compressor::impl &impl_;
 };
 
 }
 
-codec::codec()
+compressor::compressor()
   : pimpl_(std::make_shared<impl>())
 {
 }
 
-codec::~codec()
+compressor::~compressor()
 {
 }
 
-std::vector<stream_token> codec::send(std::vector<stream_token> const &tokens)
+std::vector<stream_token> compressor::send(std::vector<stream_token> const &tokens)
 {
     token_visitor visitor(*pimpl_);
 

@@ -8,11 +8,11 @@
 
 namespace telnetpp { namespace options { namespace mccp {
 
-class TELNETPP_EXPORT codec : boost::noncopyable
+class TELNETPP_EXPORT compressor : boost::noncopyable
 {
 public :
-    codec();
-    ~codec();
+    compressor();
+    ~compressor();
 
     std::vector<telnetpp::stream_token> send(
         std::vector<telnetpp::stream_token> const &tokens);
