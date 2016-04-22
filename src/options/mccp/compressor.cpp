@@ -1,27 +1,36 @@
 #include "telnetpp/options/mccp/compressor.hpp"
 #include "telnetpp/options/mccp/mccp.hpp"
+#include <functional>
 #include <vector>
 #include <zlib.h>
 
 namespace telnetpp { namespace options { namespace mccp {
 
-struct compressor::impl
+namespace {
+
+struct token_visitor : public boost::static_visitor<>
 {
-    ~impl()
+    token_visitor(
+        std::function<void (telnetpp::u8stream const &)> const &on_stream,
+        std::function<void (boost::any const &)> const &on_any)
+      : on_stream_(on_stream),
+        on_any_(on_any)
     {
-        if (compressed_)
-        {
-            deflateEnd(&deflate_stream_);
-        }
     }
 
-    std::vector<telnetpp::stream_token> buffer_;
-    z_stream                            deflate_stream_ = {};
-    bool                                blocked_ = false;
-    bool                                compressed_ = false;
-};
+    void operator()(u8stream const &elem)
+    {
+        on_stream_(elem);
+    }
 
-namespace {
+    void operator()(boost::any const &any)
+    {
+        on_any_(any);
+    }
+
+    std::function<void (telnetpp::u8stream const &)> on_stream_;
+    std::function<void (boost::any const &)> on_any_;
+};
 
 static bool is_block_token(boost::any const &any)
 {
@@ -38,80 +47,112 @@ static bool is_resume_compressed_token(boost::any const &any)
     return boost::any_cast<resume_compressed_token>(&any) != nullptr;
 }
 
-struct token_visitor : public boost::static_visitor<>
+}
+
+struct compressor::impl
 {
-public :
-    token_visitor(compressor::impl &impl)
-      : impl_(impl)
+    ~impl()
     {
+        end_compression();
     }
 
-    void operator()(u8stream const &elem)
+    std::vector<telnetpp::stream_token> send(
+        std::vector<telnetpp::stream_token> const &tokens)
     {
-        if (!impl_.blocked_)
+        result_ = {};
+
+        token_visitor visitor(
+            [this](auto const &elem){handle_stream(elem);},
+            [this](auto const &any){handle_any(any);});
+
+        for (auto const &token : tokens)
         {
-            if (impl_.compressed_)
+            boost::apply_visitor(visitor, token);
+        }
+
+        return result_;
+    }
+
+private :
+    void block_buffer()
+    {
+        blocked_ = true;
+    }
+
+    void unblock_buffer()
+    {
+        blocked_ = false;
+        append_buffer_to_result();
+        clear_buffer();
+    }
+
+    void begin_compression()
+    {
+        if (!compressed_)
+        {
+            deflateInit(&deflate_stream_, Z_DEFAULT_COMPRESSION);
+            compressed_ = true;
+        }
+    }
+
+    void end_compression()
+    {
+        if (compressed_)
+        {
+            deflateEnd(&deflate_stream_);
+            compressed_ = false;
+        }
+    }
+
+    void handle_stream(u8stream const &elem)
+    {
+        if (!blocked_)
+        {
+            if (compressed_)
             {
-                impl_.buffer_.push_back(elem);
+                buffer_.push_back(elem);
                 compress_buffer();
                 append_buffer_to_result();
                 clear_buffer();
             }
             else
             {
-                result.push_back(elem);
+                result_.push_back(elem);
             }
         }
         else
         {
-            impl_.buffer_.push_back(elem);
+            buffer_.push_back(elem);
         }
     }
 
-    void operator()(boost::any const &any)
+    void handle_any(boost::any const &any)
     {
         if (is_block_token(any))
         {
-            impl_.blocked_ = true;
+            block_buffer();
         }
         else if (is_resume_uncompressed_token(any))
         {
-            if (impl_.compressed_)
-            {
-                deflateEnd(&impl_.deflate_stream_);
-            }
-
-            impl_.blocked_ = false;
-            impl_.compressed_ = false;
-            append_buffer_to_result();
-            clear_buffer();
+            end_compression();
+            unblock_buffer();
         }
         else if (is_resume_compressed_token(any))
         {
-            if (!impl_.compressed_)
-            {
-                deflateInit(&impl_.deflate_stream_, Z_DEFAULT_COMPRESSION);
-            }
-
-            impl_.blocked_ = false;
-            impl_.compressed_ = true;
+            begin_compression();
             compress_buffer();
-            append_buffer_to_result();
-            clear_buffer();
+            unblock_buffer();
         }
         else
         {
-            result.push_back(any);
+            result_.push_back(any);
         }
     }
 
-    std::vector<stream_token> result;
-
-private :
     void append_buffer_to_result()
     {
-        result.insert(
-            result.end(), impl_.buffer_.begin(), impl_.buffer_.end());
+        result_.insert(
+            result_.end(), buffer_.begin(), buffer_.end());
     }
 
     void compress_stream(telnetpp::u8stream &stream)
@@ -119,34 +160,33 @@ private :
         telnetpp::u8 compress_buffer[1023];
         telnetpp::u8stream output;
 
-        impl_.deflate_stream_.avail_in = stream.size();
-        impl_.deflate_stream_.next_in = &stream[0];
+        deflate_stream_.avail_in = stream.size();
+        deflate_stream_.next_in = &stream[0];
 
         auto result = Z_OK;
 
         do
         {
-            impl_.deflate_stream_.avail_out = sizeof(compress_buffer);
-            impl_.deflate_stream_.next_out = compress_buffer;
+            deflate_stream_.avail_out = sizeof(compress_buffer);
+            deflate_stream_.next_out = compress_buffer;
 
             // TODO: robustness for error codes.
-            result = deflate(&impl_.deflate_stream_, Z_SYNC_FLUSH);
+            result = deflate(&deflate_stream_, Z_SYNC_FLUSH);
             assert(result == Z_OK);
 
             auto compress_buffer_end =
                 compress_buffer
-                + (sizeof(compress_buffer) - impl_.deflate_stream_.avail_out);
+                + (sizeof(compress_buffer) - deflate_stream_.avail_out);
 
             output.insert(output.end(), compress_buffer, compress_buffer_end);
-        } while (result == Z_OK && impl_.deflate_stream_.avail_out == 0);
+        } while (result == Z_OK && deflate_stream_.avail_out == 0);
 
         std::swap(stream, output);
     }
 
     void compress_buffer()
     {
-
-        for (auto &token : impl_.buffer_)
+        for (auto &token : buffer_)
         {
             auto *stream = boost::get<telnetpp::u8stream>(&token);
             // TODO: test pass-through tokens.
@@ -158,13 +198,15 @@ private :
 
     void clear_buffer()
     {
-        impl_.buffer_.clear();
+        buffer_.clear();
     }
 
-    compressor::impl &impl_;
+    std::vector<telnetpp::stream_token> buffer_;
+    std::vector<telnetpp::stream_token> result_;
+    z_stream                            deflate_stream_ = {};
+    bool                                blocked_ = false;
+    bool                                compressed_ = false;
 };
-
-}
 
 compressor::compressor()
   : pimpl_(std::make_shared<impl>())
@@ -177,14 +219,7 @@ compressor::~compressor()
 
 std::vector<stream_token> compressor::send(std::vector<stream_token> const &tokens)
 {
-    token_visitor visitor(*pimpl_);
-
-    for (auto const &token : tokens)
-    {
-        boost::apply_visitor(visitor, token);
-    }
-
-    return visitor.result;
+    return pimpl_->send(tokens);
 }
 
 }}}
