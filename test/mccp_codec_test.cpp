@@ -246,6 +246,7 @@ TEST(mccp_codec_test, restarting_compressed_stream_sends_new_compressed_data)
 
     result = inflate(&stream, Z_SYNC_FLUSH);
     ASSERT_EQ(Z_OK, result);
+    inflateEnd(&stream);
 
     auto expected =
         telnetpp::u8stream{ reinterpret_cast<telnetpp::u8 const*>("data1") };

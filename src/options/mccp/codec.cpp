@@ -7,6 +7,14 @@ namespace telnetpp { namespace options { namespace mccp {
 
 struct codec::impl
 {
+    ~impl()
+    {
+        if (compressed_)
+        {
+            deflateEnd(&deflate_stream_);
+        }
+    }
+
     std::vector<telnetpp::stream_token> buffer_;
     z_stream                            deflate_stream_ = {};
     bool                                blocked_ = false;
