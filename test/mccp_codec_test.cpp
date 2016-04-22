@@ -239,10 +239,10 @@ TEST(mccp_codec_test, restarting_compressed_stream_sends_new_compressed_data)
 
     std::copy(data.begin(), data.end(), bytes);
 
-    stream.avail_in = data.size();
-    stream.next_in = bytes;
+    stream.avail_in  = data.size();
+    stream.next_in   = bytes;
     stream.avail_out = sizeof(output);
-    stream.next_out = output;
+    stream.next_out  = output;
 
     result = inflate(&stream, Z_SYNC_FLUSH);
     ASSERT_EQ(Z_OK, result);
@@ -262,19 +262,18 @@ TEST(mccp_codec_test, compressed_large_stream_sent_correctly)
     // chunk size is 1023 bytes.  Therefore, to test this, we attempt
     // to compress a batch of random (and thus not easily compressible)
     // data that should compress to much more than that.
-    std::random_device rdev;
-    std::mt19937 rng{rdev()};
-    std::uniform_int_distribution<> distribution(0, 255);
-
-    size_t const stream_size{64000};
+    static size_t const stream_size = 64000;
 
     telnetpp::u8stream stream(stream_size, '\0');
     assert(stream.size() ==  stream_size);
 
-    for (auto &ch : stream)
-    {
-        ch = distribution(rng);
-    }
+    std::generate(stream.begin(), stream.end(),
+        []{
+            static std::random_device rdev;
+            static std::mt19937 rng{rdev()};
+            static std::uniform_int_distribution<> distribution(0, 255);
+            return distribution(rng);
+        });
 
     telnetpp::options::mccp::codec codec;
 
@@ -300,13 +299,13 @@ TEST(mccp_codec_test, compressed_large_stream_sent_correctly)
 
     telnetpp::u8stream output(stream_size, '\0');
 
-    inflate_stream.avail_in = compressed_stream.size();
-    inflate_stream.next_in = &compressed_stream[0];
+    inflate_stream.avail_in  = compressed_stream.size();
+    inflate_stream.next_in   = &compressed_stream[0];
     inflate_stream.avail_out = stream_size;
-    inflate_stream.next_out = &output[0];
+    inflate_stream.next_out  = &output[0];
 
     result = inflate(&inflate_stream, Z_SYNC_FLUSH);
-    assert(result ==  Z_OK);
+    assert(result == Z_OK);
     inflateEnd(&inflate_stream);
 
     // Because the initial stream and the expected decompressed stream are the
