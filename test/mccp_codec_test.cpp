@@ -2,6 +2,8 @@
 #include <telnetpp/options/mccp/codec.hpp>
 #include <telnetpp/options/mccp/mccp.hpp>
 #include "expect_elements.hpp"
+#include <boost/random.hpp>
+#include <boost/random/random_device.hpp>
 #include <zlib.h>
 
 TEST(mccp_codec_test, sending_empty_tokens_returns_empty_tokens)
@@ -252,6 +254,61 @@ TEST(mccp_codec_test, restarting_compressed_stream_sends_new_compressed_data)
     auto output_end = output + (sizeof(output) - stream.avail_out);
     telnetpp::u8stream actual(output, output_end);
     ASSERT_EQ(expected, actual);
+}
 
+TEST(mccp_codec_test, compressed_large_stream_sent_correctly)
+{
+    // In the compression codec, when streams are compressed, they are
+    // returned in small chunks that must be reassembled.  The default
+    // chunk size is 1023 bytes.  Therefore, to test this, we attempt
+    // to compress a batch of random (and thus not easily compressible)
+    // data that should compress to much more than that.
+    boost::random_device rdev;
+    boost::mt19937 rng{rdev()};
+    boost::uniform_int<> distribution(0, 255);
+    boost::variate_generator<boost::mt19937&, boost::uniform_int<>> generator(
+        rng, distribution);
 
+    size_t const stream_size{64000};
+
+    telnetpp::u8stream stream(stream_size, '\0');
+    assert(stream.size() ==  stream_size);
+
+    for (auto &ch : stream)
+    {
+        ch = generator();
+    }
+
+    telnetpp::options::mccp::codec codec;
+
+    auto response = codec.send({
+        boost::any{telnetpp::options::mccp::block_token{}},
+        boost::any{telnetpp::options::mccp::resume_compressed_token{}},
+        stream
+    });
+
+    ASSERT_EQ(size_t{1}, response.size());
+    auto compressed_stream = boost::get<telnetpp::u8stream>(response[0]);
+
+    // Now inflate the stream to ensure that it was completely compressed.
+    z_stream inflate_stream = {};
+    int result = inflateInit(&inflate_stream);
+    assert(result == Z_OK);
+
+    telnetpp::u8stream output(stream_size, '\0');
+
+    inflate_stream.avail_in = compressed_stream.size();
+    inflate_stream.next_in = &compressed_stream[0];
+    inflate_stream.avail_out = stream_size;
+    inflate_stream.next_out = &output[0];
+
+    result = inflate(&inflate_stream, Z_SYNC_FLUSH);
+    assert(result ==  Z_OK);
+    inflateEnd(&inflate_stream);
+
+    // Because the initial stream and the expected decompressed stream are the
+    // same size, there should be no space left in the output stream.
+    // Otherwise, the stream was clipped in some way.
+    ASSERT_EQ(0, inflate_stream.avail_out);
+    ASSERT_EQ(stream, output);
 }

@@ -109,27 +109,30 @@ private :
     void compress_stream(telnetpp::u8stream &stream)
     {
         telnetpp::u8 compress_buffer[1023];
+        telnetpp::u8stream output;
 
-        // Note: const_cast is correct, since ZLib doesn't change the
-        // content of the input stream.
         impl_.deflate_stream_.avail_in = stream.size();
-        impl_.deflate_stream_.next_in =
-            const_cast<telnetpp::u8 *>(stream.data());
+        impl_.deflate_stream_.next_in = &stream[0];
 
-        impl_.deflate_stream_.avail_out = sizeof(compress_buffer);
-        impl_.deflate_stream_.next_out = compress_buffer;
+        auto result = Z_OK;
 
-        // TODO: test deflating input stream that results in output stream
-        // larger than buffer size.
-        // TODO: robustness for error codes.
-        auto result = deflate(&impl_.deflate_stream_, Z_SYNC_FLUSH);
-        assert(result == Z_OK);
+        do
+        {
+            impl_.deflate_stream_.avail_out = sizeof(compress_buffer);
+            impl_.deflate_stream_.next_out = compress_buffer;
 
-        auto compress_buffer_end =
-            compress_buffer
-            + (sizeof(compress_buffer) - impl_.deflate_stream_.avail_out);
+            // TODO: robustness for error codes.
+            result = deflate(&impl_.deflate_stream_, Z_SYNC_FLUSH);
+            assert(result == Z_OK);
 
-        stream = telnetpp::u8stream(compress_buffer, compress_buffer_end);
+            auto compress_buffer_end =
+                compress_buffer
+                + (sizeof(compress_buffer) - impl_.deflate_stream_.avail_out);
+
+            output.insert(output.end(), compress_buffer, compress_buffer_end);
+        } while (result == Z_OK && impl_.deflate_stream_.avail_out == 0);
+
+        std::swap(stream, output);
     }
 
     void compress_buffer()

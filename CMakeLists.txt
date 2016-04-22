@@ -12,7 +12,7 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${PROJECT_SOURCE_DIR}/cmake/Modules"
 # Boost.Signals2.  All of these are header-only libraries, so no subcomponents
 # are required.
 include(FindBoost)
-find_package(Boost 1.39.0 REQUIRED)
+find_package(Boost 1.39.0 REQUIRED COMPONENTS random)
 
 # ZLib is required for the MCCP options.
 include(FindZLIB)
@@ -180,6 +180,7 @@ if (GTEST_FOUND)
         ${GTEST_LIBRARY}
         ${GTEST_MAIN_LIBRARY}
         ${CMAKE_THREAD_LIBS_INIT}
+        ${Boost_RANDOM_LIBRARY}
         ${ZLIB_LIBRARIES}
     )
 
