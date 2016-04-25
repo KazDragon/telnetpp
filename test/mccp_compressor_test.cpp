@@ -315,3 +315,38 @@ TEST(mccp_compressor_test, compressed_large_stream_sent_correctly)
     ASSERT_EQ(0, inflate_stream.avail_out);
     ASSERT_EQ(stream, output);
 }
+
+TEST(mccp_compressor_test, compressed_any_passes_through_any)
+{
+    telnetpp::options::mccp::compressor compressor;
+    struct pass_through {};
+
+    auto tokens = std::vector<telnetpp::stream_token> {
+        boost::any(telnetpp::options::mccp::resume_compressed_token{}),
+        boost::any(pass_through{})
+    };
+
+    auto result = compressor.send(tokens);
+
+    ASSERT_EQ(size_t{1}, result.size());
+    auto any = boost::get<boost::any>(result[0]);
+    auto passed_through_token = boost::any_cast<pass_through>(any);
+}
+
+TEST(mccp_compressor_test, unblocked_compressed_any_passes_through_any)
+{
+    telnetpp::options::mccp::compressor compressor;
+    struct pass_through {};
+
+    auto tokens = std::vector<telnetpp::stream_token> {
+        boost::any(telnetpp::options::mccp::block_token{}),
+        boost::any(pass_through{}),
+        boost::any(telnetpp::options::mccp::resume_compressed_token{})
+    };
+
+    auto result = compressor.send(tokens);
+
+    ASSERT_EQ(size_t{1}, result.size());
+    auto any = boost::get<boost::any>(result[0]);
+    auto passed_through_token = boost::any_cast<pass_through>(any);
+}

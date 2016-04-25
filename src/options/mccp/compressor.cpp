@@ -145,7 +145,14 @@ private :
         }
         else
         {
-            result_.push_back(any);
+            if (blocked_)
+            {
+                buffer_.push_back(any);
+            }
+            else
+            {
+                result_.push_back(any);
+            }
         }
     }
 
@@ -170,7 +177,8 @@ private :
             deflate_stream_.avail_out = sizeof(compress_buffer);
             deflate_stream_.next_out = compress_buffer;
 
-            // TODO: robustness for error codes.
+            // Since we are in control of the compression stream, and will
+            // never send invalid data, this should always result in Z_OK.
             result = deflate(&deflate_stream_, Z_SYNC_FLUSH);
             assert(result == Z_OK);
 
@@ -189,10 +197,11 @@ private :
         for (auto &token : buffer_)
         {
             auto *stream = boost::get<telnetpp::u8stream>(&token);
-            // TODO: test pass-through tokens.
-            assert(stream != nullptr);
 
-            compress_stream(*stream);
+            if (stream != nullptr)
+            {
+                compress_stream(*stream);
+            }
         }
     }
 
