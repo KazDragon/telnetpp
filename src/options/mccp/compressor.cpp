@@ -51,6 +51,13 @@ static bool is_resume_compressed_token(boost::any const &any)
 
 struct compressor::impl
 {
+    impl()
+      : visitor_(
+            [this](auto const &elem){handle_stream(elem);},
+            [this](auto const &any){handle_any(any);})
+    {
+    }
+
     ~impl()
     {
         end_compression();
@@ -61,13 +68,9 @@ struct compressor::impl
     {
         result_ = {};
 
-        token_visitor visitor(
-            [this](auto const &elem){handle_stream(elem);},
-            [this](auto const &any){handle_any(any);});
-
         for (auto const &token : tokens)
         {
-            boost::apply_visitor(visitor, token);
+            boost::apply_visitor(visitor_, token);
         }
 
         return result_;
@@ -213,6 +216,7 @@ private :
     std::vector<telnetpp::stream_token> buffer_;
     std::vector<telnetpp::stream_token> result_;
     z_stream                            deflate_stream_ = {};
+    token_visitor                       visitor_;
     bool                                blocked_ = false;
     bool                                compressed_ = false;
 };
