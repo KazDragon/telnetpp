@@ -14,14 +14,14 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${PROJECT_SOURCE_DIR}/cmake/Modules"
 include(FindBoost)
 find_package(Boost 1.39.0 REQUIRED)
 
-# ZLib is required for the MCCP options.
-include(FindZLIB)
-find_package(ZLIB REQUIRED)
-
 # When building shared objects, etc., we only want to export certain symbols.
 # Therefore, we need to generate a header suitable for declaring which
 # symbols should be included.
 include(GenerateExportHeader)
+
+# ZLib is required for the MCCP options.
+include(FindZLIB)
+find_package(ZLIB REQUIRED)
 
 # Due to the strange requirements for Google Test, it is assumed to have been
 # built in the "gtest" directory.  For this, it is required to run the moral
@@ -34,9 +34,11 @@ include(GenerateExportHeader)
 #  cd ..
 find_package(GTest)
 
-# For GTest, it is necessary to link with the appropriate local threading
-# library.
-find_package(Threads)
+if (GTEST_FOUND)
+    # For GTest, it is necessary to link with the appropriate local threading
+    # library.
+    find_package(Threads REQUIRED)
+endif()
 
 set (telnetpp_public_src
     src/client_option.cpp
