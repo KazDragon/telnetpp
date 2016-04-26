@@ -48,6 +48,30 @@ struct tokens_match : boost::static_visitor<>
     telnetpp::token const &expected_;
 };
 
+struct stream_tokens_match : boost::static_visitor<>
+{
+    stream_tokens_match(telnetpp::stream_token const &expected)
+      : expected_(expected)
+    {
+    }
+    
+    void operator()(boost::any const &any) const
+    {
+        ASSERT_TRUE(expected_.type() == typeid(boost::any));
+        
+        // See above.
+    }
+    
+    void operator()(telnetpp::u8stream const &stream) const
+    {
+        auto *expected_stream = boost::get<telnetpp::u8stream>(&expected_);
+        ASSERT_TRUE(expected_stream != nullptr);
+        ASSERT_EQ(*expected_stream, stream);
+    }
+    
+    telnetpp::stream_token const &expected_;
+};
+
 }
 
 void expect_elements(
@@ -104,5 +128,23 @@ void expect_tokens(
          ++current_result)
     {
         boost::apply_visitor(tokens_match(*current_expected), *current_result);
+    }
+}
+
+void expect_tokens(
+    std::vector<telnetpp::stream_token> const &expected, 
+    std::vector<telnetpp::stream_token> const &result)
+{
+    ASSERT_EQ(expected.size(), result.size());
+    
+    for (auto &&current_expected = expected.begin(),
+              &&current_result   = result.begin();
+         current_expected != expected.end()
+      && current_result != result.end();
+         ++current_expected,
+         ++current_result)
+    {
+        boost::apply_visitor(
+            stream_tokens_match(*current_expected), *current_result);
     }
 }

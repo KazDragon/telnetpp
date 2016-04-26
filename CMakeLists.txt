@@ -19,6 +19,10 @@ find_package(Boost 1.39.0 REQUIRED)
 # symbols should be included.
 include(GenerateExportHeader)
 
+# ZLib is required for the MCCP options.
+include(FindZLIB)
+find_package(ZLIB REQUIRED)
+
 # Due to the strange requirements for Google Test, it is assumed to have been
 # built in the "gtest" directory.  For this, it is required to run the moral
 # equivalent of the following script before building Telnet++:
@@ -30,14 +34,18 @@ include(GenerateExportHeader)
 #  cd ..
 find_package(GTest)
 
-# For GTest, it is necessary to link with the appropriate local threading
-# library.
-find_package(Threads)
+if (GTEST_FOUND)
+    # For GTest, it is necessary to link with the appropriate local threading
+    # library.
+    find_package(Threads REQUIRED)
+endif()
 
 set (telnetpp_public_src
     src/client_option.cpp
     src/command.cpp
     src/negotiation.cpp
+    src/options/mccp/compressor.cpp
+    src/options/mccp/server.cpp
     src/options/msdp/client.cpp
     src/options/msdp/server.cpp
     src/options/msdp/variable.cpp
@@ -116,6 +124,8 @@ if (GTEST_FOUND)
         test/command_router_test.cpp
         test/echo_client_test.cpp
         test/echo_server_test.cpp
+        test/mccp_compressor_test.cpp
+        test/mccp_server_test.cpp
         test/msdp_client_test.cpp
         test/msdp_server_test.cpp
         test/msdp_server_robustness_test.cpp
@@ -172,6 +182,7 @@ if (GTEST_FOUND)
         ${GTEST_LIBRARY}
         ${GTEST_MAIN_LIBRARY}
         ${CMAKE_THREAD_LIBS_INIT}
+        ${ZLIB_LIBRARIES}
     )
 
     add_test(telnetpp_test telnetpp_tester)

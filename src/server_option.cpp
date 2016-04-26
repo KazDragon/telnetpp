@@ -35,15 +35,21 @@ std::vector<telnetpp::token> server_option::activate()
     if (state_ == state::inactive)
     {
         state_ = state::activating;
-        return { telnetpp::element(
-            telnetpp::negotiation(telnetpp::will, option_) 
-        )};
+        auto response = on_state_changed(state_);
+
+        response.insert(
+            response.begin(),
+            { telnetpp::element(
+                telnetpp::negotiation(telnetpp::will, option_)
+            )});
+
+        return response;
     }
     else
     {
         if (state_ == state::active)
         {
-            return on_state_changed();
+            return on_state_changed(state_);
         }
         else
         {
@@ -59,15 +65,21 @@ std::vector<telnetpp::token> server_option::deactivate()
 {
     if (state_ == state::inactive)
     {
-        return on_state_changed();
+        return on_state_changed(state_);
     }
-    
+
     if (state_ == state::active)
     {
         state_ = state::deactivating;
-        return { telnetpp::element(
-            telnetpp::negotiation(telnetpp::wont, option_) 
-        )};
+        auto response = on_state_changed(state_);
+
+        response.insert(
+            response.begin(),
+            { telnetpp::element(
+                telnetpp::negotiation(telnetpp::wont, option_)
+            )});
+
+        return response;
     }
     else
     {
@@ -94,49 +106,54 @@ std::vector<telnetpp::token> server_option::negotiate(telnetpp::u8 request)
             if (request == telnetpp::do_ && activatable_)
             {
                 state_ = state::active;
-                auto response = on_state_changed();
+                auto response = on_state_changed(state_);
                 response.insert(
                     response.begin(),
                     { telnetpp::element(
                         telnetpp::negotiation(telnetpp::will, option_)
                     )});
-                
+
                 return response;
             }
             else
             {
                 return { telnetpp::element(
-                    telnetpp::negotiation(telnetpp::wont, option_) 
+                    telnetpp::negotiation(telnetpp::wont, option_)
                 )};
             }
-            
+
         case state::activating :
             if (request == telnetpp::do_)
             {
                 state_ = state::active;
-                return on_state_changed();
+                return on_state_changed(state_);
             }
             else
             {
                 state_ = state::inactive;
-                return on_state_changed();
+                return on_state_changed(state_);
             }
 
         case state::active :
             if (request == telnetpp::do_)
             {
                 return { telnetpp::element(
-                    telnetpp::negotiation(telnetpp::will, option_) 
+                    telnetpp::negotiation(telnetpp::will, option_)
                 )};
             }
             else
             {
                 state_ = state::inactive;
-                return { telnetpp::element(
-                    telnetpp::negotiation(telnetpp::wont, option_) 
-                )};
+                auto response = on_state_changed(state_);
+                response.insert(
+                    response.begin(),
+                    { telnetpp::element(
+                        telnetpp::negotiation(telnetpp::wont, option_)
+                    )});
+
+                return response;
             }
-            
+
         case state::deactivating :
             if (request == telnetpp::do_)
             {
@@ -145,15 +162,15 @@ std::vector<telnetpp::token> server_option::negotiate(telnetpp::u8 request)
                 // send a DO after receiving a WONT.  But to be nice, we'll
                 // re-activate.
                 state_ = state::active;
-                return on_state_changed();
+                return on_state_changed(state_);
             }
             else if (request == telnetpp::dont)
             {
                 state_ = state::inactive;
-                return on_state_changed();
+                return on_state_changed(state_);
             }
     }
-    
+
     return {};
 }
 

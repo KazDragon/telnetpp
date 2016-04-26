@@ -20,4 +20,9 @@ void expect_tokens(
     std::vector<telnetpp::token> const &expected,
     std::vector<telnetpp::token> const &result);
 
+// Check that the stream tokens of two vector match.
+void expect_tokens(
+    std::vector<telnetpp::stream_token> const &expected,
+    std::vector<telnetpp::stream_token> const &result);
+
 #endif

@@ -19,6 +19,14 @@ namespace telnetpp {
 //* =========================================================================
 class TELNETPP_EXPORT server_option {
 public :
+    enum class state
+    {
+        inactive,
+        activating,
+        active,
+        deactivating,
+    };
+
     //* =====================================================================
     /// \brief Constructor
     //* =====================================================================
@@ -61,9 +69,10 @@ public :
         u8stream const &content);
 
     boost::signals2::signal<
-        std::vector<telnetpp::token> (),
+        std::vector<telnetpp::token> (state new_state),
         token_combiner
     > on_state_changed;
+
 
 private :
     //* =====================================================================
@@ -72,14 +81,6 @@ private :
     //* =====================================================================
     virtual std::vector<telnetpp::token> handle_subnegotiation(
         u8stream const &content);
-
-    enum class state
-    {
-        inactive,
-        activating,
-        active,
-        deactivating,
-    };
 
     state state_       = state::inactive;
     bool  activatable_ = false;
