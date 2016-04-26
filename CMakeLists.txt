@@ -76,6 +76,11 @@ add_library(telnetpp
     ${telnetpp_private_src}
 )
 
+target_link_libraries(telnetpp
+    PRIVATE
+        ${ZLIB_LIBRARIES}
+)
+
 set_target_properties(telnetpp
     PROPERTIES
         CXX_VISIBILITY_PRESET hidden
