@@ -26,9 +26,16 @@ namespace telnetpp { namespace options { namespace mccp {
 class TELNETPP_EXPORT compressor : boost::noncopyable
 {
 public :
+    //* =====================================================================
+    /// \brief Constructor
+    //* =====================================================================
     compressor();
+    
+    //* =====================================================================
+    /// \brief Destructor
+    //* =====================================================================
     ~compressor();
-
+    
     //* =====================================================================
     /// \brief In a manner consistent with the rest of the telnetpp library,
     /// interprets the stream and returns a similar stream that is either
@@ -38,9 +45,8 @@ public :
     std::vector<telnetpp::stream_token> send(
         std::vector<telnetpp::stream_token> const &tokens);
 
-    struct impl;
-
 private :
+    struct impl;
     std::shared_ptr<impl> pimpl_;
 };
 
