@@ -31,8 +31,7 @@ TEST(mccp_server_test, deactivated_begin_compression_then_activate_locally_sends
    
     auto const expected = std::vector<telnetpp::token> {
         telnetpp::element(telnetpp::subnegotiation(
-            server.option(),
-            { server.option() })),
+            server.option(), {})),
         boost::any(telnetpp::options::mccp::begin_compression{})
     };
         
@@ -51,8 +50,7 @@ TEST(mccp_server_test, deactivated_begin_compression_then_activate_remotely_send
         telnetpp::element(telnetpp::negotiation(
             telnetpp::will, server.option())),
         telnetpp::element(telnetpp::subnegotiation(
-            server.option(),
-            { server.option() })),
+            server.option(), {})),
         boost::any(telnetpp::options::mccp::begin_compression{})
     };
         
@@ -111,8 +109,7 @@ TEST(mccp_server_test, activated_begin_compression_sends_begin_compression_seque
     
     auto const expected = std::vector<telnetpp::token> {
         telnetpp::element(telnetpp::subnegotiation(
-            server.option(),
-            { server.option() })),
+            server.option(), {})),
         boost::any(telnetpp::options::mccp::begin_compression{})
     };
     

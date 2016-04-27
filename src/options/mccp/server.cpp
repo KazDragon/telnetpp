@@ -8,7 +8,7 @@ namespace {
     
 static auto const begin_compression_sequence = std::vector<telnetpp::token> {
     telnetpp::element(
-        telnetpp::subnegotiation(detail::option, { detail::option })),
+        telnetpp::subnegotiation(detail::option, {})),
     boost::any(telnetpp::options::mccp::begin_compression{})
 };
 
