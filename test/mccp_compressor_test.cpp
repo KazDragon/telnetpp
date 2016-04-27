@@ -47,117 +47,79 @@ TEST(mccp_compressor_test, uncompressed_any_passes_through_any)
     auto passed_through_token = boost::any_cast<pass_through>(any);
 }
 
-TEST(mccp_compressor_test, uncompressed_send_and_block_stops_data)
+TEST(mccp_compressor_test, uncompressed_end_compression_returns_no_data)
 {
     telnetpp::options::mccp::compressor compressor;
 
     auto tokens = std::vector<telnetpp::stream_token>{
-        telnetpp::u8stream{ reinterpret_cast<telnetpp::u8 const*>("before") },
-        boost::any(telnetpp::options::mccp::block_token{}),
-        telnetpp::u8stream{ reinterpret_cast<telnetpp::u8 const*>("after") }
+        boost::any(telnetpp::options::mccp::end_compression{}),
     };
+
+    auto result = compressor.send(tokens);
 
     auto expected = std::vector<telnetpp::stream_token>{
-        telnetpp::u8stream{ reinterpret_cast<telnetpp::u8 const*>("before") }
     };
 
-    expect_tokens(expected, compressor.send(tokens));
+    expect_tokens(expected, result);
 }
 
-TEST(mccp_compressor_test, uncompressed_blocked_resume_uncompressed_returns_blocked_data_uncompressed)
+TEST(mccp_compressor_test, uncompressed_end_compression_returns_data_uncompressed)
 {
     telnetpp::options::mccp::compressor compressor;
 
     auto tokens = std::vector<telnetpp::stream_token>{
-        telnetpp::u8stream{ reinterpret_cast<telnetpp::u8 const*>("before") },
-        boost::any(telnetpp::options::mccp::block_token{}),
-        telnetpp::u8stream{ reinterpret_cast<telnetpp::u8 const*>("after") }
+        boost::any(telnetpp::options::mccp::end_compression{}),
+        telnetpp::u8stream{ reinterpret_cast<telnetpp::u8 const*>("data") }
     };
 
-    compressor.send(tokens);
-
-    tokens = {
-        boost::any(telnetpp::options::mccp::resume_uncompressed_token{})
-    };
+    auto result = compressor.send(tokens);
 
     auto expected = std::vector<telnetpp::stream_token>{
-        telnetpp::u8stream{ reinterpret_cast<telnetpp::u8 const*>("after") }
+        telnetpp::u8stream{ reinterpret_cast<telnetpp::u8 const*>("data") }
     };
 
-    expect_tokens(expected, compressor.send(tokens));
+    expect_tokens(expected, result);
 }
 
-TEST(mccp_compressor_test, compressed_blocked_resume_compressed_returns_blocked_data_compressed)
+TEST(mccp_compressor_test, uncompressed_begin_compression_returns_no_data)
 {
     telnetpp::options::mccp::compressor compressor;
 
     auto tokens = std::vector<telnetpp::stream_token>{
-        telnetpp::u8stream{ reinterpret_cast<telnetpp::u8 const*>("before") },
-        boost::any(telnetpp::options::mccp::block_token{}),
-        telnetpp::u8stream{ reinterpret_cast<telnetpp::u8 const*>("after") }
+        boost::any(telnetpp::options::mccp::begin_compression{}),
     };
 
-    compressor.send(tokens);
+    auto result = compressor.send(tokens);
 
-    auto expected =
-        telnetpp::u8stream{ reinterpret_cast<telnetpp::u8 const*>("after") };
-
-    tokens = {
-        boost::any(telnetpp::options::mccp::resume_compressed_token{})
+    auto expected = std::vector<telnetpp::stream_token>{
     };
 
-    // Rather than duplicating the work and seeing what the compressed output
-    // should look like, we instead uncompress the result of the operation.
-    // This should be identical to the sent data.
-    auto response = compressor.send(tokens);
-    ASSERT_EQ(size_t{1}, response.size());
-    auto data = boost::get<telnetpp::u8stream>(response[0]);
-
-    z_stream stream = {};
-    int result = inflateInit(&stream);
-    assert(result == Z_OK);
-
-    telnetpp::u8 bytes[1024] = {};
-    std::copy(data.begin(), data.end(), bytes);
-    telnetpp::u8 output[1024] = {};
-
-    stream.avail_in = data.size();
-    stream.next_in = bytes;
-    stream.avail_out = sizeof(output);
-    stream.next_out = output;
-
-    result = inflate(&stream, Z_SYNC_FLUSH);
-
-    ASSERT_EQ(Z_OK, result);
-
-    auto output_end = output + (sizeof(output) - stream.avail_out);
-    telnetpp::u8stream actual(output, output_end);
-    ASSERT_EQ(expected, actual);
-
-    inflateEnd(&stream);
+    expect_tokens(expected, result);
 }
 
-TEST(mccp_compressor_test, compressed_sending_data_returns_compressed_data)
+TEST(mccp_compressor_test, uncompressed_begin_compression_returns_data_compressed)
 {
     telnetpp::options::mccp::compressor compressor;
 
-    auto tokens = std::vector<telnetpp::stream_token> {
-        boost::any(telnetpp::options::mccp::block_token{}),
-        boost::any(telnetpp::options::mccp::resume_compressed_token{}),
+    auto tokens = std::vector<telnetpp::stream_token>{
+        boost::any(telnetpp::options::mccp::begin_compression{}),
         telnetpp::u8stream{ reinterpret_cast<telnetpp::u8 const*>("data") }
     };
 
     auto expected =
         telnetpp::u8stream{ reinterpret_cast<telnetpp::u8 const*>("data") };
+        
+    auto result = compressor.send(tokens);
 
-    auto response = compressor.send(tokens);
-
-    ASSERT_EQ(size_t{1}, response.size());
-    auto data = boost::get<telnetpp::u8stream>(response[0]);
+    // Rather than duplicating the work and seeing what the compressed output
+    // should look like, we instead uncompress the result of the operation.
+    // This should be identical to the sent data.
+    ASSERT_EQ(size_t{1}, result.size());
+    auto data = boost::get<telnetpp::u8stream>(result[0]);
 
     z_stream stream = {};
-    int result = inflateInit(&stream);
-    assert(result == Z_OK);
+    int response = inflateInit(&stream);
+    assert(response == Z_OK);
 
     telnetpp::u8 bytes[1024] = {};
     std::copy(data.begin(), data.end(), bytes);
@@ -168,31 +130,14 @@ TEST(mccp_compressor_test, compressed_sending_data_returns_compressed_data)
     stream.avail_out = sizeof(output);
     stream.next_out = output;
 
-    result = inflate(&stream, Z_SYNC_FLUSH);
-
-    ASSERT_EQ(Z_OK, result);
+    response = inflate(&stream, Z_SYNC_FLUSH);
+    ASSERT_EQ(Z_OK, response);
 
     auto output_end = output + (sizeof(output) - stream.avail_out);
     telnetpp::u8stream actual(output, output_end);
     ASSERT_EQ(expected, actual);
 
     inflateEnd(&stream);
-
-}
-
-TEST(mccp_compressor_test, compressed_block_blocks_data)
-{
-    telnetpp::options::mccp::compressor compressor;
-
-    auto tokens = std::vector<telnetpp::stream_token> {
-        boost::any(telnetpp::options::mccp::resume_compressed_token{}),
-        boost::any(telnetpp::options::mccp::block_token{}),
-        telnetpp::u8stream{ reinterpret_cast<telnetpp::u8 const*>("data") }
-    };
-
-    auto expected = std::vector<telnetpp::stream_token> {};
-
-    expect_tokens(expected, compressor.send(tokens));
 }
 
 TEST(mccp_compressor_test, restarting_compressed_stream_sends_new_compressed_data)
@@ -200,9 +145,9 @@ TEST(mccp_compressor_test, restarting_compressed_stream_sends_new_compressed_dat
     telnetpp::options::mccp::compressor compressor;
 
     auto tokens = std::vector<telnetpp::stream_token> {
-        boost::any(telnetpp::options::mccp::resume_compressed_token{}),
+        boost::any(telnetpp::options::mccp::begin_compression{}),
         telnetpp::u8stream{ reinterpret_cast<telnetpp::u8 const *>("data0") },
-        boost::any(telnetpp::options::mccp::resume_uncompressed_token{})
+        boost::any(telnetpp::options::mccp::begin_compression{})
     };
 
     auto response = compressor.send(tokens);
@@ -226,7 +171,7 @@ TEST(mccp_compressor_test, restarting_compressed_stream_sends_new_compressed_dat
     inflateEnd(&stream);
 
     tokens = std::vector<telnetpp::stream_token> {
-        boost::any(telnetpp::options::mccp::resume_compressed_token{}),
+        boost::any(telnetpp::options::mccp::begin_compression{}),
         telnetpp::u8stream{ reinterpret_cast<telnetpp::u8 const *>("data1") },
     };
 
@@ -279,8 +224,7 @@ TEST(mccp_compressor_test, compressed_large_stream_sent_correctly)
     telnetpp::options::mccp::compressor compressor;
 
     auto response = compressor.send({
-        boost::any{telnetpp::options::mccp::block_token{}},
-        boost::any{telnetpp::options::mccp::resume_compressed_token{}},
+        boost::any{telnetpp::options::mccp::begin_compression{}},
         stream
     });
 
@@ -322,7 +266,7 @@ TEST(mccp_compressor_test, compressed_any_passes_through_any)
     struct pass_through {};
 
     auto tokens = std::vector<telnetpp::stream_token> {
-        boost::any(telnetpp::options::mccp::resume_compressed_token{}),
+        boost::any(telnetpp::options::mccp::begin_compression{}),
         boost::any(pass_through{})
     };
 
@@ -333,20 +277,33 @@ TEST(mccp_compressor_test, compressed_any_passes_through_any)
     auto passed_through_token = boost::any_cast<pass_through>(any);
 }
 
-TEST(mccp_compressor_test, unblocked_compressed_any_passes_through_any)
+TEST(mccp_compressor_test, compressed_end_compression_returns_compression_end)
 {
     telnetpp::options::mccp::compressor compressor;
-    struct pass_through {};
-
+    
     auto tokens = std::vector<telnetpp::stream_token> {
-        boost::any(telnetpp::options::mccp::block_token{}),
-        boost::any(pass_through{}),
-        boost::any(telnetpp::options::mccp::resume_compressed_token{})
+        boost::any(telnetpp::options::mccp::begin_compression{}),
+        boost::any(telnetpp::options::mccp::end_compression{})
     };
-
+    
     auto result = compressor.send(tokens);
-
+    
     ASSERT_EQ(size_t{1}, result.size());
-    auto any = boost::get<boost::any>(result[0]);
-    auto passed_through_token = boost::any_cast<pass_through>(any);
+    auto compressed_stream = boost::get<telnetpp::u8stream>(result[0]);
+    
+    z_stream inflate_stream = {};
+    int response = inflateInit(&inflate_stream);
+    assert(response == Z_OK);
+
+    telnetpp::u8stream output(1024, '\0');
+
+    inflate_stream.avail_in  = compressed_stream.size();
+    inflate_stream.next_in   = &compressed_stream[0];
+    inflate_stream.avail_out = sizeof(output);
+    inflate_stream.next_out  = &output[0];
+
+    response = inflate(&inflate_stream, Z_SYNC_FLUSH);
+    ASSERT_EQ(Z_STREAM_END, response);
+    ASSERT_EQ(sizeof(output), inflate_stream.avail_out);
+    inflateEnd(&inflate_stream);
 }

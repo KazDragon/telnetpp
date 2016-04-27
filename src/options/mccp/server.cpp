@@ -4,57 +4,72 @@
 
 namespace telnetpp { namespace options { namespace mccp {
 
+namespace {
+    
+static auto const begin_compression_sequence = std::vector<telnetpp::token> {
+    telnetpp::element(
+        telnetpp::subnegotiation(detail::option, { detail::option })),
+    boost::any(telnetpp::options::mccp::begin_compression{})
+};
+
+static auto const end_compression_sequence = std::vector<telnetpp::token> {
+    boost::any(telnetpp::options::mccp::end_compression{})
+};
+
+}
+
 // ==========================================================================
 // CONSTRUCTOR
 // ==========================================================================
 server::server()
-  : server_option(detail::option)
+  : server_option(detail::option),
+    compression_requested_(false)
 {
     on_state_changed.connect(
-        [this](server_option::state state)
+        [this](auto const state) -> std::vector<telnetpp::token>
         {
-            std::vector<telnetpp::token> result;
-
-            switch (state)
+            if (state == telnetpp::server_option::state::active
+             && compression_requested_)
             {
-                // In the case that the option is activating or deactivating,
-                // this means that we have started the negotiation, and MUST
-                // wait on the response to determine if further data is
-                // compressed or not.  The block token is inserted into the
-                // stream here to allow a lower level to start waiting.
-                case server_option::state::deactivating :
-                    // fall-through
-                case server_option::state::activating :
-                    result = { boost::any{block_token()} };
-                    break;
-
-                // In the case that the option is now active, it means that
-                // either the remote client has agreed to compression, or has
-                // requested it and we have agreed.  Either way, the
-                // resume_compressed token is sent to the lower level to let it
-                // know to unblock if it were blocked, and to send further data
-                // in a compressed format.
-                case server_option::state::active :
-                    result = { boost::any{resume_compressed_token()} };
-                    break;
-
-                // In the case that the option is now inactive, it means that
-                // either the remote client has rejected the option, or we have
-                // decided to deactivate the option.  Either way, the
-                // resume_uncompressed token is sent to the lower level to let
-                // it know to unblock if it were blocked, and to send further
-                // data in an uncompressed format.
-                case server_option::state::inactive :
-                    result = { boost::any{resume_uncompressed_token()} };
-                    break;
-
-                default :
-                    assert(!"Invalid server option state");
-                    break;
+                return begin_compression_sequence;
             }
-
-            return result;
+            else
+            {
+                return {};
+            }
         });
+}
+
+// ==========================================================================
+// BEGIN_COMPRESSION
+// ==========================================================================
+std::vector<telnetpp::token> server::begin_compression()
+{
+    if (is_active())
+    {
+        return begin_compression_sequence;
+    }
+    else
+    {
+        compression_requested_ = true;
+        return {};
+    }
+}
+
+// ==========================================================================
+// END_COMPRESSION
+// ==========================================================================
+std::vector<telnetpp::token> server::end_compression()
+{
+    if (is_active())
+    {
+        return end_compression_sequence;
+    }
+    else
+    {
+        compression_requested_ = false;
+        return {};
+    }
 }
 
 }}}

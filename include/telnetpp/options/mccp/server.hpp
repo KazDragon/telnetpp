@@ -11,7 +11,30 @@ namespace telnetpp { namespace options { namespace mccp {
 class TELNETPP_EXPORT server : public telnetpp::server_option
 {
 public :
+    //* =====================================================================
+    /// \brief Constructor
+    //* =====================================================================
     server();
+
+    //* =====================================================================
+    /// \brief Requests that compression begins.
+    /// If the option is active, then this sends a sequence that will begin 
+    /// compression.  Otherwise, the sequence will be sent as soon as the 
+    /// option is activated.
+    //* =====================================================================
+    std::vector<telnetpp::token> begin_compression();
+
+    //* =====================================================================
+    /// \brief Requests that compression ends.
+    /// If the option is active, then this sends a sequence that will end 
+    /// compression.  If the option is not active, then this also cancels any
+    /// request to begin_compression that would auto-start compression on
+    /// activation.
+    //* =====================================================================
+    std::vector<telnetpp::token> end_compression();
+    
+private :
+    bool compression_requested_;
 };
 
 }}}
