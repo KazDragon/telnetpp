@@ -50,8 +50,7 @@ public :
     /// allows the result of receive() to be passed straight back to
     /// generate for immediate transmission.
     //* =====================================================================
-    std::vector<boost::variant<u8stream, boost::any>> send(
-        std::vector<token> const &tokens);
+    std::vector<stream_token> send(std::vector<token> const &tokens);
 
 private :
     u8stream                                unparsed_buffer_;

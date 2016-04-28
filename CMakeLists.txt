@@ -41,6 +41,7 @@ if (GTEST_FOUND)
 endif()
 
 set (telnetpp_public_src
+    src/byte_converter.cpp
     src/client_option.cpp
     src/command.cpp
     src/negotiation.cpp
@@ -125,6 +126,7 @@ if (GTEST_FOUND)
     enable_testing()
 
     set (telnetpp_tester_external_tests
+        test/byte_converter_test.cpp
         test/client_option_test.cpp
         test/command_router_test.cpp
         test/echo_client_test.cpp
