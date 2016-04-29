@@ -45,6 +45,7 @@ set (telnetpp_public_src
     src/client_option.cpp
     src/command.cpp
     src/negotiation.cpp
+    src/options/mccp/client.cpp
     src/options/mccp/compressor.cpp
     src/options/mccp/server.cpp
     src/options/msdp/client.cpp
@@ -132,6 +133,7 @@ if (GTEST_FOUND)
         test/echo_client_test.cpp
         test/echo_server_test.cpp
         test/mccp_compressor_test.cpp
+        test/mccp_client_test.cpp
         test/mccp_server_test.cpp
         test/msdp_client_test.cpp
         test/msdp_server_test.cpp
