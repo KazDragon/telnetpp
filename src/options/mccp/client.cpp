@@ -10,6 +10,13 @@ namespace telnetpp { namespace options { namespace mccp {
 client::client()
   : client_option(detail::option)
 {
+    on_state_changed.connect(
+        []
+        {
+           return std::vector<telnetpp::token>{
+               boost::any(end_decompression{})
+           };
+        });
 }
 
 // ==========================================================================

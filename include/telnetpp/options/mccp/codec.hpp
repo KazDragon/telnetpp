@@ -9,33 +9,34 @@
 namespace telnetpp { namespace options { namespace mccp {
 
 //* =========================================================================
-/// \brief A class responsible for compressing data for the MCCP server
-/// option.
+/// \brief A class responsible for compressing and decompressing data for the
+/// MCCP server option.
 ///
-/// In the mccp::compressor class, control flow is managed by interleaving
-/// certain tags within the data stream.  
+/// In the mccp::codec class, control flow is managed by interleaving
+/// certain tags within the data stream.
 ///
-/// In particular, the blocked_token tag will cause the stream to buffer up
-/// output data.  This can be used in the circumstance that it is unknown 
-/// whether data should be compressed or not (e.g. IAC WILL MCCP has just
-/// been sent, but no response has been received.)  Further, the
-/// resume_compressed_token and resume_uncompressed_token tags can be used
-/// to unblock the stream and send any data onward in either a compressed
-/// or uncompressed fashion, respectively.
+/// In particular, the begin_compression tag will cause all data from the
+/// next token to be sent in a compressed format.  The end_compression tag
+/// ends this process.
+///
+/// Additionally, sending a begin_decompression tag will cause all data from
+/// the next token to be received in a compressed format, and will be returned
+/// in a decompressed format.  This can be cancelled by either sending an
+/// end_decompression tag, or if the compressed stream is marked as finished.
 //* =========================================================================
-class TELNETPP_EXPORT compressor : boost::noncopyable
+class TELNETPP_EXPORT codec : boost::noncopyable
 {
 public :
     //* =====================================================================
     /// \brief Constructor
     //* =====================================================================
-    compressor();
-    
+    codec();
+
     //* =====================================================================
     /// \brief Destructor
     //* =====================================================================
-    ~compressor();
-    
+    ~codec();
+
     //* =====================================================================
     /// \brief In a manner consistent with the rest of the telnetpp library,
     /// interprets the stream and returns a similar stream that is either
