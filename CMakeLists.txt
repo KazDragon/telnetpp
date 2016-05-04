@@ -134,6 +134,7 @@ if (GTEST_FOUND)
         test/echo_server_test.cpp
         test/mccp_compressor_test.cpp
         test/mccp_client_test.cpp
+        test/mccp_decompressor_test.cpp
         test/mccp_server_test.cpp
         test/msdp_client_test.cpp
         test/msdp_server_test.cpp

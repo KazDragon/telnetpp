@@ -46,6 +46,12 @@ public :
     std::vector<telnetpp::stream_token> send(
         std::vector<telnetpp::stream_token> const &tokens);
 
+    //* =====================================================================
+    /// \brief Receive a byte from the lower layer, decompress it if
+    /// necessary, and return the result as a stream of bytes.
+    //* =====================================================================
+    telnetpp::u8stream receive(telnetpp::u8 byte);
+
 private :
     struct impl;
     std::shared_ptr<impl> pimpl_;

@@ -19,6 +19,16 @@ static bool is_end_compression_token(boost::any const &any)
     return boost::any_cast<telnetpp::options::mccp::end_compression>(&any) != nullptr;
 }
 
+static bool is_begin_decompression_token(boost::any const &any)
+{
+    return boost::any_cast<telnetpp::options::mccp::begin_decompression>(&any) != nullptr;
+}
+
+static bool is_end_decompression_token(boost::any const &any)
+{
+    return boost::any_cast<telnetpp::options::mccp::end_decompression>(&any) != nullptr;
+}
+
 static telnetpp::u8stream compress(
     z_stream &stream, telnetpp::u8stream const &data)
 {
@@ -79,18 +89,24 @@ class token_visitor
   : public boost::static_visitor<std::vector<telnetpp::stream_token>>
 {
 public :
-    token_visitor(z_stream &stream, bool &compressed)
-      : stream_(stream),
-        compressed_(compressed)
+    token_visitor(
+        z_stream &input_stream,
+        z_stream &output_stream,
+        bool &input_compressed,
+        bool &output_compressed)
+      : input_stream_(input_stream),
+        output_stream_(output_stream),
+        input_compressed_(input_compressed),
+        output_compressed_(output_compressed)
     {
     }
 
     std::vector<telnetpp::stream_token> operator()(
         telnetpp::u8stream const &uncompressed_data)
     {
-        if (compressed_)
+        if (output_compressed_)
         {
-            return { compress(stream_, uncompressed_data) };
+            return { compress(output_stream_, uncompressed_data) };
         }
         else
         {
@@ -108,6 +124,16 @@ public :
         {
             return end_compression();
         }
+        else if (is_begin_decompression_token(any))
+        {
+            begin_decompression();
+            return {};
+        }
+        else if (is_end_decompression_token(any))
+        {
+            end_decompression();
+            return {};
+        }
         else
         {
             return { any };
@@ -117,23 +143,23 @@ public :
 private :
     std::vector<telnetpp::stream_token> begin_compression()
     {
-        if (compressed_)
+        if (output_compressed_)
         {
-            deflateEnd(&stream_);
+            deflateEnd(&output_stream_);
         }
 
-        deflateInit(&stream_, Z_DEFAULT_COMPRESSION);
-        compressed_ = true;
+        deflateInit(&output_stream_, Z_DEFAULT_COMPRESSION);
+        output_compressed_ = true;
         return {};
     }
 
     std::vector<telnetpp::stream_token> end_compression()
     {
-        if (compressed_)
+        if (output_compressed_)
         {
-            auto result = compress_final(stream_);
-            deflateEnd(&stream_);
-            compressed_ = false;
+            auto result = compress_final(output_stream_);
+            deflateEnd(&output_stream_);
+            output_compressed_ = false;
 
             return { result };
         }
@@ -143,8 +169,68 @@ private :
         }
     }
 
+    void begin_decompression()
+    {
+        if (input_compressed_)
+        {
+            inflateEnd(&input_stream_);
+        }
+
+        inflateInit(&input_stream_);
+        input_compressed_ = true;
+    }
+
+    void end_decompression()
+    {
+        if (input_compressed_)
+        {
+            inflateEnd(&input_stream_);
+            input_compressed_ = false;
+        }
+    }
+
+    z_stream &input_stream_;
+    z_stream &output_stream_;
+    bool     &input_compressed_;
+    bool     &output_compressed_;
+};
+
+class decompressor
+{
+public :
+    decompressor(z_stream &stream, bool &compressed)
+      : stream_(stream),
+        compressed_(compressed)
+    {
+    }
+
+    telnetpp::u8stream operator()(telnetpp::u8 byte)
+    {
+        if (compressed_)
+        {
+            telnetpp::u8 buffer[1023];
+
+            stream_.next_in   = &byte;
+            stream_.avail_in  = 1;
+            stream_.next_out  = buffer;
+            stream_.avail_out = sizeof(buffer);
+
+            auto result = inflate(&stream_, Z_SYNC_FLUSH);
+            // TODO: could also be Z_STREAM_END.
+            assert(result == Z_OK);
+
+            auto amount_decompressed = sizeof(buffer) - stream_.avail_out;
+            return telnetpp::u8stream(buffer, amount_decompressed);
+        }
+        else
+        {
+            return { byte };
+        }
+    }
+
+private :
     z_stream &stream_;
-    bool     &compressed_;
+    bool &compressed_;
 };
 
 }
@@ -153,14 +239,21 @@ struct codec::impl
 {
     ~impl()
     {
-        if (compressed_)
+        if (input_compressed_)
         {
-            deflateEnd(&stream_);
+            inflateEnd(&input_stream_);
+        }
+
+        if (output_compressed_)
+        {
+            deflateEnd(&output_stream_);
         }
     }
 
-    z_stream stream_ = {};
-    bool compressed_ = false;
+    z_stream input_stream_  = {};
+    z_stream output_stream_ = {};
+    bool input_compressed_  = false;
+    bool output_compressed_ = false;
 };
 
 codec::codec()
@@ -176,7 +269,10 @@ std::vector<telnetpp::stream_token> codec::send(
     std::vector<telnetpp::stream_token> const &tokens)
 {
     auto visitor = token_visitor(
-        pimpl_->stream_, pimpl_->compressed_);
+        pimpl_->input_stream_,
+        pimpl_->output_stream_,
+        pimpl_->input_compressed_,
+        pimpl_->output_compressed_);
 
     auto result = std::accumulate(
         tokens.begin(),
@@ -196,6 +292,13 @@ std::vector<telnetpp::stream_token> codec::send(
         });
 
     return result;
+}
+
+telnetpp::u8stream codec::receive(telnetpp::u8 byte)
+{
+    decompressor dec(
+        pimpl_->input_stream_, pimpl_->input_compressed_);
+    return dec(byte);
 }
 
 }}}
