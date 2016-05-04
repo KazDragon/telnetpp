@@ -216,8 +216,12 @@ public :
             stream_.avail_out = sizeof(buffer);
 
             auto result = inflate(&stream_, Z_SYNC_FLUSH);
-            // TODO: could also be Z_STREAM_END.
-            assert(result == Z_OK);
+            assert(result == Z_OK || result == Z_STREAM_END);
+
+            if (result == Z_STREAM_END)
+            {
+                end_compression();
+            }
 
             auto amount_decompressed = sizeof(buffer) - stream_.avail_out;
             return telnetpp::u8stream(buffer, amount_decompressed);
@@ -229,6 +233,12 @@ public :
     }
 
 private :
+    void end_compression()
+    {
+        deflateEnd(&stream_);
+        compressed_ = false;
+    }
+
     z_stream &stream_;
     bool &compressed_;
 };
