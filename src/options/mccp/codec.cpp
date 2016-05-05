@@ -235,7 +235,7 @@ public :
 private :
     void end_compression()
     {
-        deflateEnd(&stream_);
+        inflateEnd(&stream_);
         compressed_ = false;
     }
 
