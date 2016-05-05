@@ -133,3 +133,41 @@ TEST(mccp_server_test, activated_end_compression_sends_end_compression_token)
     
     expect_tokens(expected, result);
 }
+
+TEST(mccp_server_test, activated_compressed_deactivate_ends_compression)
+{
+    telnetpp::options::mccp::server server;
+    server.activate();
+    server.negotiate(telnetpp::do_);
+    server.begin_compression();
+
+    // If we end compression, we expect two tokens to be output.  The first
+    // will be the (compressed) WONT MCCP negotiation.  Since the only valid
+    // response to this is DONT MCCP by the client, the second token will
+    // be an end_compression token, as we can assume that the client will
+    // immediately end compression upon reception of the negotiation.
+    auto const result = server.deactivate();
+    
+    ASSERT_EQ(size_t{2}, result.size());
+    auto const &token = boost::get<boost::any>(result[1]);
+    boost::any_cast<telnetpp::options::mccp::end_compression>(token);
+}
+
+TEST(mccp_server_test, activated_compressed_negotiate_deactivation_ends_compression)
+{
+    telnetpp::options::mccp::server server;
+    server.activate();
+    server.negotiate(telnetpp::do_);
+    server.begin_compression();
+
+    // If we end compression, we expect two tokens to be output.  The first
+    // will be the (compressed) WONT MCCP negotiation.  Since the only valid
+    // response to this is DONT MCCP by the client, the second token will
+    // be an end_compression token, as we can assume that the client will
+    // immediately end compression upon reception of the negotiation.
+    auto const result = server.negotiate(telnetpp::dont);
+    
+    ASSERT_EQ(size_t{2}, result.size());
+    auto const &token = boost::get<boost::any>(result[1]);
+    boost::any_cast<telnetpp::options::mccp::end_compression>(token);
+}
