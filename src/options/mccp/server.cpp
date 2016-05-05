@@ -33,6 +33,11 @@ server::server()
             {
                 return begin_compression_sequence;
             }
+            else if (state == telnetpp::server_option::state::deactivating
+                  || state == telnetpp::server_option::state::inactive)
+            {
+                return end_compression_sequence;
+            }
             else
             {
                 return {};
