@@ -208,7 +208,7 @@ public :
     {
         if (compressed_)
         {
-            telnetpp::u8 buffer[1023];
+            telnetpp::u8 buffer[1024];
 
             stream_.next_in   = &byte;
             stream_.avail_in  = 1;

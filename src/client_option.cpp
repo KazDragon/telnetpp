@@ -137,13 +137,11 @@ std::vector<telnetpp::token> client_option::negotiate(telnetpp::u8 request)
                 state_ = state::inactive;
 
                 auto response = on_state_changed();
-                printf("\na response size = %ld", response.size());
                 response.insert(
                     response.begin(),
                     telnetpp::element {
                         telnetpp::negotiation(telnetpp::dont, option_)
                     });
-                printf("\nb response size = %ld\n", response.size());
 
                 return response;
             }
