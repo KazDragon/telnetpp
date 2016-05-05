@@ -11,8 +11,9 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${PROJECT_SOURCE_DIR}/cmake/Modules"
 # Boost is required as we used Boost.Variant, Boost.Optional, and
 # Boost.Signals2.  All of these are header-only libraries, so no subcomponents
 # are required.
+# Requires boost::make_unique, which brings this to Boost 1.56.
 include(FindBoost)
-find_package(Boost 1.39.0 REQUIRED)
+find_package(Boost 1.56.0 REQUIRED)
 
 # When building shared objects, etc., we only want to export certain symbols.
 # Therefore, we need to generate a header suitable for declaring which
@@ -62,6 +63,7 @@ set (telnetpp_public_src
 )
 
 set (telnetpp_private_src
+    src/options/mccp/detail/zlib_compressor.cpp
     src/options/msdp/detail/decoder.cpp
     src/options/msdp/detail/encoder.cpp
     src/options/new_environ/detail/request_parser.cpp
@@ -132,7 +134,6 @@ if (GTEST_FOUND)
         test/command_router_test.cpp
         test/echo_client_test.cpp
         test/echo_server_test.cpp
-        test/mccp_compressor_test.cpp
         test/mccp_client_test.cpp
         test/mccp_decompressor_test.cpp
         test/mccp_server_test.cpp
@@ -156,6 +157,7 @@ if (GTEST_FOUND)
     set (telnetpp_tester_internal_tests
         test/parser_test.cpp
         test/generator_test.cpp
+        test/mccp_zlib_compressor_test.cpp
         test/routing_visitor_test.cpp
     )
 
