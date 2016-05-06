@@ -75,13 +75,10 @@ struct compressor::impl
             auto result = deflate(&stream_, Z_SYNC_FLUSH);
             assert(result == Z_OK);
             
-            auto const output_buffer_end = 
-                output_buffer + (output_buffer_size - stream_.avail_out);
-                
             compressed_data.insert(
                 compressed_data.end(),
                 output_buffer,
-                output_buffer_end);
+                stream_.next_out);
         } while (stream_.avail_out == 0);
         
         return compressed_data;
@@ -103,11 +100,8 @@ struct compressor::impl
         auto result = deflate(&stream_, Z_FINISH);
         assert(result == Z_STREAM_END);
 
-        auto const output_buffer_end = 
-            output_buffer + (output_buffer_size - stream_.avail_out);
-        
         auto const response = 
-            telnetpp::u8stream(output_buffer, output_buffer_end);
+            telnetpp::u8stream(output_buffer, stream_.next_out);
         
         result = deflateEnd(&stream_);
         assert(result == Z_OK);

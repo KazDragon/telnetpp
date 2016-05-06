@@ -54,13 +54,15 @@ TEST(mccp_zlib_compressor_test, compressing_data_returns_data_compressed)
 
     response = inflate(&stream, Z_SYNC_FLUSH);
     ASSERT_EQ(Z_OK, response);
-    inflateEnd(&stream);
 
     auto output_end = 
         output_buffer + (sizeof(output_buffer) - stream.avail_out);
     telnetpp::u8stream actual(output_buffer, output_end);
     
     ASSERT_EQ(expected, actual);
+    
+    response = inflateEnd(&stream);
+    assert(response == Z_OK);
 }
 
 TEST(mccp_zlib_compressor_test, compressing_more_data_returns_more_data_compressed)
@@ -104,16 +106,17 @@ TEST(mccp_zlib_compressor_test, compressing_more_data_returns_more_data_compress
     response = inflate(&stream, Z_SYNC_FLUSH);
     ASSERT_EQ(Z_OK, response);
     
-    inflateEnd(&stream);
-
     auto output_end = 
         output_buffer + (sizeof(output_buffer) - stream.avail_out);
     telnetpp::u8stream actual(output_buffer, output_end);
     
     ASSERT_EQ(expected, actual);
+    
+    response = inflateEnd(&stream);
+    assert(response == Z_OK);
 }
 
-TEST(mccp_compressor_test, end_compression_returns_compression_end_sequence)
+TEST(mccp_zlib_compressor_test, end_compression_returns_compression_end_sequence)
 {
     // It is possible to end the compression stream.  In this case, a sequence
     // is returned that denotes the end of the compression stream.
@@ -135,9 +138,12 @@ TEST(mccp_compressor_test, end_compression_returns_compression_end_sequence)
 
     response = inflate(&stream, Z_SYNC_FLUSH);
     ASSERT_EQ(Z_STREAM_END, response);
+    
+    response = inflateEnd(&stream);
+    assert(response == Z_OK);
 }
 
-TEST(mccp_compressor_test, ending_compression_then_compressing_data_restarts_compression_stream)
+TEST(mccp_zlib_compressor_test, ending_compression_then_compressing_data_restarts_compression_stream)
 {
     // After an end_compression, the next time compress() is called, the 
     // stream must begin as if new.
@@ -165,16 +171,18 @@ TEST(mccp_compressor_test, ending_compression_then_compressing_data_restarts_com
 
     response = inflate(&stream, Z_SYNC_FLUSH);
     ASSERT_EQ(Z_OK, response);
-    inflateEnd(&stream);
 
     auto output_end = 
         output_buffer + (sizeof(output_buffer) - stream.avail_out);
     telnetpp::u8stream actual(output_buffer, output_end);
     
     ASSERT_EQ(expected, actual);
+    
+    response = inflateEnd(&stream);
+    assert(response == Z_OK);
 }
 
-TEST(mccp_compressor_test, can_compress_large_data)
+TEST(mccp_zlib_compressor_test, can_compress_large_data)
 {
     // When streams are compressed, they are returned in small chunks that 
     // must be reassembled.  The default chunk size is 1023 bytes.  Therefore,
@@ -218,11 +226,13 @@ TEST(mccp_compressor_test, can_compress_large_data)
 
     result = inflate(&inflate_stream, Z_SYNC_FLUSH);
     assert(result == Z_OK);
-    inflateEnd(&inflate_stream);
     
     // Because the initial stream and the expected decompressed stream are the
     // same size, there should be no space left in the output stream.
     // Otherwise, the stream was clipped in some way.
     ASSERT_EQ(0, inflate_stream.avail_out);
     ASSERT_EQ(stream, output);
+
+    result = inflateEnd(&inflate_stream);
+    assert(result== Z_OK);
 }

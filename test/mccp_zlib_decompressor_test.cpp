@@ -1,121 +1,207 @@
-#include <telnetpp/options/mccp/codec.hpp>
-#include <telnetpp/options/mccp/mccp.hpp>
+#include <telnetpp/options/mccp/zlib/decompressor.hpp>
 #include <gtest/gtest.h>
 #include <zlib.h>
 #include <algorithm>
 #include <random>
 
-TEST(mccp_decompressor_test, uncompressed_receive_byte_returns_byte)
+TEST(mccp_zlib_decompressor_test, zlib_decompressor_is_decompressor)
 {
-    // In uncompressed mode, reception of a byte should only result in a
-    // byte stream of one element which is the received byte.
-    telnetpp::options::mccp::codec codec;
-
-    auto const &expected = telnetpp::u8stream{ 'T' };
-
-    ASSERT_EQ(expected, codec.receive('T'));
+    // This MCCP codec will rely on the decompressor interface, so
+    // zlib_decompressor must implement that.
+    telnetpp::options::mccp::zlib::decompressor zlib_decompressor;
+    telnetpp::options::mccp::decompressor &decompressor = zlib_decompressor;
 }
 
-TEST(mccp_decompressor_test, compressed_receive_compressed_data_returns_data)
+TEST(mccp_zlib_decompressor_test, decompressing_data_returns_decompressed_data)
 {
-    // If the stream is expecting compressed data, then receiving compressed
-    // data should be interpreted over time as the original data.
-    telnetpp::options::mccp::codec codec;
-    codec.send({
-        boost::any(telnetpp::options::mccp::begin_decompression{})
-    });
-
-    telnetpp::u8stream expected = { 'd', 'a', 't', 'a', 'd', 'a', 't', 'a' };
-
+    // As we pass a compressed byte stream through the decompressor, it
+    // must return byte sequences which, when concatenated, are equal to the
+    // original datastream.  This is a little bit white-box, so it's not
+    // possible to know which byte sequences are returned from which byte; 
+    // just what the sum total of the operation should be.
+    telnetpp::options::mccp::zlib::decompressor zlib_decompressor;
+    telnetpp::options::mccp::decompressor &decompressor = zlib_decompressor;
+    
+    auto const expected = telnetpp::u8stream {
+        'd', 'a', 't', 'a', 'd', 'a', 't', 'a', 'd', 'a', 't', 'a',
+        'd', 'a', 't', 'a', 'd', 'a', 't', 'a', 'd', 'a', 't', 'a',
+    };
+    
     z_stream stream = {};
     auto response = deflateInit(&stream, Z_DEFAULT_COMPRESSION);
     assert(response == Z_OK);
+    
+    telnetpp::u8 output_buffer[1023];
+    
+    stream.avail_in  = expected.size();
+    stream.next_in   = const_cast<telnetpp::u8 *>(&expected[0]);
+    stream.avail_out = sizeof(output_buffer);
+    stream.next_out  = output_buffer;
+    
+    response = deflate(&stream, Z_SYNC_FLUSH);
+    assert(response == Z_OK);
+    
+    telnetpp::u8stream const compressed_stream(output_buffer, stream.next_out);
+    telnetpp::u8stream reassembled_stream;
+    
+    for (auto byte : compressed_stream)
+    {
+        auto result = decompressor.decompress(byte);
+        
+        // The stream does not end during this operation.
+        ASSERT_EQ(false, std::get<1>(result));
+        
+        auto const &partial_stream = std::get<0>(result);
+        
+        // Append the resultant stream to the reassembled stream.
+        reassembled_stream.insert(
+            reassembled_stream.end(),
+            partial_stream.begin(),
+            partial_stream.end());
+    }
+    
+    ASSERT_EQ(expected, reassembled_stream);
+    
+    response = deflateEnd(&stream);
+    assert(response == Z_DATA_ERROR);
+}
 
-    telnetpp::u8 buffer[1023];
-    stream.next_in = &expected[0];
-    stream.avail_in = expected.size();
-    stream.next_out = buffer;
-    stream.avail_out = sizeof(buffer);
+TEST(mccp_zlib_decompressor_test, decompressing_the_end_of_the_stream_returns_true)
+{
+    // At the end of a decompression stream, the boolean member of the tuple
+    // must be set to true.  The data should also still be set as it was above.
+    telnetpp::options::mccp::zlib::decompressor zlib_decompressor;
+    telnetpp::options::mccp::decompressor &decompressor = zlib_decompressor;
+    
+    auto const expected = telnetpp::u8stream {
+        'd', 'a', 't', 'a', 'd', 'a', 't', 'a', 'd', 'a', 't', 'a',
+        'd', 'a', 't', 'a', 'd', 'a', 't', 'a', 'd', 'a', 't', 'a',
+    };
+    
+    z_stream stream = {};
+    auto response = deflateInit(&stream, Z_DEFAULT_COMPRESSION);
+    assert(response == Z_OK);
+    
+    telnetpp::u8 output_buffer[1023];
+    
+    stream.avail_in  = expected.size();
+    stream.next_in   = const_cast<telnetpp::u8 *>(&expected[0]);
+    stream.avail_out = sizeof(output_buffer);
+    stream.next_out  = output_buffer;
+    
+    response = deflate(&stream, Z_FINISH);
+    assert(response == Z_STREAM_END);
+    
+    telnetpp::u8stream const compressed_stream(output_buffer, stream.next_out);
+    telnetpp::u8stream reassembled_stream;
+    
+    bool last_iteration_was_end_of_stream = false;
+    
+    for (auto byte : compressed_stream)
+    {
+        // At no point should we see that the last iteration was the end of
+        // the stream.
+        ASSERT_EQ(false, last_iteration_was_end_of_stream);
+        
+        auto result = decompressor.decompress(byte);
+        
+        // The stream does not end during this operation.
+        last_iteration_was_end_of_stream = std::get<1>(result);
+        
+        auto const &partial_stream = std::get<0>(result);
+        
+        // Append the resultant stream to the reassembled stream.
+        reassembled_stream.insert(
+            reassembled_stream.end(),
+            partial_stream.begin(),
+            partial_stream.end());
+    }
+    
+    // The very last iteration through the stream should have set the flag.
+    ASSERT_EQ(true, last_iteration_was_end_of_stream);
+    
+    // The stream should still have been reassembled correctly.
+    ASSERT_EQ(expected, reassembled_stream);
 
+    response = deflateEnd(&stream);
+    assert(response == Z_OK);
+}
+
+TEST(mccp_zlib_decompressor_test, restarting_decompression_acts_as_if_a_new_stream)
+{
+    // If we've received and end of stream notification, then the next byte
+    // received should work as if it were an entirely new stream.  We can 
+    // verify this by compressing an entirely new stream and checking that it
+    // is reassembled correctly.
+    telnetpp::options::mccp::zlib::decompressor zlib_decompressor;
+    telnetpp::options::mccp::decompressor &decompressor = zlib_decompressor;
+    
+    auto const expected = telnetpp::u8stream {
+        'd', 'a', 't', 'a', 'd', 'a', 't', 'a', 'd', 'a', 't', 'a',
+        'd', 'a', 't', 'a', 'd', 'a', 't', 'a', 'd', 'a', 't', 'a',
+    };
+    
+    z_stream stream = {};
+    auto response = deflateInit(&stream, Z_DEFAULT_COMPRESSION);
+    assert(response == Z_OK);
+    
+    telnetpp::u8 output_buffer[1023];
+    
+    stream.avail_in  = expected.size();
+    stream.next_in   = const_cast<telnetpp::u8 *>(&expected[0]);
+    stream.avail_out = sizeof(output_buffer);
+    stream.next_out  = output_buffer;
+    
+    response = deflate(&stream, Z_FINISH);
+    assert(response == Z_STREAM_END);
+    response = deflateEnd(&stream);
+    assert(response == Z_OK);
+    
+    response = deflateInit(&stream, Z_DEFAULT_COMPRESSION);
+    assert(response == Z_OK);
+    
+    stream.avail_in  = expected.size();
+    stream.next_in   = const_cast<telnetpp::u8 *>(&expected[0]);
+    stream.avail_out = sizeof(output_buffer);
+    stream.next_out  = output_buffer;
+    
     response = deflate(&stream, Z_SYNC_FLUSH);
     assert(response == Z_OK);
 
-    auto amount_received = sizeof(buffer) - stream.avail_out;
-    telnetpp::u8stream received;
+    telnetpp::u8stream const compressed_stream(output_buffer, stream.next_out);
+    telnetpp::u8stream reassembled_stream;
+    
+    for (auto byte : compressed_stream)
+    {
+        auto result = decompressor.decompress(byte);
+        
+        // The stream does not end during this operation.
+        ASSERT_EQ(false, std::get<1>(result));
+        
+        auto const &partial_stream = std::get<0>(result);
+        
+        // Append the resultant stream to the reassembled stream.
+        reassembled_stream.insert(
+            reassembled_stream.end(),
+            partial_stream.begin(),
+            partial_stream.end());
+    }
+    
+    ASSERT_EQ(expected, reassembled_stream);
 
-    std::for_each(buffer, buffer + amount_received,
-        [&codec, &received](telnetpp::u8 byte)
-        {
-            telnetpp::u8stream partial = codec.receive(byte);
-            received.insert(received.end(), partial.begin(), partial.end());
-        });
-
-    ASSERT_EQ(expected, received);
-    deflateEnd(&stream);
+    response = deflateEnd(&stream);
+    assert(response == Z_DATA_ERROR);
 }
 
-TEST(mccp_decompressor_test, decompressed_compression_end_stops_decompression)
-{
-    // If the input stream receives the end of a compressed stream, it should
-    // disable compression for the following bytes.
-    telnetpp::options::mccp::codec codec;
-    codec.send({
-        boost::any(telnetpp::options::mccp::begin_decompression{})
-    });
-
-    auto const compressed_data = telnetpp::u8stream {
-        'c', 'o', 'm', 'p', 'c', 'o', 'm', 'p', 'c', 'o', 'm', 'p', 'c', 'o', 'm', 'p', 'c', 'o', 'm', 'p', 'c', 'o', 'm', 'p'
-    };
-
-    auto const uncompressed_data = telnetpp::u8stream {
-        'd', 'a', 't', 'a', 'd', 'a', 't', 'a', 'd', 'a', 't', 'a'
-    };
-
-    auto const expected_result = compressed_data + uncompressed_data;
-
-    z_stream stream = {};
-    auto response = deflateInit(&stream, Z_DEFAULT_COMPRESSION);
-    assert(response == Z_OK);
-
-    telnetpp::u8 buffer[1023];
-    stream.next_in = const_cast<telnetpp::u8*>(&compressed_data[0]);
-    stream.avail_in = compressed_data.size();
-    stream.next_out = buffer;
-    stream.avail_out = sizeof(buffer);
-
-    response = deflate(&stream, Z_FINISH);
-
-    auto const used_buffer = sizeof(buffer) - stream.avail_out;
-    telnetpp::u8stream data(buffer, buffer + used_buffer);
-    data.insert(
-        data.end(), uncompressed_data.begin(), uncompressed_data.end());
-
-    auto result = std::accumulate(
-        data.begin(),
-        data.end(),
-        telnetpp::u8stream{},
-        [&codec](auto &lhs, auto const &rhs)
-        {
-            auto response = codec.receive(rhs);
-            lhs.insert(lhs.end(), response.begin(), response.end());
-            return lhs;
-        });
-
-    ASSERT_EQ(expected_result, result);
-    deflateEnd(&stream);
-}
-
-TEST(mccp_decompressor_test, can_decompress_large_blocks_of_data)
+TEST(mccp_zlib_decompressor_test, can_decompress_large_blocks_of_data)
 {
     // The decompressor should be able to decompress large blocks of data.
     // The internal buffer size is set to 1023, so decompressing a block
-    // larger than that should require iterating the decompression procedure.
+    // larger than that may require iterating the decompression procedure.
     // To test this, we generate a large block of random (and hence
     // uncompressable) data of around 4KB, and glue several of these together.
-    telnetpp::options::mccp::codec codec;
-    codec.send({
-        boost::any(telnetpp::options::mccp::begin_decompression{})
-    });
+    telnetpp::options::mccp::zlib::decompressor zlib_decompressor;
+    telnetpp::options::mccp::decompressor &decompressor = zlib_decompressor;
 
     static size_t const block_size = 4096;
 
@@ -135,31 +221,36 @@ TEST(mccp_decompressor_test, can_decompress_large_blocks_of_data)
     auto response = deflateInit(&stream, Z_DEFAULT_COMPRESSION);
     assert(response == Z_OK);
 
-    telnetpp::u8 buffer[block_size * 4];
+    telnetpp::u8 output_buffer[block_size * 5];
     stream.next_in = const_cast<telnetpp::u8*>(&expected[0]);
     stream.avail_in = expected.size();
-    stream.next_out = buffer;
-    stream.avail_out = sizeof(buffer);
+    stream.next_out = output_buffer;
+    stream.avail_out = sizeof(output_buffer);
 
     response = deflate(&stream, Z_SYNC_FLUSH);
     assert(response == Z_OK);
 
-    auto const used_buffer = sizeof(buffer) - stream.avail_out;
-
-    printf("\ncompressed %ld to %ld bytes\n", expected.size(), used_buffer);
-    telnetpp::u8stream data(buffer, buffer + used_buffer);
-
-    auto result = std::accumulate(
-        data.begin(),
-        data.end(),
-        telnetpp::u8stream{},
-        [&codec](auto &lhs, auto const &rhs)
-        {
-            auto response = codec.receive(rhs);
-            lhs.insert(lhs.end(), response.begin(), response.end());
-            return lhs;
-        });
-
-    ASSERT_EQ(expected, result);
-    deflateEnd(&stream);
+    telnetpp::u8stream const compressed_stream(output_buffer, stream.next_out);
+    telnetpp::u8stream reassembled_stream;
+    
+    for (auto byte : compressed_stream)
+    {
+        auto result = decompressor.decompress(byte);
+        
+        // The stream does not end during this operation.
+        ASSERT_EQ(false, std::get<1>(result));
+        
+        auto const &partial_stream = std::get<0>(result);
+        
+        // Append the resultant stream to the reassembled stream.
+        reassembled_stream.insert(
+            reassembled_stream.end(),
+            partial_stream.begin(),
+            partial_stream.end());
+    }
+    
+    ASSERT_EQ(expected, reassembled_stream);
+    
+    response = deflateEnd(&stream);
+    assert(response == Z_DATA_ERROR);
 }
