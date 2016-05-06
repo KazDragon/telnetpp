@@ -11,9 +11,8 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${PROJECT_SOURCE_DIR}/cmake/Modules"
 # Boost is required as we used Boost.Variant, Boost.Optional, and
 # Boost.Signals2.  All of these are header-only libraries, so no subcomponents
 # are required.
-# Requires boost::make_unique, which brings this to Boost 1.56.
 include(FindBoost)
-find_package(Boost 1.56.0 REQUIRED)
+find_package(Boost 1.39.0 REQUIRED)
 
 # When building shared objects, etc., we only want to export certain symbols.
 # Therefore, we need to generate a header suitable for declaring which

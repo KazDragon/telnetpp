@@ -1,5 +1,4 @@
 #include "telnetpp/options/mccp/zlib/compressor.hpp"
-#include <boost/make_unique.hpp>
 #include <zlib.h>
 #include <cassert>
 
@@ -118,7 +117,7 @@ struct compressor::impl
 // CONSTRUCTOR
 // ==========================================================================
 compressor::compressor()
-  : pimpl_(boost::make_unique<impl>())
+  : pimpl_(new impl)
 {
 }
 

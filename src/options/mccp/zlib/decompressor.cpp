@@ -1,6 +1,5 @@
 #include "telnetpp/options/mccp/zlib/decompressor.hpp"
 #include <zlib.h>
-#include <boost/make_unique.hpp>
 #include <cassert>
 
 namespace telnetpp { namespace options { namespace mccp { namespace zlib {
@@ -69,7 +68,7 @@ private :
 // CONSTRUCTOR
 // ==========================================================================
 decompressor::decompressor()
-  : pimpl_(boost::make_unique<impl>())
+  : pimpl_(new impl)
 {
 }
 
