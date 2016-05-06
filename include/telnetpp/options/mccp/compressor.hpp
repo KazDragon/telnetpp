@@ -1,38 +1,32 @@
 #pragma once
 
-#include "telnetpp/options/mccp/detail/compressor.hpp"
-#include <memory>
+#include "telnetpp/core.hpp"
 
-namespace telnetpp { namespace options { namespace mccp { namespace detail {
+namespace telnetpp { namespace options { namespace mccp {
 
-class zlib_compressor : public compressor
+//* =========================================================================
+/// \brief Represents an object that can compress arbitrary byte sequences.
+//* =========================================================================
+class compressor
 {
 public :
     //* =====================================================================
-    /// \brief Constructor
-    //* =====================================================================
-    zlib_compressor();
-    
-    //* =====================================================================
     /// \brief Destructor
     //* =====================================================================
-    ~zlib_compressor() override;
+    virtual ~compressor() {}
     
     //* =====================================================================
     /// \brief Compress the given byte sequence and return the compressed
     /// sequence.
     //* =====================================================================
-    telnetpp::u8stream compress(telnetpp::u8stream const &sequence) override;
-    
+    virtual telnetpp::u8stream compress(
+        telnetpp::u8stream const &sequence) = 0;
+
     //* =====================================================================
     /// \brief Ends the compression stream.  Compressing further will cause
     /// the stream to restart.
     //* =====================================================================
-    telnetpp::u8stream end_compression() override;
-
-private :
-    struct impl;
-    std::unique_ptr<impl> pimpl_;
+    virtual telnetpp::u8stream end_compression() = 0;
 };
 
-}}}}
+}}}

@@ -1,17 +1,15 @@
-#include "expect_elements.hpp"
-#include <telnetpp/options/mccp/detail/zlib_compressor.hpp>
-//#include <telnetpp/options/mccp/codec.hpp>
-//#include <telnetpp/options/mccp/mccp.hpp>
-#include <random>
+#include <telnetpp/options/mccp/zlib/compressor.hpp>
 #include <zlib.h>
 #include <gtest/gtest.h>
+#include <algorithm>
+#include <random>
 
 TEST(mccp_zlib_compressor_test, zlib_compressor_is_compressor)
 {
     // The MCCP codec will rely on the compressor interface, so 
     // zlib_compressor must implement that.
-    telnetpp::options::mccp::detail::zlib_compressor zlib_compressor;
-    telnetpp::options::mccp::detail::compressor &compressor = zlib_compressor;
+    telnetpp::options::mccp::zlib::compressor zlib_compressor;
+    telnetpp::options::mccp::compressor &compressor = zlib_compressor;
 }
 
 TEST(mccp_zlib_compressor_test, compressing_empty_stream_returns_empty_stream)
@@ -19,8 +17,8 @@ TEST(mccp_zlib_compressor_test, compressing_empty_stream_returns_empty_stream)
     // If the compressor receives an empty stream of data to compress, then
     // it is not worth sending any data at all, so the compressor must return
     // an empty stream of data.
-    telnetpp::options::mccp::detail::zlib_compressor zlib_compressor;
-    telnetpp::options::mccp::detail::compressor &compressor = zlib_compressor;
+    telnetpp::options::mccp::zlib::compressor zlib_compressor;
+    telnetpp::options::mccp::compressor &compressor = zlib_compressor;
     
     auto const expected = telnetpp::u8stream{};
     
@@ -33,8 +31,8 @@ TEST(mccp_zlib_compressor_test, compressing_data_returns_data_compressed)
     // stream and return the compressed content. To test this, we then 
     // uncompress the stream and assert that it is the same as the original
     // content.
-    telnetpp::options::mccp::detail::zlib_compressor zlib_compressor;
-    telnetpp::options::mccp::detail::compressor &compressor = zlib_compressor;
+    telnetpp::options::mccp::zlib::compressor zlib_compressor;
+    telnetpp::options::mccp::compressor &compressor = zlib_compressor;
 
     auto const expected = telnetpp::u8stream{
         'd', 'a', 't', 'a', 'd', 'a', 't', 'a', 'd', 'a', 't', 'a',
@@ -72,8 +70,8 @@ TEST(mccp_zlib_compressor_test, compressing_more_data_returns_more_data_compress
     // of data may be received and return a different response to the first
     // batch.  To test this, we send the same data twice, and ensure that the
     // second batch of data is also received correctly.
-    telnetpp::options::mccp::detail::zlib_compressor zlib_compressor;
-    telnetpp::options::mccp::detail::compressor &compressor = zlib_compressor;
+    telnetpp::options::mccp::zlib::compressor zlib_compressor;
+    telnetpp::options::mccp::compressor &compressor = zlib_compressor;
 
     auto const expected = telnetpp::u8stream{
         'd', 'a', 't', 'a', 'd', 'a', 't', 'a', 'd', 'a', 't', 'a',
@@ -119,8 +117,8 @@ TEST(mccp_compressor_test, end_compression_returns_compression_end_sequence)
 {
     // It is possible to end the compression stream.  In this case, a sequence
     // is returned that denotes the end of the compression stream.
-    telnetpp::options::mccp::detail::zlib_compressor zlib_compressor;
-    telnetpp::options::mccp::detail::compressor &compressor = zlib_compressor;
+    telnetpp::options::mccp::zlib::compressor zlib_compressor;
+    telnetpp::options::mccp::compressor &compressor = zlib_compressor;
     
     auto result = compressor.end_compression();
 
@@ -143,8 +141,8 @@ TEST(mccp_compressor_test, ending_compression_then_compressing_data_restarts_com
 {
     // After an end_compression, the next time compress() is called, the 
     // stream must begin as if new.
-    telnetpp::options::mccp::detail::zlib_compressor zlib_compressor;
-    telnetpp::options::mccp::detail::compressor &compressor = zlib_compressor;
+    telnetpp::options::mccp::zlib::compressor zlib_compressor;
+    telnetpp::options::mccp::compressor &compressor = zlib_compressor;
     compressor.end_compression();
     
     auto const expected = telnetpp::u8stream{
@@ -196,8 +194,8 @@ TEST(mccp_compressor_test, can_compress_large_data)
             return distribution(rng);
         });
 
-    telnetpp::options::mccp::detail::zlib_compressor zlib_compressor;
-    telnetpp::options::mccp::detail::compressor &compressor = zlib_compressor;
+    telnetpp::options::mccp::zlib::compressor zlib_compressor;
+    telnetpp::options::mccp::compressor &compressor = zlib_compressor;
     auto compressed_stream = compressor.compress(stream);
     
     // The compressed stream must be greater than this, or otherwise we haven't

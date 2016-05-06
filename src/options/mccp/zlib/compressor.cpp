@@ -1,9 +1,9 @@
-#include "telnetpp/options/mccp/detail/zlib_compressor.hpp"
+#include "telnetpp/options/mccp/zlib/compressor.hpp"
 #include <boost/make_unique.hpp>
 #include <zlib.h>
 #include <cassert>
 
-namespace telnetpp { namespace options { namespace mccp { namespace detail {
+namespace telnetpp { namespace options { namespace mccp { namespace zlib {
 
 namespace {
     
@@ -20,7 +20,7 @@ static std::size_t constexpr output_buffer_size = 1023;
 // ==========================================================================
 // ZLIB_COMPRESSION::IMPL
 // ==========================================================================
-struct zlib_compressor::impl
+struct compressor::impl
 {
     // ======================================================================
     // CONSTRUCTOR
@@ -123,7 +123,7 @@ struct zlib_compressor::impl
 // ==========================================================================
 // CONSTRUCTOR
 // ==========================================================================
-zlib_compressor::zlib_compressor()
+compressor::compressor()
   : pimpl_(boost::make_unique<impl>())
 {
 }
@@ -131,14 +131,14 @@ zlib_compressor::zlib_compressor()
 // ==========================================================================
 // DESTRUCTOR
 // ==========================================================================
-zlib_compressor::~zlib_compressor()
+compressor::~compressor()
 {
 }
 
 // ==========================================================================
 // COMPRESS
 // ==========================================================================
-telnetpp::u8stream zlib_compressor::compress(telnetpp::u8stream const &sequence)
+telnetpp::u8stream compressor::compress(telnetpp::u8stream const &sequence)
 {
     if (sequence.empty())
     {
@@ -153,7 +153,7 @@ telnetpp::u8stream zlib_compressor::compress(telnetpp::u8stream const &sequence)
 // ==========================================================================
 // END_COMPRESSION
 // ==========================================================================
-telnetpp::u8stream zlib_compressor::end_compression()
+telnetpp::u8stream compressor::end_compression()
 {
     return pimpl_->end_compression();
 }

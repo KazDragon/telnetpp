@@ -49,6 +49,7 @@ set (telnetpp_public_src
     src/options/mccp/client.cpp
     src/options/mccp/codec.cpp
     src/options/mccp/server.cpp
+    src/options/mccp/zlib/compressor.cpp
     src/options/msdp/client.cpp
     src/options/msdp/server.cpp
     src/options/msdp/variable.cpp
@@ -63,7 +64,6 @@ set (telnetpp_public_src
 )
 
 set (telnetpp_private_src
-    src/options/mccp/detail/zlib_compressor.cpp
     src/options/msdp/detail/decoder.cpp
     src/options/msdp/detail/encoder.cpp
     src/options/new_environ/detail/request_parser.cpp
@@ -137,6 +137,7 @@ if (GTEST_FOUND)
         test/mccp_client_test.cpp
         test/mccp_decompressor_test.cpp
         test/mccp_server_test.cpp
+        test/mccp_zlib_compressor_test.cpp
         test/msdp_client_test.cpp
         test/msdp_server_test.cpp
         test/msdp_server_robustness_test.cpp
@@ -157,7 +158,6 @@ if (GTEST_FOUND)
     set (telnetpp_tester_internal_tests
         test/parser_test.cpp
         test/generator_test.cpp
-        test/mccp_zlib_compressor_test.cpp
         test/routing_visitor_test.cpp
     )
 
