@@ -7,8 +7,9 @@
 
 namespace telnetpp { namespace options { namespace mccp {
 
-namespace {
+//namespace {
 
+    /*
 static bool is_begin_compression_token(boost::any const &any)
 {
     return boost::any_cast<telnetpp::options::mccp::begin_compression>(&any) != nullptr;
@@ -266,7 +267,15 @@ struct codec::impl
     bool output_compressed_ = false;
 };
 
-codec::codec()
+*/
+  
+struct codec::impl
+{
+};
+
+codec::codec(
+    std::shared_ptr<compressor> const &co,
+    std::shared_ptr<decompressor> const &dec)
   : pimpl_(std::make_shared<impl>())
 {
 }
@@ -278,6 +287,8 @@ codec::~codec()
 std::vector<telnetpp::stream_token> codec::send(
     std::vector<telnetpp::stream_token> const &tokens)
 {
+    return tokens;
+    /*
     auto visitor = token_visitor(
         pimpl_->input_stream_,
         pimpl_->output_stream_,
@@ -302,13 +313,17 @@ std::vector<telnetpp::stream_token> codec::send(
         });
 
     return result;
+    */
 }
 
 telnetpp::u8stream codec::receive(telnetpp::u8 byte)
 {
+    return {};
+    /*
     decompressor dec(
         pimpl_->input_stream_, pimpl_->input_compressed_);
     return dec(byte);
+    */
 }
 
 }}}
