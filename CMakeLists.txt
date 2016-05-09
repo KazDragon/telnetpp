@@ -40,6 +40,12 @@ if (GTEST_FOUND)
     find_package(Threads REQUIRED)
 endif()
 
+option(TELNETPP_COVERAGE "Enable a build with coverage" OFF)
+
+if (TELNETPP_COVERAGE)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --coverage")
+endif()
+
 set (telnetpp_public_src
     src/byte_converter.cpp
     src/client_option.cpp
