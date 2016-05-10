@@ -12,14 +12,14 @@ TEST(mccp_codec_test, sending_empty_tokens_returns_empty_tokens)
     // need to do anything, and we won't do anything.
     auto compressor   = std::make_shared<fake_compressor>();
     auto decompressor = std::make_shared<fake_decompressor>();
-    
+
     telnetpp::options::mccp::codec codec{
         std::shared_ptr<telnetpp::options::mccp::compressor>(compressor),
         std::shared_ptr<telnetpp::options::mccp::decompressor>(decompressor)};
-    
+
     auto const &expected = std::vector<telnetpp::stream_token>{};
     auto const &result = codec.send({});
-    
+
     expect_tokens(expected, result);
     ASSERT_EQ(size_t{0}, compressor->compress_called);
     ASSERT_EQ(size_t{0}, compressor->end_compression_called);
@@ -32,7 +32,7 @@ TEST(mccp_codec_test, sending_uncompressed_data_returns_uncompressed_data)
     // return the data unchanged and not call the compressor at all.
     auto compressor   = std::make_shared<fake_compressor>();
     auto decompressor = std::make_shared<fake_decompressor>();
-    
+
     telnetpp::options::mccp::codec codec{
         std::shared_ptr<telnetpp::options::mccp::compressor>(compressor),
         std::shared_ptr<telnetpp::options::mccp::decompressor>(decompressor)};
@@ -40,33 +40,33 @@ TEST(mccp_codec_test, sending_uncompressed_data_returns_uncompressed_data)
     auto const &data = telnetpp::u8stream {
         't', 'e', 's', 't', 'd', 'a', 't', 'a'
     };
-    
+
     auto const &expected = std::vector<telnetpp::stream_token> { data };
-    
+
     expect_tokens(expected, codec.send({ data }));
     ASSERT_EQ(size_t{0}, compressor->compress_called);
     ASSERT_EQ(size_t{0}, compressor->end_compression_called);
     ASSERT_EQ(size_t{0}, decompressor->decompress_called);
 }
 
-TEST(mccp_codec_test, sending_any_passes_through_any)
+TEST(mccp_codec_test, uncompressed_sending_any_passes_through_any)
 {
     // If the datastream contains a token of type boost::any, and it doesn't
     // contain a token of the type that the codec consumes, then it will
     // be passed through unchanged.
     auto compressor   = std::make_shared<fake_compressor>();
     auto decompressor = std::make_shared<fake_decompressor>();
-    
+
     telnetpp::options::mccp::codec codec{
         std::shared_ptr<telnetpp::options::mccp::compressor>(compressor),
         std::shared_ptr<telnetpp::options::mccp::decompressor>(decompressor)};
 
     struct pass_through {};
-    
+
     auto const &expected = std::vector<telnetpp::stream_token> {
         boost::any(pass_through{})
     };
-    
+
     expect_tokens(expected, codec.send({ boost::any(pass_through{}) }));
     ASSERT_EQ(size_t{0}, compressor->compress_called);
     ASSERT_EQ(size_t{0}, compressor->end_compression_called);
@@ -75,17 +75,17 @@ TEST(mccp_codec_test, sending_any_passes_through_any)
 
 TEST(mccp_codec_test, uncompressed_sending_end_compression_returns_no_data)
 {
-    // In the uncompressed state, there is no compression to end.  So this 
+    // In the uncompressed state, there is no compression to end.  So this
     // call will return no data and will not forward on to the compressor.
     auto compressor   = std::make_shared<fake_compressor>();
     auto decompressor = std::make_shared<fake_decompressor>();
-    
+
     telnetpp::options::mccp::codec codec{
         std::shared_ptr<telnetpp::options::mccp::compressor>(compressor),
         std::shared_ptr<telnetpp::options::mccp::decompressor>(decompressor)};
 
     auto const &expected = std::vector<telnetpp::stream_token> {};
-    
+
     expect_tokens(expected, codec.send({
         boost::any(telnetpp::options::mccp::end_compression{})
     }));
@@ -101,13 +101,13 @@ TEST(mccp_codec_test, uncompressed_begin_compression_returns_no_data)
     // will be called.
     auto compressor   = std::make_shared<fake_compressor>();
     auto decompressor = std::make_shared<fake_decompressor>();
-    
+
     telnetpp::options::mccp::codec codec{
         std::shared_ptr<telnetpp::options::mccp::compressor>(compressor),
         std::shared_ptr<telnetpp::options::mccp::decompressor>(decompressor)};
 
     auto const &expected = std::vector<telnetpp::stream_token> {};
-    
+
     expect_tokens(expected, codec.send({
         boost::any(telnetpp::options::mccp::begin_compression{})
     }));
@@ -118,13 +118,13 @@ TEST(mccp_codec_test, uncompressed_begin_compression_returns_no_data)
 
 TEST(mccp_codec_test, compression_begun_sending_data_returns_compressed_data)
 {
-    // In the compressed state, where the codec has received a 
+    // In the compressed state, where the codec has received a
     // begin_compression token, any data that is sent will be put through
     // the compressor.
     auto compressor   = std::make_shared<fake_compressor>();
     compressor->compress_result = { 'c', 'o', 'm', 'p' };
     auto decompressor = std::make_shared<fake_decompressor>();
-    
+
     telnetpp::options::mccp::codec codec{
         std::shared_ptr<telnetpp::options::mccp::compressor>(compressor),
         std::shared_ptr<telnetpp::options::mccp::decompressor>(decompressor)};
@@ -132,9 +132,9 @@ TEST(mccp_codec_test, compression_begun_sending_data_returns_compressed_data)
     auto const &expected = std::vector<telnetpp::stream_token> {
         telnetpp::u8stream { 'c', 'o', 'm', 'p' }
     };
-    
+
     auto const &data = telnetpp::u8stream{ 'd', 'a', 't', 'a' };
-    
+
     expect_tokens(expected, codec.send({
         boost::any(telnetpp::options::mccp::begin_compression{}),
         data
@@ -144,3 +144,89 @@ TEST(mccp_codec_test, compression_begun_sending_data_returns_compressed_data)
     ASSERT_EQ(size_t{0}, decompressor->decompress_called);
 }
 
+TEST(mccp_codec_test, compression_begun_sending_any_passes_through_any)
+{
+    // In the compressed state, just as with the compressed state,
+    // if the datastream contains a token of type boost::any, and it doesn't
+    // contain a token of the type that the codec consumes, then it will
+    // be passed through unchanged.
+    auto compressor   = std::make_shared<fake_compressor>();
+    auto decompressor = std::make_shared<fake_decompressor>();
+
+    telnetpp::options::mccp::codec codec{
+        std::shared_ptr<telnetpp::options::mccp::compressor>(compressor),
+        std::shared_ptr<telnetpp::options::mccp::decompressor>(decompressor)};
+
+    struct pass_through {};
+
+    auto const &expected = std::vector<telnetpp::stream_token> {
+        boost::any(pass_through{})
+    };
+
+    auto const &data = std::vector<telnetpp::stream_token> {
+        boost::any(telnetpp::options::mccp::begin_compression{}),
+        boost::any(pass_through{})
+    };
+
+    expect_tokens(expected, codec.send(data));
+    ASSERT_EQ(size_t{0}, compressor->compress_called);
+    ASSERT_EQ(size_t{0}, compressor->end_compression_called);
+    ASSERT_EQ(size_t{0}, decompressor->decompress_called);
+}
+
+TEST(mccp_codec_test, compressed_ending_compression_returns_end_compression_sequence)
+{
+    // In the compressed state, after end_compression has been called, the
+    // codec should be un the uncompressed state - data is sent on without
+    // being passed to the compressor.
+    auto compressor   = std::make_shared<fake_compressor>();
+    compressor->end_compression_result = { 'e', 'n', 'd' };
+    compressor->compress_result = { 'c', 'o', 'm', 'p' };
+    auto decompressor = std::make_shared<fake_decompressor>();
+
+    telnetpp::options::mccp::codec codec{
+        std::shared_ptr<telnetpp::options::mccp::compressor>(compressor),
+        std::shared_ptr<telnetpp::options::mccp::decompressor>(decompressor)};
+
+    auto const &expected = std::vector<telnetpp::stream_token> {
+        telnetpp::u8stream { 'e', 'n', 'd' }, // TODO: coalesce u8streams?
+        telnetpp::u8stream { 'd', 'a', 't', 'a' }
+    };
+
+    auto const &data = std::vector<telnetpp::stream_token> {
+        boost::any(telnetpp::options::mccp::begin_compression{}),
+        boost::any(telnetpp::options::mccp::end_compression{}),
+        telnetpp::u8stream { 'd', 'a', 't', 'a' }
+    };
+
+    expect_tokens(expected, codec.send(data));
+    ASSERT_EQ(size_t{0}, compressor->compress_called);
+    ASSERT_EQ(size_t{1}, compressor->end_compression_called);
+    ASSERT_EQ(size_t{0}, decompressor->decompress_called);
+}
+
+TEST(mccp_codec_test, compressed_ending_compression_then_sending_data_returns_uncompressed_data)
+{
+    auto compressor   = std::make_shared<fake_compressor>();
+    compressor->end_compression_result = { 'e', 'n', 'd' };
+    auto decompressor = std::make_shared<fake_decompressor>();
+
+    telnetpp::options::mccp::codec codec{
+        std::shared_ptr<telnetpp::options::mccp::compressor>(compressor),
+        std::shared_ptr<telnetpp::options::mccp::decompressor>(decompressor)};
+
+    auto const &expected = std::vector<telnetpp::stream_token> {
+        telnetpp::u8stream { 'e', 'n', 'd' }
+    };
+
+    auto const &data = std::vector<telnetpp::stream_token> {
+        boost::any(telnetpp::options::mccp::begin_compression{}),
+        boost::any(telnetpp::options::mccp::end_compression{})
+    };
+
+    expect_tokens(expected, codec.send(data));
+    ASSERT_EQ(size_t{0}, compressor->compress_called);
+    ASSERT_EQ(size_t{1}, compressor->end_compression_called);
+    ASSERT_EQ(size_t{0}, decompressor->decompress_called);
+
+}

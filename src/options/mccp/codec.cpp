@@ -9,12 +9,12 @@
 namespace telnetpp { namespace options { namespace mccp {
 
 namespace {
- 
+
 class output_token_visitor : public boost::static_visitor<>
 {
 public :
     output_token_visitor(
-        std::vector<telnetpp::stream_token> &tokens, 
+        std::vector<telnetpp::stream_token> &tokens,
         compressor &co,
         bool &compressed)
       : tokens_(tokens),
@@ -22,12 +22,16 @@ public :
         compressed_(compressed)
     {
     }
-    
+
     void operator()(boost::any const &any)
     {
         if (any.type() == typeid(end_compression))
         {
-            //tokens_.push_back(compressor_.end_compression());
+            if (compressed_)
+            {
+                tokens_.push_back(compressor_.end_compression());
+                compressed_ = false;
+            }
         }
         else if (any.type() == typeid(begin_compression))
         {
@@ -38,7 +42,7 @@ public :
             tokens_.push_back(any);
         }
     }
-    
+
     void operator()(telnetpp::u8stream const &stream)
     {
         if (compressed_)
@@ -50,7 +54,7 @@ public :
             tokens_.push_back(stream);
         }
     }
-    
+
 private :
     std::vector<telnetpp::stream_token> &tokens_;
     compressor &compressor_;
@@ -63,7 +67,7 @@ struct codec::impl
 {
     std::shared_ptr<compressor>   compressor;
     std::shared_ptr<decompressor> decompressor;
-    
+
     bool compressed = false;
 };
 
@@ -86,12 +90,12 @@ std::vector<telnetpp::stream_token> codec::send(
     auto result = std::vector<telnetpp::stream_token>{};
     output_token_visitor visitor(
         result, *pimpl_->compressor, pimpl_->compressed);
-    
+
     for (auto const &token : tokens)
     {
         boost::apply_visitor(visitor, token);
     }
-    
+
     return result;
 }
 
