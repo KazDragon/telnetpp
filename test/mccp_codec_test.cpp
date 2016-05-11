@@ -24,6 +24,7 @@ TEST(mccp_codec_test, sending_empty_tokens_returns_empty_tokens)
     ASSERT_EQ(size_t{0}, compressor->compress_called);
     ASSERT_EQ(size_t{0}, compressor->end_compression_called);
     ASSERT_EQ(size_t{0}, decompressor->decompress_called);
+    ASSERT_EQ(size_t{0}, decompressor->end_decompression_called);
 }
 
 TEST(mccp_codec_test, sending_uncompressed_data_returns_uncompressed_data)
@@ -47,6 +48,7 @@ TEST(mccp_codec_test, sending_uncompressed_data_returns_uncompressed_data)
     ASSERT_EQ(size_t{0}, compressor->compress_called);
     ASSERT_EQ(size_t{0}, compressor->end_compression_called);
     ASSERT_EQ(size_t{0}, decompressor->decompress_called);
+    ASSERT_EQ(size_t{0}, decompressor->end_decompression_called);
 }
 
 TEST(mccp_codec_test, uncompressed_sending_any_passes_through_any)
@@ -71,6 +73,7 @@ TEST(mccp_codec_test, uncompressed_sending_any_passes_through_any)
     ASSERT_EQ(size_t{0}, compressor->compress_called);
     ASSERT_EQ(size_t{0}, compressor->end_compression_called);
     ASSERT_EQ(size_t{0}, decompressor->decompress_called);
+    ASSERT_EQ(size_t{0}, decompressor->end_decompression_called);
 }
 
 TEST(mccp_codec_test, uncompressed_sending_end_compression_returns_no_data)
@@ -92,6 +95,7 @@ TEST(mccp_codec_test, uncompressed_sending_end_compression_returns_no_data)
     ASSERT_EQ(size_t{0}, compressor->compress_called);
     ASSERT_EQ(size_t{0}, compressor->end_compression_called);
     ASSERT_EQ(size_t{0}, decompressor->decompress_called);
+    ASSERT_EQ(size_t{0}, decompressor->end_decompression_called);
 }
 
 TEST(mccp_codec_test, uncompressed_begin_compression_returns_no_data)
@@ -114,6 +118,7 @@ TEST(mccp_codec_test, uncompressed_begin_compression_returns_no_data)
     ASSERT_EQ(size_t{0}, compressor->compress_called);
     ASSERT_EQ(size_t{0}, compressor->end_compression_called);
     ASSERT_EQ(size_t{0}, decompressor->decompress_called);
+    ASSERT_EQ(size_t{0}, decompressor->end_decompression_called);
 }
 
 TEST(mccp_codec_test, compression_begun_sending_data_returns_compressed_data)
@@ -142,6 +147,7 @@ TEST(mccp_codec_test, compression_begun_sending_data_returns_compressed_data)
     ASSERT_EQ(size_t{1}, compressor->compress_called);
     ASSERT_EQ(size_t{0}, compressor->end_compression_called);
     ASSERT_EQ(size_t{0}, decompressor->decompress_called);
+    ASSERT_EQ(size_t{0}, decompressor->end_decompression_called);
 }
 
 TEST(mccp_codec_test, compression_begun_sending_any_passes_through_any)
@@ -172,6 +178,7 @@ TEST(mccp_codec_test, compression_begun_sending_any_passes_through_any)
     ASSERT_EQ(size_t{0}, compressor->compress_called);
     ASSERT_EQ(size_t{0}, compressor->end_compression_called);
     ASSERT_EQ(size_t{0}, decompressor->decompress_called);
+    ASSERT_EQ(size_t{0}, decompressor->end_decompression_called);
 }
 
 TEST(mccp_codec_test, compressed_ending_compression_returns_end_compression_sequence)
@@ -203,6 +210,7 @@ TEST(mccp_codec_test, compressed_ending_compression_returns_end_compression_sequ
     ASSERT_EQ(size_t{0}, compressor->compress_called);
     ASSERT_EQ(size_t{1}, compressor->end_compression_called);
     ASSERT_EQ(size_t{0}, decompressor->decompress_called);
+    ASSERT_EQ(size_t{0}, decompressor->end_decompression_called);
 }
 
 TEST(mccp_codec_test, compressed_ending_compression_then_sending_data_returns_uncompressed_data)
@@ -228,5 +236,84 @@ TEST(mccp_codec_test, compressed_ending_compression_then_sending_data_returns_un
     ASSERT_EQ(size_t{0}, compressor->compress_called);
     ASSERT_EQ(size_t{1}, compressor->end_compression_called);
     ASSERT_EQ(size_t{0}, decompressor->decompress_called);
+    ASSERT_EQ(size_t{0}, decompressor->end_decompression_called);
+}
 
+TEST(mccp_codec_test, uncompressed_end_decompression_does_nothing)
+{
+    // If we are not currently receiving any compressed data, then ending
+    // decompression does nothing.
+    auto compressor   = std::make_shared<fake_compressor>();
+    auto decompressor = std::make_shared<fake_decompressor>();
+
+    telnetpp::options::mccp::codec codec{
+        std::shared_ptr<telnetpp::options::mccp::compressor>(compressor),
+        std::shared_ptr<telnetpp::options::mccp::decompressor>(decompressor)};
+
+    auto const &expected = std::vector<telnetpp::stream_token> {};
+
+    expect_tokens(expected, codec.send({
+        boost::any(telnetpp::options::mccp::end_decompression{})
+    }));
+    ASSERT_EQ(size_t{0}, compressor->compress_called);
+    ASSERT_EQ(size_t{0}, compressor->end_compression_called);
+    ASSERT_EQ(size_t{0}, decompressor->decompress_called);
+    ASSERT_EQ(size_t{0}, decompressor->end_decompression_called);
+}
+
+TEST(mccp_codec_test, uncompressed_sending_begin_decompression_returns_nothing)
+{
+    // Sending a begin_decompression should consume the token and return
+    // nothing.  Any other effects occur later.
+    auto compressor   = std::make_shared<fake_compressor>();
+    auto decompressor = std::make_shared<fake_decompressor>();
+
+    telnetpp::options::mccp::codec codec{
+        std::shared_ptr<telnetpp::options::mccp::compressor>(compressor),
+        std::shared_ptr<telnetpp::options::mccp::decompressor>(decompressor)};
+
+    auto const &expected = std::vector<telnetpp::stream_token> {};
+
+    expect_tokens(expected, codec.send({
+        boost::any(telnetpp::options::mccp::begin_decompression{})
+    }));
+    ASSERT_EQ(size_t{0}, compressor->compress_called);
+    ASSERT_EQ(size_t{0}, compressor->end_compression_called);
+    ASSERT_EQ(size_t{0}, decompressor->decompress_called);
+    ASSERT_EQ(size_t{0}, decompressor->end_decompression_called);
+}
+
+TEST(mccp_codec_test, compressed_received_data_is_decompressed)
+{
+    auto compressor   = std::make_shared<fake_compressor>();
+    auto decompressor = std::make_shared<fake_decompressor>();
+    decompressor->decompress_result.emplace_back(telnetpp::u8stream{}, false);
+    decompressor->decompress_result.emplace_back(telnetpp::u8stream{}, false);
+    decompressor->decompress_result.emplace_back(telnetpp::u8stream{}, false);
+    decompressor->decompress_result.emplace_back(telnetpp::u8stream{ 'd', 'a', 't', 'a' }, false);
+
+    telnetpp::options::mccp::codec codec{
+        std::shared_ptr<telnetpp::options::mccp::compressor>(compressor),
+        std::shared_ptr<telnetpp::options::mccp::decompressor>(decompressor)};
+
+    auto const &expected = std::vector<telnetpp::stream_token> {
+        telnetpp::u8stream{},
+        telnetpp::u8stream{},
+        telnetpp::u8stream{},
+        telnetpp::u8stream{'d', 'a', 't', 'a'},
+    };
+
+    auto const &data = telnetpp::u8stream{'c', 'o', 'm', 'p'};
+    auto result = std::vector<telnetpp::stream_token>{};
+
+    for (auto byte : data)
+    {
+        result.push_back(codec.receive(byte));
+    }
+
+    expect_tokens(expected, result);
+    ASSERT_EQ(size_t{0}, compressor->compress_called);
+    ASSERT_EQ(size_t{0}, compressor->end_compression_called);
+    ASSERT_EQ(size_t{4}, decompressor->decompress_called);
+    ASSERT_EQ(size_t{0}, decompressor->end_decompression_called);
 }

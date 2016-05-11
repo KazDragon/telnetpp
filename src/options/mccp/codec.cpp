@@ -37,6 +37,12 @@ public :
         {
             compressed_ = true;
         }
+        else if (any.type() == typeid(end_decompression))
+        {
+        }
+        else if (any.type() == typeid(begin_decompression))
+        {
+        }
         else
         {
             tokens_.push_back(any);
@@ -101,6 +107,7 @@ std::vector<telnetpp::stream_token> codec::send(
 
 telnetpp::u8stream codec::receive(telnetpp::u8 byte)
 {
+    // TODO:
     return {};
     /*
     decompressor dec(

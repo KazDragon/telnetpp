@@ -1,4 +1,5 @@
 #include <telnetpp/options/mccp/decompressor.hpp>
+#include <deque>
 
 class fake_decompressor : public telnetpp::options::mccp::decompressor
 {
@@ -12,7 +13,17 @@ public :
         telnetpp::u8 byte) override
     {
         ++decompress_called;
-        return {};
+
+        if (!decompress_result.empty())
+        {
+            auto result = decompress_result[0];
+            decompress_result.pop_front();
+            return result;
+        }
+        else
+        {
+            return {};
+        }
     }
 
     //* =====================================================================
@@ -23,6 +34,8 @@ public :
     {
         ++end_decompression_called;
     }
+
+    std::deque<std::tuple<telnetpp::u8stream, bool>> decompress_result;
 
     size_t decompress_called = 0;
     size_t end_decompression_called = 0;
