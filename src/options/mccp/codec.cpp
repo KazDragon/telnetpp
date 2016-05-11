@@ -128,6 +128,7 @@ telnetpp::u8stream codec::receive(telnetpp::u8 byte)
     if (pimpl_->input_compressed_)
     {
         auto const &result = pimpl_->decompressor_->decompress(byte);
+        pimpl_->input_compressed_ = !std::get<1>(result);
         return std::get<0>(result);
     }
     else

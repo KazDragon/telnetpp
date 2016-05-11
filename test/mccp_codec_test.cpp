@@ -390,3 +390,45 @@ TEST(mccp_codec_test, decompression_ended_receiving_data_returns_data)
     ASSERT_EQ(size_t{0}, decompressor->decompress_called);
     ASSERT_EQ(size_t{1}, decompressor->end_decompression_called);
 }
+
+TEST(mccp_codec, compressed_receive_end_of_decompression_stream_continues_uncompressed)
+{
+    // If we receive an end of decompression stream while the data is being
+    // received, then it should continue in the uncompressed state.
+    auto compressor   = std::make_shared<fake_compressor>();
+    auto decompressor = std::make_shared<fake_decompressor>();
+    decompressor->decompress_result.emplace_back(telnetpp::u8stream{}, false);
+    decompressor->decompress_result.emplace_back(
+        telnetpp::u8stream{'c', 'o'}, true);
+
+    telnetpp::options::mccp::codec codec{
+        std::shared_ptr<telnetpp::options::mccp::compressor>(compressor),
+        std::shared_ptr<telnetpp::options::mccp::decompressor>(decompressor)};
+
+    codec.send({
+        boost::any(telnetpp::options::mccp::begin_decompression{}),
+    });
+
+    auto const &input    = telnetpp::u8stream{ 'X', 'Y', 'd', 'e', 'c' };
+
+    auto const &expected = std::vector<telnetpp::stream_token>{
+        telnetpp::u8stream{},
+        telnetpp::u8stream{ 'c', 'o' },
+        telnetpp::u8stream{ 'd' },
+        telnetpp::u8stream{ 'e' },
+        telnetpp::u8stream{ 'c' }
+    };
+
+    auto result = std::vector<telnetpp::stream_token>{};
+
+    for (auto ch : input)
+    {
+        result.push_back(codec.receive(ch));
+    }
+
+    expect_tokens(expected, result);
+    ASSERT_EQ(size_t{0}, compressor->compress_called);
+    ASSERT_EQ(size_t{0}, compressor->end_compression_called);
+    ASSERT_EQ(size_t{2}, decompressor->decompress_called);
+    ASSERT_EQ(size_t{0}, decompressor->end_decompression_called);
+}
