@@ -15,7 +15,7 @@ public :
     /// \brief Destructor
     //* =====================================================================
     virtual ~decompressor() {}
-    
+
     //* =====================================================================
     /// \brief Decompress the given byte, and return a tuple of the
     /// decompressed data and a boolean that is set to true if this was the
@@ -23,6 +23,12 @@ public :
     //* =====================================================================
     virtual std::tuple<telnetpp::u8stream, bool> decompress(
         telnetpp::u8 byte) = 0;
+
+    //* =====================================================================
+    /// \brief Ends the current decompression stream.  Any further calls
+    /// to decompress continue as if the stream were created fresh.
+    //* =====================================================================
+    virtual void end_decompression() = 0;
 };
 
 }}}

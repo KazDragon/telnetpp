@@ -14,6 +14,16 @@ public :
         ++decompress_called;
         return {};
     }
-    
-    size_t decompress_called;
+
+    //* =====================================================================
+    /// \brief Ends the current decompression stream.  Any further calls
+    /// to decompress continue as if the stream were created fresh.
+    //* =====================================================================
+    virtual void end_decompression()
+    {
+        ++end_decompression_called;
+    }
+
+    size_t decompress_called = 0;
+    size_t end_decompression_called = 0;
 };
