@@ -17,12 +17,14 @@ public :
     output_token_visitor(
         std::vector<telnetpp::stream_token> &tokens,
         compressor &co,
-        bool &compressed,
-        bool &decompressed)
+        decompressor &dec,
+        bool &output_compressed,
+        bool &input_compressed)
       : tokens_(tokens),
         compressor_(co),
-        compressed_(compressed),
-        decompressed_(decompressed)
+        decompressor_(dec),
+        output_compressed_(output_compressed),
+        input_compressed_(input_compressed)
     {
     }
 
@@ -30,22 +32,27 @@ public :
     {
         if (any.type() == typeid(end_compression))
         {
-            if (compressed_)
+            if (output_compressed_)
             {
                 tokens_.push_back(compressor_.end_compression());
-                compressed_ = false;
+                output_compressed_ = false;
             }
         }
         else if (any.type() == typeid(begin_compression))
         {
-            compressed_ = true;
+            output_compressed_ = true;
         }
         else if (any.type() == typeid(end_decompression))
         {
+            if (input_compressed_)
+            {
+                decompressor_.end_decompression();
+                input_compressed_ = false;
+            }
         }
         else if (any.type() == typeid(begin_decompression))
         {
-            decompressed_ = true;
+            input_compressed_ = true;
         }
         else
         {
@@ -55,7 +62,7 @@ public :
 
     void operator()(telnetpp::u8stream const &stream)
     {
-        if (compressed_)
+        if (output_compressed_)
         {
             tokens_.push_back(compressor_.compress(stream));
         }
@@ -68,8 +75,9 @@ public :
 private :
     std::vector<telnetpp::stream_token> &tokens_;
     compressor &compressor_;
-    bool &compressed_;
-    bool &decompressed_;
+    decompressor &decompressor_;
+    bool &output_compressed_;
+    bool &input_compressed_;
 };
 
 }
@@ -79,8 +87,8 @@ struct codec::impl
     std::shared_ptr<compressor>   compressor_;
     std::shared_ptr<decompressor> decompressor_;
 
-    bool compressed_ = false;
-    bool decompressed_ = false;
+    bool output_compressed_ = false;
+    bool input_compressed_  = false;
 };
 
 codec::codec(
@@ -103,8 +111,9 @@ std::vector<telnetpp::stream_token> codec::send(
     output_token_visitor visitor(
         result,
         *pimpl_->compressor_,
-        pimpl_->compressed_,
-        pimpl_->decompressed_);
+        *pimpl_->decompressor_,
+        pimpl_->output_compressed_,
+        pimpl_->input_compressed_);
 
     for (auto const &token : tokens)
     {
@@ -116,7 +125,7 @@ std::vector<telnetpp::stream_token> codec::send(
 
 telnetpp::u8stream codec::receive(telnetpp::u8 byte)
 {
-    if (pimpl_->decompressed_)
+    if (pimpl_->input_compressed_)
     {
         auto const &result = pimpl_->decompressor_->decompress(byte);
         return std::get<0>(result);
