@@ -239,6 +239,34 @@ TEST(mccp_codec_test, compressed_ending_compression_then_sending_data_returns_un
     ASSERT_EQ(size_t{0}, decompressor->end_decompression_called);
 }
 
+TEST(mccp_codec_test, uncompressed_receive_returns_data)
+{
+    // If we are not receiving any compressed data, then receiving data
+    // via the codec should just return it as received and not pass it
+    // to the decompressor.
+    auto compressor   = std::make_shared<fake_compressor>();
+    auto decompressor = std::make_shared<fake_decompressor>();
+
+    telnetpp::options::mccp::codec codec{
+        std::shared_ptr<telnetpp::options::mccp::compressor>(compressor),
+        std::shared_ptr<telnetpp::options::mccp::decompressor>(decompressor)};
+
+
+    std::vector<telnetpp::stream_token> expected {
+        telnetpp::u8stream{'X'}
+    };
+
+    auto result = std::vector<telnetpp::stream_token> {
+        codec.receive('X')
+    };
+
+    expect_tokens(expected, result);
+    ASSERT_EQ(size_t{0}, compressor->compress_called);
+    ASSERT_EQ(size_t{0}, compressor->end_compression_called);
+    ASSERT_EQ(size_t{0}, decompressor->decompress_called);
+    ASSERT_EQ(size_t{0}, decompressor->end_decompression_called);
+}
+
 TEST(mccp_codec_test, uncompressed_end_decompression_does_nothing)
 {
     // If we are not currently receiving any compressed data, then ending
@@ -295,6 +323,8 @@ TEST(mccp_codec_test, compressed_received_data_is_decompressed)
     telnetpp::options::mccp::codec codec{
         std::shared_ptr<telnetpp::options::mccp::compressor>(compressor),
         std::shared_ptr<telnetpp::options::mccp::decompressor>(decompressor)};
+
+    codec.send({boost::any(telnetpp::options::mccp::begin_decompression{})});
 
     auto const &expected = std::vector<telnetpp::stream_token> {
         telnetpp::u8stream{},

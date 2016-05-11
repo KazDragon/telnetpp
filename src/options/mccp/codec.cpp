@@ -1,5 +1,6 @@
 #include "telnetpp/options/mccp/codec.hpp"
 #include "telnetpp/options/mccp/compressor.hpp"
+#include "telnetpp/options/mccp/decompressor.hpp"
 #include "telnetpp/options/mccp/mccp.hpp"
 #include <functional>
 #include <numeric>
@@ -16,10 +17,12 @@ public :
     output_token_visitor(
         std::vector<telnetpp::stream_token> &tokens,
         compressor &co,
-        bool &compressed)
+        bool &compressed,
+        bool &decompressed)
       : tokens_(tokens),
         compressor_(co),
-        compressed_(compressed)
+        compressed_(compressed),
+        decompressed_(decompressed)
     {
     }
 
@@ -42,6 +45,7 @@ public :
         }
         else if (any.type() == typeid(begin_decompression))
         {
+            decompressed_ = true;
         }
         else
         {
@@ -65,16 +69,18 @@ private :
     std::vector<telnetpp::stream_token> &tokens_;
     compressor &compressor_;
     bool &compressed_;
+    bool &decompressed_;
 };
 
 }
 
 struct codec::impl
 {
-    std::shared_ptr<compressor>   compressor;
-    std::shared_ptr<decompressor> decompressor;
+    std::shared_ptr<compressor>   compressor_;
+    std::shared_ptr<decompressor> decompressor_;
 
-    bool compressed = false;
+    bool compressed_ = false;
+    bool decompressed_ = false;
 };
 
 codec::codec(
@@ -82,8 +88,8 @@ codec::codec(
     std::shared_ptr<decompressor> const &dec)
   : pimpl_(std::make_shared<impl>())
 {
-    pimpl_->compressor = co;
-    pimpl_->decompressor = dec;
+    pimpl_->compressor_ = co;
+    pimpl_->decompressor_ = dec;
 }
 
 codec::~codec()
@@ -95,7 +101,10 @@ std::vector<telnetpp::stream_token> codec::send(
 {
     auto result = std::vector<telnetpp::stream_token>{};
     output_token_visitor visitor(
-        result, *pimpl_->compressor, pimpl_->compressed);
+        result,
+        *pimpl_->compressor_,
+        pimpl_->compressed_,
+        pimpl_->decompressed_);
 
     for (auto const &token : tokens)
     {
@@ -107,13 +116,15 @@ std::vector<telnetpp::stream_token> codec::send(
 
 telnetpp::u8stream codec::receive(telnetpp::u8 byte)
 {
-    // TODO:
-    return {};
-    /*
-    decompressor dec(
-        pimpl_->input_stream_, pimpl_->input_compressed_);
-    return dec(byte);
-    */
+    if (pimpl_->decompressed_)
+    {
+        auto const &result = pimpl_->decompressor_->decompress(byte);
+        return std::get<0>(result);
+    }
+    else
+    {
+        return { byte };
+    }
 }
 
 }}}
