@@ -1,9 +1,9 @@
 language: cpp
 sudo: false
 
-#compiler:
-#  - clang
-#
+compiler:
+  - clang
+
 #env:
 #  - CONFIG=Release SHARED=1 CCOMPILE=clang CXXCOMPILE=clang++
 #  - CONFIG=Release SHARED=0 CCOMPILE=clang CXXCOMPILE=clang++
