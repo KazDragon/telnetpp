@@ -8,6 +8,9 @@
 
 namespace telnetpp { namespace options { namespace mccp {
 
+class compressor;
+class decompressor;
+
 //* =========================================================================
 /// \brief A class responsible for compressing and decompressing data for the
 /// MCCP server option.
@@ -23,6 +26,9 @@ namespace telnetpp { namespace options { namespace mccp {
 /// the next token to be received in a compressed format, and will be returned
 /// in a decompressed format.  This can be cancelled by either sending an
 /// end_decompression tag, or if the compressed stream is marked as finished.
+///
+/// Actual compression and decompression is handled by the compressor and
+/// decompressor objects passed in during construction.
 //* =========================================================================
 class TELNETPP_EXPORT codec : boost::noncopyable
 {
@@ -30,7 +36,9 @@ public :
     //* =====================================================================
     /// \brief Constructor
     //* =====================================================================
-    codec();
+    codec(
+        std::shared_ptr<compressor> const &co,
+        std::shared_ptr<decompressor> const &dec);
 
     //* =====================================================================
     /// \brief Destructor
