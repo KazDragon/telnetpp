@@ -37,6 +37,7 @@ matrix:
             - g++-5
             - libgtest-dev
             - libboost1.55-all-dev
+            - lcov
 
     # g++-5.2
 #    - compiler: g++
