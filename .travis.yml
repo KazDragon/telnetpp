@@ -102,7 +102,7 @@ before_install:
     fi
   - export CMAKE=../cmake-3.4.0-Linux-x86_64/bin/cmake
 # workaround for not having lcov 1.12
-  - if [ ! -d "lcov/usr/bin/lcov"]; then
+  - if [ ! -d "lcov/usr/bin/lcov" ]; then
       wget http://ftp.de.debian.org/debian/pool/main/l/lcov/lcov_1.12.orig.tar.gz;
       tar -xzf lcov_1.12.orig.tar.gz;
       mkdir lcov;
