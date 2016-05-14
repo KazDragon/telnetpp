@@ -106,7 +106,7 @@ before_install:
       wget http://ftp.de.debian.org/debian/pool/main/l/lcov/lcov_1.12.orig.tar.gz;
       tar -xzf lcov_1.12.orig.tar.gz;
       mkdir lcov;
-      PREFIX=$HOME/lcov make -C lcov_1.12/ install;
+      PREFIX=$HOME/lcov make -C lcov-1.12/ install;
     fi
   - export LCOV=$HOME/lcov/usr/bin/lcov
 # workaround for gtest not providing its own libraries (sigh)
