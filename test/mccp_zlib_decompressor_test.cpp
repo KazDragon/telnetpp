@@ -336,5 +336,54 @@ TEST(mccp_zlib_decompressor_test, ending_decompression_resets_decompression_stre
 
     response = deflateEnd(&stream);
     assert(response == Z_DATA_ERROR);
+}
 
+TEST(mccp_zlib_decompressor_test, corrupted_decompression_stream_throws_exception)
+{
+    // If a stream becomes corrupted -- that is, receives a block that cannot
+    // be decompressed for some reason -- then an exception must be thrown.
+    // The decompressor itself will not be able to resolve the problem.
+    telnetpp::options::mccp::zlib::decompressor zlib_decompressor;
+    telnetpp::options::mccp::decompressor &decompressor = zlib_decompressor;
+
+    auto const seed_data = telnetpp::u8stream {
+        'd', 'a', 't', 'a', 'd', 'a', 't', 'a', 'd', 'a', 't', 'a',
+        'd', 'a', 't', 'a', 'd', 'a', 't', 'a', 'd', 'a', 't', 'a',
+    };
+
+    z_stream stream = {};
+    auto response = deflateInit(&stream, Z_DEFAULT_COMPRESSION);
+    assert(response == Z_OK);
+
+    telnetpp::u8 output_buffer[1023];
+
+    stream.avail_in  = seed_data.size();
+    stream.next_in   = const_cast<telnetpp::u8 *>(&seed_data[0]);
+    stream.avail_out = sizeof(output_buffer);
+    stream.next_out  = output_buffer;
+
+    response = deflate(&stream, Z_SYNC_FLUSH);
+    assert(response == Z_OK);
+    
+    // Corrupt the first byte by flipping its bits.
+    auto compressed_stream = telnetpp::u8stream(output_buffer, stream.next_out);
+    
+    telnetpp::u8 &corrupted_byte = compressed_stream[0];
+    corrupted_byte ^= 0xFF;
+
+    auto decompress_stream =
+        [&compressed_stream, &decompressor]()
+        {
+            for (auto byte : compressed_stream)
+            {
+                decompressor.decompress(byte);
+            }
+        };
+        
+    ASSERT_THROW(
+        decompress_stream(),
+        telnetpp::options::mccp::corrupted_stream_error);
+    
+    response = deflateEnd(&stream);
+    assert(response == Z_DATA_ERROR);
 }

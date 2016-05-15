@@ -47,6 +47,7 @@ set (telnetpp_public_src
     src/negotiation.cpp
     src/options/mccp/client.cpp
     src/options/mccp/codec.cpp
+    src/options/mccp/decompressor.cpp
     src/options/mccp/server.cpp
     src/options/mccp/zlib/compressor.cpp
     src/options/mccp/zlib/decompressor.cpp

@@ -48,8 +48,16 @@ public :
         stream_.next_out  = input_buffer;
 
         auto response = inflate(&stream_, Z_SYNC_FLUSH);
+        
+        if (response == Z_DATA_ERROR)
+        {
+            throw corrupted_stream_error(
+                "Inflation of byte in ZLib stream yielded Z_DATA_ERROR");
+        }
+        
         assert(response == Z_OK || response == Z_STREAM_END);
 
+        // Error in stream yields Z_DATA_ERROR
         is_end_of_stream = response == Z_STREAM_END;
 
         decompressed_stream.insert(
