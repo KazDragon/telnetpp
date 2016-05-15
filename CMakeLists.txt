@@ -43,7 +43,7 @@ if (GTEST_FOUND)
     find_package(Threads REQUIRED)
 endif()
 
-set (TELNETPP_VERSION 1.0)
+set (TELNETPP_VERSION 1.2)
 
 set (telnetpp_public_src
     src/byte_converter.cpp
@@ -114,6 +114,11 @@ target_compile_features(telnetpp
 generate_export_header(telnetpp
     EXPORT_FILE_NAME "${PROJECT_SOURCE_DIR}/include/telnetpp/detail/export.hpp"
 )
+
+configure_file(
+    ${PROJECT_SOURCE_DIR}/include/telnetpp/version.hpp.in
+    ${PROJECT_SOURCE_DIR}/include/telnetpp/version.hpp
+    @ONLY)
 
 install(
     TARGETS

@@ -1,0 +1,4 @@
+#pragma once
+
+#define TELNETPP_VERSION @TELNETPP_VERSION@
+
