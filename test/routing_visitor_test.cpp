@@ -87,7 +87,8 @@ TEST(routing_visitor_test, negotiation_routes_to_negotiation_router)
 
     bool state_changed = false;
     client.on_state_changed.connect(
-        [&state_changed]() -> std::vector<telnetpp::token>
+        [&state_changed](telnetpp::client_option::state state)
+            -> std::vector<telnetpp::token>
         {
             state_changed = true;
             return {};
