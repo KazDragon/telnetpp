@@ -96,7 +96,7 @@ before_install:
   - export GTEST_ROOT=$PWD/gtest
 
 before_script:
-  - mkdir build
+  - mkdir build || true
   - cd build
   - CC=$CCOMPILE CXX=$CXXCOMPILE $CMAKE -DCMAKE_BUILD_TYPE=$CONFIG -DBUILD_SHARED_LIBS=$SHARED ..
   
