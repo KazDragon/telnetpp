@@ -34,11 +34,16 @@ find_package(ZLIB REQUIRED)
 #  cd ..
 find_package(GTest)
 
+# For producing automatically-generated documentation, we use Doxygen.
+find_package(Doxygen)
+
 if (GTEST_FOUND)
     # For GTest, it is necessary to link with the appropriate local threading
     # library.
     find_package(Threads REQUIRED)
 endif()
+
+set (TELNETPP_VERSION 1.0)
 
 set (telnetpp_public_src
     src/byte_converter.cpp
@@ -89,8 +94,8 @@ target_link_libraries(telnetpp
 set_target_properties(telnetpp
     PROPERTIES
         CXX_VISIBILITY_PRESET hidden
-        VERSION 1.0
-        SOVERSION 1.0
+        VERSION ${TELNETPP_VERSION}
+        SOVERSION ${TELNETPP_VERSION}
 )
 
 target_include_directories(telnetpp
@@ -200,4 +205,20 @@ if (GTEST_FOUND)
     )
 
     add_test(telnetpp_test telnetpp_tester)
+endif()
+
+# Add a rule for generating documentation
+if (DOXYGEN_FOUND)
+    configure_file(
+        ${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile.in
+        ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile 
+        @ONLY)
+        
+    add_custom_target(doc
+        ${DOXYGEN_EXECUTABLE} ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile
+        WORKING_DIRECTORY
+            ${CMAKE_CURRENT_BINARY_DIR}
+        COMMENT
+            "Generate API documentation with Doxygen" VERBATIM
+    )
 endif()
