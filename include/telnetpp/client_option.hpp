@@ -1,6 +1,5 @@
 #pragma once
 
-#include "telnetpp/core.hpp"
 #include "telnetpp/element.hpp"
 #include <boost/signals2.hpp>
 #include <vector>
@@ -15,11 +14,19 @@ namespace telnetpp {
 /// \par
 /// Note that the usage of client in this context may disagree with a
 /// particular option's RFC specification.  The determination of what is a
-/// server and what is a client is not rigorously applies throughout the
+/// client and what is a server is not rigorously applies throughout the
 /// RFCs, so consider this merely an implementation detail of this library.
 //* =========================================================================
 class TELNETPP_EXPORT client_option {
 public :
+    enum class state
+    {
+        inactive,
+        activating,
+        active,
+        deactivating,
+    };
+
     //* =====================================================================
     /// \brief Constructor
     //* =====================================================================
@@ -62,9 +69,10 @@ public :
         u8stream const &content);
 
     boost::signals2::signal<
-        std::vector<token> (),
+        std::vector<telnetpp::token> (state new_state),
         token_combiner
     > on_state_changed;
+
 
 private :
     //* =====================================================================
@@ -73,14 +81,6 @@ private :
     //* =====================================================================
     virtual std::vector<telnetpp::token> handle_subnegotiation(
         u8stream const &content);
-
-    enum class state
-    {
-        inactive,
-        activating,
-        active,
-        deactivating,
-    };
 
     state state_       = state::inactive;
     bool  activatable_ = false;

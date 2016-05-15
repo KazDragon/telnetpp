@@ -35,15 +35,21 @@ std::vector<telnetpp::token> client_option::activate()
     if (state_ == state::inactive)
     {
         state_ = state::activating;
-        return { telnetpp::element {
-            telnetpp::negotiation(telnetpp::do_, option_) }
-        };
+        auto response = on_state_changed(state_);
+
+        response.insert(
+            response.begin(),
+            { telnetpp::element(
+                telnetpp::negotiation(telnetpp::do_, option_)
+            )});
+
+        return response;
     }
     else
     {
         if (state_ == state::active)
         {
-            return on_state_changed();
+            return on_state_changed(state_);
         }
         else
         {
@@ -59,16 +65,21 @@ std::vector<telnetpp::token> client_option::deactivate()
 {
     if (state_ == state::inactive)
     {
-        return on_state_changed();
+        return on_state_changed(state_);
     }
 
     if (state_ == state::active)
     {
         state_ = state::deactivating;
+        auto response = on_state_changed(state_);
 
-        return {
-            telnetpp::element(telnetpp::negotiation(telnetpp::dont, option_))
-        };
+        response.insert(
+            response.begin(),
+            { telnetpp::element(
+                telnetpp::negotiation(telnetpp::dont, option_)
+            )});
+
+        return response;
     }
     else
     {
@@ -95,53 +106,50 @@ std::vector<telnetpp::token> client_option::negotiate(telnetpp::u8 request)
             if (request == telnetpp::will && activatable_)
             {
                 state_ = state::active;
-                auto response = on_state_changed();
+                auto response = on_state_changed(state_);
                 response.insert(
                     response.begin(),
-                    { telnetpp::element {
-                        telnetpp::negotiation(telnetpp::do_, option_) }
-                    });
+                    { telnetpp::element(
+                        telnetpp::negotiation(telnetpp::do_, option_)
+                    )});
 
                 return response;
             }
             else
             {
-                return { telnetpp::element {
-                    telnetpp::negotiation(telnetpp::dont, option_) }
-                };
+                return { telnetpp::element(
+                    telnetpp::negotiation(telnetpp::dont, option_)
+                )};
             }
 
         case state::activating :
             if (request == telnetpp::will)
             {
                 state_ = state::active;
-                return on_state_changed();
+                return on_state_changed(state_);
             }
-            else if (request == telnetpp::wont)
+            else
             {
                 state_ = state::inactive;
-                return on_state_changed();
+                return on_state_changed(state_);
             }
-
-            return {};
 
         case state::active :
             if (request == telnetpp::will)
             {
-                return { telnetpp::element {
-                    telnetpp::negotiation(telnetpp::do_, option_) }
-                };
+                return { telnetpp::element(
+                    telnetpp::negotiation(telnetpp::do_, option_)
+                )};
             }
-            else if (request == telnetpp::wont)
+            else
             {
                 state_ = state::inactive;
-
-                auto response = on_state_changed();
+                auto response = on_state_changed(state_);
                 response.insert(
                     response.begin(),
-                    telnetpp::element {
+                    { telnetpp::element(
                         telnetpp::negotiation(telnetpp::dont, option_)
-                    });
+                    )});
 
                 return response;
             }
@@ -149,21 +157,21 @@ std::vector<telnetpp::token> client_option::negotiate(telnetpp::u8 request)
         case state::deactivating :
             if (request == telnetpp::will)
             {
-                // NOTE: This is technically unspecified.  No client would send
+                // NOTE: This is technically unspecified.  No server would send
                 // a WILL when we're already active, and they're not allowed to
                 // send a WILL after receiving a DONT.  But to be nice, we'll
                 // re-activate.
                 state_ = state::active;
-                return on_state_changed();
+                return on_state_changed(state_);
             }
             else if (request == telnetpp::wont)
             {
                 state_ = state::inactive;
-                return on_state_changed();
+                return on_state_changed(state_);
             }
-
-            return {};
     }
+
+    return {};
 }
 
 // ==========================================================================
@@ -186,7 +194,7 @@ std::vector<telnetpp::token> client_option::subnegotiate(
 // HANDLE_SUBNEGOTIATION
 // ==========================================================================
 std::vector<telnetpp::token> client_option::handle_subnegotiation(
-    u8stream const&)
+    u8stream const &)
 {
     // By default, do nothing.
     return {};

@@ -15,7 +15,7 @@ public :
       : telnetpp::client_option(pass_through_option_id)
     {
         on_state_changed.connect(
-            []() -> std::vector<telnetpp::token>
+            [](telnetpp::client_option::state) -> std::vector<telnetpp::token>
             {
                 return { boost::any(test_string) };
             });

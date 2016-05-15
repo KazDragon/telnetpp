@@ -11,11 +11,17 @@ client::client()
   : client_option(detail::option)
 {
     on_state_changed.connect(
-        []
+        [](client_option::state state)
+            -> std::vector<telnetpp::token>
         {
-           return std::vector<telnetpp::token>{
-               boost::any(end_decompression{})
-           };
+            if (state == client_option::state::inactive)
+            {
+                return { boost::any(end_decompression{}) };
+            }
+            else
+            {
+                return {};
+            }
         });
 }
 
