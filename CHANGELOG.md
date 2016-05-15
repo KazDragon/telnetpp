@@ -1,12 +1,13 @@
 # Version 1.2
 [X] More standard option implementations
-  * NEW_ENVIRON
+  * #69, #70 NEW_ENVIRON
   
 [x] MUD-specific option implementations
-  * MCCP
-  * MSDP
+  * #67, #68 MCCP
+  * #82, #83 MSDP
   
 [x] Usability improvements
+  * #79 Migrated from CppUnit to GTest testing framework
   * #110 Added byte_converter to filter out non-bytestream tokens
   
 [x] Bug fixes
