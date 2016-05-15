@@ -1,3 +1,4 @@
+# Telnet++
 project(telnetpp)
 cmake_minimum_required(VERSION 3.2 FATAL_ERROR)
 cmake_policy(VERSION 3.2)
@@ -38,6 +39,12 @@ if (GTEST_FOUND)
     # For GTest, it is necessary to link with the appropriate local threading
     # library.
     find_package(Threads REQUIRED)
+endif()
+
+option(TELNETPP_COVERAGE "Enable a build with coverage" OFF)
+
+if (TELNETPP_COVERAGE)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --coverage")
 endif()
 
 set (telnetpp_public_src
