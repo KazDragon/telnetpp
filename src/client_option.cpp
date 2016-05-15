@@ -157,9 +157,9 @@ std::vector<telnetpp::token> client_option::negotiate(telnetpp::u8 request)
         case state::deactivating :
             if (request == telnetpp::will)
             {
-                // NOTE: This is technically unspecified.  No client would send
-                // a DO when we're already active, and they're not allowed to
-                // send a DO after receiving a WONT.  But to be nice, we'll
+                // NOTE: This is technically unspecified.  No server would send
+                // a WILL when we're already active, and they're not allowed to
+                // send a WILL after receiving a DONT.  But to be nice, we'll
                 // re-activate.
                 state_ = state::active;
                 return on_state_changed(state_);

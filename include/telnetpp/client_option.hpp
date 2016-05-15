@@ -14,7 +14,7 @@ namespace telnetpp {
 /// \par
 /// Note that the usage of client in this context may disagree with a
 /// particular option's RFC specification.  The determination of what is a
-/// client and what is a client is not rigorously applies throughout the
+/// client and what is a server is not rigorously applies throughout the
 /// RFCs, so consider this merely an implementation detail of this library.
 //* =========================================================================
 class TELNETPP_EXPORT client_option {
