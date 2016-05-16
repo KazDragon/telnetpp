@@ -5,6 +5,9 @@
 
 namespace telnetpp { namespace options { namespace mccp { namespace zlib {
 
+//* =========================================================================
+/// \brief Represents an object that can compress arbitrary byte sequences.
+//* =========================================================================
 class TELNETPP_EXPORT compressor : public telnetpp::options::mccp::compressor
 {
 public :

@@ -1,7 +1,7 @@
 #include "expect_elements.hpp"
 #include <telnetpp/protocol.hpp>
 #include <telnetpp/options/mccp/client.hpp>
-#include <telnetpp/options/mccp/mccp.hpp>
+#include <telnetpp/options/mccp/detail/protocol.hpp>
 #include <gtest/gtest.h>
 
 TEST(mccp_client_test, client_is_mccp)
@@ -18,7 +18,7 @@ TEST(mccp_client_test, empty_subnegotiation_returns_begin_decompression)
     client.negotiate(telnetpp::will);
 
     auto const expected = std::vector<telnetpp::token> {
-        boost::any(telnetpp::options::mccp::begin_decompression{})
+        boost::any(telnetpp::options::mccp::detail::begin_decompression{})
     };
 
     // When an empty subnegotiation is received, we should send a
@@ -57,7 +57,7 @@ TEST(mccp_client_test, deactivated_client_locally_returns_end_decompression)
     // compressed.  Therefore, we should end decompression.
     expect_tokens(
         {
-            boost::any(telnetpp::options::mccp::end_decompression{})
+            boost::any(telnetpp::options::mccp::detail::end_decompression{})
         },
         client.negotiate(telnetpp::wont));
 }
@@ -81,5 +81,5 @@ TEST(mccp_client_test, deactivating_client_remotely_returns_end_decompression)
     auto const &any = boost::get<boost::any>(result[1]);
 
     ASSERT_TRUE(
-        typeid(telnetpp::options::mccp::end_decompression) == any.type());
+        typeid(telnetpp::options::mccp::detail::end_decompression) == any.type());
 }

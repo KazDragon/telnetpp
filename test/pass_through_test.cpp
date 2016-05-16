@@ -1,18 +1,18 @@
-#include "telnetpp/client_option.hpp"
+#include "telnetpp/options/subnegotiationless_client.hpp"
 #include "telnetpp/protocol.hpp"
 #include "expect_elements.hpp"
 #include <gtest/gtest.h>
 
 namespace {
 
-static telnetpp::u8 pass_through_option_id = 0xAB;
+static telnetpp::u8 const pass_through_option_id = 0xAB;
 static std::string const test_string = "TEST";
 
-class pass_through_option : public telnetpp::client_option
+class pass_through_option 
+  : public telnetpp::options::subnegotiationless_client<pass_through_option_id>
 {
 public :  
     pass_through_option()
-      : telnetpp::client_option(pass_through_option_id)
     {
         on_state_changed.connect(
             [](telnetpp::client_option::state) -> std::vector<telnetpp::token>

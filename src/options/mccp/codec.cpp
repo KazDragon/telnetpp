@@ -1,7 +1,7 @@
 #include "telnetpp/options/mccp/codec.hpp"
 #include "telnetpp/options/mccp/compressor.hpp"
 #include "telnetpp/options/mccp/decompressor.hpp"
-#include "telnetpp/options/mccp/mccp.hpp"
+#include "telnetpp/options/mccp/detail/protocol.hpp"
 #include <functional>
 #include <numeric>
 #include <vector>
@@ -30,7 +30,7 @@ public :
 
     void operator()(boost::any const &any)
     {
-        if (any.type() == typeid(end_compression))
+        if (any.type() == typeid(detail::end_compression))
         {
             if (output_compressed_)
             {
@@ -38,11 +38,11 @@ public :
                 output_compressed_ = false;
             }
         }
-        else if (any.type() == typeid(begin_compression))
+        else if (any.type() == typeid(detail::begin_compression))
         {
             output_compressed_ = true;
         }
-        else if (any.type() == typeid(end_decompression))
+        else if (any.type() == typeid(detail::end_decompression))
         {
             if (input_compressed_)
             {
@@ -50,7 +50,7 @@ public :
                 input_compressed_ = false;
             }
         }
-        else if (any.type() == typeid(begin_decompression))
+        else if (any.type() == typeid(detail::begin_decompression))
         {
             input_compressed_ = true;
         }
