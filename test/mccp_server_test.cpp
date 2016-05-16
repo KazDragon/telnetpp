@@ -1,6 +1,6 @@
 #include "expect_elements.hpp"
 #include <telnetpp/options/mccp/server.hpp>
-#include <telnetpp/options/mccp/mccp.hpp>
+#include <telnetpp/options/mccp/detail/protocol.hpp>
 #include <telnetpp/protocol.hpp>
 #include <gtest/gtest.h>
 
@@ -32,7 +32,7 @@ TEST(mccp_server_test, deactivated_begin_compression_then_activate_locally_sends
     auto const expected = std::vector<telnetpp::token> {
         telnetpp::element(telnetpp::subnegotiation(
             server.option(), {})),
-        boost::any(telnetpp::options::mccp::begin_compression{})
+        boost::any(telnetpp::options::mccp::detail::begin_compression{})
     };
         
     auto const result = server.negotiate(telnetpp::do_);
@@ -51,7 +51,7 @@ TEST(mccp_server_test, deactivated_begin_compression_then_activate_remotely_send
             telnetpp::will, server.option())),
         telnetpp::element(telnetpp::subnegotiation(
             server.option(), {})),
-        boost::any(telnetpp::options::mccp::begin_compression{})
+        boost::any(telnetpp::options::mccp::detail::begin_compression{})
     };
         
     auto const result = server.negotiate(telnetpp::do_);
@@ -110,7 +110,7 @@ TEST(mccp_server_test, activated_begin_compression_sends_begin_compression_seque
     auto const expected = std::vector<telnetpp::token> {
         telnetpp::element(telnetpp::subnegotiation(
             server.option(), {})),
-        boost::any(telnetpp::options::mccp::begin_compression{})
+        boost::any(telnetpp::options::mccp::detail::begin_compression{})
     };
     
     auto const result = server.begin_compression();
@@ -126,7 +126,7 @@ TEST(mccp_server_test, activated_end_compression_sends_end_compression_token)
     assert(server.is_active());
     
     auto const expected = std::vector<telnetpp::token> {
-        boost::any(telnetpp::options::mccp::end_compression{})
+        boost::any(telnetpp::options::mccp::detail::end_compression{})
     };
     
     auto const result = server.end_compression();
@@ -150,7 +150,7 @@ TEST(mccp_server_test, activated_compressed_deactivate_ends_compression)
     
     ASSERT_EQ(size_t{2}, result.size());
     auto const &token = boost::get<boost::any>(result[1]);
-    boost::any_cast<telnetpp::options::mccp::end_compression>(token);
+    boost::any_cast<telnetpp::options::mccp::detail::end_compression>(token);
 }
 
 TEST(mccp_server_test, activated_compressed_negotiate_deactivation_ends_compression)
@@ -169,5 +169,5 @@ TEST(mccp_server_test, activated_compressed_negotiate_deactivation_ends_compress
     
     ASSERT_EQ(size_t{2}, result.size());
     auto const &token = boost::get<boost::any>(result[1]);
-    boost::any_cast<telnetpp::options::mccp::end_compression>(token);
+    boost::any_cast<telnetpp::options::mccp::detail::end_compression>(token);
 }

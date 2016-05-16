@@ -1,5 +1,4 @@
 #include "telnetpp/options/mccp/server.hpp"
-#include "telnetpp/options/mccp/mccp.hpp"
 #include "telnetpp/options/mccp/detail/protocol.hpp"
 
 namespace telnetpp { namespace options { namespace mccp {
@@ -9,11 +8,11 @@ namespace {
 static auto const begin_compression_sequence = std::vector<telnetpp::token> {
     telnetpp::element(
         telnetpp::subnegotiation(detail::option, {})),
-    boost::any(telnetpp::options::mccp::begin_compression{})
+    boost::any(telnetpp::options::mccp::detail::begin_compression{})
 };
 
 static auto const end_compression_sequence = std::vector<telnetpp::token> {
-    boost::any(telnetpp::options::mccp::end_compression{})
+    boost::any(telnetpp::options::mccp::detail::end_compression{})
 };
 
 }
@@ -75,6 +74,15 @@ std::vector<telnetpp::token> server::end_compression()
         compression_requested_ = false;
         return {};
     }
+}
+
+// ==========================================================================
+// HANDLE_SUBNEGOTIATION
+// ==========================================================================
+std::vector<telnetpp::token> server::handle_subnegotiation(
+    telnetpp::u8stream const &content)
+{
+    return {};
 }
 
 }}}

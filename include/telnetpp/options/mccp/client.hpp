@@ -4,6 +4,10 @@
 
 namespace telnetpp { namespace options { namespace mccp {
 
+//* =========================================================================
+/// \brief A server option responsible for negotiating the client part of the
+/// MCCP protocol.
+//* =========================================================================
 class TELNETPP_EXPORT client : public telnetpp::client_option
 {
 public :

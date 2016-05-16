@@ -11,14 +11,32 @@ namespace telnetpp {
 /// the side that received WILL and WONT negotiations and sends DO and DONT
 /// negotiations.
 ///
-/// \par
+/// \par Server vs. Client
 /// Note that the usage of client in this context may disagree with a
 /// particular option's RFC specification.  The determination of what is a
 /// client and what is a server is not rigorously applies throughout the
 /// RFCs, so consider this merely an implementation detail of this library.
+/// \par Usage
+/// client_option provides a general interface to enable the implementation
+/// of the client sides of all Telnet options. There are two customization
+/// points that must be filled in before an implementation is complete:
+/// \li the derived class must call the constructor, passing in a value
+/// that is the Option Code for the feature being implemented.
+/// \li the derived class must implement the handle_subnegotiation function.
+/// This is called whenever data specific to the option passes through the
+/// Telnet layer.
+///
+/// A final third customization point is the on_state_changed signal, to which
+/// a user can connect to have functionality executed when the option changes
+/// state.
+/// \see https://tools.ietf.org/html/std8
 //* =========================================================================
 class TELNETPP_EXPORT client_option {
 public :
+    //* =====================================================================
+    /// \brief An enumeration of the different states in which this option
+    /// can be.
+    //* =====================================================================
     enum class state
     {
         inactive,
@@ -28,27 +46,27 @@ public :
     };
 
     //* =====================================================================
-    /// \brief Constructor
-    //* =====================================================================
-    client_option(telnetpp::u8 option);
-
-    //* =====================================================================
     /// \brief Returns the option code.
     //* =====================================================================
     telnetpp::u8 option() const;
 
     //* =====================================================================
-    /// \brief Allows the option to be activated by the remote end.
+    /// \brief Flags the option as remotely activatable.
+    ///
+    /// Allows the option to be activated by the remote end.  That is,
+    /// if the option receives a WILL negotiation, it will respond with a
+    /// DO negotiation.  An option that has not have this function called
+    /// will instead respond with a DONT negotiation.
     //* =====================================================================
     void set_activatable();
 
     //* =====================================================================
-    /// \brief Activates the option.
+    /// \brief Activates the option; sends a DO negotiation.
     //* =====================================================================
     std::vector<telnetpp::token> activate();
 
     //* =====================================================================
-    /// \brief Deactivates the option.
+    /// \brief Deactivates the option; sends a DONT negotiation.
     //* =====================================================================
     std::vector<telnetpp::token> deactivate();
 
@@ -58,21 +76,46 @@ public :
     bool is_active() const;
 
     //* =====================================================================
-    /// \brief Makes a request of the option
+    /// \brief Makes a request of the option and returns the response from
+    /// that request.
     //* =====================================================================
     std::vector<telnetpp::token> negotiate(telnetpp::u8 request);
 
     //* =====================================================================
-    /// \brief Send a subnegotiation to the option.
+    /// \brief Send a subnegotiation to the option and returns the response
+    /// from that subnegotiation.
     //* =====================================================================
     std::vector<telnetpp::token> subnegotiate(
-        u8stream const &content);
+        telnetpp::u8stream const &content);
 
+    //* =====================================================================
+    /// \brief A signal that you can connect to in order to detect changes
+    /// in the state of the option.
+    /// \par Usage
+    /// \code
+    /// my_option.on_state_changed.connect(
+    ///     [](telnetpp::client_option::state new_state)
+    ///         -> std::vector<telnetpp::token>
+    ///     {
+    ///         // Do something with the state change
+    ///         std::cout << "state is now: " << new_state << "\n";
+    ///         // return some vector of tokens, or an empty vector
+    ///         return {};
+    ///     });
+    /// \endcode
+    /// \see telnetpp::client_option::state
+    //* =====================================================================
     boost::signals2::signal<
         std::vector<telnetpp::token> (state new_state),
         token_combiner
     > on_state_changed;
 
+protected :
+    //* =====================================================================
+    /// \brief Constructor
+    /// \param option The Option Code of this option.
+    //* =====================================================================
+    explicit client_option(telnetpp::u8 option);
 
 private :
     //* =====================================================================
@@ -80,7 +123,7 @@ private :
     /// state.
     //* =====================================================================
     virtual std::vector<telnetpp::token> handle_subnegotiation(
-        u8stream const &content);
+        telnetpp::u8stream const &content) = 0;
 
     state state_       = state::inactive;
     bool  activatable_ = false;

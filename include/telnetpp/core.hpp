@@ -11,6 +11,11 @@ using s16 = boost::int16_t;
 using s32 = boost::int32_t;
 using s64 = boost::int64_t;
 
+//* =========================================================================
+/// \typedef u8
+/// \brief A typedef of an unsigned 8-bit integer that is used to represent
+/// a byte of data.
+//* =========================================================================
 using u8  = boost::uint8_t;
 using u16 = boost::uint16_t;
 using u32 = boost::uint32_t;

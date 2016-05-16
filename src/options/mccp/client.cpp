@@ -1,5 +1,4 @@
 #include "telnetpp/options/mccp/client.hpp"
-#include "telnetpp/options/mccp/mccp.hpp"
 #include "telnetpp/options/mccp/detail/protocol.hpp"
 
 namespace telnetpp { namespace options { namespace mccp {
@@ -16,7 +15,7 @@ client::client()
         {
             if (state == client_option::state::inactive)
             {
-                return { boost::any(end_decompression{}) };
+                return { boost::any(detail::end_decompression{}) };
             }
             else
             {
@@ -31,7 +30,7 @@ client::client()
 std::vector<telnetpp::token> client::handle_subnegotiation(
     telnetpp::u8stream const &data)
 {
-    return { boost::any(begin_decompression{}) };
+    return { boost::any(detail::begin_decompression{}) };
 }
 
 }}}

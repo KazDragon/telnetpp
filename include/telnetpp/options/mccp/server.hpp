@@ -34,6 +34,13 @@ public :
     std::vector<telnetpp::token> end_compression();
     
 private :
+    //* =====================================================================
+    /// \brief Handle a negotiation that has been received in the active
+    /// state.
+    //* =====================================================================
+    std::vector<telnetpp::token> handle_subnegotiation(
+        telnetpp::u8stream const &content) override;
+
     bool compression_requested_;
 };
 

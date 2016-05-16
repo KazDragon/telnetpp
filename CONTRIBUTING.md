@@ -1,3 +1,5 @@
+# How to Contribute to Telnet++
+
 ## General
 
 Contributions are welcome!
