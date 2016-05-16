@@ -166,6 +166,8 @@ The code above: the session set-up, and the send/receive functions, are all that
 
 The Mud Client Compression Protocol v2 (http://tintin.sourceforge.net/mccp/) is a unique protocol in that activating it also changes the way the Telnet Protocol is carried, since it too is compressed.  This requires careful design in order to ensure that uncompressed data is not sent or received when compressed data has been sent or received, and vice versa.
 
+The following is a rough guide to how to integrate the MCCP functionality.  How it actually integrates with your application will vary.  Consider functions starting with "app" to be something in your application above the Telnet layer that receives user input, and those starting with "my" to be an interaction between the Telnet layer and a lower layer that deals with sending and receiving byte streams, such as a socket API.
+
 ```
 // class variables for the connection
 telnetpp::session session(
@@ -205,17 +207,15 @@ void my_lower_layer_send(vector<telnetpp::stream_token> const &tokens)
 {
     // NOTE: this consumes some of the Boost.Any elements present at this layer of
     // the protocol.
-    vector<telnetpp::stream_token> compressed_tokens = codec.send(tokens);
+    vector<telnetpp::stream_token> const &compressed_tokens = codec.send(tokens);
     
     // NOTE: it can be assumed that no Boost.Any elements are present and, if they
-    // are present, they are not used.  Therefore, we can just filter them out.
-    vector<telnetpp::u8stream> byte_streams = byte_converter.send(compressed_tokens);
+    // are present, they are not used.  Therefore, we can just filter them out and
+    // return the entire set as one stream of bytes.
+    telnetpp::u8stream const &stream = byte_converter.send(compressed_tokens);
     
-    for (auto const &byte_stream : byte_streams)
-    {
-        // Write the data according to whatever API is being used at the connection level.
-        my_connection.write(byte_stream.begin(), byte_stream.end());
-    }
+    // Write the data according to whatever API is being used at the connection level.
+    my_connection.write(stream.begin(), stream.end());
 }
 
 ```
