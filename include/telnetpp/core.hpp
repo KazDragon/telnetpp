@@ -29,6 +29,13 @@ using u64 = boost::uint64_t;
 
 // This may change in future to some other type, but it will always be
 // something that models the basic standard Container concept.
+
+//* =========================================================================
+/// \class telnetpp::u8stream
+/// \brief A collection of bytes that models the Standard Library's
+/// Container concept.  This is used for transporting arrays of bytes
+/// across the library.
+//* =========================================================================
 using u8stream = std::basic_string<u8>;
 
 }
