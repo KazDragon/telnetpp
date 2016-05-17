@@ -10,6 +10,11 @@ namespace telnetpp { namespace options { namespace msdp {
 
 struct variable;
 
+//* =========================================================================
+/// \class telnetpp::options::msdp::value_type
+/// \brief A variant that can either be a string, an array of string, or
+/// an array of telnetpp::options::msdp::variable.
+//* =========================================================================
 using value_type = boost::variant<
     std::string,
     std::vector<std::string>,
@@ -17,8 +22,9 @@ using value_type = boost::variant<
 >;
 
 //* =========================================================================
-/// \brief A structure that represents a named MSDP variable whose value is
-/// either a string, an array of strings, or an array of MSDP variables.
+/// \brief A structure that represents a named value.
+/// \see telnetpp::options::msdp::client
+/// \see telnetpp::options::msdp::server
 //* =========================================================================
 struct TELNETPP_EXPORT variable
 {
