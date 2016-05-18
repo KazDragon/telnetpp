@@ -3,6 +3,11 @@
 #include "telnetpp/options/mccp/compressor.hpp"
 #include <memory>
 
+//* =========================================================================
+/// \namespace telnetpp::options::mccp::zlib
+/// \brief Implementation of the compressor/decompressor functionality for
+/// use with a telnetpp::options::mccp::codec.
+//* =========================================================================
 namespace telnetpp { namespace options { namespace mccp { namespace zlib {
 
 //* =========================================================================
