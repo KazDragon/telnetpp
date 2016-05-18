@@ -21,7 +21,7 @@ include(GenerateExportHeader)
 
 # ZLib is required for the MCCP options.
 include(FindZLIB)
-find_package(ZLIB REQUIRED)
+find_package(ZLIB)
 
 # Due to the strange requirements for Google Test, it is assumed to have been
 # built in the "gtest" directory.  For this, it is required to run the moral
@@ -54,8 +54,6 @@ set (telnetpp_public_src
     src/options/mccp/codec.cpp
     src/options/mccp/decompressor.cpp
     src/options/mccp/server.cpp
-    src/options/mccp/zlib/compressor.cpp
-    src/options/mccp/zlib/decompressor.cpp
     src/options/msdp/client.cpp
     src/options/msdp/server.cpp
     src/options/msdp/variable.cpp
@@ -68,6 +66,19 @@ set (telnetpp_public_src
     src/session.cpp
     src/subnegotiation.cpp
 )
+
+# The zlib compressors for MCCP should only be compiled into the library
+# if zlib is available.
+if (ZLIB_FOUND)
+    message("ZLIB_FOUND")
+    set (telnetpp_public_src
+        ${telnetpp_public_src}
+        src/options/mccp/zlib/compressor.cpp
+        src/options/mccp/zlib/decompressor.cpp
+    )
+else()
+    message("ZLIB NOT FOUND")
+endif()
 
 set (telnetpp_private_src
     src/options/msdp/detail/decoder.cpp
@@ -86,10 +97,12 @@ add_library(telnetpp
     ${telnetpp_private_src}
 )
 
-target_link_libraries(telnetpp
-    PRIVATE
-        ${ZLIB_LIBRARIES}
-)
+if (ZLIB_FOUND)
+    target_link_libraries(telnetpp
+        PRIVATE
+            ${ZLIB_LIBRARIES}
+    )
+endif()
 
 set_target_properties(telnetpp
     PROPERTIES
@@ -148,8 +161,6 @@ if (GTEST_FOUND)
         test/mccp_client_test.cpp
         test/mccp_codec_test.cpp
         test/mccp_server_test.cpp
-        test/mccp_zlib_compressor_test.cpp
-        test/mccp_zlib_decompressor_test.cpp
         test/msdp_client_test.cpp
         test/msdp_server_test.cpp
         test/msdp_server_robustness_test.cpp
@@ -166,6 +177,16 @@ if (GTEST_FOUND)
         test/suppress_ga_server_test.cpp
         test/terminal_type_client_test.cpp
     )
+
+    # The tests for the zlib compressors for MCCP should only be compiled into
+    # the executable if zlib is available.
+    if (ZLIB_FOUND)
+        set (telnetpp_tester_external_tests
+            ${telnetpp_tester_external_tests}
+            test/mccp_zlib_compressor_test.cpp
+            test/mccp_zlib_decompressor_test.cpp
+        )
+    endif()
 
     set (telnetpp_tester_internal_tests
         test/parser_test.cpp
@@ -216,9 +237,9 @@ endif()
 if (DOXYGEN_FOUND)
     configure_file(
         ${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile.in
-        ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile 
+        ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile
         @ONLY)
-        
+
     add_custom_target(doc
         ${DOXYGEN_EXECUTABLE} ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile
         WORKING_DIRECTORY
