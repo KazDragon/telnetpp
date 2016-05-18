@@ -70,14 +70,11 @@ set (telnetpp_public_src
 # The zlib compressors for MCCP should only be compiled into the library
 # if zlib is available.
 if (ZLIB_FOUND)
-    message("ZLIB_FOUND")
     set (telnetpp_public_src
         ${telnetpp_public_src}
         src/options/mccp/zlib/compressor.cpp
         src/options/mccp/zlib/decompressor.cpp
     )
-else()
-    message("ZLIB NOT FOUND")
 endif()
 
 set (telnetpp_private_src
