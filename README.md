@@ -232,7 +232,3 @@ Unit testing is implemented with Google Test, but this requires a separate compi
     export GTEST_ROOT=$PWD
 
 After this, re-running cmake with Telnet++ should pick up both the Google Test includes in /usr/include and also the binary which was just built.  If GTest was not found, Telnet++ will still build; just the automatic tests will be elided.
-
-
-[![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/KazDragon/telnetpp/trend.png)](https://bitdeli.com/free "Bitdeli Badge")
-
