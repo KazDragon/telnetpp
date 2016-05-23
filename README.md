@@ -1,11 +1,14 @@
 # Telnet++
 
+[![Documentation](https://codedocs.xyz/KazDragon/telnetpp.svg)](https://codedocs.xyz/KazDragon/telnetpp/)
+[![License](https://img.shields.io/github/license/KazDragon/telnetpp.svg)](https://en.wikipedia.org/wiki/MIT_License)
+
+[![Github Issues](https://img.shields.io/github/issues/KazDragon/telnetpp.svg)](https://github.com/KazDragon/telnetpp/issues)
 [![Stories in Ready](https://badge.waffle.io/KazDragon/telnetpp.png?label=ready&title=Stories%20In%20Ready)](https://waffle.io/KazDragon/telnetpp)
 [![Stories in Progress](https://badge.waffle.io/KazDragon/telnetpp.png?label=in%20progress&title=Stories%20In%20Progress)](https://waffle.io/KazDragon/telnetpp)
 
 [![Gitter](https://badges.gitter.im/KazDragon/telnetpp.svg)](https://gitter.im/KazDragon/telnetpp?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
 [![This is a forkable respository](https://img.shields.io/badge/forkable-yes-brightgreen.svg)](https://basicallydan.github.io/forkability/?u=KazDragon&r=telnetpp)
-[![Documentation](https://codedocs.xyz/KazDragon/telnetpp.svg)](https://codedocs.xyz/KazDragon/telnetpp/)
 
 Telnet++ is an implementation of the Telnet Session Layer protocol that is used primarily to negotiate a feature set between a client and server, the former of which is usually some kind of text-based terminal,  Commonly used terminals include Xterm, PuTTY, and a whole host of Telnet-enabled MUD clients including Tintin++, MushClient, and more.
 
