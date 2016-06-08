@@ -2,6 +2,7 @@
 #include "telnetpp/options/msdp/detail/protocol.hpp"
 #include <algorithm>
 #include <iterator>
+#include <numeric>
 
 using variable = telnetpp::options::msdp::variable;
 
