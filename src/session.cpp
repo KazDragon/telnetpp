@@ -2,11 +2,12 @@
 #include "telnetpp/detail/generator.hpp"
 #include "telnetpp/detail/parser.hpp"
 #include "telnetpp/detail/registration.hpp"
+#include <numeric>
 
 namespace telnetpp {
 
 // ==========================================================================
-// CONSTRUCTOR    
+// CONSTRUCTOR
 // ==========================================================================
 session::session(
     std::function<std::vector<token> (std::string const &)> on_text)
@@ -24,12 +25,12 @@ session::session(
             -> std::vector<telnetpp::token>
         {
             auto const &request = negotiation.request();
-            
+
             u8 result =
                 (request == telnetpp::will || request == telnetpp::wont)
               ? telnetpp::dont
               : telnetpp::wont;
-              
+
             return {
                 telnetpp::element {
                     telnetpp::negotiation(result, negotiation.option())
@@ -70,15 +71,15 @@ std::vector<token> session::receive(const u8stream& stream)
 {
     using std::begin;
     using std::end;
-    
+
     unparsed_buffer_.insert(
         end(unparsed_buffer_),
         begin(stream),
         end(stream));
-    
+
     auto it1 = begin(unparsed_buffer_);
     auto it2 = end(unparsed_buffer_);
-    
+
     auto const &parse_results = telnetpp::detail::parse(it1, it2);
 
     unparsed_buffer_.erase(begin(unparsed_buffer_), it1);
@@ -93,7 +94,7 @@ std::vector<token> session::receive(const u8stream& stream)
             results.insert(end(results), begin(result), end(result));
             return results;
         });
-    
+
     return results;
 }
 

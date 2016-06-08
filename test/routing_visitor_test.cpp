@@ -4,6 +4,7 @@
 #include "telnetpp/detail/registration.hpp"
 #include "expect_elements.hpp"
 #include <gtest/gtest.h>
+#include <numeric>
 
 TEST(routing_visitor_test, text_routes_to_text_function)
 {
