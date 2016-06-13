@@ -237,7 +237,7 @@ if (DOXYGEN_FOUND)
         ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile
         @ONLY)
 
-    add_custom_target(doc
+    add_custom_target(telnetpp_doc
         ${DOXYGEN_EXECUTABLE} ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile
         WORKING_DIRECTORY
             ${CMAKE_CURRENT_BINARY_DIR}
