@@ -43,7 +43,7 @@ if (GTEST_FOUND)
     find_package(Threads REQUIRED)
 endif()
 
-set (TELNETPP_VERSION 1.2)
+set (TELNETPP_VERSION 1.2.2)
 
 set (telnetpp_public_src
     src/byte_converter.cpp
