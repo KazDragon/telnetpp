@@ -30,7 +30,7 @@ public :
     /// \brief Ends the current decompression stream.  Any further calls
     /// to decompress continue as if the stream were created fresh.
     //* =====================================================================
-    virtual void end_decompression()
+    virtual void end_decompression() override
     {
         ++end_decompression_called;
     }
