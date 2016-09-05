@@ -110,7 +110,7 @@ set_target_properties(telnetpp
 
 target_include_directories(telnetpp
     PUBLIC
-        "${PROJECT_SOURCE_DIR}/include"
+        $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
         "${Boost_INCLUDE_DIRS}"
 )
 
@@ -133,6 +133,8 @@ configure_file(
 install(
     TARGETS
         telnetpp
+    EXPORT
+        telnetpp-config
     ARCHIVE DESTINATION
         lib
     LIBRARY DESTINATION
@@ -144,6 +146,13 @@ install(
         include/
     DESTINATION
         include
+)
+
+install(
+    EXPORT
+        telnetpp-config
+    DESTINATION
+        lib/telnetpp
 )
 
 if (GTEST_FOUND)
