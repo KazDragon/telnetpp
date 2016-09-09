@@ -43,6 +43,11 @@ if (GTEST_FOUND)
     find_package(Threads REQUIRED)
 endif()
 
+if (TELNETPP_SANITIZE)
+    list(APPEND CMAKE_CXX_FLAGS "-fsanitize=${TELNETPP_SANITIZE}")
+    list(APPEND CMAKE_EXE_LINKER_FLAGS "-fsanitize=${TELNETPP_SANITIZE}")
+endif()
+
 set (TELNETPP_VERSION 1.2.2)
 
 set (telnetpp_public_src
