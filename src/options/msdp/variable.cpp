@@ -71,7 +71,7 @@ variable::variable(
     std::string const &name,
     std::initializer_list<variable> const &il)
   : name(name),
-    value(il)
+    value(std::vector<variable>{il})
 {
 }
 
