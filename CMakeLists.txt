@@ -48,6 +48,11 @@ if (TELNETPP_SANITIZE)
     list(APPEND CMAKE_EXE_LINKER_FLAGS "-fsanitize=${TELNETPP_SANITIZE}")
 endif()
 
+if (TELNETPP_COVERAGE)
+    list(APPEND CMAKE_CXX_FLAGS "--coverage -g -O0")
+    list(APPEND CMAKE_EXE_LINKER_FLAGS "--coverage")
+endif()
+
 set (TELNETPP_VERSION 1.2.2)
 
 set (telnetpp_public_src
