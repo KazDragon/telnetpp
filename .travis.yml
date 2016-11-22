@@ -5,10 +5,10 @@ compiler:
   - clang
 
 env:
-  - CONFIG=Release SHARED=1 CCOMPILE=clang CXXCOMPILE=clang++
-  - CONFIG=Release SHARED=0 CCOMPILE=clang CXXCOMPILE=clang++
-  - CONFIG=Debug SHARED=1 CCOMPILE=clang CXXCOMPILE=clang++
-  - CONFIG=Debug SHARED=0 CCOMPILE=clang CXXCOMPILE=clang++
+#  - CONFIG=Release SHARED=1 CCOMPILE=clang CXXCOMPILE=clang++
+#  - CONFIG=Release SHARED=0 CCOMPILE=clang CXXCOMPILE=clang++
+#  - CONFIG=Debug SHARED=1 CCOMPILE=clang CXXCOMPILE=clang++
+#  - CONFIG=Debug SHARED=0 CCOMPILE=clang CXXCOMPILE=clang++
 
 addons:
   apt:
@@ -24,7 +24,6 @@ addons:
 
 matrix:
   include:
-
     # g++-5.2 with coverage
     - compiler: g++
       env: CONFIG=Debug SHARED=0 CCOMPILE=gcc-5 CXXCOMPILE=g++-5 COVERAGE=ON
@@ -134,7 +133,8 @@ after_failure:
 
 after_success:
 #todo: master only
-  - $LCOV --directory . --capture --output-file coverage.info # capture coverage info
+  - $LCOV --base-directory . --directory . --zerocounters -q
+  - $LCOV --base-directory . --directory . --capture --output-file coverage.info # capture coverage info
   - $LCOV --remove coverage.info 'tests/*' '/usr/*' --output-file coverage.info # filter out system and test code
   - $LCOV --list coverage.info # debug before upload
   - coveralls-lcov --repo-token ${COVERALLS_TOKEN} coverage.info # uploads to coveralls
