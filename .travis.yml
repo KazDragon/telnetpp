@@ -39,53 +39,53 @@ matrix:
             - libboost1.55-all-dev
 
     # g++-5.2
-#    - compiler: g++
-#      env: CONFIG=Release SHARED=1 CCOMPILE=gcc-5 CXXCOMPILE=g++-5 COVERAGE=OFF
-#      addons:
-#        apt:
-#          sources: *sources
-#          packages:
-#            - clang
-#            - gcc-5
-#            - g++-5
-#            - libgtest-dev
-#            - libboost1.55-all-dev
-#
-#    - compiler: g++
-#      env: CONFIG=Release SHARED=0 CCOMPILE=gcc-5 CXXCOMPILE=g++-5 COVERAGE=OFF
-#      addons:
-#        apt:
-#          sources: *sources
-#          packages:
-#            - clang
-#            - gcc-5
-#            - g++-5
-#            - libgtest-dev
-#            - libboost1.55-all-dev
-#
-#    - compiler: g++
-#      env: CONFIG=Debug SHARED=1 CCOMPILE=gcc-5 CXXCOMPILE=g++-5 COVERAGE=OFF
-#      addons:
-#        apt:
-#          sources: *sources
-#          packages:
-#            - clang
-#            - gcc-5
-#            - g++-5
-#            - libgtest-dev
-#            - libboost1.55-all-dev
-#
-#    - compiler: g++
-#      env: CONFIG=Debug SHARED=0 CCOMPILE=gcc-5 CXXCOMPILE=g++-5 COVERAGE=OFF
-#      addons:
-#        apt:
-#          sources: *sources
-#          packages:
-#            - clang
-#            - gcc-5
-#            - g++-5
-#            - libgtest-dev
-#            - libboost1.55-all-dev
+    - compiler: g++
+      env: CONFIG=Release SHARED=1 CCOMPILE=gcc-5 CXXCOMPILE=g++-5 COVERAGE=OFF
+      addons:
+        apt:
+          sources: *sources
+          packages:
+            - clang
+            - gcc-5
+            - g++-5
+            - libgtest-dev
+            - libboost1.55-all-dev
+
+    - compiler: g++
+      env: CONFIG=Release SHARED=0 CCOMPILE=gcc-5 CXXCOMPILE=g++-5 COVERAGE=OFF
+      addons:
+        apt:
+          sources: *sources
+          packages:
+            - clang
+            - gcc-5
+            - g++-5
+            - libgtest-dev
+            - libboost1.55-all-dev
+
+    - compiler: g++
+      env: CONFIG=Debug SHARED=1 CCOMPILE=gcc-5 CXXCOMPILE=g++-5 COVERAGE=OFF
+      addons:
+        apt:
+          sources: *sources
+          packages:
+            - clang
+            - gcc-5
+            - g++-5
+            - libgtest-dev
+            - libboost1.55-all-dev
+
+    - compiler: g++
+      env: CONFIG=Debug SHARED=0 CCOMPILE=gcc-5 CXXCOMPILE=g++-5 COVERAGE=OFF
+      addons:
+        apt:
+          sources: *sources
+          packages:
+            - clang
+            - gcc-5
+            - g++-5
+            - libgtest-dev
+            - libboost1.55-all-dev
 
 cache:
   - apt: true
