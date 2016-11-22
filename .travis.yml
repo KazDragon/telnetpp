@@ -126,6 +126,7 @@ before_script:
 
 script:
   - make -j2
+  - $LCOV --base-directory . --directory . --zerocounters -q
   - make test
 
 after_failure:
@@ -133,7 +134,6 @@ after_failure:
 
 after_success:
 #todo: master only
-  - $LCOV --base-directory . --directory . --zerocounters -q
   - $LCOV --base-directory . --directory . --capture --output-file coverage.info # capture coverage info
   - $LCOV --remove coverage.info 'tests/*' '/usr/*' --output-file coverage.info # filter out system and test code
   - $LCOV --list coverage.info # debug before upload
