@@ -2,6 +2,8 @@
 
 [![Documentation](https://codedocs.xyz/KazDragon/telnetpp.svg)](https://codedocs.xyz/KazDragon/telnetpp/)
 [![License](https://img.shields.io/github/license/KazDragon/telnetpp.svg)](https://en.wikipedia.org/wiki/MIT_License)
+[![Build Status](https://travis-ci.org/KazDragon/telnetpp.svg?branch=master)](https://travis-ci.org/KazDragon/telnetpp)
+[![Coverage Status](https://coveralls.io/repos/github/KazDragon/telnetpp/badge.svg?branch=master)](https://coveralls.io/github/KazDragon/telnetpp?branch=master)
 
 [![Github Issues](https://img.shields.io/github/issues/KazDragon/telnetpp.svg)](https://github.com/KazDragon/telnetpp/issues)
 [![Stories in Ready](https://badge.waffle.io/KazDragon/telnetpp.png?label=ready&title=Stories%20In%20Ready)](https://waffle.io/KazDragon/telnetpp)
@@ -40,7 +42,6 @@ Telnet++ requires a C++14 compiler and the Boost Libraries.  It also uses Google
   * [x] A byte_converter, which converts a stream of tokens into streams of bytes.
 
 # Status
-[![Build Status](https://travis-ci.org/KazDragon/telnetpp.svg?branch=master)](https://travis-ci.org/KazDragon/telnetpp)
 
 Telnet++ is automatically tested with Clang and G++ 5.2.
 
