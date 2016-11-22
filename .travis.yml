@@ -117,7 +117,7 @@ before_install:
     fi
   - export GTEST_ROOT=$PWD/gtest
 # install coverage software (todo: only if coverage=1)
-  - if [ "$COVERAGE" != "" ]; then gem install coveralls-lcov; fi
+  - if [ "$COVERAGE" == "ON" ]; then gem install coveralls-lcov; fi
 
 before_script:
   - mkdir build
@@ -126,7 +126,7 @@ before_script:
 
 script:
   - make -j2
-  - if [ "$COVERAGE" != "" ]; then 
+  - if [ "$COVERAGE" == "ON" ]; then 
         $LCOV --gcov-tool=gcov-5 --base-directory . --directory . \
             --zerocounters -q;
     fi
@@ -137,7 +137,7 @@ after_failure:
 
 after_success:
 #todo: master only
-  - if [ "$COVERAGE" != "" ]; then
+  - if [ "$COVERAGE" == "ON" ]; then
         $LCOV --gcov-tool=gcov-5 --base-directory . --directory . \
             --capture --output-file coverage.info; # capture coverage info
         $LCOV --gcov-tool=gcov-5 --remove coverage.info 'tests/*' '/usr/*' \
