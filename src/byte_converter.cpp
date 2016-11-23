@@ -1,39 +1,25 @@
 #include "telnetpp/byte_converter.hpp"
+#include "telnetpp/detail/lambda_visitor.hpp"
 
 namespace telnetpp {
-
-namespace {
-
-struct stream_token_appender : boost::static_visitor<>
-{
-    stream_token_appender(u8stream &stream)
-      : stream_(stream)
-    {
-    }
-
-    void operator()(u8stream const &data)
-    {
-        stream_.insert(stream_.end(), data.begin(), data.end());
-    }
-
-    void operator()(boost::any const &any)
-    {
-    }
-
-    u8stream &stream_;
-};
-
-}
 
 u8stream byte_converter::send(std::vector<stream_token> const &tokens)
 {
     u8stream result;
-    stream_token_appender appender(result);
 
-    for (auto const &token : tokens)
+    for_each(tokens.begin(), tokens.end(), [&result](auto const &token)
     {
-        boost::apply_visitor(appender, token);
-    }
+        boost::apply_visitor(
+            detail::make_lambda_visitor<void>(
+                [&result](u8stream const &data)
+                {
+                    result.insert(result.end(), data.begin(), data.end());
+                },
+                [](boost::any const &)
+                {
+                }),
+            token);
+    });
 
     return result;
 }
