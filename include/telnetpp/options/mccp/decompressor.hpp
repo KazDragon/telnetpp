@@ -45,7 +45,6 @@ class corrupted_stream_error
     virtual boost::exception
 {
 public :
-    corrupted_stream_error(std::string const &what_arg);
     corrupted_stream_error(char const *what_arg);
 };
 
