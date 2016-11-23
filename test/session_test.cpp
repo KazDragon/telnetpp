@@ -199,3 +199,15 @@ TEST(session_test, unrouted_dont_results_in_wont)
             0xA0
         }));
 }
+
+TEST(session_test, non_telnet_objects_are_passed_through)
+{
+    telnetpp::session session(nullptr);
+
+    expect_tokens(
+        {
+            boost::any{}
+        },
+        session.send({boost::any{}})
+    );
+}
