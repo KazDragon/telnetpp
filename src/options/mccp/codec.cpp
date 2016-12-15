@@ -5,7 +5,6 @@
 #include <functional>
 #include <numeric>
 #include <vector>
-#include <zlib.h>
 
 namespace telnetpp { namespace options { namespace mccp {
 
