@@ -1,41 +1,7 @@
 #include "telnetpp/options/msdp/variable.hpp"
+#include "telnetpp/detail/lambda_visitor.hpp"
 
 namespace telnetpp { namespace options { namespace msdp {
-
-namespace {
-
-// ==========================================================================
-// \brief A class that determines if one variable's value equals another.
-// ==========================================================================
-class value_equals : public boost::static_visitor<bool>
-{
-public :
-    // ======================================================================
-    // CONSTRUCTOR
-    // ======================================================================
-    value_equals(value_type const &value)
-      : value_(value)
-    {
-    }
-
-    // ======================================================================
-    // OPERATOR()
-    // ======================================================================
-    template <class Value>
-    bool operator()(Value const &rhs) const
-    {
-        auto const *lhs = boost::get<Value>(&value_);
-
-        return lhs == nullptr
-             ? false
-             : *lhs == rhs;
-    }
-
-private :
-    value_type const &value_;
-};
-
-}
 
 // ==========================================================================
 // CONSTRUCTOR
@@ -80,8 +46,14 @@ variable::variable(
 // ==========================================================================
 bool operator==(variable const &lhs, variable const &rhs)
 {
+    auto const &lhs_value = lhs.value;
+
     return lhs.name == rhs.name
-        && boost::apply_visitor(value_equals(lhs.value), rhs.value);
+        && boost::apply_visitor(detail::make_lambda_visitor<bool>(
+            [&lhs_value](auto const &inner_rhs)
+            {
+                return boost::get<decltype(inner_rhs)>(lhs_value) == inner_rhs;
+            }), rhs.value);
 }
 
 // ==========================================================================

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "telnetpp/detail/generate_helper.hpp"
+#include "telnetpp/detail/lambda_visitor.hpp"
 #include <algorithm>
 #include <iterator>
 #include <utility>
@@ -15,33 +16,33 @@ namespace telnetpp { namespace detail {
 template <class InputIterator1, class InputIterator2>
 auto generate(InputIterator1 begin, InputIterator2 end)
 {
-    typedef boost::variant<u8stream, boost::any> result;
-    std::vector<result> results;
+    std::vector<stream_token> results;
     u8stream stream;
 
     std::for_each(begin, end, [&results, &stream](auto &&token)
     {
-        if (token.type() == typeid(element))
-        {
-            detail::generate_helper(
-                stream,
-                boost::get<element>(token));
-        }
-        else
-        {
-            if (!stream.empty())
-            {
-                results.push_back(result(stream));
-                stream.clear();
-            }
-
-            results.push_back(result(boost::get<boost::any>(token)));
-        }
+        boost::apply_visitor(
+            make_lambda_visitor<void>(
+               [&stream](element const &elem) 
+               {
+                    detail::generate_helper(stream, elem);
+               },
+               [&stream, &results](boost::any const &any)
+               {
+                    if (!stream.empty())
+                    {
+                        results.push_back(stream);
+                        stream.clear();
+                    }
+        
+                    results.push_back(any);
+               }),
+            token);
     });
 
     if (!stream.empty())
     {
-        results.push_back(result(stream));
+        results.push_back(stream);
     }
 
     return results;
