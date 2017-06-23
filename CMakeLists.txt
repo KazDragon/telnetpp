@@ -55,7 +55,7 @@ endif()
 
 set (TELNETPP_VERSION 1.2.2)
 
-set (telnetpp_public_src
+set (TELNETPP_PUBLIC_SOURCE_FILES
     src/byte_converter.cpp
     src/client_option.cpp
     src/command.cpp
@@ -77,17 +77,56 @@ set (telnetpp_public_src
     src/subnegotiation.cpp
 )
 
+set (TELNETPP_PUBLIC_HEADER_FILES
+    include/telnetpp/byte_converter.hpp
+    include/telnetpp/client_option.hpp
+    include/telnetpp/command.hpp
+    include/telnetpp/core.hpp
+    include/telnetpp/element.hpp
+    include/telnetpp/negotiation.hpp
+    include/telnetpp/protocol.hpp
+    include/telnetpp/server_option.hpp
+    include/telnetpp/session.hpp
+    include/telnetpp/subnegotiation.hpp
+    include/telnetpp/telnetpp.hpp
+    include/telnetpp/version.hpp
+    include/telnetpp/options/echo/client.hpp
+    include/telnetpp/options/echo/server.hpp
+    include/telnetpp/options/mccp/client.hpp
+    include/telnetpp/options/mccp/codec.hpp
+    include/telnetpp/options/mccp/decompressor.hpp
+    include/telnetpp/options/mccp/server.hpp
+    include/telnetpp/options/msdp/client.hpp
+    include/telnetpp/options/msdp/server.hpp
+    include/telnetpp/options/msdp/variable.hpp
+    include/telnetpp/options/naws/client.hpp
+    include/telnetpp/options/naws/server.hpp
+    include/telnetpp/options/new_environ/client.hpp
+    include/telnetpp/options/new_environ/server.hpp
+    include/telnetpp/options/terminal_type/client.hpp
+    include/telnetpp/options/subnegotiationless_client.hpp
+    include/telnetpp/options/subnegotiationless_server.hpp
+    include/telnetpp/options/suppress_ga/client.hpp
+    include/telnetpp/options/suppress_ga/server.hpp
+)
+
 # The zlib compressors for MCCP should only be compiled into the library
 # if zlib is available.
 if (ZLIB_FOUND)
-    set (telnetpp_public_src
-        ${telnetpp_public_src}
+    set (TELNETPP_PUBLIC_SOURCE_FILES
+        ${TELNETPP_PUBLIC_SOURCE_FILES}
         src/options/mccp/zlib/compressor.cpp
         src/options/mccp/zlib/decompressor.cpp
     )
+
+    set (TELNETPP_PUBLIC_INCLUDE_FILES
+        ${TELNETPP_PUBLIC_SOURCE_FILES}
+        include/telnetpp/options/mccp/zlib/compressor.hpp
+        include/telnetpp/options/mccp/zlib/decompressor.hpp
+    )
 endif()
 
-set (telnetpp_private_src
+set (TELNETPP_PRIVATE_SOURCE_FILES
     src/options/msdp/detail/decoder.cpp
     src/options/msdp/detail/encoder.cpp
     src/options/new_environ/detail/request_parser.cpp
@@ -99,9 +138,38 @@ set (telnetpp_private_src
     src/detail/routing_visitor.cpp
 )
 
+set (TELNETPP_PRIVATE_INCLUDE_FILES
+    include/telnetpp/detail/command_router.hpp
+    include/telnetpp/detail/export.hpp
+    include/telnetpp/detail/generate_helper.hpp
+    include/telnetpp/detail/generator.hpp
+    include/telnetpp/detail/lambda_visitor.hpp
+    include/telnetpp/detail/negotiation_router.hpp
+    include/telnetpp/detail/parse_helper.hpp
+    include/telnetpp/detail/parser.hpp
+    include/telnetpp/detail/registration.hpp
+    include/telnetpp/detail/return_default.hpp
+    include/telnetpp/detail/router.hpp
+    include/telnetpp/detail/routing_visitor.hpp
+    include/telnetpp/detail/subnegotiation_router.hpp
+    include/telnetpp/options/echo/detail/protocol.hpp
+    include/telnetpp/options/mccp/detail/protocol.hpp
+    include/telnetpp/options/msdp/detail/decoder.hpp
+    include/telnetpp/options/msdp/detail/encoder.hpp
+    include/telnetpp/options/msdp/detail/protocol.hpp
+    include/telnetpp/options/naws/detail/protocol.hpp
+    include/telnetpp/options/new_environ/detail/protocol.hpp
+    include/telnetpp/options/new_environ/detail/request_parser.hpp
+    include/telnetpp/options/new_environ/detail/response_parser.hpp
+    include/telnetpp/options/new_environ/detail/stream.hpp
+    include/telnetpp/options/suppress_ga/detail/protocol.hpp
+)
+
 add_library(telnetpp
-    ${telnetpp_public_src}
-    ${telnetpp_private_src}
+    ${TELNETPP_PUBLIC_HEADER_FILES}
+    ${TELNETPP_PUBLIC_SOURCE_FILES}
+    ${TELNETPP_PRIVATE_SOURCE_FILES}
+    ${TELNETPP_PRIVATE_INCLUDE_FILES}
 )
 
 if (ZLIB_FOUND)
