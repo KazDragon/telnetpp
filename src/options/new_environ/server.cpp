@@ -10,7 +10,7 @@ namespace {
 // ==========================================================================
 // VARIABLE_WAS_REQUESTED
 // ==========================================================================
-bool variable_was_requested(
+static bool variable_was_requested(
     std::vector<request> const &requests,
     variable_type        const &type,
     std::string          const &name)
@@ -34,7 +34,7 @@ bool variable_was_requested(
 // ==========================================================================
 // APPEND_VARIABLE
 // ==========================================================================
-u8stream &append_variable(
+static u8stream &append_variable(
     u8stream                                        &stream,
     telnetpp::u8                                     type,
     std::pair<std::string const, std::string> const &variable)

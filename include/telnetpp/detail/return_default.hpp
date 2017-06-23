@@ -3,9 +3,6 @@
 namespace telnetpp { namespace detail {
 
 template <class T>
-struct return_default_constructed;
-
-template <class T>
 struct return_default_constructed
 {
     T operator()()

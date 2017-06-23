@@ -62,7 +62,7 @@ struct compressor::impl
         telnetpp::u8stream compressed_data;
         
         stream_.avail_in  = sequence.size();
-        stream_.next_in   = const_cast<telnetpp::u8 *>(&sequence[0]);
+        stream_.next_in   = const_cast<telnetpp::u8 *>(sequence.data());
             
         do
         {
