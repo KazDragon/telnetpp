@@ -21,6 +21,7 @@ void append_escaped(
                 // Fall-through
                 stream.push_back(telnetpp::options::new_environ::detail::esc);
             default :
+                // Fall-through
                 stream.push_back(ch);
                 break;
         }
