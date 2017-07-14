@@ -129,3 +129,18 @@ TEST_F(a_server_option_being_activated, ignores_deactivate_requests)
     auto result = option_.deactivate();
     ASSERT_EQ(0u, result.size());
 }
+
+// Rule 2: Prohibit new requests before completing old negotiation.
+// This is covered above.  All requests are ignored if there is one underway.
+// In this way, a user of the code may assume that the next response that
+// arrives is destined for him.  This may involve some odd results, such as
+// sending WONT and receiving DO (since it's actually the result of the
+// previous WILL).
+//
+// I could implement a queue here, but I imagine it's a rare case.  For my
+// use cases, there is only usually one initial request, and then nothing
+// else changes.
+
+// Rule 3: Separate WANTNO and WANTYET
+// This is the activating/deactivating states.
+
