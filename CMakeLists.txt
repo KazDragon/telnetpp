@@ -254,6 +254,7 @@ if (GTEST_FOUND)
         test/new_environ_server_test.cpp
         test/negotiation_router_test.cpp
         test/pass_through_test.cpp
+        test/q_method_test.cpp
         test/server_option_test.cpp
         test/session_test.cpp
         test/subnegotiation_router_test.cpp
