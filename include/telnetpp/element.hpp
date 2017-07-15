@@ -46,8 +46,10 @@ using stream_token = boost::variant<u8stream, boost::any>;
 //* =========================================================================
 struct token_combiner
 {
+    /// The result type of combining the tokens
     using result_type = std::vector<token>;
 
+    /// Combine a range of tokens into a vector.
     template <class InputIterator1, class InputIterator2>
     std::vector<token> operator()(InputIterator1 begin, InputIterator2 end) const
     {

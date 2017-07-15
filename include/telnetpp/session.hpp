@@ -36,7 +36,7 @@ namespace telnetpp {
 ///             return { telnetpp::element("Echo!") };
 ///         }
 ///         ...
-///     }   
+///     }
 ///
 ///     ...
 ///
@@ -45,7 +45,7 @@ namespace telnetpp {
 /// \par Installation
 /// It is possible to "install" handlers into the session.  The most basic
 /// installation is for handling Telnet commands, such as "Are You There?".
-/// It is also possible to install client- and server options into the 
+/// It is also possible to install client- and server options into the
 /// session, which ensures that any negotiations or subnegotiations that are
 /// tagged as belonging to those options are forwarded to those option
 /// handlers.
@@ -54,11 +54,11 @@ namespace telnetpp {
 ///     {
 ///         return { telnetpp::element("Yes, I'm here.") };
 ///     }
-///     
+///
 ///     telnetpp::options::echo::server echo_server;
-///     
+///
 ///     ...
-///     
+///
 ///     session.install(telnetpp::ayt, ayt_handler);
 ///     session.install(echo_server);
 /// \endcode
@@ -71,11 +71,11 @@ namespace telnetpp {
 /// complete, the application must write the byte streams over the actual
 /// data connection itself.
 /// \par Receiving
-/// The receive() function is used to receive data that has been read from 
+/// The receive() function is used to receive data that has been read from
 /// the remote connection and route it to the correct handler, be it the
 /// installed options or command handlers, or the text handler registered in
 /// the constructor.  Note: receiving data frequently has an immediate
-/// response.  For example, receving bytes that amount to an option 
+/// response.  For example, receving bytes that amount to an option
 /// negotiation will result in a reply to that negotiation.  For this reason,
 /// the usual pattern for receiving is to immediately send() the result of
 /// the call to receive, and then write that result to the data connection.
@@ -94,7 +94,7 @@ public :
     /// \brief Constructor
     /// \param on_text a function to be called whenever text is received.
     //* =====================================================================
-    session(
+    explicit session(
         std::function<std::vector<token> (std::string const&)> on_text);
 
     //* =====================================================================

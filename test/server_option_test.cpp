@@ -8,7 +8,7 @@ namespace {
 class fake_server_option : public telnetpp::server_option
 {
 public :
-    fake_server_option(telnetpp::u8 option)
+    explicit fake_server_option(telnetpp::u8 option)
       : telnetpp::server_option(option)
     {
     }

@@ -9,7 +9,7 @@ namespace {
 
 struct stream_match : boost::static_visitor<>
 {
-    stream_match(
+    explicit stream_match(
         boost::variant<telnetpp::u8stream, boost::any> const &expected)
       : expected_(expected)
     {
