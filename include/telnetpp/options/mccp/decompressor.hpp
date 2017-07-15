@@ -45,7 +45,10 @@ class corrupted_stream_error
     virtual boost::exception
 {
 public :
-    corrupted_stream_error(char const *what_arg);
+    //* =====================================================================
+    /// Constructor
+    //* =====================================================================
+    explicit corrupted_stream_error(char const *what_arg);
 };
 
 }}}

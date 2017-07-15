@@ -8,7 +8,7 @@ namespace {
 class fake_client_option : public telnetpp::client_option
 {
 public :
-    fake_client_option(telnetpp::u8 option)
+    explicit fake_client_option(telnetpp::u8 option)
       : telnetpp::client_option(option)
     {
     }
