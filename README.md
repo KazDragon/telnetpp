@@ -2,6 +2,7 @@
 
 [![Documentation](https://codedocs.xyz/KazDragon/telnetpp.svg)](https://codedocs.xyz/KazDragon/telnetpp/)
 [![License](https://img.shields.io/github/license/KazDragon/telnetpp.svg)](https://en.wikipedia.org/wiki/MIT_License)
+[![GitHub Releases](https://img.shields.io/github/release/KazDragon/telnetpp.svg)](https://github.com/KazDragon/telnetpp/releases)
 [![Build Status](https://travis-ci.org/KazDragon/telnetpp.svg?branch=master)](https://travis-ci.org/KazDragon/telnetpp)
 [![Coverage Status](https://coveralls.io/repos/github/KazDragon/telnetpp/badge.svg?branch=master)](https://coveralls.io/github/KazDragon/telnetpp?branch=master)
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/63ec54845f2c41f1899706c61f1c316b)](https://www.codacy.com/app/KazDragon/telnetpp?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=KazDragon/telnetpp&amp;utm_campaign=Badge_Grade)
