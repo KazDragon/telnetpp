@@ -20,7 +20,7 @@
 namespace telnetpp { namespace options { namespace terminal_type {
     namespace detail {
 
-static constexpr option_type option = 24;
+static constexpr option_type const option = 24;
 
 using terminal_type_command_type = byte;
 static constexpr terminal_type_command_type const is   = 0;

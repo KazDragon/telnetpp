@@ -84,7 +84,6 @@ set (TELNETPP_PUBLIC_HEADER_FILES
     include/telnetpp/core.hpp
     include/telnetpp/element.hpp
     include/telnetpp/negotiation.hpp
-    include/telnetpp/protocol.hpp
     include/telnetpp/server_option.hpp
     include/telnetpp/session.hpp
     include/telnetpp/subnegotiation.hpp

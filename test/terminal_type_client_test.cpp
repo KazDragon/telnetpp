@@ -1,5 +1,4 @@
 #include "telnetpp/options/terminal_type/client.hpp"
-#include "telnetpp/protocol.hpp"
 #include "expect_elements.hpp"
 #include <gtest/gtest.h>
 

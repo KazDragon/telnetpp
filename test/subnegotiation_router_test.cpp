@@ -1,6 +1,5 @@
 #include "telnetpp/detail/subnegotiation_router.hpp"
 #include "telnetpp/options/naws/client.hpp"
-#include "telnetpp/protocol.hpp"
 #include "telnetpp/detail/registration.hpp"
 #include <gtest/gtest.h>
 

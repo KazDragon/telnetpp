@@ -1,6 +1,5 @@
 #include "telnetpp/detail/generate_helper.hpp"
 #include "telnetpp/detail/lambda_visitor.hpp"
-#include "telnetpp/protocol.hpp"
 
 namespace telnetpp { namespace detail {
 

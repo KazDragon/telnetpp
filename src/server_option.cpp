@@ -1,5 +1,4 @@
 #include "telnetpp/server_option.hpp"
-#include "telnetpp/protocol.hpp"
 
 namespace telnetpp {
 

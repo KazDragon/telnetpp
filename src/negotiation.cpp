@@ -1,5 +1,4 @@
 #include "telnetpp/negotiation.hpp"
-#include "telnetpp/protocol.hpp"
 #include <iostream>
 #include <iomanip>
 
