@@ -15,14 +15,14 @@
 /// \par
 /// While all modern servers and clients now begin with the assumption of a
 /// full-duplex protocol, there is one extra feature in Suppress Go-Ahead
-/// that remains useful: if a server has both this and the Echo option 
-/// active, then it is "commonly understood" that this should enable 
+/// that remains useful: if a server has both this and the Echo option
+/// active, then it is "commonly understood" that this should enable
 /// character-at-a-time mode instead of the normal line-at-a-time mode.
 /// \see https://tools.ietf.org/html/rfc858
 /// \see telnetpp::options::echo
 //* =========================================================================
 namespace telnetpp { namespace options { namespace suppress_ga { namespace detail {
 
-static constexpr telnetpp::u8 option = 3;
+static constexpr option_type option = 3;
 
 }}}}

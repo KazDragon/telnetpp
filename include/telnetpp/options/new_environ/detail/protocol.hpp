@@ -7,10 +7,10 @@
 /// \namespace telnetpp::options::new_environ
 /// \brief An implementation of the Telnet Environment option
 /// \par Overview
-/// NEW-ENVIRON is used to send the values of variables from server to 
+/// NEW-ENVIRON is used to send the values of variables from server to
 /// client.
 /// \par
-/// Variables are transmitted in pairs of 
+/// Variables are transmitted in pairs of
 /// telnetpp::options::new_environ::request and
 /// telnetpp::options::new_environ::response, where the request is the type
 /// of the variable (either a well known "var" type, the names of which are
@@ -25,21 +25,22 @@
 /// It may also register for notifications about responses by subscribing to
 /// the on_variable_changed signal.
 /// \par
-/// A server may set or delete variables and user variables, and will 
+/// A server may set or delete variables and user variables, and will
 /// automatically handle requests sent from a client by using this data.
 /// \see https://tools.ietf.org/html/rfc1572
 //* =========================================================================
 namespace telnetpp { namespace options { namespace new_environ { namespace detail {
 
-static constexpr telnetpp::u8 option  = 39;
+static constexpr option_type option  = 39;
 
-static constexpr telnetpp::u8 is      = 0;
-static constexpr telnetpp::u8 send    = 1;
-static constexpr telnetpp::u8 info    = 2;
+using new_environ_command_type = byte;
+static constexpr new_environ_command_type const is      = 0;
+static constexpr new_environ_command_type const send    = 1;
+static constexpr new_environ_command_type const info    = 2;
 
-static constexpr telnetpp::u8 var     = 0;
-static constexpr telnetpp::u8 value   = 1;
-static constexpr telnetpp::u8 esc     = 2;
-static constexpr telnetpp::u8 uservar = 3;
+static constexpr new_environ_command_type const var     = 0;
+static constexpr new_environ_command_type const value   = 1;
+static constexpr new_environ_command_type const esc     = 2;
+static constexpr new_environ_command_type const uservar = 3;
 
 }}}}

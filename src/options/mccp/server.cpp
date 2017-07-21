@@ -80,7 +80,7 @@ std::vector<telnetpp::token> server::end_compression()
 // HANDLE_SUBNEGOTIATION
 // ==========================================================================
 std::vector<telnetpp::token> server::handle_subnegotiation(
-    telnetpp::u8stream const &content)
+    telnetpp::byte_stream const &content)
 {
     return {};
 }

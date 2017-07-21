@@ -22,7 +22,7 @@ private :
     /// state.
     //* =====================================================================
     virtual std::vector<telnetpp::token> handle_subnegotiation(
-        telnetpp::u8stream const &content);
+        telnetpp::byte_stream const &content);
 
 };
 

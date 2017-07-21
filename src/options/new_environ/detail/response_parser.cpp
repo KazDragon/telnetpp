@@ -16,21 +16,19 @@ enum class parse_state
     value_esc,
 };
 
-
-static telnetpp::options::new_environ::variable_type u8_to_type(
-    telnetpp::u8 value)
+// ==========================================================================
+// BYTE_TO_TYPE
+// ==========================================================================
+static telnetpp::options::new_environ::variable_type byte_to_type(byte value)
 {
-    return value == telnetpp::options::new_environ::detail::var
-         ? telnetpp::options::new_environ::variable_type::var
-         : telnetpp::options::new_environ::variable_type::uservar;
+    return value == detail::var ? variable_type::var : variable_type::uservar;
 }
-
 
 // ==========================================================================
 // PARSE_VALUE_ESC
 // ==========================================================================
 boost::optional<response> parse_value_esc(
-    parse_state &state, response &temp, u8 data)
+    parse_state &state, response &temp, byte data)
 {
     temp.value->push_back(data);
     state = parse_state::value;
@@ -42,7 +40,7 @@ boost::optional<response> parse_value_esc(
 // PARSE_VALUE
 // ==========================================================================
 boost::optional<response> parse_value(
-    parse_state &state, response &temp, u8 data)
+    parse_state &state, response &temp, byte data)
 {
     boost::optional<response> resp;
 
@@ -56,7 +54,7 @@ boost::optional<response> parse_value(
         case detail::uservar :
             resp = temp;
 
-            temp.type = u8_to_type(data);
+            temp.type = byte_to_type(data);
             temp.name = "";
             temp.value = boost::none;
             state = parse_state::name;
@@ -74,7 +72,7 @@ boost::optional<response> parse_value(
 // PARSE_NAME_ESC
 // ==========================================================================
 boost::optional<response> parse_name_esc(
-    parse_state &state, response &temp, u8 data)
+    parse_state &state, response &temp, byte data)
 {
     temp.name.push_back(char(data));
     state = parse_state::name;
@@ -86,7 +84,7 @@ boost::optional<response> parse_name_esc(
 // PARSE_NAME
 // ==========================================================================
 boost::optional<response> parse_name(
-    parse_state &state, response &temp, u8 data)
+    parse_state &state, response &temp, byte data)
 {
     boost::optional<response> resp;
 
@@ -100,7 +98,7 @@ boost::optional<response> parse_name(
         case detail::uservar :
             resp = temp;
 
-            temp.type = u8_to_type(data);
+            temp.type = byte_to_type(data);
             temp.name = "";
             temp.value = boost::none;
             state = parse_state::name;
@@ -123,9 +121,9 @@ boost::optional<response> parse_name(
 // PARSE_TYPE
 // ==========================================================================
 boost::optional<response> parse_type(
-    parse_state &state, response &temp, u8 data)
+    parse_state &state, response &temp, byte data)
 {
-    temp.type = u8_to_type(data);
+    temp.type = byte_to_type(data);
     state = parse_state::name;
     return {};
 }
@@ -134,7 +132,7 @@ boost::optional<response> parse_type(
 // PARSE_IS_OR_INFO
 // ==========================================================================
 boost::optional<response> parse_is_or_info(
-    parse_state &state, response &temp, u8 data)
+    parse_state &state, response &temp, byte data)
 {
     state = parse_state::type;
     return {};
@@ -144,7 +142,7 @@ boost::optional<response> parse_is_or_info(
 // PARSE_DATA
 // ==========================================================================
 boost::optional<response> parse_data(
-    parse_state &state, response &temp, u8 data)
+    parse_state &state, response &temp, byte data)
 {
     boost::optional<response> resp;
 
@@ -187,7 +185,7 @@ boost::optional<response> parse_data(
 // ==========================================================================
 // PARSE_RESPONSES
 // ==========================================================================
-std::vector<response> parse_responses(telnetpp::u8stream const &stream)
+std::vector<response> parse_responses(telnetpp::byte_stream const &stream)
 {
     std::vector<response> responses;
     parse_state state = parse_state::is_or_info;

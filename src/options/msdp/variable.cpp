@@ -49,11 +49,12 @@ bool operator==(variable const &lhs, variable const &rhs)
     auto const &lhs_value = lhs.value;
 
     return lhs.name == rhs.name
-        && boost::apply_visitor(detail::make_lambda_visitor<bool>(
-            [&lhs_value](auto const &inner_rhs)
-            {
-                return boost::get<decltype(inner_rhs)>(lhs_value) == inner_rhs;
-            }), rhs.value);
+        && detail::visit_lambdas<bool>(
+               rhs.value,
+               [&lhs_value](auto const &inner_rhs)
+               {
+                   return boost::get<decltype(inner_rhs)>(lhs_value) == inner_rhs;
+               });
 }
 
 // ==========================================================================

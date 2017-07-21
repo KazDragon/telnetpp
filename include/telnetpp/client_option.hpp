@@ -48,7 +48,7 @@ public :
     //* =====================================================================
     /// \brief Returns the option code.
     //* =====================================================================
-    telnetpp::u8 option() const;
+    option_type option() const;
 
     //* =====================================================================
     /// \brief Flags the option as remotely activatable.
@@ -79,14 +79,14 @@ public :
     /// \brief Makes a request of the option and returns the response from
     /// that request.
     //* =====================================================================
-    std::vector<telnetpp::token> negotiate(telnetpp::u8 request);
+    std::vector<telnetpp::token> negotiate(negotiation_type request);
 
     //* =====================================================================
     /// \brief Send a subnegotiation to the option and returns the response
     /// from that subnegotiation.
     //* =====================================================================
     std::vector<telnetpp::token> subnegotiate(
-        telnetpp::u8stream const &content);
+        telnetpp::byte_stream const &content);
 
     //* =====================================================================
     /// \brief A signal that you can connect to in order to detect changes
@@ -115,7 +115,7 @@ protected :
     /// \brief Constructor
     /// \param option The Option Code of this option.
     //* =====================================================================
-    explicit client_option(telnetpp::u8 option);
+    explicit client_option(option_type option);
 
 private :
     //* =====================================================================
@@ -123,11 +123,11 @@ private :
     /// state.
     //* =====================================================================
     virtual std::vector<telnetpp::token> handle_subnegotiation(
-        telnetpp::u8stream const &content) = 0;
+        telnetpp::byte_stream const &content) = 0;
 
-    state state_       = state::inactive;
-    bool  activatable_ = false;
-    u8    option_;
+    state       state_       = state::inactive;
+    bool        activatable_ = false;
+    option_type option_;
 };
 
 }

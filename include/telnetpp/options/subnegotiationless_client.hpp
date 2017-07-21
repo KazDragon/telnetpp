@@ -9,7 +9,7 @@ namespace telnetpp { namespace options {
 ///        subnegotiations; they merely exist for enabling and disabling
 ///        the option.
 //* =========================================================================
-template <telnetpp::u8 Option>
+template <option_type Option>
 class subnegotiationless_client : public telnetpp::client_option
 {
 public :
@@ -20,14 +20,14 @@ public :
       : client_option(Option)
     {
     }
-    
+
 private :
     //* =====================================================================
     /// \brief Handle a negotiation that has been received in the active
     /// state.
     //* =====================================================================
     std::vector<telnetpp::token> handle_subnegotiation(
-        telnetpp::u8stream const &content) override
+        telnetpp::byte_stream const &content) override
     {
         return {};
     }

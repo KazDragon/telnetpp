@@ -4,14 +4,14 @@
 #include <iomanip>
 
 namespace telnetpp {
-    
+
 // ==========================================================================
-// OPERATOR<<    
+// OPERATOR<<
 // ==========================================================================
 std::ostream &operator<<(std::ostream &out, negotiation const &neg)
 {
     out << "negotiation[";
-    
+
     switch (neg.request())
     {
         case telnetpp::will : out << "WILL"; break;
@@ -19,11 +19,11 @@ std::ostream &operator<<(std::ostream &out, negotiation const &neg)
         case telnetpp::do_  : out << "DO"; break;
         case telnetpp::dont : out << "DONT"; break;
         default :
-            out << "0x" << std::hex << u32(neg.request());
+            out << "0x" << std::hex << int(neg.request());
             break;
     }
-    
-    return out << ",0x" << std::hex << u32(neg.option()) << "]";
+
+    return out << ",0x" << std::hex << int(neg.option()) << "]";
 }
 
 }

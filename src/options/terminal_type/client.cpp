@@ -27,7 +27,7 @@ std::vector<telnetpp::token> client::request_terminal_type()
 // HANDLE_SUBNEGOTIATION
 // ==========================================================================
 std::vector<telnetpp::token> client::handle_subnegotiation(
-    u8stream const &content)
+    byte_stream const &content)
 {
     auto begin = content.begin();
     auto end   = content.end();

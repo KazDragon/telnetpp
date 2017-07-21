@@ -9,7 +9,7 @@ namespace telnetpp { namespace detail {
 
 struct subnegotiation_router_key_from_message_policy
 {
-    static telnetpp::u8 key_from_message(subnegotiation const &sub)
+    static option_type key_from_message(subnegotiation const &sub)
     {
         return sub.option();
     }
@@ -17,7 +17,7 @@ struct subnegotiation_router_key_from_message_policy
 
 class subnegotiation_router
   : public router<
-        u8,
+        option_type,
         subnegotiation,
         std::vector<telnetpp::token>,
         detail::subnegotiation_router_key_from_message_policy

@@ -6,20 +6,29 @@
 
 namespace telnetpp {
 
-using s8  = boost::int8_t;
-using s16 = boost::int16_t;
-using s32 = boost::int32_t;
-using s64 = boost::int64_t;
+using byte                        = std::uint8_t;
+using option_type                 = std::uint8_t;
+using command_type                = std::uint8_t;
+using negotiation_type            = std::uint8_t;
+using subnegotiation_content_type = byte;
 
-//* =========================================================================
-/// \typedef u8
-/// \brief A typedef of an unsigned 8-bit integer that is used to represent
-/// a byte of data.
-//* =========================================================================
-using u8  = boost::uint8_t;
-using u16 = boost::uint16_t;
-using u32 = boost::uint32_t;
-using u64 = boost::uint64_t;
+// TELNET Commands
+static constexpr command_type const se   = 240; // Subnegotiation End
+static constexpr command_type const nop  = 241; // No Operation
+static constexpr command_type const dm   = 242; // Data Mark
+static constexpr command_type const brk  = 243; // Break
+static constexpr command_type const ip   = 244; // Interrupt Process
+static constexpr command_type const ao   = 245; // Abort Output
+static constexpr command_type const ayt  = 246; // Are You There?
+static constexpr command_type const ec   = 247; // Erase Character
+static constexpr command_type const el   = 248; // Erase Line
+static constexpr command_type const ga   = 249; // Go Ahead
+static constexpr command_type const sb   = 250; // Subnegotiation Begin
+static constexpr command_type const will = 251;
+static constexpr command_type const wont = 252;
+static constexpr command_type const do_  = 253;
+static constexpr command_type const dont = 254;
+static constexpr command_type const iac  = 255; // Interpret As Command
 
 // Originally, Telnet++ used std::vector<u8> as its stream type.
 // However, most Telnet packets tend to be small, and this means that
@@ -31,11 +40,11 @@ using u64 = boost::uint64_t;
 // something that models the basic standard Container concept.
 
 //* =========================================================================
-/// \class telnetpp::u8stream
+/// \class telnetpp::byte_stream
 /// \brief A collection of bytes that models the Standard Library's
 /// Container concept.  This is used for transporting arrays of bytes
 /// across the library.
 //* =========================================================================
-using u8stream = std::basic_string<u8>;
+using byte_stream = std::basic_string<byte>;
 
 }

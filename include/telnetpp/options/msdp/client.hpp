@@ -37,7 +37,7 @@ private :
     /// state.
     //* =====================================================================
     std::vector<telnetpp::token> handle_subnegotiation(
-        u8stream const &content) override;
+        byte_stream const &content) override;
 };
 
 }}}

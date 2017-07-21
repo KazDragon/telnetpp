@@ -59,7 +59,7 @@ public :
         }
     }
 
-    void operator()(telnetpp::u8stream const &stream)
+    void operator()(telnetpp::byte_stream const &stream)
     {
         if (output_compressed_)
         {
@@ -122,17 +122,17 @@ std::vector<telnetpp::stream_token> codec::send(
     return result;
 }
 
-telnetpp::u8stream codec::receive(telnetpp::u8 byte)
+telnetpp::byte_stream codec::receive(byte data)
 {
     if (pimpl_->input_compressed_)
     {
-        auto const &result = pimpl_->decompressor_->decompress(byte);
+        auto const &result = pimpl_->decompressor_->decompress(data);
         pimpl_->input_compressed_ = !std::get<1>(result);
         return std::get<0>(result);
     }
     else
     {
-        return { byte };
+        return { data };
     }
 }
 

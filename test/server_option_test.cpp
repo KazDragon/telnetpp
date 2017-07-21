@@ -8,19 +8,19 @@ namespace {
 class fake_server_option : public telnetpp::server_option
 {
 public :
-    explicit fake_server_option(telnetpp::u8 option)
+    explicit fake_server_option(telnetpp::option_type option)
       : telnetpp::server_option(option)
     {
     }
 
     boost::signals2::signal<
-        std::vector<telnetpp::token> (telnetpp::u8stream const &content),
+        std::vector<telnetpp::token> (telnetpp::byte_stream const &content),
         telnetpp::token_combiner
     > on_subnegotiation;
 
 private :
     std::vector<telnetpp::token> handle_subnegotiation(
-        telnetpp::u8stream const &content)
+        telnetpp::byte_stream const &content)
     {
         return on_subnegotiation(content);
     }
@@ -31,7 +31,7 @@ private :
 TEST(server_option_test, option_returns_option)
 {
     fake_server_option server(21);
-    ASSERT_EQ(telnetpp::u8(21), server.option());
+    ASSERT_EQ(telnetpp::option_type(21), server.option());
 }
 
 TEST(server_option_test, deactivated_negotiate_do_responds_with_wont_no_signal)
@@ -389,10 +389,10 @@ TEST(server_option_test, active_subnegotiation_is_handled)
     server.negotiate(telnetpp::do_);
 
     bool called = false;
-    telnetpp::u8stream content;
+    telnetpp::byte_stream content;
 
     server.on_subnegotiation.connect(
-        [&called, &content](telnetpp::u8stream const &new_content)
+        [&called, &content](telnetpp::byte_stream const &new_content)
             -> std::vector<telnetpp::token>
         {
             called = true;

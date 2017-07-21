@@ -6,7 +6,7 @@ namespace telnetpp {
 // ==========================================================================
 // CONSTRUCTOR
 // ==========================================================================
-server_option::server_option(u8 option)
+server_option::server_option(option_type option)
   : option_(option)
 {
 }
@@ -14,7 +14,7 @@ server_option::server_option(u8 option)
 // ==========================================================================
 // OPTION
 // ==========================================================================
-u8 server_option::option() const
+option_type server_option::option() const
 {
     return option_;
 }
@@ -98,7 +98,8 @@ bool server_option::is_active() const
 // ==========================================================================
 // NEGOTIATE
 // ==========================================================================
-std::vector<telnetpp::token> server_option::negotiate(telnetpp::u8 request)
+std::vector<telnetpp::token> server_option::negotiate(
+    negotiation_type request)
 {
     switch(state_)
     {
@@ -178,7 +179,7 @@ std::vector<telnetpp::token> server_option::negotiate(telnetpp::u8 request)
 // SUBNEGOTIATE
 // ==========================================================================
 std::vector<telnetpp::token> server_option::subnegotiate(
-    u8stream const &content)
+    byte_stream const &content)
 {
     if (state_ == state::active)
     {
@@ -194,7 +195,7 @@ std::vector<telnetpp::token> server_option::subnegotiate(
 // HANDLE_SUBNEGOTIATION
 // ==========================================================================
 std::vector<telnetpp::token> server_option::handle_subnegotiation(
-    u8stream const &)
+    byte_stream const &)
 {
     // By default, do nothing.
     return {};

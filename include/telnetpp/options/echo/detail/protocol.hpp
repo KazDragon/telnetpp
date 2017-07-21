@@ -24,6 +24,6 @@
 //* =========================================================================
 namespace telnetpp { namespace options { namespace echo { namespace detail {
 
-static constexpr telnetpp::u8 option = 1;
+static constexpr option_type const option = 1;
 
 }}}}

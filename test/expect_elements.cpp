@@ -62,9 +62,9 @@ struct stream_tokens_match : boost::static_visitor<>
         // See above.
     }
 
-    void operator()(telnetpp::u8stream const &stream) const
+    void operator()(telnetpp::byte_stream const &stream) const
     {
-        auto *expected_stream = boost::get<telnetpp::u8stream>(&expected_);
+        auto *expected_stream = boost::get<telnetpp::byte_stream>(&expected_);
         ASSERT_TRUE(expected_stream != nullptr);
         ASSERT_EQ(*expected_stream, stream);
     }

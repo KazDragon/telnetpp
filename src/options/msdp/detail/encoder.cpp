@@ -11,15 +11,19 @@ namespace telnetpp { namespace options { namespace msdp { namespace detail {
 
 namespace {
 
-static void append_name(telnetpp::u8stream &stream, std::string const &name);
-static void append_value(telnetpp::u8stream &stream, value_type const &value);
-static telnetpp::u8stream &append_variable(
-    telnetpp::u8stream &stream, variable const &variable);
+static void append_name(
+    telnetpp::byte_stream &stream, std::string const &name);
+
+static void append_value(
+    telnetpp::byte_stream &stream, value_type const &value);
+
+static telnetpp::byte_stream &append_variable(
+    telnetpp::byte_stream &stream, variable const &variable);
 
 // ==========================================================================
 // APPEND_NAME
 // ==========================================================================
-static void append_name(telnetpp::u8stream &stream, std::string const &name)
+static void append_name(telnetpp::byte_stream &stream, std::string const &name)
 {
     using std::begin;
     using std::end;
@@ -32,7 +36,7 @@ static void append_name(telnetpp::u8stream &stream, std::string const &name)
 // APPEND_STRING_VALUE
 // ==========================================================================
 static void append_string_value(
-    telnetpp::u8stream &stream,
+    telnetpp::byte_stream &stream,
     std::string const &string_value)
 {
     using std::begin;
@@ -46,7 +50,7 @@ static void append_string_value(
 // APPEND_ARRAY_VALUE
 // ==========================================================================
 static void append_array_value(
-    telnetpp::u8stream &stream,
+    telnetpp::byte_stream &stream,
     std::vector<std::string> const &array_value)
 {
     stream.push_back(telnetpp::options::msdp::detail::val);
@@ -60,7 +64,7 @@ static void append_array_value(
 // APPEND_TABLE_VALUE
 // ==========================================================================
 static void append_table_value(
-    telnetpp::u8stream& stream,
+    telnetpp::byte_stream& stream,
     std::vector<variable> const &table)
 {
     stream.push_back(telnetpp::options::msdp::detail::val);
@@ -76,9 +80,11 @@ static void append_table_value(
 // ==========================================================================
 // APPEND_VALUE
 // ==========================================================================
-static void append_value(telnetpp::u8stream &stream, value_type const &value)
+static void append_value(
+    telnetpp::byte_stream &stream, value_type const &value)
 {
-    boost::apply_visitor(telnetpp::detail::make_lambda_visitor<void>(
+    telnetpp::detail::visit_lambdas(
+        value,
         [&stream](std::string const &string_value)
         {
             append_string_value(stream, string_value);
@@ -90,14 +96,14 @@ static void append_value(telnetpp::u8stream &stream, value_type const &value)
         [&stream](std::vector<variable> const &table_value)
         {
             append_table_value(stream, table_value);
-        }), value);
+        });
 }
 
 // ==========================================================================
 // APPEND_VARIABLE
 // ==========================================================================
-static telnetpp::u8stream &append_variable(
-    telnetpp::u8stream &stream,
+static telnetpp::byte_stream &append_variable(
+    telnetpp::byte_stream &stream,
     variable const &variable)
 {
     append_name(stream, variable.name);
@@ -111,12 +117,12 @@ static telnetpp::u8stream &append_variable(
 // ==========================================================================
 // ENCODE
 // ==========================================================================
-telnetpp::u8stream encode(std::vector<variable> const &variables)
+telnetpp::byte_stream encode(std::vector<variable> const &variables)
 {
     return std::accumulate(
         variables.begin(),
         variables.end(),
-        telnetpp::u8stream{},
+        telnetpp::byte_stream{},
         append_variable);
 }
 

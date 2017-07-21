@@ -26,8 +26,7 @@ public :
     /// passed that it could not decompress.  I.e. the stream has been
     /// corrupted or otherwise constructed in an invalid manner.
     //* =====================================================================
-    virtual std::tuple<telnetpp::u8stream, bool> decompress(
-        telnetpp::u8 byte) = 0;
+    virtual std::tuple<telnetpp::byte_stream, bool> decompress(byte data) = 0;
 
     //* =====================================================================
     /// \brief Ends the current decompression stream.  Any further calls

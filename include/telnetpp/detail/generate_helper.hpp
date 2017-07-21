@@ -4,6 +4,6 @@
 
 namespace telnetpp { namespace detail {
 
-void generate_helper(u8stream &result, telnetpp::element const &element);
+void generate_helper(byte_stream &result, telnetpp::element const &element);
 
 }}

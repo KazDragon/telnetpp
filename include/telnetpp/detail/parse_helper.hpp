@@ -18,12 +18,12 @@ enum class parse_state
 struct parse_temps
 {
     std::vector<telnetpp::element> elements;
-    u8stream                       subnegotiation_content;
+    byte_stream                    subnegotiation_content;
 
     parse_state                    state = parse_state::idle;
-    u8                             id;
+    byte                           id;
 };
 
-void parse_helper(parse_temps &temps, telnetpp::u8 byte);
+void parse_helper(parse_temps &temps, byte data);
 
 }}

@@ -30,7 +30,7 @@ void register_server_option(
 template <class NegotiableOption>
 void register_route_from_negotiation_to_option(
     negotiation_router &route,
-    u8                  request,
+    negotiation_type    request,
     NegotiableOption   &option)
 {
     route.register_route(negotiation(request, option.option()),

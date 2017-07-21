@@ -9,13 +9,15 @@ namespace telnetpp { namespace options { namespace naws {
 //* =========================================================================
 class TELNETPP_EXPORT client : public telnetpp::client_option {
 public :
+    using window_dimension = std::uint16_t;
+
     //* =====================================================================
     /// CONSTRUCTOR
     //* =====================================================================
     client();
 
     boost::signals2::signal<
-        std::vector<telnetpp::token> (telnetpp::u16, telnetpp::u16),
+        std::vector<telnetpp::token> (window_dimension, window_dimension),
         telnetpp::token_combiner
     > on_window_size_changed;
 
@@ -25,7 +27,7 @@ private :
     /// state.
     //* =====================================================================
     std::vector<telnetpp::token> handle_subnegotiation(
-        u8stream const &content) override;
+        byte_stream const &content) override;
 
 };
 

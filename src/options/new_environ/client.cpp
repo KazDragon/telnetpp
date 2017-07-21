@@ -8,9 +8,9 @@ namespace telnetpp { namespace options { namespace new_environ {
 namespace {
 
 // ==========================================================================
-// TYPE_TO_U8
+// TYPE_TO_BYTE
 // ==========================================================================
-static telnetpp::u8 type_to_u8(
+static byte type_to_byte(
     telnetpp::options::new_environ::variable_type const &type)
 {
     return type == variable_type::var
@@ -34,12 +34,12 @@ client::client()
 std::vector<token> client::request_variables(
     std::vector<request> const &requests)
 {
-    telnetpp::u8stream content;
+    telnetpp::byte_stream content;
     content.push_back(telnetpp::options::new_environ::detail::send);
 
     for(auto &req : requests)
     {
-        content.push_back(type_to_u8(req.type));
+        content.push_back(type_to_byte(req.type));
         detail::append_escaped(content, req.name);
     }
 
@@ -53,7 +53,7 @@ std::vector<token> client::request_variables(
 // ==========================================================================
 // HANDLE_SUBNEGOTIATION
 // ==========================================================================
-std::vector<token> client::handle_subnegotiation(u8stream const &stream)
+std::vector<token> client::handle_subnegotiation(byte_stream const &stream)
 {
     std::vector<token> responses;
 
