@@ -14,21 +14,19 @@ enum class parse_state
     name_esc,
 };
 
-
-static telnetpp::options::new_environ::variable_type u8_to_type(
-    telnetpp::u8 value)
+// ==========================================================================
+// BYTE_TO_TYPE
+// ==========================================================================
+static telnetpp::options::new_environ::variable_type byte_to_type(byte value)
 {
-    return value == telnetpp::options::new_environ::detail::var
-         ? telnetpp::options::new_environ::variable_type::var
-         : telnetpp::options::new_environ::variable_type::uservar;
+    return value == detail::var ? variable_type::var : variable_type::uservar;
 }
-
 
 // ==========================================================================
 // PARSE_NAME_ESC
 // ==========================================================================
 boost::optional<request> parse_name_esc(
-    parse_state &state, request &temp, u8 data)
+    parse_state &state, request &temp, byte data)
 {
     temp.name.push_back(char(data));
     state = parse_state::name;
@@ -40,7 +38,7 @@ boost::optional<request> parse_name_esc(
 // PARSE_NAME
 // ==========================================================================
 boost::optional<request> parse_name(
-    parse_state &state, request &temp, u8 data)
+    parse_state &state, request &temp, byte data)
 {
     boost::optional<request> resp;
 
@@ -54,7 +52,7 @@ boost::optional<request> parse_name(
         case detail::uservar :
             resp = temp;
 
-            temp.type = u8_to_type(data);
+            temp.type = byte_to_type(data);
             temp.name = "";
             state = parse_state::name;
             break;
@@ -71,9 +69,9 @@ boost::optional<request> parse_name(
 // PARSE_TYPE
 // ==========================================================================
 boost::optional<request> parse_type(
-    parse_state &state, request &temp, u8 data)
+    parse_state &state, request &temp, byte data)
 {
-    temp.type = u8_to_type(data);
+    temp.type = byte_to_type(data);
     state = parse_state::name;
     return {};
 }
@@ -82,7 +80,7 @@ boost::optional<request> parse_type(
 // PARSE_IS_OR_INFO
 // ==========================================================================
 boost::optional<request> parse_send(
-    parse_state &state, request &temp, u8 data)
+    parse_state &state, request &temp, byte data)
 {
     state = parse_state::type;
     return {};
@@ -92,7 +90,7 @@ boost::optional<request> parse_send(
 // PARSE_DATA
 // ==========================================================================
 boost::optional<request> parse_data(
-    parse_state &state, request &temp, u8 data)
+    parse_state &state, request &temp, byte data)
 {
     boost::optional<request> req;
 
@@ -127,7 +125,7 @@ boost::optional<request> parse_data(
 // ==========================================================================
 // PARSE_RESPONSES
 // ==========================================================================
-std::vector<request> parse_requests(telnetpp::u8stream const &stream)
+std::vector<request> parse_requests(telnetpp::byte_stream const &stream)
 {
     std::vector<request> requests;
     parse_state state = parse_state::send;

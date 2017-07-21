@@ -11,11 +11,11 @@
 /// compression of an output stream, and telnetpp::options::mccp::client
 /// controls compression of an input stream.
 /// \par Codec
-/// This implementation of the MCCP comprises two distinct parts: the 
+/// This implementation of the MCCP comprises two distinct parts: the
 /// client/server pair, and the codec.  Where the client/server pair are
 /// used to control when compression/decompression should happen, it is the
 /// codec that actually performs the compression and decompression.  It does
-/// this with the aid of a compressor and a decompressor object.  In 
+/// this with the aid of a compressor and a decompressor object.  In
 /// principle, any API that conforms to the ZLIB compressed data format can
 /// be used to perform the compression/decompression functions.  Telnet++
 /// bundles compressors for the common zlib library "libz".
@@ -40,7 +40,7 @@
 ///     my_lower_layer_write(telnet_session.send(
 ///         mccp_server.begin_compression()));
 /// \endcode
-/// Finally, ensure that your lower layer write function passes the data 
+/// Finally, ensure that your lower layer write function passes the data
 /// through the codec.
 /// \code
 ///     void my_lower_layer_write(std::vector<telnetpp::stream_token> const &d)
@@ -48,9 +48,9 @@
 ///         static telnetpp::byte_converter byte_converter;
 ///         // Compress (if necessary) the data.
 ///         auto const &compressed_data = mccp_codec.send(d);
-///         // Flatten the stream_tokens to a single u8stream.
+///         // Flatten the stream_tokens to a single byte_stream.
 ///         auto const &stream = byte_converter.send(compressed_data);
-///         // Output the u8stream to your socket (or whatever).
+///         // Output the byte_stream to your socket (or whatever).
 ///         socket_->write({stream.begin(), stream.end()});
 ///     }
 /// \endcode
@@ -65,7 +65,7 @@
 
 namespace telnetpp { namespace options { namespace mccp { namespace detail {
 
-static constexpr telnetpp::u8 option = 86;
+static constexpr option_type const option = 86;
 
 //* =========================================================================
 /// \brief A token passed down (in the boost::any part of the token stream)

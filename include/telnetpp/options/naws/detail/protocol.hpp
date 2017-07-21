@@ -18,6 +18,6 @@
 //* =========================================================================
 namespace telnetpp { namespace options { namespace naws { namespace detail {
 
-static constexpr telnetpp::u8 option = 31;
+static constexpr option_type const option = 31;
 
 }}}}

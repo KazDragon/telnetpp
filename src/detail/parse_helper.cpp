@@ -1,6 +1,5 @@
 #include "telnetpp/detail/parse_helper.hpp"
 #include "telnetpp/detail/lambda_visitor.hpp"
-#include "telnetpp/protocol.hpp"
 #include <cassert>
 
 namespace telnetpp { namespace detail {
@@ -20,15 +19,15 @@ void append_parsed_element(
 // ==========================================================================
 void parse_idle(
     parse_temps &temps,
-    u8           byte)
+    byte         data)
 {
-    if (byte == telnetpp::iac)
+    if (data == telnetpp::iac)
     {
         temps.state = parse_state::iac;
     }
     else
     {
-        append_parsed_element(temps.elements, std::string{char(byte)});
+        append_parsed_element(temps.elements, std::string{char(data)});
     }
 }
 
@@ -37,22 +36,22 @@ void parse_idle(
 // ==========================================================================
 void parse_iac(
     parse_temps &temps,
-    u8           byte)
+    byte         data)
 {
-    if (byte == telnetpp::iac)
+    if (data == telnetpp::iac)
     {
-        append_parsed_element(temps.elements, std::string{char(byte)});
+        append_parsed_element(temps.elements, std::string{char(data)});
         temps.state = parse_state::idle;
     }
     else
     {
-        switch (byte)
+        switch (data)
         {
             case telnetpp::will : // fall-through
             case telnetpp::wont : // fall-through
             case telnetpp::do_  : // fall-through
             case telnetpp::dont : // fall-through
-                temps.id = byte;
+                temps.id = data;
                 temps.state = parse_state::negotiation;
                 break;
 
@@ -61,7 +60,7 @@ void parse_iac(
                 break;
 
             default :
-                append_parsed_element(temps.elements, telnetpp::command(byte));
+                append_parsed_element(temps.elements, telnetpp::command(data));
                 temps.state = parse_state::idle;
         }
     }
@@ -71,10 +70,10 @@ void parse_iac(
 // PARSE_NEGOTIATION
 // ==========================================================================
 void parse_negotiation(
-    parse_temps  &temps,
-    telnetpp::u8  byte)
+    parse_temps &temps,
+    byte         data)
 {
-    append_parsed_element(temps.elements, negotiation{temps.id, byte});
+    append_parsed_element(temps.elements, negotiation{temps.id, data});
     temps.state = parse_state::idle;
 }
 
@@ -82,10 +81,10 @@ void parse_negotiation(
 // PARSE_SUBNEGOTIATION
 // ==========================================================================
 void parse_subnegotiation(
-    parse_temps  &temps,
-    telnetpp::u8  byte)
+    parse_temps &temps,
+    byte         data)
 {
-    temps.id = byte;
+    temps.id = data;
     temps.subnegotiation_content.clear();
     temps.state = parse_state::subnegotiation_content;
 }
@@ -94,16 +93,16 @@ void parse_subnegotiation(
 // PARSE_SUBNEGOTIATION_CONTENT
 // ==========================================================================
 void parse_subnegotiation_content(
-    parse_temps  &temps,
-    telnetpp::u8  byte)
+    parse_temps &temps,
+    byte         data)
 {
-    if (byte == telnetpp::iac)
+    if (data == telnetpp::iac)
     {
         temps.state = parse_state::subnegotiation_content_iac;
     }
     else
     {
-        temps.subnegotiation_content.push_back(byte);
+        temps.subnegotiation_content.push_back(data);
         temps.state = parse_state::subnegotiation_content;
     }
 }
@@ -112,10 +111,10 @@ void parse_subnegotiation_content(
 // PARSE_SUBNEGOTIATION_CONTENT_IAC
 // ==========================================================================
 void parse_subnegotiation_content_iac(
-    parse_temps  &temps,
-    telnetpp::u8  byte)
+    parse_temps &temps,
+    byte         data)
 {
-    if (byte == telnetpp::se)
+    if (data == telnetpp::se)
     {
         append_parsed_element(
             temps.elements,
@@ -124,7 +123,7 @@ void parse_subnegotiation_content_iac(
     }
     else
     {
-        temps.subnegotiation_content.push_back(byte);
+        temps.subnegotiation_content.push_back(data);
         temps.state = parse_state::subnegotiation_content;
     }
 }
@@ -136,35 +135,35 @@ void append_parsed_element(
     std::vector<telnetpp::element> &elements,
     telnetpp::element const &element)
 {
-    boost::apply_visitor(detail::make_lambda_visitor<>(
+    detail::visit_lambdas(
+        element,
         // In the case of the string, we want to merge strings together where
         // possible so that there are never adjacent string elements.
         [&elements](std::string const &text)
         {
             if (elements.empty())
             {
-                elements.emplace_back(text);
+                elements.push_back(text);
             }
             else
             {
-                boost::apply_visitor(detail::make_lambda_visitor<>(
+                detail::visit_lambdas(
+                    elements.back(),
                     [&text](std::string &existing_text)
                     {
                         existing_text += text;
                     },
                     [&text, &elements](auto const &)
                     {
-                        elements.emplace_back(text);
-                    }),
-                    elements.back());
+                        elements.push_back(text);
+                    });
             }
         },
         // All other types can just be appended to the list of elements.
         [&elements](auto const &element)
         {
             elements.emplace_back(element);
-        }),
-        element);
+        });
 }
 
 }
@@ -172,32 +171,32 @@ void append_parsed_element(
 // ==========================================================================
 // PARSE_HELPER
 // ==========================================================================
-void parse_helper(parse_temps &temps, telnetpp::u8 byte)
+void parse_helper(parse_temps &temps, byte data)
 {
     switch (temps.state)
     {
         case parse_state::idle :
-            parse_idle(temps, byte);
+            parse_idle(temps, data);
             break;
 
         case parse_state::iac :
-            parse_iac(temps, byte);
+            parse_iac(temps, data);
             break;
 
         case parse_state::negotiation :
-            parse_negotiation(temps, byte);
+            parse_negotiation(temps, data);
             break;
 
         case parse_state::subnegotiation :
-            parse_subnegotiation(temps, byte);
+            parse_subnegotiation(temps, data);
             break;
 
         case parse_state::subnegotiation_content :
-            parse_subnegotiation_content(temps, byte);
+            parse_subnegotiation_content(temps, data);
             break;
 
         case parse_state::subnegotiation_content_iac :
-            parse_subnegotiation_content_iac(temps, byte);
+            parse_subnegotiation_content_iac(temps, data);
             break;
 
         default :

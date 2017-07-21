@@ -80,7 +80,7 @@ namespace telnetpp {
 /// the usual pattern for receiving is to immediately send() the result of
 /// the call to receive, and then write that result to the data connection.
 /// \code
-///     void recv(telnetpp::u8stream const &data)
+///     void recv(telnetpp::byte_stream const &data)
 ///     {
 ///         my_lower_layer_write(
 ///             session.send(session.receive(data)));
@@ -119,7 +119,7 @@ public :
     /// \returns a stream of tokens generated as a result of receiving this
     ///          stream.
     //* =====================================================================
-    std::vector<token> receive(u8stream const &stream);
+    std::vector<token> receive(byte_stream const &stream);
 
     //* =====================================================================
     /// \brief "Sends" a stream of tokens by converting them to a stream of
@@ -130,7 +130,7 @@ public :
     std::vector<stream_token> send(std::vector<token> const &tokens);
 
 private :
-    u8stream                                unparsed_buffer_;
+    byte_stream                             unparsed_buffer_;
     telnetpp::detail::command_router        command_router_;
     telnetpp::detail::negotiation_router    negotiation_router_;
     telnetpp::detail::subnegotiation_router subnegotiation_router_;

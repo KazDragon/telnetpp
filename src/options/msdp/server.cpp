@@ -33,7 +33,7 @@ std::vector<telnetpp::token> server::send(
 // HANDLE_SUBNEGOTIATION
 // ==========================================================================
 std::vector<telnetpp::token> server::handle_subnegotiation(
-    u8stream const &content)
+    byte_stream const &content)
 {
     auto result = detail::decode(content);
 

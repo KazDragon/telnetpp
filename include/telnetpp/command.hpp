@@ -14,7 +14,7 @@ public :
     //* =====================================================================
     /// \brief Constructor
     //* =====================================================================
-    explicit constexpr command(u8 command)
+    explicit constexpr command(command_type command)
       : command_(command)
     {
     }
@@ -22,13 +22,13 @@ public :
     //* =====================================================================
     /// \brief Returns the value of the command.
     //* =====================================================================
-    constexpr u8 value() const
+    constexpr command_type value() const
     {
         return command_;
     }
 
 private :
-    u8 command_;
+    command_type command_;
 };
 
 //* =========================================================================

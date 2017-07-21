@@ -38,7 +38,7 @@ TEST(mccp_codec_test, sending_uncompressed_data_returns_uncompressed_data)
         std::shared_ptr<telnetpp::options::mccp::compressor>(compressor),
         std::shared_ptr<telnetpp::options::mccp::decompressor>(decompressor)};
 
-    auto const &data = telnetpp::u8stream {
+    auto const &data = telnetpp::byte_stream {
         't', 'e', 's', 't', 'd', 'a', 't', 'a'
     };
 
@@ -135,10 +135,10 @@ TEST(mccp_codec_test, compression_begun_sending_data_returns_compressed_data)
         std::shared_ptr<telnetpp::options::mccp::decompressor>(decompressor)};
 
     auto const &expected = std::vector<telnetpp::stream_token> {
-        telnetpp::u8stream { 'c', 'o', 'm', 'p' }
+        telnetpp::byte_stream { 'c', 'o', 'm', 'p' }
     };
 
-    auto const &data = telnetpp::u8stream{ 'd', 'a', 't', 'a' };
+    auto const &data = telnetpp::byte_stream{ 'd', 'a', 't', 'a' };
 
     expect_tokens(expected, codec.send({
         boost::any(telnetpp::options::mccp::detail::begin_compression{}),
@@ -196,14 +196,14 @@ TEST(mccp_codec_test, compressed_ending_compression_returns_end_compression_sequ
         std::shared_ptr<telnetpp::options::mccp::decompressor>(decompressor)};
 
     auto const &expected = std::vector<telnetpp::stream_token> {
-        telnetpp::u8stream { 'e', 'n', 'd' }, // TODO: coalesce u8streams?
-        telnetpp::u8stream { 'd', 'a', 't', 'a' }
+        telnetpp::byte_stream { 'e', 'n', 'd' }, // TODO: coalesce byte_streams?
+        telnetpp::byte_stream { 'd', 'a', 't', 'a' }
     };
 
     auto const &data = std::vector<telnetpp::stream_token> {
         boost::any(telnetpp::options::mccp::detail::begin_compression{}),
         boost::any(telnetpp::options::mccp::detail::end_compression{}),
-        telnetpp::u8stream { 'd', 'a', 't', 'a' }
+        telnetpp::byte_stream { 'd', 'a', 't', 'a' }
     };
 
     expect_tokens(expected, codec.send(data));
@@ -224,7 +224,7 @@ TEST(mccp_codec_test, compressed_ending_compression_then_sending_data_returns_un
         std::shared_ptr<telnetpp::options::mccp::decompressor>(decompressor)};
 
     auto const &expected = std::vector<telnetpp::stream_token> {
-        telnetpp::u8stream { 'e', 'n', 'd' }
+        telnetpp::byte_stream { 'e', 'n', 'd' }
     };
 
     auto const &data = std::vector<telnetpp::stream_token> {
@@ -250,9 +250,9 @@ TEST(mccp_codec_test, uncompressed_receiving_data_receives_data)
         std::shared_ptr<telnetpp::options::mccp::compressor>(compressor),
         std::shared_ptr<telnetpp::options::mccp::decompressor>(decompressor)};
 
-    auto const &expected = telnetpp::u8stream{ 'X' };
+    auto const &expected = telnetpp::byte_stream{ 'X' };
 
-    ASSERT_EQ(expected, codec.receive(telnetpp::u8('X')));
+    ASSERT_EQ(expected, codec.receive(telnetpp::byte('X')));
     ASSERT_EQ(size_t{0}, compressor->compress_called);
     ASSERT_EQ(size_t{0}, compressor->end_compression_called);
     ASSERT_EQ(size_t{0}, decompressor->decompress_called);
@@ -307,10 +307,10 @@ TEST(mccp_codec_test, compressed_received_data_is_decompressed)
 {
     auto compressor   = std::make_shared<fake_compressor>();
     auto decompressor = std::make_shared<fake_decompressor>();
-    decompressor->decompress_result.emplace_back(telnetpp::u8stream{}, false);
-    decompressor->decompress_result.emplace_back(telnetpp::u8stream{}, false);
-    decompressor->decompress_result.emplace_back(telnetpp::u8stream{}, false);
-    decompressor->decompress_result.emplace_back(telnetpp::u8stream{ 'd', 'a', 't', 'a' }, false);
+    decompressor->decompress_result.emplace_back(telnetpp::byte_stream{}, false);
+    decompressor->decompress_result.emplace_back(telnetpp::byte_stream{}, false);
+    decompressor->decompress_result.emplace_back(telnetpp::byte_stream{}, false);
+    decompressor->decompress_result.emplace_back(telnetpp::byte_stream{ 'd', 'a', 't', 'a' }, false);
 
     telnetpp::options::mccp::codec codec{
         std::shared_ptr<telnetpp::options::mccp::compressor>(compressor),
@@ -321,13 +321,13 @@ TEST(mccp_codec_test, compressed_received_data_is_decompressed)
     });
 
     auto const &expected = std::vector<telnetpp::stream_token> {
-        telnetpp::u8stream{},
-        telnetpp::u8stream{},
-        telnetpp::u8stream{},
-        telnetpp::u8stream{'d', 'a', 't', 'a'},
+        telnetpp::byte_stream{},
+        telnetpp::byte_stream{},
+        telnetpp::byte_stream{},
+        telnetpp::byte_stream{'d', 'a', 't', 'a'},
     };
 
-    auto const &data = telnetpp::u8stream{'c', 'o', 'm', 'p'};
+    auto const &data = telnetpp::byte_stream{'c', 'o', 'm', 'p'};
     auto result = std::vector<telnetpp::stream_token>{};
 
     for (auto byte : data)
@@ -381,8 +381,8 @@ TEST(mccp_codec_test, decompression_ended_receiving_data_returns_data)
         boost::any(telnetpp::options::mccp::detail::end_decompression{})
     });
 
-    auto const &expected = telnetpp::u8stream{ 'Y' };
-    auto const &result   = codec.receive(telnetpp::u8('Y'));
+    auto const &expected = telnetpp::byte_stream{ 'Y' };
+    auto const &result   = codec.receive(telnetpp::byte('Y'));
 
     ASSERT_EQ(expected, result);
     ASSERT_EQ(size_t{0}, compressor->compress_called);
@@ -397,9 +397,9 @@ TEST(mccp_codec, compressed_receive_end_of_decompression_stream_continues_uncomp
     // received, then it should continue in the uncompressed state.
     auto compressor   = std::make_shared<fake_compressor>();
     auto decompressor = std::make_shared<fake_decompressor>();
-    decompressor->decompress_result.emplace_back(telnetpp::u8stream{}, false);
+    decompressor->decompress_result.emplace_back(telnetpp::byte_stream{}, false);
     decompressor->decompress_result.emplace_back(
-        telnetpp::u8stream{'c', 'o'}, true);
+        telnetpp::byte_stream{'c', 'o'}, true);
 
     telnetpp::options::mccp::codec codec{
         std::shared_ptr<telnetpp::options::mccp::compressor>(compressor),
@@ -409,14 +409,14 @@ TEST(mccp_codec, compressed_receive_end_of_decompression_stream_continues_uncomp
         boost::any(telnetpp::options::mccp::detail::begin_decompression{}),
     });
 
-    auto const &input    = telnetpp::u8stream{ 'X', 'Y', 'd', 'e', 'c' };
+    auto const &input    = telnetpp::byte_stream{ 'X', 'Y', 'd', 'e', 'c' };
 
     auto const &expected = std::vector<telnetpp::stream_token>{
-        telnetpp::u8stream{},
-        telnetpp::u8stream{ 'c', 'o' },
-        telnetpp::u8stream{ 'd' },
-        telnetpp::u8stream{ 'e' },
-        telnetpp::u8stream{ 'c' }
+        telnetpp::byte_stream{},
+        telnetpp::byte_stream{ 'c', 'o' },
+        telnetpp::byte_stream{ 'd' },
+        telnetpp::byte_stream{ 'e' },
+        telnetpp::byte_stream{ 'c' }
     };
 
     auto result = std::vector<telnetpp::stream_token>{};

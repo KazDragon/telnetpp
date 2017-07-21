@@ -38,7 +38,7 @@ using token = boost::variant<element, boost::any>;
 /// bytes, or after the object represented by the boost::any member has been
 /// passed through.
 //* =========================================================================
-using stream_token = boost::variant<u8stream, boost::any>;
+using stream_token = boost::variant<byte_stream, boost::any>;
 
 //* =========================================================================
 /// \brief A combiner for tokens.  This can be used during signalling to

@@ -39,7 +39,7 @@ private :
     /// state.
     //* =====================================================================
     std::vector<telnetpp::token> handle_subnegotiation(
-        telnetpp::u8stream const &content) override;
+        telnetpp::byte_stream const &content) override;
 
     bool compression_requested_;
 };

@@ -1,5 +1,4 @@
 #include "telnetpp/options/naws/client.hpp"
-#include "telnetpp/protocol.hpp"
 #include <gtest/gtest.h>
 
 TEST(naws_client_test, option_is_naws)
@@ -14,10 +13,10 @@ TEST(naws_client_test, valid_subnegotiation_signals_window_size_change)
     client.activate();
     client.negotiate(telnetpp::will);
 
-    telnetpp::u16 width = 0, height = 0;
+    telnetpp::options::naws::client::window_dimension width = 0, height = 0;
 
     client.on_window_size_changed.connect(
-        [&width, &height](telnetpp::u16 new_width, telnetpp::u16 new_height)
+        [&width, &height](auto new_width, auto new_height)
             -> std::vector<telnetpp::token>
         {
             width = new_width;
@@ -27,8 +26,10 @@ TEST(naws_client_test, valid_subnegotiation_signals_window_size_change)
 
     client.subnegotiate({0x01, 0x02, 0x03, 0x04});
 
-    telnetpp::u16 const expected_width  = 0x01 << 8 | 0x02;
-    telnetpp::u16 const expected_height = 0x03 << 8 | 0x04;
+    telnetpp::options::naws::client::window_dimension const expected_width =
+        0x01 << 8 | 0x02;
+    telnetpp::options::naws::client::window_dimension const expected_height =
+        0x03 << 8 | 0x04;
 
     ASSERT_EQ(expected_width, width);
     ASSERT_EQ(expected_height, height);

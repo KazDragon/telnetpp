@@ -58,7 +58,7 @@ public :
     /// \brief Receive a byte from the lower layer, decompress it if
     /// necessary, and return the result as a stream of bytes.
     //* =====================================================================
-    telnetpp::u8stream receive(telnetpp::u8 byte);
+    telnetpp::byte_stream receive(byte data);
 
 private :
     struct impl;

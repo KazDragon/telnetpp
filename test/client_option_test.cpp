@@ -1,5 +1,4 @@
 #include "telnetpp/client_option.hpp"
-#include "telnetpp/protocol.hpp"
 #include "expect_elements.hpp"
 #include <gtest/gtest.h>
 
@@ -8,19 +7,19 @@ namespace {
 class fake_client_option : public telnetpp::client_option
 {
 public :
-    explicit fake_client_option(telnetpp::u8 option)
+    explicit fake_client_option(telnetpp::option_type option)
       : telnetpp::client_option(option)
     {
     }
 
     boost::signals2::signal<
-        std::vector<telnetpp::token> (telnetpp::u8stream const &content),
+        std::vector<telnetpp::token> (telnetpp::byte_stream const &content),
         telnetpp::token_combiner
     > on_subnegotiation;
 
 private :
     std::vector<telnetpp::token> handle_subnegotiation(
-        telnetpp::u8stream const &content)
+        telnetpp::byte_stream const &content)
     {
         return on_subnegotiation(content);
     }
@@ -31,7 +30,7 @@ private :
 TEST(client_option_test, option_returns_option)
 {
     fake_client_option client(21);
-    ASSERT_EQ(telnetpp::u8(21), client.option());
+    ASSERT_EQ(telnetpp::option_type(21), client.option());
 }
 
 TEST(client_option_test, deactivated_negotiate_will_responds_with_dont_no_signal)
@@ -389,10 +388,10 @@ TEST(client_option_test, active_subnegotiation_is_handled)
     client.negotiate(telnetpp::will);
 
     bool called = false;
-    telnetpp::u8stream content;
+    telnetpp::byte_stream content;
 
     client.on_subnegotiation.connect(
-        [&called, &content](telnetpp::u8stream const &new_content)
+        [&called, &content](telnetpp::byte_stream const &new_content)
             -> std::vector<telnetpp::token>
         {
             called = true;

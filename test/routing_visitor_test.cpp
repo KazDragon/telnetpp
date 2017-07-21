@@ -1,6 +1,5 @@
 #include "telnetpp/detail/routing_visitor.hpp"
 #include "telnetpp/options/naws/client.hpp"
-#include "telnetpp/protocol.hpp"
 #include "telnetpp/detail/registration.hpp"
 #include "expect_elements.hpp"
 #include <gtest/gtest.h>
@@ -124,8 +123,8 @@ TEST(routing_visitor_test, subnegotiation_routes_to_subnegotiation_router)
     client.activate();
     client.negotiate(telnetpp::will);
 
-    telnetpp::u16 width = 0;
-    telnetpp::u16 height = 0;
+    telnetpp::options::naws::client::window_dimension width = 0;
+    telnetpp::options::naws::client::window_dimension height = 0;
     client.on_window_size_changed.connect(
         [&width, &height](auto &&new_width, auto &&new_height)
             -> std::vector<telnetpp::token>
@@ -152,8 +151,8 @@ TEST(routing_visitor_test, subnegotiation_routes_to_subnegotiation_router)
 
     boost::apply_visitor(visitor, sub_token);
 
-    telnetpp::u16 expected_width = 80;
-    telnetpp::u16 expected_height = 24;
+    telnetpp::options::naws::client::window_dimension expected_width = 80;
+    telnetpp::options::naws::client::window_dimension expected_height = 24;
 
     ASSERT_EQ(expected_width, width);
     ASSERT_EQ(expected_height, height);

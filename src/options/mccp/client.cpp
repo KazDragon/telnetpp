@@ -28,7 +28,7 @@ client::client()
 // HANDLE_SUBNEGOTIATION
 // ==========================================================================
 std::vector<telnetpp::token> client::handle_subnegotiation(
-    telnetpp::u8stream const &data)
+    telnetpp::byte_stream const &data)
 {
     return { boost::any(detail::begin_decompression{}) };
 }

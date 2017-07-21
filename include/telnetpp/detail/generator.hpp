@@ -17,27 +17,26 @@ template <class InputIterator1, class InputIterator2>
 auto generate(InputIterator1 begin, InputIterator2 end)
 {
     std::vector<stream_token> results;
-    u8stream stream;
+    byte_stream stream;
 
     std::for_each(begin, end, [&results, &stream](auto &&token)
     {
-        boost::apply_visitor(
-            make_lambda_visitor<void>(
-               [&stream](element const &elem) 
-               {
-                    detail::generate_helper(stream, elem);
-               },
-               [&stream, &results](boost::any const &any)
-               {
-                    if (!stream.empty())
-                    {
-                        results.push_back(stream);
-                        stream.clear();
-                    }
-        
-                    results.push_back(any);
-               }),
-            token);
+        detail::visit_lambdas(
+            token,
+            [&stream](element const &elem)
+            {
+                 detail::generate_helper(stream, elem);
+            },
+            [&stream, &results](boost::any const &any)
+            {
+                 if (!stream.empty())
+                 {
+                     results.push_back(stream);
+                     stream.clear();
+                 }
+
+                 results.push_back(any);
+            });
     });
 
     if (!stream.empty())

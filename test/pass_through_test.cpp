@@ -1,17 +1,16 @@
 #include "telnetpp/options/subnegotiationless_client.hpp"
-#include "telnetpp/protocol.hpp"
 #include "expect_elements.hpp"
 #include <gtest/gtest.h>
 
 namespace {
 
-static telnetpp::u8 const pass_through_option_id = 0xAB;
+static telnetpp::option_type const pass_through_option_id = 0xAB;
 static std::string const test_string = "TEST";
 
-class pass_through_option 
+class pass_through_option
   : public telnetpp::options::subnegotiationless_client<pass_through_option_id>
 {
-public :  
+public :
     pass_through_option()
     {
         on_state_changed.connect(
@@ -28,7 +27,7 @@ TEST(pass_through_test, can_pass_arbitrary_object_as_result_of_negotiation)
 {
     pass_through_option option;
     option.set_activatable();
-    
+
     expect_tokens(
         {
             telnetpp::element(telnetpp::negotiation(

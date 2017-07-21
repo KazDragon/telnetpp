@@ -1,17 +1,16 @@
 #include "telnetpp/command.hpp"
-#include "telnetpp/protocol.hpp"
 #include <iostream>
 #include <iomanip>
 
 namespace telnetpp {
-    
+
 // ==========================================================================
-// OPERATOR<<    
+// OPERATOR<<
 // ==========================================================================
 std::ostream &operator<<(std::ostream &out, command const &cmd)
 {
     out << "command[";
-    
+
     switch (cmd.value())
     {
         case telnetpp::nop : out << "NOP"; break;
@@ -24,10 +23,10 @@ std::ostream &operator<<(std::ostream &out, command const &cmd)
         case telnetpp::el  : out << "EL"; break;
         case telnetpp::ga  : out << "GA"; break;
         default :
-            out << "0x" << std::hex << u32(cmd.value());
+            out << "0x" << std::hex << int(cmd.value());
             break;
     }
-    
+
     return out << "]";
 }
 

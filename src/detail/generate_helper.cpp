@@ -1,9 +1,8 @@
 #include "telnetpp/detail/generate_helper.hpp"
 #include "telnetpp/detail/lambda_visitor.hpp"
-#include "telnetpp/protocol.hpp"
 
 namespace telnetpp { namespace detail {
-    
+
 namespace {
 
 template <class InputIterator1, class InputIterator2, class OutputIterator>
@@ -12,13 +11,13 @@ void append_escaped(
 {
     while (begin != end)
     {
-        auto value = telnetpp::u8(*begin++);
-        
-        if (value == telnetpp::iac)
+        auto value = byte(*begin++);
+
+        if (command_type(value) == telnetpp::iac)
         {
             *out++ = value;
         }
-        
+
         *out++ = value;
     }
 }
@@ -36,10 +35,11 @@ void append_escaped(
 }
 
 void generate_helper(
-    u8stream &result, 
+    byte_stream &result,
     telnetpp::element const &token)
 {
-    boost::apply_visitor(detail::make_lambda_visitor<void>(
+    detail::visit_lambdas(
+        token,
         [&result](std::string const &text)
         {
             append_escaped(text, result);
@@ -63,8 +63,7 @@ void generate_helper(
             append_escaped(sub.content(), result);
             result.push_back(telnetpp::iac);
             result.push_back(telnetpp::se);
-        }),
-        token);
+        });
 }
 
 }}

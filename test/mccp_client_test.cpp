@@ -1,5 +1,4 @@
 #include "expect_elements.hpp"
-#include <telnetpp/protocol.hpp>
 #include <telnetpp/options/mccp/client.hpp>
 #include <telnetpp/options/mccp/detail/protocol.hpp>
 #include <gtest/gtest.h>

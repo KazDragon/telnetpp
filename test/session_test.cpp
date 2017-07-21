@@ -1,7 +1,6 @@
 #include "telnetpp/session.hpp"
 #include "telnetpp/options/echo/client.hpp"
 #include "telnetpp/options/echo/server.hpp"
-#include "telnetpp/protocol.hpp"
 #include "expect_elements.hpp"
 #include <gtest/gtest.h>
 
@@ -10,7 +9,7 @@ namespace {
 struct stream_match : boost::static_visitor<>
 {
     explicit stream_match(
-        boost::variant<telnetpp::u8stream, boost::any> const &expected)
+        boost::variant<telnetpp::byte_stream, boost::any> const &expected)
       : expected_(expected)
     {
     }
@@ -20,20 +19,20 @@ struct stream_match : boost::static_visitor<>
         boost::get<boost::any>(expected_);
     }
 
-    void operator()(telnetpp::u8stream const &stream) const
+    void operator()(telnetpp::byte_stream const &stream) const
     {
         auto const &expected_stream =
-            boost::get<telnetpp::u8stream>(expected_);
+            boost::get<telnetpp::byte_stream>(expected_);
 
         ASSERT_EQ(expected_stream, stream);
     }
 
-    boost::variant<telnetpp::u8stream, boost::any> expected_;
+    boost::variant<telnetpp::byte_stream, boost::any> expected_;
 };
 
 static void expect_result(
-    std::vector<boost::variant<telnetpp::u8stream, boost::any>> const &expected,
-    std::vector<boost::variant<telnetpp::u8stream, boost::any>> const &result)
+    std::vector<boost::variant<telnetpp::byte_stream, boost::any>> const &expected,
+    std::vector<boost::variant<telnetpp::byte_stream, boost::any>> const &result)
 {
     ASSERT_EQ(expected.size(), result.size());
 
@@ -63,7 +62,7 @@ TEST(session_test, reception_of_text_routes_to_user_supplied_function)
         });
 
     std::string expected = "TEST STRING";
-    session.receive(telnetpp::u8stream{expected.begin(), expected.end()});
+    session.receive(telnetpp::byte_stream{expected.begin(), expected.end()});
 
     ASSERT_EQ(expected, result);
 }
@@ -133,8 +132,8 @@ TEST(session_test, sending_element_converts_element_to_bytes)
 
     session.install(server);
 
-    std::vector<boost::variant<telnetpp::u8stream, boost::any>> expected = {
-        telnetpp::u8stream {
+    std::vector<boost::variant<telnetpp::byte_stream, boost::any>> expected = {
+        telnetpp::byte_stream {
             telnetpp::iac,
             telnetpp::will,
             server.option()

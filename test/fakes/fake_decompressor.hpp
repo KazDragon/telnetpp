@@ -9,8 +9,7 @@ public :
     /// decompressed data and a boolean that is set to true if this was the
     /// end of the decompression stream.
     //* =====================================================================
-    std::tuple<telnetpp::u8stream, bool> decompress(
-        telnetpp::u8 byte) override
+    std::tuple<telnetpp::byte_stream, bool> decompress(telnetpp::byte) override
     {
         ++decompress_called;
 
@@ -35,7 +34,7 @@ public :
         ++end_decompression_called;
     }
 
-    std::deque<std::tuple<telnetpp::u8stream, bool>> decompress_result;
+    std::deque<std::tuple<telnetpp::byte_stream, bool>> decompress_result;
 
     size_t decompress_called = 0;
     size_t end_decompression_called = 0;

@@ -1,4 +1,5 @@
 #pragma once
+#include <boost/variant/apply_visitor.hpp>
 
 namespace telnetpp { namespace detail {
 
@@ -40,6 +41,14 @@ lambda_visitor<ReturnType, Lambdas...> make_lambda_visitor(Lambdas &&... lambdas
     return lambda_visitor<ReturnType, Lambdas...>{
         std::forward<Lambdas>(lambdas)...
     };
+}
+
+template <typename ReturnType = void, typename... Lambdas, typename T>
+auto visit_lambdas(T &&t, Lambdas &&... lambdas)
+{
+    return boost::apply_visitor(
+        make_lambda_visitor<ReturnType>(std::forward<Lambdas>(lambdas)...),
+        std::forward<T>(t));
 }
 
 }}

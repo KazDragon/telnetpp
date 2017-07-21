@@ -26,7 +26,7 @@ session::session(
         {
             auto const &request = negotiation.request();
 
-            u8 result =
+            negotiation_type result =
                 (request == telnetpp::will || request == telnetpp::wont)
               ? telnetpp::dont
               : telnetpp::wont;
@@ -67,7 +67,7 @@ void session::install(server_option &option)
 // ==========================================================================
 // RECEIVE
 // ==========================================================================
-std::vector<token> session::receive(const u8stream& stream)
+std::vector<token> session::receive(const byte_stream& stream)
 {
     using std::begin;
     using std::end;
@@ -101,7 +101,7 @@ std::vector<token> session::receive(const u8stream& stream)
 // ==========================================================================
 // SEND
 // ==========================================================================
-std::vector<boost::variant<u8stream, boost::any>> session::send(
+std::vector<boost::variant<byte_stream, boost::any>> session::send(
     std::vector<token> const &tokens)
 {
     return detail::generate(tokens);

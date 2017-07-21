@@ -7,6 +7,6 @@ namespace telnetpp { namespace options { namespace new_environ {
     namespace detail {
 
 void append_escaped(
-    telnetpp::u8stream &stream, std::string const &data);
+    telnetpp::byte_stream &stream, std::string const &data);
 
 }}}}

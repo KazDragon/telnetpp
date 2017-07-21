@@ -1,5 +1,4 @@
 #include "telnetpp/options/new_environ/server.hpp"
-#include "telnetpp/protocol.hpp"
 #include "expect_elements.hpp"
 #include <gtest/gtest.h>
 

@@ -15,21 +15,21 @@ public :
     //* =====================================================================
     /// \brief Constructor
     //* =====================================================================
-    subnegotiation(u8 option, u8stream content);
+    subnegotiation(option_type option, byte_stream content);
 
     //* =====================================================================
     /// \brief Returns the option for this subnegotiation.
     //* =====================================================================
-    u8 option() const;
+    option_type option() const;
 
     //* =====================================================================
     /// \brief Returns the content for this subnegotiation.
     //* =====================================================================
-    u8stream const &content() const;
+    byte_stream const &content() const;
 
 private :
-    u8 option_;
-    u8stream content_;
+    option_type option_;
+    byte_stream content_;
 };
 
 //* =========================================================================

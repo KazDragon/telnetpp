@@ -1,5 +1,4 @@
 #include "telnetpp/options/terminal_type/client.hpp"
-#include "telnetpp/protocol.hpp"
 #include "expect_elements.hpp"
 #include <gtest/gtest.h>
 
@@ -49,9 +48,9 @@ TEST(terminal_type_client_test, receiving_terminal_type_reports_terminal_type)
         },
         client.subnegotiate({
             0,
-            telnetpp::u8(expected[0]),
-            telnetpp::u8(expected[1]),
-            telnetpp::u8(expected[2])}));
+            telnetpp::byte(expected[0]),
+            telnetpp::byte(expected[1]),
+            telnetpp::byte(expected[2])}));
 
     ASSERT_EQ(expected, terminal_type);
 }

@@ -1,27 +1,26 @@
 #include "telnetpp/detail/generator.hpp"
-#include "telnetpp/protocol.hpp"
 #include <gtest/gtest.h>
 
 namespace {
 
 template <class InputIterator>
 void expect(
-    InputIterator begin, 
+    InputIterator begin,
     InputIterator end,
-    telnetpp::u8stream const &expectation)
+    telnetpp::byte_stream const &expectation)
 {
     auto result = telnetpp::detail::generate(begin, end);
-    
+
     if (expectation.empty())
     {
         ASSERT_EQ(size_t{0}, result.size());
     }
     else
     {
-        auto stream = boost::get<telnetpp::u8stream>(result[0]);
-            
+        auto stream = boost::get<telnetpp::byte_stream>(result[0]);
+
         ASSERT_EQ(expectation.size(), stream.size());
-        
+
         for (size_t index = 0; index < expectation.size(); ++index)
         {
             ASSERT_EQ(expectation[index], stream[index]);
@@ -32,21 +31,21 @@ void expect(
 template <class Collection>
 void expect(
     Collection &&collection,
-    telnetpp::u8stream const &expectation)
+    telnetpp::byte_stream const &expectation)
 {
     auto result = telnetpp::detail::generate(std::forward<Collection>(collection));
-    
+
     if (expectation.empty())
     {
         ASSERT_EQ(size_t{0}, result.size());
     }
     else
     {
-        auto stream = boost::get<telnetpp::u8stream>(
+        auto stream = boost::get<telnetpp::byte_stream>(
             result[0]);
 
         ASSERT_EQ(expectation.size(), stream.size());
-        
+
         for (size_t index = 0; index < expectation.size(); ++index)
         {
             ASSERT_EQ(expectation[index], stream[index]);
@@ -59,63 +58,63 @@ void expect(
 TEST(generator_test, empty_array_generates_nothing)
 {
     std::vector<telnetpp::token> data = {};
-    telnetpp::u8stream expected = {};
-    
+    telnetpp::byte_stream expected = {};
+
     expect(data.begin(), data.end(), expected);
 }
 
 TEST(generator_test, empty_string_generates_nothing)
 {
-    std::vector<telnetpp::token> data = { 
+    std::vector<telnetpp::token> data = {
         telnetpp::element(std::string(""))
     };
-    
-    telnetpp::u8stream expected = {};
-    
+
+    telnetpp::byte_stream expected = {};
+
     expect(data.begin(), data.end(), expected);
 }
 
 TEST(generator_test, string_with_content_generates_string)
 {
-    std::vector<telnetpp::token> data = { 
+    std::vector<telnetpp::token> data = {
         telnetpp::element(std::string("abcde"))
     };
-    
-    telnetpp::u8stream expected = { 'a', 'b', 'c', 'd', 'e' };
-    
+
+    telnetpp::byte_stream expected = { 'a', 'b', 'c', 'd', 'e' };
+
     expect(data.begin(), data.end(), expected);
 }
 
 TEST(generator_test, string_with_iac_content_generates_doubled_iac)
 {
-    std::vector<telnetpp::token> data = { 
+    std::vector<telnetpp::token> data = {
         telnetpp::element(std::string("ab\xFF""cd"))
     };
-    
-    telnetpp::u8stream expected = { 'a', 'b', 0xFF, 0xFF, 'c', 'd' };
-    
+
+    telnetpp::byte_stream expected = { 'a', 'b', 0xFF, 0xFF, 'c', 'd' };
+
     expect(data.begin(), data.end(), expected);
 }
 
 TEST(generator_test, command_generates_command)
 {
-    std::vector<telnetpp::token> data = { 
+    std::vector<telnetpp::token> data = {
         telnetpp::element(telnetpp::command(telnetpp::nop))
     };
-    
-    telnetpp::u8stream expected = { 0xFF, 0xF1 };
-    
+
+    telnetpp::byte_stream expected = { 0xFF, 0xF1 };
+
     expect(data.begin(), data.end(), expected);
 }
 
 TEST(generator_test, negotiation_generates_negotiation)
 {
-    std::vector<telnetpp::token> data = { 
+    std::vector<telnetpp::token> data = {
         telnetpp::element(telnetpp::negotiation(telnetpp::will, 0xDE))
     };
-    
-    telnetpp::u8stream expected = { 0xFF, 0xFB, 0xDE };
-    
+
+    telnetpp::byte_stream expected = { 0xFF, 0xFB, 0xDE };
+
     expect(data.begin(), data.end(), expected);
 }
 
@@ -124,9 +123,9 @@ TEST(generator_test, empty_subnegotiation_generates_empty_subnegotiation)
     std::vector<telnetpp::token> data = {
         telnetpp::element(telnetpp::subnegotiation(0xAB, {}))
     };
-    
-    telnetpp::u8stream expected = { 0xFF, 0xFA, 0xAB, 0xFF, 0xF0 };
-    
+
+    telnetpp::byte_stream expected = { 0xFF, 0xFA, 0xAB, 0xFF, 0xF0 };
+
     expect(data.begin(), data.end(), expected);
 }
 
@@ -135,8 +134,8 @@ TEST(generator_test, subnegotiation_with_content_generates_subnegotiation_with_c
     std::vector<telnetpp::token> data = {
         telnetpp::element(telnetpp::subnegotiation(0xCD, { 'a', 'b', 'c', 'd', 'e' }))
     };
-    
-    telnetpp::u8stream expected = {
+
+    telnetpp::byte_stream expected = {
         0xFF, 0xFA,
         0xCD,
         'a', 'b', 'c', 'd', 'e',
@@ -151,8 +150,8 @@ TEST(generator_test, subnegotiation_with_iac_content_generates_doubled_iac)
     std::vector<telnetpp::token> data = {
         telnetpp::element(telnetpp::subnegotiation(0x74, { 'a', 'b', 0xFF, 'c', 'd' }))
     };
-    
-    telnetpp::u8stream expected = {
+
+    telnetpp::byte_stream expected = {
         0xFF, 0xFA,
         0x74,
         'a', 'b', 0xFF, 0xFF, 'c', 'd',
@@ -170,13 +169,13 @@ TEST(generator_test, many_elements_generates_many_elements)
         telnetpp::element(telnetpp::negotiation(telnetpp::wont, 0xFF)),
         telnetpp::element(telnetpp::subnegotiation(0xFF, { 0xFF }))
     };
-    
-    telnetpp::u8stream expected = {
-        'a', 'b', 'c', 'd', 
+
+    telnetpp::byte_stream expected = {
+        'a', 'b', 'c', 'd',
         'e', 'f', 0xFF, 0xFF, 'g',
         0xFF, 0xFC, 0xFF,
         0xFF, 0xFA, 0xFF, 0xFF, 0xFF, 0xFF, 0xF0
     };
-    
+
     expect(data, expected);
 }

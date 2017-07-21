@@ -22,7 +22,7 @@ TEST(mccp_zlib_decompressor_test, decompressing_data_returns_decompressed_data)
     telnetpp::options::mccp::zlib::decompressor zlib_decompressor;
     telnetpp::options::mccp::decompressor &decompressor = zlib_decompressor;
 
-    auto const expected = telnetpp::u8stream {
+    auto const expected = telnetpp::byte_stream {
         'd', 'a', 't', 'a', 'd', 'a', 't', 'a', 'd', 'a', 't', 'a',
         'd', 'a', 't', 'a', 'd', 'a', 't', 'a', 'd', 'a', 't', 'a',
     };
@@ -31,18 +31,18 @@ TEST(mccp_zlib_decompressor_test, decompressing_data_returns_decompressed_data)
     auto response = deflateInit(&stream, Z_DEFAULT_COMPRESSION);
     assert(response == Z_OK);
 
-    telnetpp::u8 output_buffer[1023];
+    telnetpp::byte output_buffer[1023];
 
     stream.avail_in  = expected.size();
-    stream.next_in   = const_cast<telnetpp::u8 *>(&expected[0]);
+    stream.next_in   = const_cast<telnetpp::byte *>(&expected[0]);
     stream.avail_out = sizeof(output_buffer);
     stream.next_out  = output_buffer;
 
     response = deflate(&stream, Z_SYNC_FLUSH);
     assert(response == Z_OK);
 
-    telnetpp::u8stream const compressed_stream(output_buffer, stream.next_out);
-    telnetpp::u8stream reassembled_stream;
+    telnetpp::byte_stream const compressed_stream(output_buffer, stream.next_out);
+    telnetpp::byte_stream reassembled_stream;
 
     for (auto byte : compressed_stream)
     {
@@ -73,7 +73,7 @@ TEST(mccp_zlib_decompressor_test, decompressing_the_end_of_the_stream_returns_tr
     telnetpp::options::mccp::zlib::decompressor zlib_decompressor;
     telnetpp::options::mccp::decompressor &decompressor = zlib_decompressor;
 
-    auto const expected = telnetpp::u8stream {
+    auto const expected = telnetpp::byte_stream {
         'd', 'a', 't', 'a', 'd', 'a', 't', 'a', 'd', 'a', 't', 'a',
         'd', 'a', 't', 'a', 'd', 'a', 't', 'a', 'd', 'a', 't', 'a',
     };
@@ -82,18 +82,18 @@ TEST(mccp_zlib_decompressor_test, decompressing_the_end_of_the_stream_returns_tr
     auto response = deflateInit(&stream, Z_DEFAULT_COMPRESSION);
     assert(response == Z_OK);
 
-    telnetpp::u8 output_buffer[1023];
+    telnetpp::byte output_buffer[1023];
 
     stream.avail_in  = expected.size();
-    stream.next_in   = const_cast<telnetpp::u8 *>(&expected[0]);
+    stream.next_in   = const_cast<telnetpp::byte *>(&expected[0]);
     stream.avail_out = sizeof(output_buffer);
     stream.next_out  = output_buffer;
 
     response = deflate(&stream, Z_FINISH);
     assert(response == Z_STREAM_END);
 
-    telnetpp::u8stream const compressed_stream(output_buffer, stream.next_out);
-    telnetpp::u8stream reassembled_stream;
+    telnetpp::byte_stream const compressed_stream(output_buffer, stream.next_out);
+    telnetpp::byte_stream reassembled_stream;
 
     bool last_iteration_was_end_of_stream = false;
 
@@ -136,7 +136,7 @@ TEST(mccp_zlib_decompressor_test, restarting_decompression_acts_as_if_a_new_stre
     telnetpp::options::mccp::zlib::decompressor zlib_decompressor;
     telnetpp::options::mccp::decompressor &decompressor = zlib_decompressor;
 
-    auto const expected = telnetpp::u8stream {
+    auto const expected = telnetpp::byte_stream {
         'd', 'a', 't', 'a', 'd', 'a', 't', 'a', 'd', 'a', 't', 'a',
         'd', 'a', 't', 'a', 'd', 'a', 't', 'a', 'd', 'a', 't', 'a',
     };
@@ -145,10 +145,10 @@ TEST(mccp_zlib_decompressor_test, restarting_decompression_acts_as_if_a_new_stre
     auto response = deflateInit(&stream, Z_DEFAULT_COMPRESSION);
     assert(response == Z_OK);
 
-    telnetpp::u8 output_buffer[1023];
+    telnetpp::byte output_buffer[1023];
 
     stream.avail_in  = expected.size();
-    stream.next_in   = const_cast<telnetpp::u8 *>(&expected[0]);
+    stream.next_in   = const_cast<telnetpp::byte *>(&expected[0]);
     stream.avail_out = sizeof(output_buffer);
     stream.next_out  = output_buffer;
 
@@ -161,15 +161,15 @@ TEST(mccp_zlib_decompressor_test, restarting_decompression_acts_as_if_a_new_stre
     assert(response == Z_OK);
 
     stream.avail_in  = expected.size();
-    stream.next_in   = const_cast<telnetpp::u8 *>(&expected[0]);
+    stream.next_in   = const_cast<telnetpp::byte *>(&expected[0]);
     stream.avail_out = sizeof(output_buffer);
     stream.next_out  = output_buffer;
 
     response = deflate(&stream, Z_SYNC_FLUSH);
     assert(response == Z_OK);
 
-    telnetpp::u8stream const compressed_stream(output_buffer, stream.next_out);
-    telnetpp::u8stream reassembled_stream;
+    telnetpp::byte_stream const compressed_stream(output_buffer, stream.next_out);
+    telnetpp::byte_stream reassembled_stream;
 
     for (auto byte : compressed_stream)
     {
@@ -205,7 +205,7 @@ TEST(mccp_zlib_decompressor_test, can_decompress_large_blocks_of_data)
 
     static size_t const block_size = 4096;
 
-    telnetpp::u8stream block(block_size, '\0');
+    telnetpp::byte_stream block(block_size, '\0');
 
     std::generate(block.begin(), block.end(),
         []{
@@ -215,14 +215,14 @@ TEST(mccp_zlib_decompressor_test, can_decompress_large_blocks_of_data)
             return distribution(rng);
         });
 
-    telnetpp::u8stream const expected = block + block + block + block;
+    telnetpp::byte_stream const expected = block + block + block + block;
 
     z_stream stream = {};
     auto response = deflateInit(&stream, Z_DEFAULT_COMPRESSION);
     assert(response == Z_OK);
 
-    telnetpp::u8 output_buffer[block_size * 5];
-    stream.next_in = const_cast<telnetpp::u8*>(&expected[0]);
+    telnetpp::byte output_buffer[block_size * 5];
+    stream.next_in = const_cast<telnetpp::byte *>(&expected[0]);
     stream.avail_in = expected.size();
     stream.next_out = output_buffer;
     stream.avail_out = sizeof(output_buffer);
@@ -230,8 +230,8 @@ TEST(mccp_zlib_decompressor_test, can_decompress_large_blocks_of_data)
     response = deflate(&stream, Z_SYNC_FLUSH);
     assert(response == Z_OK);
 
-    telnetpp::u8stream const compressed_stream(output_buffer, stream.next_out);
-    telnetpp::u8stream reassembled_stream;
+    telnetpp::byte_stream const compressed_stream(output_buffer, stream.next_out);
+    telnetpp::byte_stream reassembled_stream;
 
     for (auto byte : compressed_stream)
     {
@@ -266,7 +266,7 @@ TEST(mccp_zlib_decompressor_test, ending_decompression_resets_decompression_stre
     telnetpp::options::mccp::zlib::decompressor zlib_decompressor;
     telnetpp::options::mccp::decompressor &decompressor = zlib_decompressor;
 
-    auto const seed_data = telnetpp::u8stream {
+    auto const seed_data = telnetpp::byte_stream {
         'd', 'a', 't', 'a', 'd', 'a', 't', 'a', 'd', 'a', 't', 'a',
         'd', 'a', 't', 'a', 'd', 'a', 't', 'a', 'd', 'a', 't', 'a',
     };
@@ -275,17 +275,17 @@ TEST(mccp_zlib_decompressor_test, ending_decompression_resets_decompression_stre
     auto response = deflateInit(&stream, Z_DEFAULT_COMPRESSION);
     assert(response == Z_OK);
 
-    telnetpp::u8 output_buffer[1023];
+    telnetpp::byte output_buffer[1023];
 
     stream.avail_in  = seed_data.size();
-    stream.next_in   = const_cast<telnetpp::u8 *>(&seed_data[0]);
+    stream.next_in   = const_cast<telnetpp::byte *>(&seed_data[0]);
     stream.avail_out = sizeof(output_buffer);
     stream.next_out  = output_buffer;
 
     response = deflate(&stream, Z_SYNC_FLUSH);
     assert(response == Z_OK);
 
-    telnetpp::u8stream compressed_stream(
+    telnetpp::byte_stream compressed_stream(
         output_buffer, stream.next_out);
     for (auto byte : compressed_stream)
     {
@@ -297,7 +297,7 @@ TEST(mccp_zlib_decompressor_test, ending_decompression_resets_decompression_stre
     response = deflateEnd(&stream);
     assert(response == Z_DATA_ERROR);
 
-    auto const expected = telnetpp::u8stream {
+    auto const expected = telnetpp::byte_stream {
         't', 'a', 'd', 'a', 't', 'a', 'd', 'a', 't', 'a', 'd', 'a',
         't', 'a', 'd', 'a', 't', 'a', 'd', 'a', 't', 'a', 'd', 'a',
     };
@@ -306,15 +306,15 @@ TEST(mccp_zlib_decompressor_test, ending_decompression_resets_decompression_stre
     assert(response == Z_OK);
 
     stream.avail_in  = expected.size();
-    stream.next_in   = const_cast<telnetpp::u8 *>(&expected[0]);
+    stream.next_in   = const_cast<telnetpp::byte *>(&expected[0]);
     stream.avail_out = sizeof(output_buffer);
     stream.next_out  = output_buffer;
 
     response = deflate(&stream, Z_SYNC_FLUSH);
     assert(response == Z_OK);
 
-    compressed_stream = telnetpp::u8stream(output_buffer, stream.next_out);
-    telnetpp::u8stream reassembled_stream;
+    compressed_stream = telnetpp::byte_stream(output_buffer, stream.next_out);
+    telnetpp::byte_stream reassembled_stream;
 
     for (auto byte : compressed_stream)
     {
@@ -346,7 +346,7 @@ TEST(mccp_zlib_decompressor_test, corrupted_decompression_stream_throws_exceptio
     telnetpp::options::mccp::zlib::decompressor zlib_decompressor;
     telnetpp::options::mccp::decompressor &decompressor = zlib_decompressor;
 
-    auto const seed_data = telnetpp::u8stream {
+    auto const seed_data = telnetpp::byte_stream {
         'd', 'a', 't', 'a', 'd', 'a', 't', 'a', 'd', 'a', 't', 'a',
         'd', 'a', 't', 'a', 'd', 'a', 't', 'a', 'd', 'a', 't', 'a',
     };
@@ -355,20 +355,20 @@ TEST(mccp_zlib_decompressor_test, corrupted_decompression_stream_throws_exceptio
     auto response = deflateInit(&stream, Z_DEFAULT_COMPRESSION);
     assert(response == Z_OK);
 
-    telnetpp::u8 output_buffer[1023];
+    telnetpp::byte output_buffer[1023];
 
     stream.avail_in  = seed_data.size();
-    stream.next_in   = const_cast<telnetpp::u8 *>(&seed_data[0]);
+    stream.next_in   = const_cast<telnetpp::byte *>(&seed_data[0]);
     stream.avail_out = sizeof(output_buffer);
     stream.next_out  = output_buffer;
 
     response = deflate(&stream, Z_SYNC_FLUSH);
     assert(response == Z_OK);
-    
+
     // Corrupt the first byte by flipping its bits.
-    auto compressed_stream = telnetpp::u8stream(output_buffer, stream.next_out);
-    
-    telnetpp::u8 &corrupted_byte = compressed_stream[0];
+    auto compressed_stream = telnetpp::byte_stream(output_buffer, stream.next_out);
+
+    telnetpp::byte &corrupted_byte = compressed_stream[0];
     corrupted_byte ^= 0xFF;
 
     auto decompress_stream =
@@ -379,11 +379,11 @@ TEST(mccp_zlib_decompressor_test, corrupted_decompression_stream_throws_exceptio
                 decompressor.decompress(byte);
             }
         };
-        
+
     ASSERT_THROW(
         decompress_stream(),
         telnetpp::options::mccp::corrupted_stream_error);
-    
+
     response = deflateEnd(&stream);
     assert(response == Z_DATA_ERROR);
 }

@@ -1,6 +1,5 @@
 #include "telnetpp/detail/subnegotiation_router.hpp"
 #include "telnetpp/options/naws/client.hpp"
-#include "telnetpp/protocol.hpp"
 #include "telnetpp/detail/registration.hpp"
 #include <gtest/gtest.h>
 
@@ -79,8 +78,9 @@ TEST(subnegotiation_router_test, routing_subnegotiation_returns_subnegotiation_r
 
     telnetpp::detail::register_route_from_subnegotiation_to_option(router, client);
 
-    telnetpp::u16 width = 0;
-    telnetpp::u16 height = 0;
+    telnetpp::options::naws::client::window_dimension width = 0;
+    telnetpp::options::naws::client::window_dimension height = 0;
+
     client.on_window_size_changed.connect(
         [&width, &height](auto new_width, auto new_height)
             -> std::vector<telnetpp::token>
@@ -94,8 +94,8 @@ TEST(subnegotiation_router_test, routing_subnegotiation_returns_subnegotiation_r
         client.option(),
         { 0x00, 80, 0x00, 24 }));
 
-    telnetpp::u16 expected_width = 80;
-    telnetpp::u16 expected_height = 24;
+    telnetpp::options::naws::client::window_dimension const expected_width = 80;
+    telnetpp::options::naws::client::window_dimension const expected_height = 24;
 
     ASSERT_EQ(expected_width, width);
     ASSERT_EQ(expected_height, height);

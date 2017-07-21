@@ -34,27 +34,27 @@ public :
         assert(response == Z_OK);
     }
 
-    std::tuple<telnetpp::u8stream, bool> decompress(telnetpp::u8 byte)
+    std::tuple<telnetpp::byte_stream, bool> decompress(byte data)
     {
-        std::tuple<telnetpp::u8stream, bool> result;
+        std::tuple<telnetpp::byte_stream, bool> result;
         auto &decompressed_stream = std::get<0>(result);
         auto &is_end_of_stream    = std::get<1>(result);
 
-        telnetpp::u8 input_buffer[input_buffer_size];
+        byte input_buffer[input_buffer_size];
 
         stream_.avail_in  = 1;
-        stream_.next_in   = &byte;
+        stream_.next_in   = &data;
         stream_.avail_out = input_buffer_size;
         stream_.next_out  = input_buffer;
 
         auto response = inflate(&stream_, Z_SYNC_FLUSH);
-        
+
         if (response == Z_DATA_ERROR)
         {
             throw corrupted_stream_error(
                 "Inflation of byte in ZLib stream yielded Z_DATA_ERROR");
         }
-        
+
         assert(response == Z_OK || response == Z_STREAM_END);
 
         // Error in stream yields Z_DATA_ERROR
@@ -99,10 +99,9 @@ decompressor::~decompressor()
 // ==========================================================================
 // DECOMPRESS
 // ==========================================================================
-std::tuple<telnetpp::u8stream, bool> decompressor::decompress(
-    telnetpp::u8 byte)
+std::tuple<telnetpp::byte_stream, bool> decompressor::decompress(byte data)
 {
-    return pimpl_->decompress(byte);
+    return pimpl_->decompress(data);
 }
 
 // ==========================================================================

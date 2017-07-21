@@ -27,8 +27,7 @@ public :
     /// decompressed data and a boolean that is set to true if this was the
     /// end of the decompression stream.
     //* =====================================================================
-    std::tuple<telnetpp::u8stream, bool> decompress(
-        telnetpp::u8 byte) override;
+    std::tuple<telnetpp::byte_stream, bool> decompress(byte data) override;
 
     //* =====================================================================
     /// \brief Ends the current decompression stream.  Any further calls

@@ -1,6 +1,5 @@
 #include <telnetpp/client_option.hpp>
 #include <telnetpp/server_option.hpp>
-#include <telnetpp/protocol.hpp>
 #include <gtest/gtest.h>
 
 // The Q Method (RFC 1153) is a specification of how to use TELNET negotiations
@@ -14,7 +13,7 @@
 // Rule 1: a client/server must remember whether it is being disabled (in
 // addition to whether it is being enabled.)  It must not send any further
 // negotiations until the previous negotiation is complete.
-template <class Option, telnetpp::u8 PositiveResponse>
+template <class Option, telnetpp::negotiation_type PositiveResponse>
 class an_option_being_deactivated : public testing::Test
 {
 public :
@@ -35,7 +34,7 @@ protected :
         }
 
         std::vector<telnetpp::token> handle_subnegotiation(
-            telnetpp::u8stream const &content) override
+            telnetpp::byte_stream const &content) override
         {
             return {};
         }
@@ -92,7 +91,7 @@ protected :
         }
 
         std::vector<telnetpp::token> handle_subnegotiation(
-            telnetpp::u8stream const &content) override
+            telnetpp::byte_stream const &content) override
         {
             return {};
         }

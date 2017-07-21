@@ -45,7 +45,8 @@ private :
     /// \brief Handle a negotiation that has been received in the active
     /// state.
     //* =====================================================================
-    std::vector<telnetpp::token> handle_subnegotiation(u8stream const &content);
+    std::vector<telnetpp::token> handle_subnegotiation(
+        byte_stream const &content) override;
 
     std::map<std::string, std::string> variables_;
     std::map<std::string, std::string> user_variables_;

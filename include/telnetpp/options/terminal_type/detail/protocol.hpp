@@ -9,7 +9,7 @@
 /// This option is used to exchange the name(s) of the current terminal
 /// between server and client.
 /// \par Server and Client
-/// It may seem unintuitive at first, but it is the 
+/// It may seem unintuitive at first, but it is the
 /// telnetpp::options::terminal_type::client that requests the terminal type.
 /// Normally, this client would be part of a server application.  However,
 /// since it is the client that "owns" the data, it implements the server
@@ -20,8 +20,10 @@
 namespace telnetpp { namespace options { namespace terminal_type {
     namespace detail {
 
-static constexpr telnetpp::u8 option = 24;
-static constexpr telnetpp::u8 is     = 0;
-static constexpr telnetpp::u8 send   = 1;
+static constexpr option_type const option = 24;
+
+using terminal_type_command_type = byte;
+static constexpr terminal_type_command_type const is   = 0;
+static constexpr terminal_type_command_type const send = 1;
 
 }}}}

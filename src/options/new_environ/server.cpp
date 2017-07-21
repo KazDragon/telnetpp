@@ -8,6 +8,17 @@ namespace telnetpp { namespace options { namespace new_environ {
 namespace {
 
 // ==========================================================================
+// TYPE_TO_BYTE
+// ==========================================================================
+static byte type_to_byte(
+    telnetpp::options::new_environ::variable_type const &type)
+{
+    return type == variable_type::var
+         ? telnetpp::options::new_environ::detail::var
+         : telnetpp::options::new_environ::detail::uservar;
+}
+
+// ==========================================================================
 // VARIABLE_WAS_REQUESTED
 // ==========================================================================
 static bool variable_was_requested(
@@ -34,15 +45,15 @@ static bool variable_was_requested(
 // ==========================================================================
 // APPEND_VARIABLE
 // ==========================================================================
-static u8stream &append_variable(
-    u8stream                                        &stream,
-    telnetpp::u8                                     type,
+static byte_stream &append_variable(
+    byte_stream                                     &stream,
+    variable_type                                    type,
     std::pair<std::string const, std::string> const &variable)
 {
     std::string const &name = variable.first;
     std::string const &val  = variable.second;
 
-    stream.push_back(type);
+    stream.push_back(type_to_byte(type));
     detail::append_escaped(stream, name);
     stream.push_back(detail::value);
     detail::append_escaped(stream, val);
@@ -68,8 +79,8 @@ std::vector<telnetpp::token> server::set_variable(
 {
     variables_[name] = value;
 
-    u8stream result = { detail::info };
-    append_variable(result, detail::var, {name, value});
+    byte_stream result = { detail::info };
+    append_variable(result, variable_type::var, {name, value});
 
     return { telnetpp::element{
         telnetpp::subnegotiation(option(), result)
@@ -83,7 +94,7 @@ std::vector<telnetpp::token> server::delete_variable(std::string const &name)
 {
     variables_.erase(name);
 
-    u8stream result = { detail::info, detail::var };
+    byte_stream result = { detail::info, detail::var };
     detail::append_escaped(result, name);
 
     return { telnetpp::element{
@@ -99,8 +110,8 @@ std::vector<telnetpp::token> server::set_user_variable(
 {
     user_variables_[name] = value;
 
-    u8stream result = { detail::info };
-    append_variable(result, detail::uservar, {name, value});
+    byte_stream result = { detail::info };
+    append_variable(result, variable_type::uservar, {name, value});
 
     return { telnetpp::element{
         telnetpp::subnegotiation(option(), result)
@@ -115,7 +126,7 @@ std::vector<telnetpp::token> server::delete_user_variable(
 {
     user_variables_.erase(name);
 
-    u8stream result = { detail::info, detail::uservar };
+    byte_stream result = { detail::info, detail::uservar };
     detail::append_escaped(result, name);
 
     return { telnetpp::element{
@@ -127,18 +138,18 @@ std::vector<telnetpp::token> server::delete_user_variable(
 // HANDLE_SUBNEGOTIATION
 // ==========================================================================
 std::vector<telnetpp::token> server::handle_subnegotiation(
-    u8stream const &content)
+    byte_stream const &content)
 {
     auto const &requests = detail::parse_requests(content);
 
-    u8stream result = { detail::is };
+    byte_stream result = { detail::is };
 
     for (auto &variable : variables_)
     {
         if (variable_was_requested(
             requests, variable_type::var, variable.first))
         {
-            append_variable(result, detail::var, variable);
+            append_variable(result, variable_type::var, variable);
         }
     }
 
@@ -147,7 +158,7 @@ std::vector<telnetpp::token> server::handle_subnegotiation(
         if (variable_was_requested(
             requests, variable_type::uservar, variable.first))
         {
-            append_variable(result, detail::uservar, variable);
+            append_variable(result, variable_type::uservar, variable);
         }
     }
 

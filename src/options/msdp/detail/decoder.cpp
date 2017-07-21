@@ -23,26 +23,26 @@ public :
     // ======================================================================
     // OPERATOR()
     // ======================================================================
-    void operator()(telnetpp::u8 byte)
+    void operator()(byte data)
     {
         assert(!stack_.empty());
 
         switch(state_)
         {
             case state::idle:
-                parse_idle(byte);
+                parse_idle(data);
                 break;
 
             case state::name:
-                parse_name(byte);
+                parse_name(data);
                 break;
 
             case state::value:
-                parse_value(byte);
+                parse_value(data);
                 break;
 
             case state::array:
-                parse_array(byte);
+                parse_array(data);
                 break;
 
             default:
@@ -113,9 +113,9 @@ private :
     // ======================================================================
     // PARSE_IDLE
     // ======================================================================
-    void parse_idle(u8 byte)
+    void parse_idle(byte data)
     {
-        if (byte == telnetpp::options::msdp::detail::var)
+        if (data == telnetpp::options::msdp::detail::var)
         {
             top().push_back({});
             state_ = state::name;
@@ -125,29 +125,29 @@ private :
     // ======================================================================
     // PARSE_NAME
     // ======================================================================
-    void parse_name(u8 byte)
+    void parse_name(byte data)
     {
         assert(!result_.empty());
 
-        if (byte == telnetpp::options::msdp::detail::val)
+        if (data == telnetpp::options::msdp::detail::val)
         {
             state_ = state::value;
             value() = std::string{};
         }
         else
         {
-            name() += char(byte);
+            name() += char(data);
         }
     }
 
     // ======================================================================
     // PARSE_VALUE
     // ======================================================================
-    void parse_value(u8 byte)
+    void parse_value(byte data)
     {
         assert(!result_.empty());
 
-        switch(byte)
+        switch(data)
         {
             case telnetpp::options::msdp::detail::var :
                 top().push_back({});
@@ -175,7 +175,7 @@ private :
                 break;
 
             default :
-                value_as_string() += char(byte);
+                value_as_string() += char(data);
                 break;
         }
     }
@@ -183,9 +183,9 @@ private :
     // ======================================================================
     // PARSE_ARRAY
     // ======================================================================
-    void parse_array(u8 byte)
+    void parse_array(byte data)
     {
-        switch(byte)
+        switch(data)
         {
             case telnetpp::options::msdp::detail::array_close :
                 state_ = state::idle;
@@ -196,7 +196,7 @@ private :
                 break;
 
             default :
-                value_as_array().back() += char(byte);
+                value_as_array().back() += char(data);
                 break;
         }
     }
@@ -219,7 +219,7 @@ private :
 // ==========================================================================
 // DECODE
 // ==========================================================================
-std::vector<variable> decode(telnetpp::u8stream const &stream)
+std::vector<variable> decode(telnetpp::byte_stream const &stream)
 {
     using std::begin;
     using std::end;

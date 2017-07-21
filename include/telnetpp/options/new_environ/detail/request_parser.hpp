@@ -6,6 +6,6 @@
 namespace telnetpp { namespace options { namespace new_environ {
     namespace detail {
 
-std::vector<request> parse_requests(telnetpp::u8stream const &stream);
+std::vector<request> parse_requests(telnetpp::byte_stream const &stream);
 
 }}}}

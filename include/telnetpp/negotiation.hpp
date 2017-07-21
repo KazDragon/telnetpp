@@ -15,7 +15,7 @@ public :
     //* =====================================================================
     /// \brief Constructor
     //* =====================================================================
-    constexpr negotiation(u8 request, u8 option)
+    constexpr negotiation(negotiation_type request, option_type option)
       : request_(request),
         option_(option)
     {
@@ -25,7 +25,7 @@ public :
     /// \brief Returns the request (will, wont, do, dont) of this
     /// negotiation.
     //* =====================================================================
-    constexpr u8 request() const
+    constexpr negotiation_type request() const
     {
         return request_;
     }
@@ -33,14 +33,14 @@ public :
     //* =====================================================================
     /// \brief Returns the option (e.g. echo, naws) of this negotiation
     //* =====================================================================
-    constexpr u8 option() const
+    constexpr option_type option() const
     {
         return option_;
     }
 
 private :
-    u8 request_;
-    u8 option_;
+    negotiation_type request_;
+    option_type option_;
 };
 
 //* =========================================================================

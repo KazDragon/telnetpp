@@ -8,7 +8,7 @@ namespace telnetpp { namespace options { namespace new_environ {
 // APPEND_ESCAPED
 // ==========================================================================
 void append_escaped(
-    telnetpp::u8stream &stream, std::string const &data)
+    telnetpp::byte_stream &stream, std::string const &data)
 {
     for (auto &ch : data)
     {
