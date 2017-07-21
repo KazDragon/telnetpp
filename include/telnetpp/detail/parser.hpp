@@ -2,7 +2,6 @@
 
 #include "telnetpp/command.hpp"
 #include "telnetpp/negotiation.hpp"
-#include "telnetpp/protocol.hpp"
 #include "telnetpp/subnegotiation.hpp"
 #include "telnetpp/element.hpp"
 #include "telnetpp/detail/parse_helper.hpp"

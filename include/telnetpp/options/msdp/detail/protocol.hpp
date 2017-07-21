@@ -24,7 +24,7 @@
 namespace telnetpp { namespace options { namespace msdp {
     namespace detail {
 
-static constexpr option_type option = 69;
+static constexpr option_type const option = 69;
 
 using msdp_command_type = byte;
 static constexpr msdp_command_type const var         = 1;

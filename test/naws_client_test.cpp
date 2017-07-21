@@ -1,5 +1,4 @@
 #include "telnetpp/options/naws/client.hpp"
-#include "telnetpp/protocol.hpp"
 #include <gtest/gtest.h>
 
 TEST(naws_client_test, option_is_naws)

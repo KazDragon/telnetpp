@@ -31,7 +31,7 @@
 //* =========================================================================
 namespace telnetpp { namespace options { namespace new_environ { namespace detail {
 
-static constexpr option_type option  = 39;
+static constexpr option_type const option  = 39;
 
 using new_environ_command_type = byte;
 static constexpr new_environ_command_type const is      = 0;

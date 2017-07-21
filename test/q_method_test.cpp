@@ -1,6 +1,5 @@
 #include <telnetpp/client_option.hpp>
 #include <telnetpp/server_option.hpp>
-#include <telnetpp/protocol.hpp>
 #include <gtest/gtest.h>
 
 // The Q Method (RFC 1153) is a specification of how to use TELNET negotiations

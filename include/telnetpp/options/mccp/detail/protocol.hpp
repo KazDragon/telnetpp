@@ -65,7 +65,7 @@
 
 namespace telnetpp { namespace options { namespace mccp { namespace detail {
 
-static constexpr option_type option = 86;
+static constexpr option_type const option = 86;
 
 //* =========================================================================
 /// \brief A token passed down (in the boost::any part of the token stream)

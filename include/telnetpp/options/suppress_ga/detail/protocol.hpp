@@ -23,6 +23,6 @@
 //* =========================================================================
 namespace telnetpp { namespace options { namespace suppress_ga { namespace detail {
 
-static constexpr option_type option = 3;
+static constexpr option_type const option = 3;
 
 }}}}

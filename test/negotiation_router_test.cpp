@@ -1,6 +1,5 @@
 #include "telnetpp/detail/negotiation_router.hpp"
 #include "telnetpp/options/echo/server.hpp"
-#include "telnetpp/protocol.hpp"
 #include "telnetpp/detail/registration.hpp"
 #include "expect_elements.hpp"
 #include <gtest/gtest.h>

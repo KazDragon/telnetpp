@@ -1,13 +1,13 @@
 #include "telnetpp/detail/registration.hpp"
-#include "telnetpp/protocol.hpp"
+
 namespace telnetpp { namespace detail {
 
 // ==========================================================================
 // REGISTER_CLIENT_OPTION
 // ==========================================================================
 void register_client_option(
-    client_option &option, 
-    negotiation_router &neg_router, 
+    client_option &option,
+    negotiation_router &neg_router,
     subnegotiation_router &sub_router)
 {
     register_route_from_negotiation_to_option(
@@ -22,8 +22,8 @@ void register_client_option(
 // REGISTER_SERVER_OPTION
 // ==========================================================================
 void register_server_option(
-    server_option &option, 
-    negotiation_router &neg_router, 
+    server_option &option,
+    negotiation_router &neg_router,
     subnegotiation_router &sub_router)
 {
     register_route_from_negotiation_to_option(
