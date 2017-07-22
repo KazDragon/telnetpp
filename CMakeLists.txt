@@ -53,7 +53,7 @@ if (TELNETPP_COVERAGE)
     list(APPEND CMAKE_EXE_LINKER_FLAGS "--coverage")
 endif()
 
-set (TELNETPP_VERSION 1.2.3)
+set (TELNETPP_VERSION 1.2.4)
 
 set (TELNETPP_PUBLIC_SOURCE_FILES
     src/byte_converter.cpp
