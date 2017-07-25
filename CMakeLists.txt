@@ -1,6 +1,10 @@
-cmake_policy(SET CMP0048 NEW)
+if (POLICY CMP0048)
+    cmake_policy(SET CMP0048 NEW)
+    project(TELNETPP VERSION 1.2.4)
+else()
+    project(TELNETPP)
+endif()
 
-project(TELNETPP VERSION 1.2.4)
 cmake_minimum_required(VERSION 3.2 FATAL_ERROR)
 cmake_policy(VERSION 3.2)
 
@@ -214,9 +218,9 @@ install(
     EXPORT
         telnetpp-config
     ARCHIVE DESTINATION
-        lib
+        lib/telnetpp
     LIBRARY DESTINATION
-        lib
+        lib/telnetpp
 )
 
 install(
