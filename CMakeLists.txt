@@ -1,4 +1,6 @@
-project(telnetpp)
+cmake_policy(SET CMP0048 NEW)
+
+project(TELNETPP VERSION 1.2.4)
 cmake_minimum_required(VERSION 3.2 FATAL_ERROR)
 cmake_policy(VERSION 3.2)
 
@@ -7,6 +9,7 @@ if (POLICY CMP0063)
 endif()
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${PROJECT_SOURCE_DIR}/cmake/Modules")
+set(CMAKE_DEBUG_POSTFIX d)
 
 # Boost is required as we used Boost.Variant, Boost.Optional, and
 # Boost.Signals2.  All of these are header-only libraries, so no subcomponents
@@ -52,8 +55,6 @@ if (TELNETPP_COVERAGE)
     list(APPEND CMAKE_CXX_FLAGS "--coverage -g -O0")
     list(APPEND CMAKE_EXE_LINKER_FLAGS "--coverage")
 endif()
-
-set (TELNETPP_VERSION 1.2.4)
 
 set (TELNETPP_PUBLIC_SOURCE_FILES
     src/byte_converter.cpp
@@ -225,11 +226,36 @@ install(
         include
 )
 
+include(CMakePackageConfigHelpers)
+write_basic_package_version_file(
+    "${CMAKE_CURRENT_BINARY_DIR}/telnetpp-config-version.cmake"
+    VERSION
+        "${TELNETPP_VERSION}"
+    COMPATIBILITY AnyNewerVersion
+)
+
+export(
+    EXPORT
+        telnetpp-config
+    FILE
+        "${CMAKE_CURRENT_BINARY_DIR}/telnetpp-config.cmake"
+)
+
 install(
     EXPORT
         telnetpp-config
+    FILE
+        telnetpp-config.cmake
     DESTINATION
         lib/telnetpp
+)
+
+install(
+    FILES
+        "${CMAKE_CURRENT_BINARY_DIR}/telnetpp-config.cmake"
+        "${CMAKE_CURRENT_BINARY_DIR}/telnetpp-config-version.cmake"
+    DESTINATION
+        lib/telnetpp/cmake
 )
 
 if (GTEST_FOUND)
