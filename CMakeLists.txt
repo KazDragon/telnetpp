@@ -218,16 +218,16 @@ install(
     EXPORT
         telnetpp-config
     ARCHIVE DESTINATION
-        lib/telnetpp
+        lib/telnetpp-${TELNETPP_VERSION}
     LIBRARY DESTINATION
-        lib/telnetpp
+        lib/telnetpp-${TELNETPP_VERSION}
 )
 
 install(
     DIRECTORY
         include/
     DESTINATION
-        include
+        include/telnetpp-${TELNETPP_VERSION}
 )
 
 include(CMakePackageConfigHelpers)
@@ -251,7 +251,7 @@ install(
     FILE
         telnetpp-config.cmake
     DESTINATION
-        lib/telnetpp
+        lib/telnetpp-${TELNETPP_VERSION}
 )
 
 install(
@@ -259,7 +259,7 @@ install(
         "${CMAKE_CURRENT_BINARY_DIR}/telnetpp-config.cmake"
         "${CMAKE_CURRENT_BINARY_DIR}/telnetpp-config-version.cmake"
     DESTINATION
-        lib/telnetpp/cmake
+        lib/telnetpp-${TELNETPP_VERSION}/cmake
 )
 
 if (GTEST_FOUND)
