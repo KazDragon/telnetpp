@@ -43,8 +43,7 @@ std::vector<telnetpp::token> server::report_window_size()
 {
     if (is_active() && window_size_.is_initialized())
     {
-        return
-        {
+        return {
             telnetpp::element(telnetpp::subnegotiation(
                 option(),
                 {

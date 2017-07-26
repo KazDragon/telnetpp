@@ -7,13 +7,13 @@ template <typename ReturnType, typename... Lambdas>
 struct lambda_visitor;
 
 template <typename ReturnType, typename Lambda1, typename... Lambdas>
-struct lambda_visitor< ReturnType, Lambda1 , Lambdas...>
+struct lambda_visitor<ReturnType, Lambda1, Lambdas...>
   : public lambda_visitor<ReturnType, Lambdas...>, public Lambda1 {
 
     using Lambda1::operator();
-    using lambda_visitor< ReturnType , Lambdas...>::operator();
+    using lambda_visitor<ReturnType, Lambdas...>::operator();
     explicit lambda_visitor(Lambda1 l1, Lambdas... lambdas)
-      : Lambda1(l1), lambda_visitor< ReturnType , Lambdas...> (lambdas...)
+      : Lambda1(l1), lambda_visitor<ReturnType, Lambdas...> (lambdas...)
     {}
 };
 

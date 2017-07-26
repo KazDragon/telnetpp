@@ -37,7 +37,7 @@ std::vector<token> client::request_variables(
     telnetpp::byte_stream content;
     content.push_back(telnetpp::options::new_environ::detail::send);
 
-    for(auto &req : requests)
+    for (auto &req : requests)
     {
         content.push_back(type_to_byte(req.type));
         detail::append_escaped(content, req.name);

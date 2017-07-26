@@ -27,7 +27,7 @@ public :
     {
         assert(!stack_.empty());
 
-        switch(state_)
+        switch (state_)
         {
             case state::idle:
                 parse_idle(data);

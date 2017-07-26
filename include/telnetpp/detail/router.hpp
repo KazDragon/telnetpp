@@ -46,10 +46,10 @@ namespace telnetpp { namespace detail {
 /// \code std::for_each(vec.begin(), vec.end(), route); \endcode
 //* =========================================================================
 template <
-    class Key
-  , class Message
-  , class Result
-  , class KeyFromMessagePolicy
+    class Key,
+    class Message,
+    class Result,
+    class KeyFromMessagePolicy
 >
 class router
 {
@@ -60,8 +60,8 @@ public :
     typedef std::function<Result (Message const&)> function_type;
     typedef std::map
     <
-        key_type
-      , function_type
+        key_type,
+        function_type
     > registered_functions_map_type;
 
     //* =====================================================================
