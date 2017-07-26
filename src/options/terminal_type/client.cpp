@@ -16,8 +16,7 @@ client::client()
 // ==========================================================================
 std::vector<telnetpp::token> client::request_terminal_type()
 {
-    return
-    {
+    return {
         telnetpp::element(
             telnetpp::subnegotiation(option(), { detail::send }))
     };

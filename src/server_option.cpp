@@ -100,7 +100,7 @@ bool server_option::is_active() const
 std::vector<telnetpp::token> server_option::negotiate(
     negotiation_type request)
 {
-    switch(state_)
+    switch (state_)
     {
         case state::inactive :
             if (request == telnetpp::do_ && activatable_)
