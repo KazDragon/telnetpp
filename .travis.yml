@@ -70,6 +70,20 @@ matrix:
           - libgtest-dev
           - libboost1.55-all-dev
     env:
+      - MATRIX_EVAL="CC=clang-3.6 && CXX=clang++-3.6 && CONFIG=Debug && SHARED=0"
+
+  - os: linux
+    dist: trusty
+    addons:
+      apt:
+        sources:
+          - ubuntu-toolchain-r-test
+          - llvm-toolchain-precise-3.6
+        packages:
+          - clang-3.6
+          - libgtest-dev
+          - libboost1.55-all-dev
+    env:
       - MATRIX_EVAL="CC=clang-3.6 && CXX=clang++-3.6 && CONFIG=Debug && SHARED=1"
 
   - os: linux
@@ -84,7 +98,7 @@ matrix:
           - libgtest-dev
           - libboost1.55-all-dev
     env:
-      - MATRIX_EVAL="CC=clang-3.6 && CXX=clang++-3.6 && CONFIG=Release && SHARED=0"
+      - MATRIX_EVAL="CC=clang-3.6 && CXX=clang++-3.6 && CONFIG=Debug && SHARED=0 && SANITIZE=address"
 
   - os: linux
     dist: trusty
@@ -98,7 +112,21 @@ matrix:
           - libgtest-dev
           - libboost1.55-all-dev
     env:
-      - MATRIX_EVAL="CC=clang-3.6 && CXX=clang++-3.6 && CONFIG=Release && SHARED=1"
+      - MATRIX_EVAL="CC=clang-3.6 && CXX=clang++-3.6 && CONFIG=Debug && SHARED=0 && SANITIZE=undefined"
+
+  - os: linux
+    dist: trusty
+    addons:
+      apt:
+        sources:
+          - ubuntu-toolchain-r-test
+          - llvm-toolchain-precise-3.6
+        packages:
+          - clang-3.6
+          - libgtest-dev
+          - libboost1.55-all-dev
+    env:
+      - MATRIX_EVAL="CC=clang-3.6 && CXX=clang++-3.6 && CONFIG=Debug && SHARED=0 && SANITIZE=thread"
 
   - os: linux
     dist: trusty
