@@ -28,7 +28,10 @@ matrix:
           - libgtest-dev
           - libboost1.55-all-dev
     env:
-      - MATRIX_EVAL="CC=gcc-5 && CXX=g++-5"
+      - MATRIX_EVAL="CC=gcc-5 && CXX=g++-5 && CONFIG=Debug && SHARED=0"
+      - MATRIX_EVAL="CC=gcc-5 && CXX=g++-5 && CONFIG=Debug && SHARED=1 && COVERAGE=ON"
+      - MATRIX_EVAL="CC=gcc-5 && CXX=g++-5 && CONFIG=Release && SHARED=0"
+      - MATRIX_EVAL="CC=gcc-5 && CXX=g++-5 && CONFIG=Release && SHARED=1"
 
   - os: linux
     dist: trusty
@@ -53,15 +56,7 @@ cache:
 before_install:
 # Set up CC/CXX variables.
   - eval "${MATRIX_EVAL}"
-
-  - cmake --version
   - export CMAKE=cmake
-# workaround for not having CMake 3.4
-#  - if [ ! -d "cmake-3.4.0-Linux-x86_64/bin" ]; then
-#      wget --no-check-certificate https://cmake.org/files/v3.4/cmake-3.4.0-Linux-x86_64.tar.gz;
-#      tar -xzf cmake-3.4.0-Linux-x86_64.tar.gz;
-#    fi
-#  - export CMAKE=../cmake-3.4.0-Linux-x86_64/bin/cmake
 # workaround for not having lcov 1.13
   - if [ ! -d "lcov/usr/bin/lcov" ]; then
       wget http://ftp.de.debian.org/debian/pool/main/l/lcov/lcov_1.13.orig.tar.gz;
