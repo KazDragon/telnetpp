@@ -25,6 +25,8 @@ matrix:
           - ubuntu-toolchain-r-test
         packages:
           - g++-5
+          - libgtest-dev
+          - libboost1.55-all-dev
     env:
       - MATRIX_EVAL="CC=gcc-5 && CXX=gcc-5"
 
@@ -58,7 +60,7 @@ before_install:
 # workaround for gtest not providing its own libraries (sigh)
   - if [ ! -d "gtest/libgtest.a" ]; then
       cd gtest;
-      CC=$CCOMPILE CXX=$CXXCOMPILE $CMAKE /usr/src/gtest -DCMAKE_CXX_FLAGS='-fPIC' && make;
+      $CMAKE /usr/src/gtest -DCMAKE_CXX_FLAGS='-fPIC' && make;
       cd ..;
     fi
   - export GTEST_ROOT=$PWD/gtest
@@ -68,7 +70,7 @@ before_install:
 before_script:
   - mkdir build || true
   - cd build
-  - CC=$CCOMPILE CXX=$CXXCOMPILE $CMAKE -DCMAKE_BUILD_TYPE=$CONFIG -DBUILD_SHARED_LIBS=$SHARED -DTELNETPP_SANITIZE=$SANITIZE -DTELNETPP_COVERAGE=$COVERAGE ..
+  - $CMAKE -DCMAKE_BUILD_TYPE=$CONFIG -DBUILD_SHARED_LIBS=$SHARED -DTELNETPP_SANITIZE=$SANITIZE -DTELNETPP_COVERAGE=$COVERAGE ..
 
 script:
   - make -j2
