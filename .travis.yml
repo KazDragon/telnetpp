@@ -4,17 +4,6 @@ sudo: false
 compiler:
   - clang
 
-env:
-  - CONFIG=Debug SHARED=0
-#env:
-#  - CONFIG=Release SHARED=1 CCOMPILE=clang CXXCOMPILE=clang++
-#  - CONFIG=Release SHARED=0 CCOMPILE=clang CXXCOMPILE=clang++
-#  - CONFIG=Debug SHARED=1 CCOMPILE=clang CXXCOMPILE=clang++
-#  - CONFIG=Debug SHARED=0 CCOMPILE=clang CXXCOMPILE=clang++
-#  - CONFIG=Debug SHARED=0 CCOMPILE=clang CXXCOMPILE=clang++ SANITIZE=address
-#  - CONFIG=Debug SHARED=0 CCOMPILE=clang CXXCOMPILE=clang++ SANITIZE=thread
-#  - CONFIG=Debug SHARED=0 CCOMPILE=clang CXXCOMPILE=clang++ SANITIZE=undefined
-
 matrix:
   include:
   - os: linux
@@ -29,8 +18,44 @@ matrix:
           - libboost1.55-all-dev
     env:
       - MATRIX_EVAL="CC=gcc-5 && CXX=g++-5 && CONFIG=Debug && SHARED=0"
+
+  - os: linux
+    dist: trusty
+    addons:
+      apt:
+        sources:
+          - ubuntu-toolchain-r-test
+        packages:
+          - g++-5
+          - libgtest-dev
+          - libboost1.55-all-dev
+    env:
       - MATRIX_EVAL="CC=gcc-5 && CXX=g++-5 && CONFIG=Debug && SHARED=1 && COVERAGE=ON"
+
+  - os: linux
+    dist: trusty
+    addons:
+      apt:
+        sources:
+          - ubuntu-toolchain-r-test
+        packages:
+          - g++-5
+          - libgtest-dev
+          - libboost1.55-all-dev
+    env:
       - MATRIX_EVAL="CC=gcc-5 && CXX=g++-5 && CONFIG=Release && SHARED=0"
+
+  - os: linux
+    dist: trusty
+    addons:
+      apt:
+        sources:
+          - ubuntu-toolchain-r-test
+        packages:
+          - g++-5
+          - libgtest-dev
+          - libboost1.55-all-dev
+    env:
       - MATRIX_EVAL="CC=gcc-5 && CXX=g++-5 && CONFIG=Release && SHARED=1"
 
   - os: linux
@@ -45,7 +70,7 @@ matrix:
           - libgtest-dev
           - libboost1.55-all-dev
     env:
-      - MATRIX_EVAL="CC=clang-3.6 && CXX=clang++-3.6"
+      - MATRIX_EVAL="CC=clang-3.6 && CXX=clang++-3.6 && CONFIG=Debug && SHARED=0"
 
 cache:
   - apt: true
