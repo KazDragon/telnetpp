@@ -64,13 +64,13 @@ matrix:
       apt:
         sources:
           - ubuntu-toolchain-r-test
-          - llvm-toolchain-precise-3.6
+          - llvm-toolchain-trusty-4.0
         packages:
-          - clang-3.6
+          - clang-4.0
           - libgtest-dev
           - libboost1.55-all-dev
     env:
-      - MATRIX_EVAL="CC=clang-3.6 && CXX=clang++-3.6 && CONFIG=Debug && SHARED=0"
+      - MATRIX_EVAL="CC=clang-4.0 && CXX=clang++-4.0 && CONFIG=Debug && SHARED=0"
 
   - os: linux
     dist: trusty
@@ -78,13 +78,13 @@ matrix:
       apt:
         sources:
           - ubuntu-toolchain-r-test
-          - llvm-toolchain-precise-3.6
+          - llvm-toolchain-trusty-4.0
         packages:
-          - clang-3.6
+          - clang-4.0
           - libgtest-dev
           - libboost1.55-all-dev
     env:
-      - MATRIX_EVAL="CC=clang-3.6 && CXX=clang++-3.6 && CONFIG=Debug && SHARED=1"
+      - MATRIX_EVAL="CC=clang-4.0 && CXX=clang++-4.0 && CONFIG=Debug && SHARED=1"
 
   - os: linux
     dist: trusty
@@ -92,13 +92,13 @@ matrix:
       apt:
         sources:
           - ubuntu-toolchain-r-test
-          - llvm-toolchain-precise-3.6
+          - llvm-toolchain-trusty-4.0
         packages:
-          - clang-3.6
+          - clang-4.0
           - libgtest-dev
           - libboost1.55-all-dev
     env:
-      - MATRIX_EVAL="CC=clang-3.6 && CXX=clang++-3.6 && CONFIG=Debug && SHARED=0 && SANITIZE=address"
+      - MATRIX_EVAL="CC=clang-4.0 && CXX=clang++-4.0 && CONFIG=Debug && SHARED=0 && SANITIZE=address"
 
   - os: linux
     dist: trusty
@@ -106,13 +106,13 @@ matrix:
       apt:
         sources:
           - ubuntu-toolchain-r-test
-          - llvm-toolchain-precise-3.6
+          - llvm-toolchain-trusty-4.0
         packages:
-          - clang-3.6
+          - clang-4.0
           - libgtest-dev
           - libboost1.55-all-dev
     env:
-      - MATRIX_EVAL="CC=clang-3.6 && CXX=clang++-3.6 && CONFIG=Debug && SHARED=0 && SANITIZE=undefined"
+      - MATRIX_EVAL="CC=clang-4.0 && CXX=clang++-4.0 && CONFIG=Debug && SHARED=0 && SANITIZE=undefined"
 
   - os: linux
     dist: trusty
@@ -120,13 +120,13 @@ matrix:
       apt:
         sources:
           - ubuntu-toolchain-r-test
-          - llvm-toolchain-precise-3.6
+          - llvm-toolchain-trusty-4.0
         packages:
-          - clang-3.6
+          - clang-4.0
           - libgtest-dev
           - libboost1.55-all-dev
     env:
-      - MATRIX_EVAL="CC=clang-3.6 && CXX=clang++-3.6 && CONFIG=Debug && SHARED=0 && SANITIZE=thread"
+      - MATRIX_EVAL="CC=clang-4.0 && CXX=clang++-4.0 && CONFIG=Debug && SHARED=0 && SANITIZE=thread"
 
   - os: linux
     dist: trusty
@@ -134,13 +134,13 @@ matrix:
       apt:
         sources:
           - ubuntu-toolchain-r-test
-          - llvm-toolchain-precise-3.6
+          - llvm-toolchain-trusty-4.0
         packages:
-          - clang-3.6
+          - clang-4.0
           - libgtest-dev
           - libboost1.55-all-dev
     env:
-      - MATRIX_EVAL="CC=clang-3.6 && CXX=clang++-3.6 && CONFIG=Debug && SHARED=0"
+      - MATRIX_EVAL="CC=clang-4.0 && CXX=clang++-4.0 && CONFIG=Debug && SHARED=0"
 cache:
   - apt: true
   - directories:
