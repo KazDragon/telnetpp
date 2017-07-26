@@ -5,103 +5,48 @@ compiler:
   - clang
 
 env:
-  - CONFIG=Release SHARED=1 CCOMPILE=clang CXXCOMPILE=clang++
-  - CONFIG=Release SHARED=0 CCOMPILE=clang CXXCOMPILE=clang++
-  - CONFIG=Debug SHARED=1 CCOMPILE=clang CXXCOMPILE=clang++
-  - CONFIG=Debug SHARED=0 CCOMPILE=clang CXXCOMPILE=clang++
-  - CONFIG=Debug SHARED=0 CCOMPILE=clang CXXCOMPILE=clang++ SANITIZE=address
- # - CONFIG=Debug SHARED=0 CCOMPILE=clang CXXCOMPILE=clang++ SANITIZE=thread
-  - CONFIG=Debug SHARED=0 CCOMPILE=clang CXXCOMPILE=clang++ SANITIZE=undefined
-
-addons:
-  apt:
-    sources: &sources
-      - ubuntu-toolchain-r-test
-      - boost-latest
-    packages:
-      - clang
-      - gcc-4.8
-      - g++-4.8
-      - libgtest-dev
-      - libboost1.55-all-dev
+  - CONFIG=Debug SHARED=0
+#env:
+#  - CONFIG=Release SHARED=1 CCOMPILE=clang CXXCOMPILE=clang++
+#  - CONFIG=Release SHARED=0 CCOMPILE=clang CXXCOMPILE=clang++
+#  - CONFIG=Debug SHARED=1 CCOMPILE=clang CXXCOMPILE=clang++
+#  - CONFIG=Debug SHARED=0 CCOMPILE=clang CXXCOMPILE=clang++
+#  - CONFIG=Debug SHARED=0 CCOMPILE=clang CXXCOMPILE=clang++ SANITIZE=address
+#  - CONFIG=Debug SHARED=0 CCOMPILE=clang CXXCOMPILE=clang++ SANITIZE=thread
+#  - CONFIG=Debug SHARED=0 CCOMPILE=clang CXXCOMPILE=clang++ SANITIZE=undefined
 
 matrix:
   include:
-    # g++-5.2 with coverage
-    - compiler: g++
-      env: CONFIG=Debug SHARED=0 CCOMPILE=gcc-5 CXXCOMPILE=g++-5 COVERAGE=ON
-      addons:
-        apt:
-          sources: *sources
-          packages:
-            - gcc-5
-            - g++-5
-            - libgtest-dev
-            - libboost1.55-all-dev
-
-    # g++-5.2
-    - compiler: g++
-      env: CONFIG=Release SHARED=1 CCOMPILE=gcc-5 CXXCOMPILE=g++-5 COVERAGE=OFF
-      addons:
-        apt:
-          sources: *sources
-          packages:
-            - clang
-            - gcc-5
-            - g++-5
-            - libgtest-dev
-            - libboost1.55-all-dev
-
-    - compiler: g++
-      env: CONFIG=Release SHARED=0 CCOMPILE=gcc-5 CXXCOMPILE=g++-5 COVERAGE=OFF
-      addons:
-        apt:
-          sources: *sources
-          packages:
-            - clang
-            - gcc-5
-            - g++-5
-            - libgtest-dev
-            - libboost1.55-all-dev
-
-    - compiler: g++
-      env: CONFIG=Debug SHARED=1 CCOMPILE=gcc-5 CXXCOMPILE=g++-5 COVERAGE=OFF
-      addons:
-        apt:
-          sources: *sources
-          packages:
-            - clang
-            - gcc-5
-            - g++-5
-            - libgtest-dev
-            - libboost1.55-all-dev
-
-    - compiler: g++
-      env: CONFIG=Debug SHARED=0 CCOMPILE=gcc-5 CXXCOMPILE=g++-5 COVERAGE=OFF
-      addons:
-        apt:
-          sources: *sources
-          packages:
-            - clang
-            - gcc-5
-            - g++-5
-            - libgtest-dev
-            - libboost1.55-all-dev
+    os: linux
+    dist: trusty
+    addons:
+      apt:
+        sources:
+          - ubuntu-toolchain-r-test
+        packages:
+          - g++-5
+    env:
+      - MATRIX_EVAL="CC=gcc-5 && CXX=gcc-5"
 
 cache:
   - apt: true
   - directories:
-    - cmake-3.4.0-Linux-x86_64
+#    - cmake-3.4.0-Linux-x86_64
     - lcov
     - gtest
 
 before_install:
+# Set up CC/CXX variables.
+  - eval "${MATRIX_EVAL}"
+
+  - cmake --version
+  - export CMAKE=cmake
 # workaround for not having CMake 3.4
-  - if [ ! -d "cmake-3.4.0-Linux-x86_64/bin" ]; then
-      wget --no-check-certificate https://cmake.org/files/v3.4/cmake-3.4.0-Linux-x86_64.tar.gz;
-      tar -xzf cmake-3.4.0-Linux-x86_64.tar.gz;
-    fi
-  - export CMAKE=../cmake-3.4.0-Linux-x86_64/bin/cmake
+#  - if [ ! -d "cmake-3.4.0-Linux-x86_64/bin" ]; then
+#      wget --no-check-certificate https://cmake.org/files/v3.4/cmake-3.4.0-Linux-x86_64.tar.gz;
+#      tar -xzf cmake-3.4.0-Linux-x86_64.tar.gz;
+#    fi
+#  - export CMAKE=../cmake-3.4.0-Linux-x86_64/bin/cmake
 # workaround for not having lcov 1.13
   - if [ ! -d "lcov/usr/bin/lcov" ]; then
       wget http://ftp.de.debian.org/debian/pool/main/l/lcov/lcov_1.13.orig.tar.gz;
@@ -117,7 +62,7 @@ before_install:
       cd ..;
     fi
   - export GTEST_ROOT=$PWD/gtest
-# install coverage software (todo: only if coverage=1)
+# install coverage software
   - if [ "$COVERAGE" == "ON" ]; then gem install coveralls-lcov; fi
 
 before_script:
