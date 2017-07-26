@@ -28,7 +28,7 @@ matrix:
           - libgtest-dev
           - libboost1.55-all-dev
     env:
-      - MATRIX_EVAL="CC=gcc-5 && CXX=gcc-5"
+      - MATRIX_EVAL="CC=gcc-5 && CXX=g++-5"
 
 cache:
   - apt: true
