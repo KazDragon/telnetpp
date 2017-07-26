@@ -47,7 +47,6 @@ matrix:
 cache:
   - apt: true
   - directories:
-#    - cmake-3.4.0-Linux-x86_64
     - lcov
     - gtest
 
@@ -87,7 +86,7 @@ before_script:
   - $CMAKE -DCMAKE_BUILD_TYPE=$CONFIG -DBUILD_SHARED_LIBS=$SHARED -DTELNETPP_SANITIZE=$SANITIZE -DTELNETPP_COVERAGE=$COVERAGE ..
 
 script:
-  - make -j2
+  - make -j2 VERBOSE=1
   - if [ "$COVERAGE" == "ON" ]; then
         $LCOV --gcov-tool=gcov-5 --base-directory . --directory . --zerocounters -q;
     fi
