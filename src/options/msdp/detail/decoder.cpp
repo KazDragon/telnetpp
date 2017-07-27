@@ -147,7 +147,7 @@ private :
     {
         assert(!result_.empty());
 
-        switch(data)
+        switch (data)
         {
             case telnetpp::options::msdp::detail::var :
                 top().push_back({});
@@ -185,7 +185,7 @@ private :
     // ======================================================================
     void parse_array(byte data)
     {
-        switch(data)
+        switch (data)
         {
             case telnetpp::options::msdp::detail::array_close :
                 state_ = state::idle;

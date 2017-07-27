@@ -21,7 +21,8 @@
 /// \see https://tools.ietf.org/html/rfc858
 /// \see telnetpp::options::echo
 //* =========================================================================
-namespace telnetpp { namespace options { namespace suppress_ga { namespace detail {
+namespace telnetpp { namespace options { namespace suppress_ga {
+    namespace detail {
 
 static constexpr option_type const option = 3;
 

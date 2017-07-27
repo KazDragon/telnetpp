@@ -53,7 +53,8 @@ bool operator==(variable const &lhs, variable const &rhs)
                rhs.value,
                [&lhs_value](auto const &inner_rhs)
                {
-                   return boost::get<decltype(inner_rhs)>(lhs_value) == inner_rhs;
+                   return boost::get<decltype(inner_rhs)>(lhs_value)
+                       == inner_rhs;
                });
 }
 

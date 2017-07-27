@@ -18,7 +18,8 @@ class routing_visitor
 {
 public :
     routing_visitor(
-        std::function<std::vector<telnetpp::token> (std::string const &)> on_text,
+        std::function<std::vector<telnetpp::token> (
+            std::string const &)> on_text,
         command_router &cmd_router,
         negotiation_router &neg_router,
         subnegotiation_router &sub_router);

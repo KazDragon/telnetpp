@@ -18,7 +18,8 @@ namespace telnetpp { namespace detail {
 /// \param KeyFromMessagePolicy A template class that implements the
 /// following function: \code
 /// static void KeyFromMessagePolicy::key_from_message(Message const &message)
-/// \endcode This function should return a Key that is derived from the Message.
+/// \endcode This function should return a Key that is derived from the
+/// Message.
 ///
 /// A class template that receives messages and forwards them on to
 /// appropriate handlers.
