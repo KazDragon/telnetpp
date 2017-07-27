@@ -51,7 +51,8 @@ struct token_combiner
 
     /// Combine a range of tokens into a vector.
     template <class InputIterator1, class InputIterator2>
-    std::vector<token> operator()(InputIterator1 begin, InputIterator2 end) const
+    std::vector<token> operator()(
+        InputIterator1 begin, InputIterator2 end) const
     {
         return std::accumulate(
             begin,

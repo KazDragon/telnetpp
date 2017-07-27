@@ -29,7 +29,8 @@
 /// automatically handle requests sent from a client by using this data.
 /// \see https://tools.ietf.org/html/rfc1572
 //* =========================================================================
-namespace telnetpp { namespace options { namespace new_environ { namespace detail {
+namespace telnetpp { namespace options { namespace new_environ {
+    namespace detail {
 
 static constexpr option_type const option  = 39;
 
