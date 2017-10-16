@@ -79,6 +79,8 @@ A telnetpp::element is a Boost.Variant that may contain a command, a negotiation
 
 Furthermore, it is also possible to send objects of any other type using Boost.Any.  The main structure used to pass information around the library is therefore the telnetpp::token, which is a Boost.Variant that may contain either a Boost.Any or a telnetpp::element.
 
+![Diagram of token contents](doc/img/telnet-token.png?raw-true)
+
 When communicating with the lower byte-streaming layer, telnetpp::elements are transformed into byte streams, which are represented by the u8stream type.
 
 After a telnetpp::token passes through the Telnet layer, this results in a telnetpp::stream_token, which is a Boost.Variant of a telnetpp::u8stream and a Boost.Any.  This enables layers above Telnet to talk to layers below Telnet.
