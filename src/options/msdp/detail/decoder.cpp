@@ -2,6 +2,7 @@
 #include "telnetpp/options/msdp/detail/protocol.hpp"
 #include <algorithm>
 #include <cassert>
+#include <functional>
 
 namespace telnetpp { namespace options { namespace msdp { namespace detail {
 
