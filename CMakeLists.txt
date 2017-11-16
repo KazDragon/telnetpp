@@ -193,6 +193,7 @@ set_target_properties(telnetpp
 target_include_directories(telnetpp
     PUBLIC
         $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
+        $<INSTALL_INTERFACE:include/telnetpp-${TELNETPP_VERSION}>
         "${Boost_INCLUDE_DIRS}"
 )
 
@@ -230,14 +231,6 @@ install(
         include/telnetpp-${TELNETPP_VERSION}
 )
 
-include(CMakePackageConfigHelpers)
-write_basic_package_version_file(
-    "${CMAKE_CURRENT_BINARY_DIR}/telnetpp-config-version.cmake"
-    VERSION
-        "${TELNETPP_VERSION}"
-    COMPATIBILITY AnyNewerVersion
-)
-
 export(
     EXPORT
         telnetpp-config
@@ -248,18 +241,23 @@ export(
 install(
     EXPORT
         telnetpp-config
-    FILE
-        telnetpp-config.cmake
     DESTINATION
         lib/telnetpp-${TELNETPP_VERSION}
 )
 
+include(CMakePackageConfigHelpers)
+write_basic_package_version_file(
+    "${CMAKE_CURRENT_BINARY_DIR}/telnetpp-config-version.cmake"
+    VERSION
+        "${TELNETPP_VERSION}"
+    COMPATIBILITY AnyNewerVersion
+)
+
 install(
     FILES
-        "${CMAKE_CURRENT_BINARY_DIR}/telnetpp-config.cmake"
         "${CMAKE_CURRENT_BINARY_DIR}/telnetpp-config-version.cmake"
     DESTINATION
-        lib/telnetpp-${TELNETPP_VERSION}/cmake
+        lib/telnetpp-${TELNETPP_VERSION}
 )
 
 if (GTEST_FOUND)
