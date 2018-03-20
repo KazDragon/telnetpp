@@ -22,20 +22,43 @@ static std::size_t constexpr input_buffer_size = 1023;
 class decompressor::impl
 {
 public :
-    impl()
-    {
-        auto response = inflateInit(&stream_);
-        assert(response == Z_OK);
-    }
+    // ======================================================================
+    // CONSTRUCTOR
+    // ======================================================================
+    impl() = default;
+
+    // ======================================================================
+    // COPY CONSTRUCTOR
+    // ======================================================================
+    impl(impl const &) = delete;
+
+    // ======================================================================
+    // COPY ASSIGNMENT
+    // ======================================================================
+    impl &operator=(impl const &) = delete;
 
     ~impl()
     {
-        auto response = inflateEnd(&stream_);
-        assert(response == Z_OK);
+        if (decompressing_)
+        {
+            auto response = inflateEnd(&stream_);
+            assert(response == Z_OK);
+        }
     }
 
+    // ======================================================================
+    // DECOMPRESS
+    // ======================================================================
     std::tuple<telnetpp::byte_stream, bool> decompress(byte data)
     {
+        if (!decompressing_)
+        {
+            auto result = inflateInit(&stream_);
+            assert(result == Z_OK);
+            
+            decompressing_ = true;
+        }
+
         std::tuple<telnetpp::byte_stream, bool> result;
         auto &decompressed_stream = std::get<0>(result);
         auto &is_end_of_stream    = std::get<1>(result);
@@ -68,17 +91,23 @@ public :
         return result;
     }
 
+    // ======================================================================
+    // END_DECOMPRESSION
+    // ======================================================================
     void end_decompression()
     {
-        auto result = inflateEnd(&stream_);
-        assert(result == Z_OK);
+        if (decompressing_)
+        {
+            auto result = inflateEnd(&stream_);
+            assert(result == Z_OK);
 
-        result = inflateInit(&stream_);
-        assert(result == Z_OK);
+            decompressing_ = false;
+        }
     }
 
 private :
     z_stream stream_ = {};
+    bool     decompressing_ = false;
 };
 
 // ==========================================================================
