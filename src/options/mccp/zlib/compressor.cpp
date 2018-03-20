@@ -24,11 +24,17 @@ struct compressor::impl
     // ======================================================================
     // CONSTRUCTOR
     // ======================================================================
-    impl()
-    {
-        auto result = deflateInit(&stream_, Z_DEFAULT_COMPRESSION);
-        assert(result == Z_OK);
-    }
+    impl() = default;
+
+    // ======================================================================
+    // COPY CONSTRUCTOR
+    // ======================================================================
+    impl(impl const &) = delete;
+
+    // ======================================================================
+    // ASSIGNMENT
+    // ======================================================================
+    impl &operator=(impl const &) = delete;
 
     // ======================================================================
     // DESTRUCTOR
@@ -88,28 +94,35 @@ struct compressor::impl
     // ======================================================================
     telnetpp::byte_stream end_compression()
     {
-        byte input_buffer[1] = {};
-        byte output_buffer[output_buffer_size];
+        if (compression_started_)
+        {
+            byte input_buffer[1] = {};
+            byte output_buffer[output_buffer_size];
 
-        stream_.avail_in  = 0;
-        stream_.next_in   = input_buffer;
-        stream_.avail_out = output_buffer_size;
-        stream_.next_out  = output_buffer;
+            stream_.avail_in  = 0;
+            stream_.next_in   = input_buffer;
+            stream_.avail_out = output_buffer_size;
+            stream_.next_out  = output_buffer;
 
-        auto result = deflate(&stream_, Z_FINISH);
-        assert(result == Z_STREAM_END);
+            auto result = deflate(&stream_, Z_FINISH);
+            assert(result == Z_STREAM_END);
 
-        auto const response =
-            telnetpp::byte_stream(output_buffer, stream_.next_out);
+            auto const response =
+                telnetpp::byte_stream(output_buffer, stream_.next_out);
 
-        result = deflateEnd(&stream_);
-        assert(result == Z_OK);
-        compression_started_ = false;
+            result = deflateEnd(&stream_);
+            assert(result == Z_OK);
+            compression_started_ = false;
 
-        return response;
+            return response;
+        }
+        else
+        {
+            return {};
+        }
     }
 
-    bool     compression_started_ = true;
+    bool     compression_started_ = false;
     z_stream stream_ = {};
 };
 

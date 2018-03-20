@@ -116,14 +116,28 @@ TEST(mccp_zlib_compressor_test, compressing_more_data_returns_more_data_compress
     assert(response == Z_OK);
 }
 
-TEST(mccp_zlib_compressor_test, end_compression_returns_compression_end_sequence)
+TEST(mccp_zlib_compressor_test, end_compression_after_no_compressed_data_returns_empty_stream)
 {
-    // It is possible to end the compression stream.  In this case, a sequence
-    // is returned that denotes the end of the compression stream.
+    // In the case that end_compression is requested, but the stream has not
+    // sent any data, there's no reason to send the command.
     telnetpp::options::mccp::zlib::compressor zlib_compressor;
     telnetpp::options::mccp::compressor &compressor = zlib_compressor;
 
     auto result = compressor.end_compression();
+
+    ASSERT_TRUE(result.empty());    
+}
+
+TEST(mccp_zlib_compressor_test, end_compression_after_compressed_data_returns_compression_end_sequence)
+{
+    // It is possible to end the compression stream .  In this case, a sequence
+    // is returned that denotes the end of the compression stream.
+    telnetpp::options::mccp::zlib::compressor zlib_compressor;
+    telnetpp::options::mccp::compressor &compressor = zlib_compressor;
+
+    auto const data_to_compress = telnetpp::byte_stream{1, 2, 3, 4, 5};
+    auto result0 = compressor.compress(data_to_compress);
+    auto result1 = compressor.end_compression();
 
     z_stream stream = {};
     int response = inflateInit(&stream);
@@ -131,14 +145,25 @@ TEST(mccp_zlib_compressor_test, end_compression_returns_compression_end_sequence
 
     telnetpp::byte output_buffer[1024] = {};
 
-    stream.avail_in  = result.size();
-    stream.next_in   = &result[0];
+    // Here we test how the stream was compressed by decompressing its result.
+    // First, decompress the compressed data.
+    stream.avail_in  = result0.size();
+    stream.next_in   = &result0[0];
+    stream.avail_out = sizeof(output_buffer);
+    stream.next_out  = output_buffer;
+
+    response = inflate(&stream, Z_SYNC_FLUSH);
+    ASSERT_EQ(Z_OK, response);
+
+    // Then we decompress the compressed end_compression() call.
+    stream.avail_in  = result1.size();
+    stream.next_in   = &result1[0];
     stream.avail_out = sizeof(output_buffer);
     stream.next_out  = output_buffer;
 
     response = inflate(&stream, Z_SYNC_FLUSH);
     ASSERT_EQ(Z_STREAM_END, response);
-
+    
     response = inflateEnd(&stream);
     assert(response == Z_OK);
 }
