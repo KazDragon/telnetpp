@@ -1,0 +1,11 @@
+[requires]
+boost/[>=1.66]@conan/stable
+zlib/[>=1.0]@conan/stable
+gsl-lite/[>=0.26]@nonstd-lite/stable
+fmt/[>=5.2]@bincrafters/stable
+
+[build_requires]
+gtest/[>=1.8.1]@bincrafters/stable
+
+[generators]
+cmake

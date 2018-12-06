@@ -5,40 +5,6 @@
 namespace telnetpp {
 
 // ==========================================================================
-// CONSTRUCTOR
-// ==========================================================================
-subnegotiation::subnegotiation(option_type option, byte_stream content)
-  : option_(std::move(option)),
-    content_(std::move(content))
-{
-}
-
-// ==========================================================================
-// OPTION
-// ==========================================================================
-option_type subnegotiation::option() const
-{
-    return option_;
-}
-
-// ==========================================================================
-// CONTENT
-// ==========================================================================
-byte_stream const &subnegotiation::content() const
-{
-    return content_;
-}
-
-// ==========================================================================
-// OPERATOR==
-// ==========================================================================
-bool operator==(subnegotiation const &lhs, subnegotiation const &rhs)
-{
-    return lhs.option() == rhs.option()
-        && lhs.content() == rhs.content();
-}
-
-// ==========================================================================
 // OPERATOR<<
 // ==========================================================================
 std::ostream &operator<<(std::ostream& out, const subnegotiation& sub)
