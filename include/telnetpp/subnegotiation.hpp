@@ -16,7 +16,7 @@ public :
     //* =====================================================================
     /// \brief Constructor
     //* =====================================================================
-    constexpr subnegotiation(option_type option, gsl::span<byte> content)
+    constexpr subnegotiation(option_type option, bytes content) noexcept
       : option_(std::move(option)),
         content_(std::move(content))
     {
@@ -25,7 +25,7 @@ public :
     //* =====================================================================
     /// \brief Returns the option for this subnegotiation.
     //* =====================================================================
-    constexpr option_type option() const
+    constexpr option_type option() const noexcept
     {
         return option_;
     }
@@ -33,7 +33,7 @@ public :
     //* =====================================================================
     /// \brief Returns the content for this subnegotiation.
     //* =====================================================================
-    constexpr gsl::span<byte> content() const
+    constexpr bytes content() const noexcept
     {
         return content_;
     }
@@ -41,14 +41,14 @@ public :
 
 private :
     option_type option_;
-    gsl::span<byte> content_;
+    bytes content_;
 };
 
 //* =========================================================================
 /// \brief Comparison function for subnegotiations
 //* =========================================================================
 TELNETPP_EXPORT
-constexpr bool operator==(subnegotiation const &lhs, subnegotiation const &rhs)
+constexpr bool operator==(subnegotiation const &lhs, subnegotiation const &rhs) noexcept
 {
     return lhs.option() == rhs.option()
         && lhs.content() == rhs.content();

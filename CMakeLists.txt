@@ -27,7 +27,7 @@ include(GenerateExportHeader)
 find_package(Doxygen)
 
 if (TELNETPP_SANITIZE)
-   list(APPEND CMAKE_CXX_FLAGS "-fsanitize=${TELNETPP_SANITIZE}")
+    list(APPEND CMAKE_CXX_FLAGS "-fsanitize=${TELNETPP_SANITIZE}")
     list(APPEND CMAKE_EXE_LINKER_FLAGS "-fsanitize=${TELNETPP_SANITIZE}")
 endif()
 
@@ -58,18 +58,19 @@ set (TELNETPP_PUBLIC_SOURCE_FILES
     src/subnegotiation.cpp
 )
 #
-#set (TELNETPP_PUBLIC_HEADER_FILES
+set (TELNETPP_PUBLIC_HEADER_FILES
 #    include/telnetpp/byte_converter.hpp
 #    include/telnetpp/client_option.hpp
-#    include/telnetpp/command.hpp
-#    include/telnetpp/core.hpp
-#    include/telnetpp/element.hpp
-#    include/telnetpp/negotiation.hpp
+    include/telnetpp/command.hpp
+    include/telnetpp/core.hpp
+    include/telnetpp/element.hpp
+    include/telnetpp/negotiation.hpp
+    include/telnetpp/parser.hpp
 #    include/telnetpp/server_option.hpp
 #    include/telnetpp/session.hpp
-#    include/telnetpp/subnegotiation.hpp
-#    include/telnetpp/telnetpp.hpp
-#    include/telnetpp/version.hpp
+    include/telnetpp/subnegotiation.hpp
+    include/telnetpp/telnetpp.hpp
+    include/telnetpp/version.hpp
 #    include/telnetpp/options/echo/client.hpp
 #    include/telnetpp/options/echo/server.hpp
 #    include/telnetpp/options/mccp/client.hpp
@@ -88,7 +89,7 @@ set (TELNETPP_PUBLIC_SOURCE_FILES
 #    include/telnetpp/options/subnegotiationless_server.hpp
 #    include/telnetpp/options/suppress_ga/client.hpp
 #    include/telnetpp/options/suppress_ga/server.hpp
-#)
+)
 #
 ## The zlib compressors for MCCP should only be compiled into the library
 ## if zlib is available.
@@ -113,19 +114,18 @@ set (TELNETPP_PUBLIC_SOURCE_FILES
 #    src/options/new_environ/detail/response_parser.cpp
 #    src/options/new_environ/detail/stream.cpp
 #    src/detail/generate_helper.cpp
-#    src/detail/parse_helper.cpp
 #    src/detail/registration.cpp
 #    src/detail/routing_visitor.cpp
 #)
 #
-#set (TELNETPP_PRIVATE_INCLUDE_FILES
+set (TELNETPP_PRIVATE_INCLUDE_FILES
 #    include/telnetpp/detail/command_router.hpp
 #    include/telnetpp/detail/export.hpp
 #    include/telnetpp/detail/generate_helper.hpp
 #    include/telnetpp/detail/generator.hpp
 #    include/telnetpp/detail/lambda_visitor.hpp
 #    include/telnetpp/detail/negotiation_router.hpp
-#    include/telnetpp/detail/parse_helper.hpp
+    include/telnetpp/detail/parse_helper.hpp
 #    include/telnetpp/detail/parser.hpp
 #    include/telnetpp/detail/registration.hpp
 #    include/telnetpp/detail/return_default.hpp
@@ -143,8 +143,8 @@ set (TELNETPP_PUBLIC_SOURCE_FILES
 #    include/telnetpp/options/new_environ/detail/response_parser.hpp
 #    include/telnetpp/options/new_environ/detail/stream.hpp
 #    include/telnetpp/options/suppress_ga/detail/protocol.hpp
-#)
-#
+)
+
 add_library(telnetpp
     ${TELNETPP_PUBLIC_HEADER_FILES}
     ${TELNETPP_PUBLIC_SOURCE_FILES}
@@ -154,24 +154,20 @@ add_library(telnetpp
 
 target_link_libraries(telnetpp
     PUBLIC
-        CONAN_PKG::boost
         CONAN_PKG::gsl-lite
+        CONAN_PKG::boost_any
+        CONAN_PKG::boost_container
+        CONAN_PKG::boost_variant
+        CONAN_PKG::zlib
 )
-#
-#if (ZLIB_FOUND)
-#    target_link_libraries(telnetpp
-#        PRIVATE
-#            ${ZLIB_LIBRARIES}
-#    )
-#endif()
-#
-#set_target_properties(telnetpp
-#    PROPERTIES
-#        CXX_VISIBILITY_PRESET hidden
-#        VERSION ${TELNETPP_VERSION}
-#        SOVERSION ${TELNETPP_VERSION}
-#)
-#
+
+set_target_properties(telnetpp
+    PROPERTIES
+        CXX_VISIBILITY_PRESET hidden
+        VERSION ${TELNETPP_VERSION}
+        SOVERSION ${TELNETPP_VERSION}
+)
+
 target_include_directories(telnetpp
     PUBLIC
         $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
@@ -188,55 +184,54 @@ configure_file(
     ${PROJECT_SOURCE_DIR}/include/telnetpp/version.hpp
     @ONLY)
 
-#install(
-#    TARGETS
-#        telnetpp
-#    EXPORT
-#        telnetpp-config
-#    ARCHIVE DESTINATION
-#        lib/telnetpp-${TELNETPP_VERSION}
-#    LIBRARY DESTINATION
-#        lib/telnetpp-${TELNETPP_VERSION}
-#)
-#
-#install(
-#    DIRECTORY
-#        include/
-#    DESTINATION
-#        include/telnetpp-${TELNETPP_VERSION}
-#)
-#
-#export(
-#    EXPORT
-#        telnetpp-config
-#    FILE
-#        "${CMAKE_CURRENT_BINARY_DIR}/telnetpp-config.cmake"
-#)
-#
-#install(
-#    EXPORT
-#        telnetpp-config
-#    DESTINATION
-#        lib/telnetpp-${TELNETPP_VERSION}
-#)
-#
-#include(CMakePackageConfigHelpers)
-#write_basic_package_version_file(
-#    "${CMAKE_CURRENT_BINARY_DIR}/telnetpp-config-version.cmake"
-#    VERSION
-#        "${TELNETPP_VERSION}"
-#    COMPATIBILITY AnyNewerVersion
-#)
-#
-#install(
-#    FILES
-#        "${CMAKE_CURRENT_BINARY_DIR}/telnetpp-config-version.cmake"
-#    DESTINATION
-#        lib/telnetpp-${TELNETPP_VERSION}
-#)
-#
-#if (GTEST_FOUND)
-    enable_testing()
+install(
+    TARGETS
+        telnetpp
+    EXPORT
+        telnetpp-config
+    ARCHIVE DESTINATION
+        lib/telnetpp-${TELNETPP_VERSION}
+    LIBRARY DESTINATION
+        lib/telnetpp-${TELNETPP_VERSION}
+)
+
+install(
+    DIRECTORY
+        include/
+    DESTINATION
+        include/telnetpp-${TELNETPP_VERSION}
+)
+
+export(
+    EXPORT
+        telnetpp-config
+    FILE
+        "${CMAKE_CURRENT_BINARY_DIR}/telnetpp-config.cmake"
+)
+
+install(
+    EXPORT
+        telnetpp-config
+    DESTINATION
+        lib/telnetpp-${TELNETPP_VERSION}
+)
+
+include(CMakePackageConfigHelpers)
+write_basic_package_version_file(
+    "${CMAKE_CURRENT_BINARY_DIR}/telnetpp-config-version.cmake"
+    VERSION
+        "${TELNETPP_VERSION}"
+    COMPATIBILITY AnyNewerVersion
+)
+
+install(
+    FILES
+        "${CMAKE_CURRENT_BINARY_DIR}/telnetpp-config-version.cmake"
+    DESTINATION
+        lib/telnetpp-${TELNETPP_VERSION}
+)
+
+enable_testing()
 
 #    set (telnetpp_tester_external_tests
 #        test/byte_converter_test.cpp
@@ -301,40 +296,36 @@ configure_file(
 #        test/expect_elements.cpp
     )
 
-    message("${CMAKE_THREAD_LIBS_INIT}")
     target_link_libraries(telnetpp_tester
         telnetpp
-        ${CONAN_LIBS_GTEST}
-        #${ZLIB_LIBRARIES}
+        CONAN_PKG::gtest
     )
 
     add_test(telnetpp_test telnetpp_tester)
-#endif()
 
-## Add a rule for generating documentation
-#if (DOXYGEN_FOUND)
-#    configure_file(
-#        ${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile.in
-#        ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile
-#        @ONLY)
-#
-#    add_custom_target(telnetpp_doc
-#        ${DOXYGEN_EXECUTABLE} ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile
-#        WORKING_DIRECTORY
-#            ${CMAKE_CURRENT_BINARY_DIR}
-#        COMMENT
-#            "Generate API documentation with Doxygen" VERBATIM
-#    )
-#endif()
-#
-## Add customizations for packaging
-#set(CPACK_PACKAGE_NAME "Telnet++")
-#set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Telnet++")
-#set(CPACK_PACKAGE_VENDOR "Matthew Chaplain")
-#set(CPACK_PACKAGE_DESCRIPTION_FILE "${PROJECT_SOURCE_DIR}/README.md")
-#set(CPACK_RESOURCE_FILE_LICENSE "${PROJECT_SOURCE_DIR}/LICENSE")
-#set(CPACK_PACKAGE_VERSION_MAJOR ${TELNETPP_VERSION_MAJOR})
-#set(CPACK_PACKAGE_VERSION_MINOR ${TELNETPP_VERSION_MINOR})
-#set(CPACK_PACKAGE_VERSION_PATCH ${TELNETPP_VERSION_PATCH})
-#include(CPack)
-#
+# Add a rule for generating documentation
+if (DOXYGEN_FOUND)
+    configure_file(
+        ${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile.in
+        ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile
+        @ONLY)
+
+    add_custom_target(telnetpp_doc
+        ${DOXYGEN_EXECUTABLE} ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile
+        WORKING_DIRECTORY
+            ${CMAKE_CURRENT_BINARY_DIR}
+        COMMENT
+            "Generate API documentation with Doxygen" VERBATIM
+    )
+endif()
+
+# Add customizations for packaging
+set(CPACK_PACKAGE_NAME "Telnet++")
+set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Telnet++")
+set(CPACK_PACKAGE_VENDOR "Matthew Chaplain")
+set(CPACK_PACKAGE_DESCRIPTION_FILE "${PROJECT_SOURCE_DIR}/README.md")
+set(CPACK_RESOURCE_FILE_LICENSE "${PROJECT_SOURCE_DIR}/LICENSE")
+set(CPACK_PACKAGE_VERSION_MAJOR ${TELNETPP_VERSION_MAJOR})
+set(CPACK_PACKAGE_VERSION_MINOR ${TELNETPP_VERSION_MINOR})
+set(CPACK_PACKAGE_VERSION_PATCH ${TELNETPP_VERSION_PATCH})
+include(CPack)

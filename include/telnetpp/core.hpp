@@ -1,6 +1,7 @@
 #pragma once
 
 #include "telnetpp/detail/export.hpp"
+#include <gsl-lite.h>
 #include <cstdint>
 
 namespace telnetpp {
@@ -28,5 +29,12 @@ static constexpr command_type const wont = 252;
 static constexpr command_type const do_  = 253;
 static constexpr command_type const dont = 254;
 static constexpr command_type const iac  = 255; // Interpret As Command
+
+// A stream of bytes in Telnet++ is exposed as a non-owning span.  It is
+// expected that the data will live for no longer than any function in
+// which it is found.  For that reason, these spans should never be stored.
+// if this is necessary, it must be converted into a longer-term data
+// structure, e.g. a std::vector, or std::basic_string<byte>.
+using bytes = gsl::span<byte const>;
 
 }

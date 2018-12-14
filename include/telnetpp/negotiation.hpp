@@ -15,7 +15,7 @@ public :
     //* =====================================================================
     /// \brief Constructor
     //* =====================================================================
-    constexpr negotiation(negotiation_type request, option_type option)
+    constexpr negotiation(negotiation_type request, option_type option) noexcept
       : request_(request),
         option_(option)
     {
@@ -25,7 +25,7 @@ public :
     /// \brief Returns the request (will, wont, do, dont) of this
     /// negotiation.
     //* =====================================================================
-    constexpr negotiation_type request() const
+    constexpr negotiation_type request() const noexcept
     {
         return request_;
     }
@@ -33,7 +33,7 @@ public :
     //* =====================================================================
     /// \brief Returns the option (e.g. echo, naws) of this negotiation
     //* =====================================================================
-    constexpr option_type option() const
+    constexpr option_type option() const noexcept
     {
         return option_;
     }
@@ -46,7 +46,7 @@ private :
 //* =========================================================================
 /// \brief Comparison function for negotiations
 //* =========================================================================
-constexpr bool operator==(negotiation const &lhs, negotiation const &rhs)
+constexpr bool operator==(negotiation const &lhs, negotiation const &rhs) noexcept
 {
     return lhs.request() == rhs.request()
         && lhs.option() == rhs.option();
@@ -55,7 +55,7 @@ constexpr bool operator==(negotiation const &lhs, negotiation const &rhs)
 //* =========================================================================
 /// \brief Ordering function for negotiations
 //* =========================================================================
-constexpr bool operator<(negotiation const &lhs, negotiation const &rhs)
+constexpr bool operator<(negotiation const &lhs, negotiation const &rhs) noexcept
 {
     return lhs.request() < rhs.request()
         || (!(rhs.request() < lhs.request()) && lhs.option() < rhs.option());
