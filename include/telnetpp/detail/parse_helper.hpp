@@ -79,7 +79,7 @@ static constexpr void emit_negotiation(parser_state &state, Continuation &&cont)
 /// \exclude
 //* =========================================================================
 template <typename Continuation>
-static constexpr void emit_subnegotiation(parser_state &state, Continuation &&cont)
+static void emit_subnegotiation(parser_state &state, Continuation &&cont)
 {
     telnetpp::bytes content{state.token_begin, state.token_end};
 
