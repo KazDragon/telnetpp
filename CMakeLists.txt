@@ -64,6 +64,7 @@ set (TELNETPP_PUBLIC_HEADER_FILES
     include/telnetpp/command.hpp
     include/telnetpp/core.hpp
     include/telnetpp/element.hpp
+    include/telnetpp/generator.hpp
     include/telnetpp/negotiation.hpp
     include/telnetpp/parser.hpp
 #    include/telnetpp/server_option.hpp
@@ -113,17 +114,15 @@ set (TELNETPP_PUBLIC_HEADER_FILES
 #    src/options/new_environ/detail/request_parser.cpp
 #    src/options/new_environ/detail/response_parser.cpp
 #    src/options/new_environ/detail/stream.cpp
-#    src/detail/generate_helper.cpp
 #    src/detail/registration.cpp
 #    src/detail/routing_visitor.cpp
 #)
 #
-set (TELNETPP_PRIVATE_INCLUDE_FILES
+set (TELNETPP_PRIVATE_HEADER_FILES
 #    include/telnetpp/detail/command_router.hpp
 #    include/telnetpp/detail/export.hpp
-#    include/telnetpp/detail/generate_helper.hpp
-#    include/telnetpp/detail/generator.hpp
-#    include/telnetpp/detail/lambda_visitor.hpp
+    include/telnetpp/detail/generate_helper.hpp
+    include/telnetpp/detail/lambda_visitor.hpp
 #    include/telnetpp/detail/negotiation_router.hpp
     include/telnetpp/detail/parse_helper.hpp
 #    include/telnetpp/detail/parser.hpp
@@ -233,33 +232,35 @@ install(
 
 enable_testing()
 
-#    set (telnetpp_tester_external_tests
-#        test/byte_converter_test.cpp
-#        test/client_option_test.cpp
-#        test/command_router_test.cpp
-#        test/echo_client_test.cpp
-#        test/echo_server_test.cpp
-#        test/mccp_client_test.cpp
-#        test/mccp_codec_test.cpp
-#        test/mccp_server_test.cpp
-#        test/msdp_client_test.cpp
-#        test/msdp_server_test.cpp
-#        test/msdp_server_robustness_test.cpp
-#        test/naws_client_test.cpp
-#        test/naws_server_test.cpp
-#        test/new_environ_client_test.cpp
-#        test/new_environ_server_test.cpp
-#        test/negotiation_router_test.cpp
-#        test/pass_through_test.cpp
-#        test/q_method_test.cpp
-#        test/server_option_test.cpp
-#        test/session_test.cpp
-#        test/subnegotiation_router_test.cpp
-#        test/suppress_ga_client_test.cpp
-#        test/suppress_ga_server_test.cpp
-#        test/terminal_type_client_test.cpp
-#    )
-#
+set (telnetpp_tester_external_tests
+#    test/byte_converter_test.cpp
+#    test/client_option_test.cpp
+#    test/command_router_test.cpp
+#    test/echo_client_test.cpp
+#    test/echo_server_test.cpp
+    test/generator_test.cpp
+#    test/mccp_client_test.cpp
+#    test/mccp_codec_test.cpp
+#    test/mccp_server_test.cpp
+#    test/msdp_client_test.cpp
+#    test/msdp_server_test.cpp
+#    test/msdp_server_robustness_test.cpp
+#    test/naws_client_test.cpp
+#    test/naws_server_test.cpp
+#    test/new_environ_client_test.cpp
+#    test/new_environ_server_test.cpp
+#    test/negotiation_router_test.cpp
+#    test/pass_through_test.cpp
+    test/parser_test.cpp
+#    test/q_method_test.cpp
+#    test/server_option_test.cpp
+#    test/session_test.cpp
+#    test/subnegotiation_router_test.cpp
+#    test/suppress_ga_client_test.cpp
+#    test/suppress_ga_server_test.cpp
+#    test/terminal_type_client_test.cpp
+)
+
 #    # The tests for the zlib compressors for MCCP should only be compiled into
 #    # the executable if zlib is available.
 #    if (ZLIB_FOUND)
@@ -271,8 +272,6 @@ enable_testing()
 #    endif()
 #
     set (telnetpp_tester_internal_tests
-        test/parser_test.cpp
-#        test/generator_test.cpp
 #        test/routing_visitor_test.cpp
     )
 

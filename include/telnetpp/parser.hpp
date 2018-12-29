@@ -7,11 +7,10 @@ namespace telnetpp {
 
 //* =========================================================================
 /// \brief Parse a series of bytes into a stream of Telnet tokens
-/// \param begin a reference to the start of the series.  This will be
-///        modified to be an iterator to the position after the last
-///        completely-parsed token.
-/// \param end an iterator to one past the end of the series.
-/// \returns a collection of completely parsed tokens.
+/// \param bytes a span representing the bytes to parse.
+/// \param cont a continuation that will be called for each complete
+///        token that is parsed out of the data.
+/// \returns the remaining bytes that did not form a complete token.
 //* =========================================================================
 template <typename Continuation>
 constexpr bytes parse(bytes data, Continuation &&cont)
