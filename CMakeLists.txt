@@ -73,8 +73,8 @@ set (TELNETPP_PUBLIC_HEADER_FILES
     include/telnetpp/subnegotiation.hpp
     include/telnetpp/telnetpp.hpp
     include/telnetpp/version.hpp
-#    include/telnetpp/options/echo/client.hpp
-#    include/telnetpp/options/echo/server.hpp
+    include/telnetpp/options/echo/client.hpp
+    include/telnetpp/options/echo/server.hpp
 #    include/telnetpp/options/mccp/client.hpp
 #    include/telnetpp/options/mccp/codec.hpp
 #    include/telnetpp/options/mccp/decompressor.hpp
@@ -87,8 +87,8 @@ set (TELNETPP_PUBLIC_HEADER_FILES
 #    include/telnetpp/options/new_environ/client.hpp
 #    include/telnetpp/options/new_environ/server.hpp
 #    include/telnetpp/options/terminal_type/client.hpp
-#    include/telnetpp/options/subnegotiationless_client.hpp
-#    include/telnetpp/options/subnegotiationless_server.hpp
+    include/telnetpp/options/subnegotiationless_client.hpp
+    include/telnetpp/options/subnegotiationless_server.hpp
 #    include/telnetpp/options/suppress_ga/client.hpp
 #    include/telnetpp/options/suppress_ga/server.hpp
 )
@@ -133,7 +133,7 @@ set (TELNETPP_PRIVATE_HEADER_FILES
 #    include/telnetpp/detail/router.hpp
 #    include/telnetpp/detail/routing_visitor.hpp
 #    include/telnetpp/detail/subnegotiation_router.hpp
-#    include/telnetpp/options/echo/detail/protocol.hpp
+    include/telnetpp/options/echo/detail/protocol.hpp
 #    include/telnetpp/options/mccp/detail/protocol.hpp
 #    include/telnetpp/options/msdp/detail/decoder.hpp
 #    include/telnetpp/options/msdp/detail/encoder.hpp
@@ -238,8 +238,8 @@ set (telnetpp_tester_external_tests
 #    test/byte_converter_test.cpp
     test/client_option_test.cpp
 #    test/command_router_test.cpp
-#    test/echo_client_test.cpp
-#    test/echo_server_test.cpp
+    test/echo_client_test.cpp
+    test/echo_server_test.cpp
     test/generator_test.cpp
 #    test/mccp_client_test.cpp
 #    test/mccp_codec_test.cpp
