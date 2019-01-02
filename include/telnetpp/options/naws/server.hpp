@@ -9,8 +9,9 @@ namespace telnetpp { namespace options { namespace naws {
 //* =========================================================================
 /// \brief An implementation of the server side of the Telnet NAWS option.
 //* =========================================================================
-class TELNETPP_EXPORT server : public telnetpp::server_option {
-public :
+class TELNETPP_EXPORT server : public telnetpp::server_option 
+{
+public:
     using window_dimension = std::uint16_t;
 
     //* =====================================================================
@@ -21,22 +22,47 @@ public :
     //* =====================================================================
     /// \brief Sets the window size that this option will report.
     //* =====================================================================
-    std::vector<telnetpp::token> set_window_size(
+    template <typename Continuation>
+    void set_window_size(
         window_dimension width,
-        window_dimension height);
+        window_dimension height,
+        Continuation &&cont)
+    {
+        window_size_ = std::make_pair(width, height);
+        
+        if (active())
+        {
+            report_window_size(cont);
+        }
+    }
 
-private :
+private:
     //* =====================================================================
-    /// \brief Handle a negotiation that has been received in the active
-    /// state.
+    /// \brief Called when a subnegotiation is received while the option is
+    /// active.  Override for option-specific functionality.
     //* =====================================================================
-    std::vector<telnetpp::token> handle_subnegotiation(
-        byte_stream const &content) override;
+    void handle_subnegotiation(
+        telnetpp::bytes content,
+        continuation const &cont) override;
 
     //* =====================================================================
     /// \brief Report the window size.
     //* =====================================================================
-    std::vector<telnetpp::token> report_window_size();
+    template <typename Continuation>
+    void report_window_size(Continuation &&send)
+    {
+        if (window_size_.is_initialized())
+        {
+            telnetpp::byte const content[] = {
+                byte(window_size_->first >> 8),
+                byte(window_size_->first & 0xFF),
+                byte(window_size_->second >> 8),
+                byte(window_size_->second & 0xFF)
+            };
+
+            send(telnetpp::subnegotiation(code(), content));
+        }
+    }
 
     boost::optional<std::pair<
         window_dimension, window_dimension

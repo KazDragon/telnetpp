@@ -1,54 +1,104 @@
 #include "telnetpp/options/naws/server.hpp"
-#include "expect_elements.hpp"
 #include <gtest/gtest.h>
 
 TEST(naws_server_test, option_is_naws)
 {
     telnetpp::options::naws::server server;
-    ASSERT_EQ(31, server.option());
+    ASSERT_EQ(31, server.code());
 }
 
 TEST(naws_server_test, activation_with_no_screen_size_sends_nothing)
 {
     telnetpp::options::naws::server server;
-    server.activate();
-    auto result = server.negotiate(telnetpp::do_);
 
-    ASSERT_EQ(size_t{0}, result.size());
+    std::vector<telnetpp::element> const expected_result = {
+    };
+
+    std::vector<telnetpp::element> received_result;
+    server.activate([&](auto &&){});
+    server.negotiate(
+        telnetpp::do_,
+        [&](telnetpp::element const &elem)
+        {
+            received_result.push_back(elem);
+        });
+    assert(server.active());
+
+    ASSERT_EQ(expected_result, received_result);
 }
 
 TEST(naws_server_test, setting_screen_size_when_not_activated_sends_nothing)
 {
     telnetpp::options::naws::server server;
-    auto result = server.set_window_size(80, 24);
 
-    ASSERT_EQ(size_t{0}, result.size());
+    std::vector<telnetpp::element> const expected_result = {
+    };
+
+    std::vector<telnetpp::element> received_result;
+
+    server.set_window_size(
+        80, 24, 
+        [&](telnetpp::element const &elem)
+        {
+            received_result.push_back(elem);
+        });
+
+    ASSERT_EQ(expected_result, received_result);
 }
 
 TEST(naws_server_test, activation_with_screen_size_sends_screen_size)
 {
     telnetpp::options::naws::server server;
-    server.set_window_size(80, 24);
-    server.activate();
+    server.set_window_size(80, 24, [&](auto &&){});
 
-    expect_elements(
-        { telnetpp::subnegotiation(
-            server.option(),
-            { 0, 80, 0, 24 })
-        },
-        server.negotiate(telnetpp::do_));
+    telnetpp::byte const expected_content[] = {
+        0, 80, 0, 24
+    };
+
+    std::vector<telnetpp::element> const expected_result = {
+        telnetpp::subnegotiation{server.code(), expected_content}
+    };
+
+    std::vector<telnetpp::element> received_result;
+    server.activate([&](auto &&){});
+    server.negotiate(
+        telnetpp::do_,
+        [&](telnetpp::element const &elem)
+        {
+            received_result.push_back(elem);
+
+            // Have to check here due to the span's short life.
+            ASSERT_EQ(expected_result, received_result);
+        });
+    assert(server.active());
+
+    ASSERT_EQ(size_t{1}, received_result.size());
 }
 
 TEST(naws_server_test, setting_screen_size_when_activated_sends_screen_size)
 {
     telnetpp::options::naws::server server;
-    server.activate();
-    server.negotiate(telnetpp::do_);
+    server.activate([&](auto &&){});
+    server.negotiate(telnetpp::do_, [&](auto &&){});
 
-    expect_elements(
-        { telnetpp::subnegotiation(
-            server.option(),
-            { 0, 80, 0, 24 })
-        },
-        server.set_window_size(80, 24));
+    telnetpp::byte const expected_content[] = {
+        0, 80, 0, 24
+    };
+
+    std::vector<telnetpp::element> const expected_result = {
+        telnetpp::subnegotiation{server.code(), expected_content}
+    };
+
+    std::vector<telnetpp::element> received_result;
+    server.set_window_size(
+        80, 24,
+        [&](telnetpp::element const &elem)
+        {
+            received_result.push_back(elem);
+
+            // Have to check here due to the span's short life.
+            ASSERT_EQ(expected_result, received_result);
+        });
+
+    ASSERT_EQ(size_t{1}, received_result.size());
 }
