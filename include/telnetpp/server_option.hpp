@@ -45,4 +45,6 @@ protected:
     explicit server_option(option_type code);
 };
 
+using server_options = gsl::span<server_option>;
+
 }

@@ -45,4 +45,6 @@ protected:
     explicit client_option(option_type code);
 };
 
+using client_options = gsl::span<client_option>;
+
 }

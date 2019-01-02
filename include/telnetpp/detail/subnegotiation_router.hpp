@@ -19,7 +19,9 @@ class subnegotiation_router
   : public router<
         option_type,
         subnegotiation,
-        std::vector<telnetpp::token>,
+        void (
+            telnetpp::subnegotiation, 
+            std::function<void (telnetpp::element const &)>),
         detail::subnegotiation_router_key_from_message_policy
     >
 {

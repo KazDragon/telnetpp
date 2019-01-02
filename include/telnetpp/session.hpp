@@ -1,9 +1,14 @@
 #pragma once
 
+#include "telnetpp/generator.hpp"
+#include "telnetpp/parser.hpp"
+#include "telnetpp/detail/lambda_visitor.hpp"
 #include "telnetpp/client_option.hpp"
 #include "telnetpp/server_option.hpp"
-#include "telnetpp/detail/routing_visitor.hpp"
-#include <functional>
+#include "telnetpp/detail/command_router.hpp"
+#include "telnetpp/detail/negotiation_router.hpp"
+#include "telnetpp/detail/subnegotiation_router.hpp"
+#include <string>
 
 namespace telnetpp {
 
@@ -92,17 +97,103 @@ class TELNETPP_EXPORT session
 public :
     //* =====================================================================
     /// \brief Constructor
-    /// \param on_text a function to be called whenever text is received.
     //* =====================================================================
-    explicit session(
-        std::function<std::vector<token> (std::string const&)> on_text);
+    session();
+
+    //* =====================================================================
+    /// \brief Sends non-Telnet data
+    /// \param content The data to send
+    /// \param send_continuation A continuation that is used to send the 
+    /// resultant stream of bytes onward.
+    //* =====================================================================
+    template <typename SendContinuation>
+    void send(
+        telnetpp::bytes content,
+        SendContinuation &&send_continuation)
+    {
+        telnetpp::element const elems[] = { content };
+        telnetpp::generate(elems, send_continuation);
+    }
+
+    //* =====================================================================
+    /// \brief Send a Telnet command
+    /// \param cmd The command to send
+    /// \param send_continuation A continuation that is used to send the 
+    /// resultant stream of bytes onward.
+    //* =====================================================================
+    template <typename SendContinuation>
+    void send(
+        telnetpp::command const &cmd, 
+        SendContinuation &&send_continuation)
+    {
+        telnetpp::element const elems[] = { cmd };
+        telnetpp::generate(elems, send_continuation);
+    }
+
+    //* =====================================================================
+    /// \brief Receive a stream of bytes.
+    /// \param content The content of the data.
+    /// \param data_continuation A continuation for any data received that is
+    /// not encapsulated as Telnet protocol units (i.e. plain text).
+    /// \param send_continuation A continuation that is used to send any 
+    /// response that occur as a consequence of receiving the data.
+    //* =====================================================================
+    template <typename DataContinuation, typename SendContinuation>
+    void receive(
+        telnetpp::bytes content,
+        DataContinuation &&data_continuation,
+        SendContinuation &&send_continuation)
+    {
+        // TODO: The vast majority of the time, a packet will be completely 
+        // parsed and require no temporary storage.  Optimize for that case.
+        unparsed_buffer_.insert(
+            unparsed_buffer_.end(),
+            content.begin(),
+            content.end());
+
+        auto remainder = telnetpp::parse(
+            unparsed_buffer_,
+            [&](telnetpp::element const &elem)
+            {
+                auto generator = [&](telnetpp::element const &elem)
+                {
+                    telnetpp::element const elems[] = { elem };
+                    telnetpp::generate(elems, send_continuation);
+                };
+
+                detail::visit_lambdas(
+                    elem,
+                    [&](telnetpp::bytes content)
+                    {
+                        data_continuation(content, generator);
+                    },
+                    [&](telnetpp::command const &cmd)
+                    {
+                        command_router_(cmd, generator);
+                    },
+                    [&](telnetpp::negotiation const &neg)
+                    {
+                        negotiation_router_(neg, generator);
+                    },
+                    [&](telnetpp::subnegotiation const &sub)
+                    {
+                        subnegotiation_router_(sub, generator);
+                    });
+            });
+
+        unparsed_buffer_.substr(unparsed_buffer_.size() - remainder.size());
+    }
 
     //* =====================================================================
     /// \brief Installs a handler for the given command.
     //* =====================================================================
+    template <typename Continuation>
     void install(
-        command const &cmd,
-        std::function<std::vector<token> (command const &)> const &on_command);
+        telnetpp::command_type cmd,
+        Continuation &&cont)
+    {
+        command_router_.register_route(cmd, cont);
+    }
 
     //* =====================================================================
     /// \brief Installs a client option.
@@ -114,28 +205,11 @@ public :
     //* =====================================================================
     void install(server_option &option);
 
-    //* =====================================================================
-    /// \brief Receive a stream of bytes.
-    /// \returns a stream of tokens generated as a result of receiving this
-    ///          stream.
-    //* =====================================================================
-    std::vector<token> receive(byte_stream const &stream);
-
-    //* =====================================================================
-    /// \brief "Sends" a stream of tokens by converting them to a stream of
-    /// bytes.  Any non-element tokens are passed through unchanged.  This
-    /// allows the result of receive() to be passed straight back to
-    /// generate for immediate transmission.
-    //* =====================================================================
-    std::vector<stream_token> send(std::vector<token> const &tokens);
-
-private :
-    byte_stream                             unparsed_buffer_;
+private:
+    std::basic_string<telnetpp::byte>       unparsed_buffer_;
     telnetpp::detail::command_router        command_router_;
     telnetpp::detail::negotiation_router    negotiation_router_;
     telnetpp::detail::subnegotiation_router subnegotiation_router_;
-    telnetpp::detail::routing_visitor       visitor_;
-
 };
 
 }

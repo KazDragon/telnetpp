@@ -1,5 +1,6 @@
 #pragma once
 
+#include "telnetpp/element.hpp"
 #include "telnetpp/detail/negotiation_router.hpp"
 #include "telnetpp/detail/subnegotiation_router.hpp"
 #include "telnetpp/client_option.hpp"
@@ -33,10 +34,11 @@ void register_route_from_negotiation_to_option(
     negotiation_type    request,
     NegotiableOption   &option)
 {
-    route.register_route(negotiation(request, option.option()),
-        [&option, request](auto &&neg)
+    route.register_route(
+        negotiation{request, option.code()},
+        [&option, request](auto &&neg, auto &&cont)
         {
-            return option.negotiate(request);
+            return option.negotiate(request, cont);
         });
 }
 
@@ -48,10 +50,10 @@ void register_route_from_subnegotiation_to_option(
     subnegotiation_router &route,
     SubnegotiableOption   &option)
 {
-    route.register_route(option.option(),
-        [&option](auto &&sub)
+    route.register_route(option.code(),
+        [&option](auto &&sub, auto &&cont)
         {
-            return option.subnegotiate(sub.content());
+            return option.subnegotiate(sub.content(), cont);
         });
 }
 

@@ -22,6 +22,11 @@ public:
         void (telnetpp::element const &)
     >;
 
+    static constexpr telnetpp::command_type const local_positive  = LocalPositive;
+    static constexpr telnetpp::command_type const local_negative  = LocalNegative;
+    static constexpr telnetpp::command_type const remote_positive = RemotePositive;
+    static constexpr telnetpp::command_type const remote_negative = RemoteNegative;
+
     //* =====================================================================
     /// Constructor
     //* =====================================================================
@@ -62,7 +67,7 @@ public:
         switch (state_)
         {
             case internal_state::inactive:
-                send(telnetpp::negotiation{LocalPositive, code_});
+                send(telnetpp::negotiation{local_positive, code_});
                 state_ = internal_state::activating;
                 break;
 
@@ -90,7 +95,7 @@ public:
         switch (state_)
         {
             case internal_state::active:
-                send(telnetpp::negotiation{LocalNegative, code_});
+                send(telnetpp::negotiation{local_negative, code_});
                 state_ = internal_state::deactivating;
                 on_state_changed(send);
                 break;
@@ -113,26 +118,27 @@ public:
     /// This should be called when the remote side either initiates a 
     /// negotiation request or responds to an ongoing request.
     //* =====================================================================
-    template <class Continuation>
-    void negotiate(telnetpp::negotiation_type neg, Continuation &&send)
+    void negotiate(
+        telnetpp::negotiation_type neg, 
+        continuation const &send)
     {
         switch (state_)
         {
             case internal_state::inactive:
-                if (neg == RemotePositive)
+                if (neg == remote_positive)
                 {
-                    send(telnetpp::negotiation{LocalPositive, code_});
+                    send(telnetpp::negotiation{local_positive, code_});
                     state_ = internal_state::active;
                     on_state_changed(send);
                 }
                 else
                 {
-                    send(telnetpp::negotiation{LocalNegative, code_});
+                    send(telnetpp::negotiation{local_negative, code_});
                 }
                 break;
 
             case internal_state::activating:
-                if (neg == RemotePositive)
+                if (neg == remote_positive)
                 {
                     state_ = internal_state::active;
                     on_state_changed(send);
@@ -145,20 +151,20 @@ public:
                 break;
 
             case internal_state::active:
-                if (neg == RemotePositive)
+                if (neg == remote_positive)
                 {
-                    send(telnetpp::negotiation{LocalPositive, code_});
+                    send(telnetpp::negotiation{local_positive, code_});
                 }
                 else
                 {
-                    send(telnetpp::negotiation{LocalNegative, code_});
+                    send(telnetpp::negotiation{local_negative, code_});
                     state_ = internal_state::inactive;
                     on_state_changed(send);
                 }
                 break;
 
             case internal_state::deactivating:
-                if (neg == RemotePositive)
+                if (neg == remote_positive)
                 {
                     state_ = internal_state::active;
                     on_state_changed(send);
@@ -181,10 +187,9 @@ public:
     /// This should be called when a subnegotiation sequence has been received
     /// from the remote.
     //* =====================================================================
-    template <typename Continuation>
     void subnegotiate(
         telnetpp::bytes content,
-        Continuation &&cont)
+        continuation const &cont)
     {
         if (state_ == internal_state::active)
         {

@@ -8,17 +8,19 @@ namespace telnetpp { namespace detail {
 
 struct command_router_key_from_message_policy
 {
-    static command key_from_message(command const &cmd)
+    static command_type key_from_message(command const &cmd)
     {
-        return cmd;
+        return cmd.value();
     }
 };
 
 class command_router
   : public router<
+        command_type,
         command,
-        command,
-        std::vector<token>,
+        void (
+            command const &,
+            std::function<void (telnetpp::element const &)>),
         detail::command_router_key_from_message_policy
     >
 {

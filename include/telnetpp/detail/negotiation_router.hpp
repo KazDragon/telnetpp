@@ -1,9 +1,8 @@
 #pragma once
 
 #include "telnetpp/detail/router.hpp"
-#include "telnetpp/negotiation.hpp"
 #include "telnetpp/element.hpp"
-#include <vector>
+#include "telnetpp/negotiation.hpp"
 
 namespace telnetpp { namespace detail {
 
@@ -26,7 +25,9 @@ class negotiation_router
   : public router<
         negotiation,
         negotiation,
-        std::vector<telnetpp::token>,
+        void (
+            telnetpp::negotiation, 
+            std::function<void (telnetpp::element const &)>),
         detail::negotiation_router_key_from_message_policy
     >
 {

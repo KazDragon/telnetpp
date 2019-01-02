@@ -37,7 +37,6 @@ if (TELNETPP_COVERAGE)
 endif()
 
 set (TELNETPP_PUBLIC_SOURCE_FILES
-#    src/byte_converter.cpp
     src/client_option.cpp
     src/command.cpp
     src/element.cpp
@@ -55,12 +54,11 @@ set (TELNETPP_PUBLIC_SOURCE_FILES
 #    src/options/new_environ/server.cpp
     src/options/terminal_type/client.cpp
     src/server_option.cpp
-#    src/session.cpp
+    src/session.cpp
     src/subnegotiation.cpp
 )
 #
 set (TELNETPP_PUBLIC_HEADER_FILES
-#    include/telnetpp/byte_converter.hpp
     include/telnetpp/client_option.hpp
     include/telnetpp/command.hpp
     include/telnetpp/core.hpp
@@ -69,7 +67,7 @@ set (TELNETPP_PUBLIC_HEADER_FILES
     include/telnetpp/negotiation.hpp
     include/telnetpp/parser.hpp
     include/telnetpp/server_option.hpp
-#    include/telnetpp/session.hpp
+    include/telnetpp/session.hpp
     include/telnetpp/subnegotiation.hpp
     include/telnetpp/telnetpp.hpp
     include/telnetpp/version.hpp
@@ -108,31 +106,28 @@ set (TELNETPP_PUBLIC_HEADER_FILES
 #        include/telnetpp/options/mccp/zlib/decompressor.hpp
 #    )
 #endif()
-#
-#set (TELNETPP_PRIVATE_SOURCE_FILES
+
+set (TELNETPP_PRIVATE_SOURCE_FILES
 #    src/options/msdp/detail/decoder.cpp
 #    src/options/msdp/detail/encoder.cpp
 #    src/options/new_environ/detail/request_parser.cpp
 #    src/options/new_environ/detail/response_parser.cpp
 #    src/options/new_environ/detail/stream.cpp
-#    src/detail/registration.cpp
-#    src/detail/routing_visitor.cpp
-#)
-#
+    src/detail/registration.cpp
+)
+
 set (TELNETPP_PRIVATE_HEADER_FILES
-#    include/telnetpp/detail/command_router.hpp
-#    include/telnetpp/detail/export.hpp
+    include/telnetpp/detail/command_router.hpp
+    include/telnetpp/detail/export.hpp
     include/telnetpp/detail/generate_helper.hpp
     include/telnetpp/detail/lambda_visitor.hpp
-#    include/telnetpp/detail/negotiation_router.hpp
+    include/telnetpp/detail/negotiation_router.hpp
     include/telnetpp/detail/option.hpp
     include/telnetpp/detail/parse_helper.hpp
-#    include/telnetpp/detail/parser.hpp
-#    include/telnetpp/detail/registration.hpp
-#    include/telnetpp/detail/return_default.hpp
-#    include/telnetpp/detail/router.hpp
-#    include/telnetpp/detail/routing_visitor.hpp
-#    include/telnetpp/detail/subnegotiation_router.hpp
+    include/telnetpp/detail/registration.hpp
+    include/telnetpp/detail/return_default.hpp
+    include/telnetpp/detail/router.hpp
+    include/telnetpp/detail/subnegotiation_router.hpp
     include/telnetpp/options/echo/detail/protocol.hpp
 #    include/telnetpp/options/mccp/detail/protocol.hpp
 #    include/telnetpp/options/msdp/detail/decoder.hpp
@@ -235,9 +230,8 @@ install(
 enable_testing()
 
 set (telnetpp_tester_external_tests
-#    test/byte_converter_test.cpp
     test/client_option_test.cpp
-#    test/command_router_test.cpp
+    test/command_router_test.cpp
     test/echo_client_test.cpp
     test/echo_server_test.cpp
     test/generator_test.cpp
@@ -251,13 +245,12 @@ set (telnetpp_tester_external_tests
 #    test/naws_server_test.cpp
 #    test/new_environ_client_test.cpp
 #    test/new_environ_server_test.cpp
-#    test/negotiation_router_test.cpp
-#    test/pass_through_test.cpp
+    test/negotiation_router_test.cpp
     test/parser_test.cpp
 #    test/q_method_test.cpp
     test/server_option_test.cpp
-#    test/session_test.cpp
-#    test/subnegotiation_router_test.cpp
+    test/session_test.cpp
+    test/subnegotiation_router_test.cpp
     test/suppress_ga_client_test.cpp
     test/suppress_ga_server_test.cpp
     test/terminal_type_client_test.cpp
@@ -274,7 +267,6 @@ set (telnetpp_tester_external_tests
 #    endif()
 #
     set (telnetpp_tester_internal_tests
-#        test/routing_visitor_test.cpp
     )
 
     # If we are building shared libraries, then we wont be able to test any of
