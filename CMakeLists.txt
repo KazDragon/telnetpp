@@ -38,8 +38,9 @@ endif()
 
 set (TELNETPP_PUBLIC_SOURCE_FILES
 #    src/byte_converter.cpp
-#    src/client_option.cpp
+    src/client_option.cpp
     src/command.cpp
+    src/element.cpp
     src/negotiation.cpp
 #    src/options/mccp/client.cpp
 #    src/options/mccp/codec.cpp
@@ -124,6 +125,7 @@ set (TELNETPP_PRIVATE_HEADER_FILES
     include/telnetpp/detail/generate_helper.hpp
     include/telnetpp/detail/lambda_visitor.hpp
 #    include/telnetpp/detail/negotiation_router.hpp
+    include/telnetpp/detail/option.hpp
     include/telnetpp/detail/parse_helper.hpp
 #    include/telnetpp/detail/parser.hpp
 #    include/telnetpp/detail/registration.hpp
@@ -154,8 +156,8 @@ add_library(telnetpp
 target_link_libraries(telnetpp
     PUBLIC
         CONAN_PKG::gsl-lite
-        CONAN_PKG::boost_any
         CONAN_PKG::boost_container
+        CONAN_PKG::boost_signals2
         CONAN_PKG::boost_variant
         CONAN_PKG::zlib
 )
@@ -234,7 +236,7 @@ enable_testing()
 
 set (telnetpp_tester_external_tests
 #    test/byte_converter_test.cpp
-#    test/client_option_test.cpp
+    test/client_option_test.cpp
 #    test/command_router_test.cpp
 #    test/echo_client_test.cpp
 #    test/echo_server_test.cpp

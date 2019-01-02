@@ -1,8 +1,6 @@
 #pragma once
 
-#include "telnetpp/element.hpp"
-#include <boost/signals2.hpp>
-#include <vector>
+#include "telnetpp/detail/option.hpp"
 
 namespace telnetpp {
 
@@ -31,103 +29,20 @@ namespace telnetpp {
 /// state.
 /// \see https://tools.ietf.org/html/std8
 //* =========================================================================
-class TELNETPP_EXPORT client_option {
-public :
-    //* =====================================================================
-    /// \brief An enumeration of the different states in which this option
-    /// can be.
-    //* =====================================================================
-    enum class state
-    {
-        inactive,
-        activating,
-        active,
-        deactivating,
-    };
-
-    //* =====================================================================
-    /// \brief Returns the option code.
-    //* =====================================================================
-    option_type option() const;
-
-    //* =====================================================================
-    /// \brief Flags the option as remotely activatable.
-    ///
-    /// Allows the option to be activated by the remote end.  That is,
-    /// if the option receives a WILL negotiation, it will respond with a
-    /// DO negotiation.  An option that has not have this function called
-    /// will instead respond with a DONT negotiation.
-    //* =====================================================================
-    void set_activatable();
-
-    //* =====================================================================
-    /// \brief Activates the option; sends a DO negotiation.
-    //* =====================================================================
-    std::vector<telnetpp::token> activate();
-
-    //* =====================================================================
-    /// \brief Deactivates the option; sends a DONT negotiation.
-    //* =====================================================================
-    std::vector<telnetpp::token> deactivate();
-
-    //* =====================================================================
-    /// \brief Returns true iff the option is active.
-    //* =====================================================================
-    bool is_active() const;
-
-    //* =====================================================================
-    /// \brief Makes a request of the option and returns the response from
-    /// that request.
-    //* =====================================================================
-    std::vector<telnetpp::token> negotiate(negotiation_type request);
-
-    //* =====================================================================
-    /// \brief Send a subnegotiation to the option and returns the response
-    /// from that subnegotiation.
-    //* =====================================================================
-    std::vector<telnetpp::token> subnegotiate(
-        telnetpp::byte_stream const &content);
-
-    //* =====================================================================
-    /// \brief A signal that you can connect to in order to detect changes
-    /// in the state of the option.
-    /// \par Usage
-    /// \code
-    /// my_option.on_state_changed.connect(
-    ///     [](telnetpp::client_option::state new_state)
-    ///         -> std::vector<telnetpp::token>
-    ///     {
-    ///         // Do something with the state change
-    ///         std::cout << "state is now: " << new_state << "\n";
-    ///         // return some vector of tokens, or an empty vector
-    ///         return {};
-    ///     });
-    /// \endcode
-    /// \see telnetpp::client_option::state
-    //* =====================================================================
-    boost::signals2::signal<
-        std::vector<telnetpp::token> (state new_state),
-        token_combiner
-    > on_state_changed;
-
-protected :
+class TELNETPP_EXPORT client_option
+  : public telnetpp::detail::option<
+        telnetpp::do_,
+        telnetpp::dont,
+        telnetpp::will,
+        telnetpp::wont
+    >
+{
+protected:
     //* =====================================================================
     /// \brief Constructor
-    /// \param option The Option Code of this option.
+    /// \param code The option code for this option.
     //* =====================================================================
-    explicit client_option(option_type option);
-
-private :
-    //* =====================================================================
-    /// \brief Handle a negotiation that has been received in the active
-    /// state.
-    //* =====================================================================
-    virtual std::vector<telnetpp::token> handle_subnegotiation(
-        telnetpp::byte_stream const &content) = 0;
-
-    state       state_       = state::inactive;
-    bool        activatable_ = false;
-    option_type option_;
+    explicit client_option(option_type code);
 };
 
 }
