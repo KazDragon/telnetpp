@@ -12,34 +12,16 @@ client::client()
 }
 
 // ==========================================================================
-// REQUEST_TERMINAL_TYPE
-// ==========================================================================
-std::vector<telnetpp::token> client::request_terminal_type()
-{
-    return {
-        telnetpp::element(
-            telnetpp::subnegotiation(option(), { detail::send }))
-    };
-}
-
-// ==========================================================================
 // HANDLE_SUBNEGOTIATION
 // ==========================================================================
-std::vector<telnetpp::token> client::handle_subnegotiation(
-    byte_stream const &content)
+void client::handle_subnegotiation(
+    telnetpp::bytes data,
+    continuation const &cont)
 {
-    auto begin = content.begin();
-    auto end   = content.end();
-
-    if (begin != end)
+    if (!data.empty() && data[0] == detail::is)
     {
-        if (*begin++ == detail::is)
-        {
-            return on_terminal_type({begin, end});
-        }
+        on_terminal_type(data.subspan(1), cont);
     }
-
-    return {};
 }
 
 }}}

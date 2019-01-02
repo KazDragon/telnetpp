@@ -53,7 +53,7 @@ set (TELNETPP_PUBLIC_SOURCE_FILES
 #    src/options/naws/server.cpp
 #    src/options/new_environ/client.cpp
 #    src/options/new_environ/server.cpp
-#    src/options/terminal_type/client.cpp
+    src/options/terminal_type/client.cpp
     src/server_option.cpp
 #    src/session.cpp
     src/subnegotiation.cpp
@@ -61,7 +61,7 @@ set (TELNETPP_PUBLIC_SOURCE_FILES
 #
 set (TELNETPP_PUBLIC_HEADER_FILES
 #    include/telnetpp/byte_converter.hpp
-#    include/telnetpp/client_option.hpp
+    include/telnetpp/client_option.hpp
     include/telnetpp/command.hpp
     include/telnetpp/core.hpp
     include/telnetpp/element.hpp
@@ -86,7 +86,7 @@ set (TELNETPP_PUBLIC_HEADER_FILES
 #    include/telnetpp/options/naws/server.hpp
 #    include/telnetpp/options/new_environ/client.hpp
 #    include/telnetpp/options/new_environ/server.hpp
-#    include/telnetpp/options/terminal_type/client.hpp
+    include/telnetpp/options/terminal_type/client.hpp
     include/telnetpp/options/subnegotiationless_client.hpp
     include/telnetpp/options/subnegotiationless_server.hpp
     include/telnetpp/options/suppress_ga/client.hpp
@@ -260,7 +260,7 @@ set (telnetpp_tester_external_tests
 #    test/subnegotiation_router_test.cpp
     test/suppress_ga_client_test.cpp
     test/suppress_ga_server_test.cpp
-#    test/terminal_type_client_test.cpp
+    test/terminal_type_client_test.cpp
 )
 
 #    # The tests for the zlib compressors for MCCP should only be compiled into

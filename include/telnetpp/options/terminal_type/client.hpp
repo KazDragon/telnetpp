@@ -1,6 +1,8 @@
 #pragma once
 
 #include "telnetpp/client_option.hpp"
+#include "telnetpp/options/terminal_type/detail/protocol.hpp"
+#include <boost/signals2.hpp>
 
 namespace telnetpp { namespace options { namespace terminal_type {
 
@@ -18,21 +20,28 @@ public :
     //* =====================================================================
     /// \brief Requests that the remote end send its terminal type.
     //* =====================================================================
-    std::vector<telnetpp::token> request_terminal_type();
+    template <typename Continuation>
+    void request_terminal_type(Continuation &&send)
+    {
+        static constexpr telnetpp::byte const request_content[] = {
+            detail::send
+        };
 
-    boost::signals2::signal
-    <
-        std::vector<telnetpp::token> (std::string const &),
-        telnetpp::token_combiner
+        send(telnetpp::subnegotiation{code(), request_content});
+    }
+
+    boost::signals2::signal<
+        void (telnetpp::bytes, continuation const &)
     > on_terminal_type;
 
 private :
     //* =====================================================================
-    /// \brief Handle a negotiation that has been received in the active
-    /// state.
+    /// \brief Called when a subnegotiation is received while the option is
+    /// active.  Override for option-specific functionality.
     //* =====================================================================
-    std::vector<telnetpp::token> handle_subnegotiation(
-        byte_stream const &content) override;
+    void handle_subnegotiation(
+        telnetpp::bytes data,
+        continuation const &cont) override;
 };
 
 }}}
