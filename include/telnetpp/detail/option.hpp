@@ -78,6 +78,9 @@ public:
                 on_state_changed(send);
                 break;
 
+            case internal_state::deactivating:
+                break;
+
             default:
                 assert(!"Unimplemented");
                 break;
@@ -100,11 +103,14 @@ public:
                 on_state_changed(send);
                 break;
 
-            case internal_state::deactivating:
+            case internal_state::activating:
                 break;
 
             case internal_state::inactive:
                 on_state_changed(send);
+                break;
+
+            case internal_state::deactivating:
                 break;
 
             default:

@@ -247,7 +247,7 @@ set (telnetpp_tester_external_tests
 #    test/new_environ_server_test.cpp
     test/negotiation_router_test.cpp
     test/parser_test.cpp
-#    test/q_method_test.cpp
+    test/q_method_test.cpp
     test/server_option_test.cpp
     test/session_test.cpp
     test/subnegotiation_router_test.cpp
