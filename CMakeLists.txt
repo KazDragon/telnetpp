@@ -89,8 +89,8 @@ set (TELNETPP_PUBLIC_HEADER_FILES
 #    include/telnetpp/options/terminal_type/client.hpp
     include/telnetpp/options/subnegotiationless_client.hpp
     include/telnetpp/options/subnegotiationless_server.hpp
-#    include/telnetpp/options/suppress_ga/client.hpp
-#    include/telnetpp/options/suppress_ga/server.hpp
+    include/telnetpp/options/suppress_ga/client.hpp
+    include/telnetpp/options/suppress_ga/server.hpp
 )
 #
 ## The zlib compressors for MCCP should only be compiled into the library
@@ -143,7 +143,7 @@ set (TELNETPP_PRIVATE_HEADER_FILES
 #    include/telnetpp/options/new_environ/detail/request_parser.hpp
 #    include/telnetpp/options/new_environ/detail/response_parser.hpp
 #    include/telnetpp/options/new_environ/detail/stream.hpp
-#    include/telnetpp/options/suppress_ga/detail/protocol.hpp
+    include/telnetpp/options/suppress_ga/detail/protocol.hpp
 )
 
 add_library(telnetpp
@@ -258,8 +258,8 @@ set (telnetpp_tester_external_tests
     test/server_option_test.cpp
 #    test/session_test.cpp
 #    test/subnegotiation_router_test.cpp
-#    test/suppress_ga_client_test.cpp
-#    test/suppress_ga_server_test.cpp
+    test/suppress_ga_client_test.cpp
+    test/suppress_ga_server_test.cpp
 #    test/terminal_type_client_test.cpp
 )
 
