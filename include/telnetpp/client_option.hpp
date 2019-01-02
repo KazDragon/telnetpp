@@ -6,7 +6,7 @@ namespace telnetpp {
 
 //* =========================================================================
 /// \brief A class that represents a Telnet option's client side.  That is,
-/// the side that received WILL and WONT negotiations and sends DO and DONT
+/// the side that receives WILL and WONT negotiations and sends DO and DONT
 /// negotiations.
 ///
 /// \par Server vs. Client

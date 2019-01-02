@@ -25,6 +25,7 @@ using element = boost::variant<
 //* =========================================================================
 /// \brief Output operator for a telnetpp::element.
 //* =========================================================================
+TELNETPP_EXPORT
 std::ostream &operator<<(std::ostream &out, telnetpp::element const &elem);
 
 }

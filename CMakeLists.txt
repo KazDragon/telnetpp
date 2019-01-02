@@ -54,7 +54,7 @@ set (TELNETPP_PUBLIC_SOURCE_FILES
 #    src/options/new_environ/client.cpp
 #    src/options/new_environ/server.cpp
 #    src/options/terminal_type/client.cpp
-#    src/server_option.cpp
+    src/server_option.cpp
 #    src/session.cpp
     src/subnegotiation.cpp
 )
@@ -68,7 +68,7 @@ set (TELNETPP_PUBLIC_HEADER_FILES
     include/telnetpp/generator.hpp
     include/telnetpp/negotiation.hpp
     include/telnetpp/parser.hpp
-#    include/telnetpp/server_option.hpp
+    include/telnetpp/server_option.hpp
 #    include/telnetpp/session.hpp
     include/telnetpp/subnegotiation.hpp
     include/telnetpp/telnetpp.hpp
@@ -255,7 +255,7 @@ set (telnetpp_tester_external_tests
 #    test/pass_through_test.cpp
     test/parser_test.cpp
 #    test/q_method_test.cpp
-#    test/server_option_test.cpp
+    test/server_option_test.cpp
 #    test/session_test.cpp
 #    test/subnegotiation_router_test.cpp
 #    test/suppress_ga_client_test.cpp
@@ -294,7 +294,6 @@ set (telnetpp_tester_external_tests
 
     add_executable(telnetpp_tester
         ${telnetpp_tester_tests}
-#        test/expect_elements.cpp
     )
 
     target_link_libraries(telnetpp_tester

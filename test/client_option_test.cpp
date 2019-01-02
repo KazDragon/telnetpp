@@ -1,5 +1,4 @@
 #include "telnetpp/client_option.hpp"
-//#include "expect_elements.hpp"
 #include <gtest/gtest.h>
 
 namespace {
