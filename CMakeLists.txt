@@ -12,6 +12,8 @@ if (POLICY CMP0063)
     cmake_policy(SET CMP0063 OLD) # Do not allow hidden visibility for static libs
 endif()
 
+option(TELNETPP_WITH_TESTS "Build with tests included" False)
+
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 conan_basic_setup(TARGETS NO_OUTPUT_DIRS)
 
@@ -154,7 +156,6 @@ target_link_libraries(telnetpp
         CONAN_PKG::boost_container
         CONAN_PKG::boost_signals2
         CONAN_PKG::boost_variant
-        CONAN_PKG::zlib
 )
 
 set_target_properties(telnetpp
@@ -227,45 +228,46 @@ install(
         lib/telnetpp-${TELNETPP_VERSION}
 )
 
-enable_testing()
+if (TELNETPP_WITH_TESTS)
+    enable_testing()
 
-set (telnetpp_tester_external_tests
-    test/client_option_test.cpp
-    test/command_router_test.cpp
-    test/echo_client_test.cpp
-    test/echo_server_test.cpp
-    test/generator_test.cpp
-#    test/mccp_client_test.cpp
-#    test/mccp_codec_test.cpp
-#    test/mccp_server_test.cpp
-#    test/msdp_client_test.cpp
-#    test/msdp_server_test.cpp
-#    test/msdp_server_robustness_test.cpp
-    test/naws_client_test.cpp
-    test/naws_server_test.cpp
-#    test/new_environ_client_test.cpp
-#    test/new_environ_server_test.cpp
-    test/negotiation_router_test.cpp
-    test/parser_test.cpp
-    test/q_method_test.cpp
-    test/server_option_test.cpp
-    test/session_test.cpp
-    test/subnegotiation_router_test.cpp
-    test/suppress_ga_client_test.cpp
-    test/suppress_ga_server_test.cpp
-    test/terminal_type_client_test.cpp
-)
+    set (telnetpp_tester_external_tests
+        test/client_option_test.cpp
+        test/command_router_test.cpp
+        test/echo_client_test.cpp
+        test/echo_server_test.cpp
+        test/generator_test.cpp
+    #    test/mccp_client_test.cpp
+    #    test/mccp_codec_test.cpp
+    #    test/mccp_server_test.cpp
+    #    test/msdp_client_test.cpp
+    #    test/msdp_server_test.cpp
+    #    test/msdp_server_robustness_test.cpp
+        test/naws_client_test.cpp
+        test/naws_server_test.cpp
+    #    test/new_environ_client_test.cpp
+    #    test/new_environ_server_test.cpp
+        test/negotiation_router_test.cpp
+        test/parser_test.cpp
+        test/q_method_test.cpp
+        test/server_option_test.cpp
+        test/session_test.cpp
+        test/subnegotiation_router_test.cpp
+        test/suppress_ga_client_test.cpp
+        test/suppress_ga_server_test.cpp
+        test/terminal_type_client_test.cpp
+    )
 
-#    # The tests for the zlib compressors for MCCP should only be compiled into
-#    # the executable if zlib is available.
-#    if (ZLIB_FOUND)
-#        set (telnetpp_tester_external_tests
-#            ${telnetpp_tester_external_tests}
-#            test/mccp_zlib_compressor_test.cpp
-#            test/mccp_zlib_decompressor_test.cpp
-#        )
-#    endif()
-#
+    #    # The tests for the zlib compressors for MCCP should only be compiled into
+    #    # the executable if zlib is available.
+    #    if (ZLIB_FOUND)
+    #        set (telnetpp_tester_external_tests
+    #            ${telnetpp_tester_external_tests}
+    #            test/mccp_zlib_compressor_test.cpp
+    #            test/mccp_zlib_decompressor_test.cpp
+    #        )
+    #    endif()
+
     set (telnetpp_tester_internal_tests
     )
 
@@ -294,6 +296,7 @@ set (telnetpp_tester_external_tests
     )
 
     add_test(telnetpp_test telnetpp_tester)
+endif()
 
 # Add a rule for generating documentation
 if (DOXYGEN_FOUND)
