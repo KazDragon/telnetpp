@@ -188,7 +188,7 @@ before_script:
   - $CMAKE -DCMAKE_BUILD_TYPE=$CONFIG -DBUILD_SHARED_LIBS=$SHARED -DTELNETPP_SANITIZE=$SANITIZE -DTELNETPP_COVERAGE=$COVERAGE ..
 
 script:
-  - make VERBOSE=1
+  - make
   - if [ "$COVERAGE" == "ON" ]; then
         $LCOV --gcov-tool=gcov-5 --base-directory . --directory . --zerocounters -q;
     fi
