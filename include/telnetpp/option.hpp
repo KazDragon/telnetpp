@@ -5,7 +5,7 @@
 #include <boost/signals2.hpp>
 #include <functional>
 
-namespace telnetpp { namespace detail {
+namespace telnetpp {
 
 //* =========================================================================
 /// \exclude
@@ -18,22 +18,12 @@ template <
 class option
 {
 public:
-    using continuation = std::function<
-        void (telnetpp::element const &)
-    >;
+    using continuation = std::function<void (telnetpp::element const &)>;
 
     static constexpr telnetpp::command_type const local_positive  = LocalPositive;
     static constexpr telnetpp::command_type const local_negative  = LocalNegative;
     static constexpr telnetpp::command_type const remote_positive = RemotePositive;
     static constexpr telnetpp::command_type const remote_negative = RemoteNegative;
-
-    //* =====================================================================
-    /// Constructor
-    //* =====================================================================
-    explicit option(telnetpp::option_type code)
-      : code_(code)
-    {
-    }
 
     //* =====================================================================
     /// Destructor
@@ -43,7 +33,7 @@ public:
     //* =====================================================================
     /// Returns the code for the option.
     //* =====================================================================
-    telnetpp::option_type code() const
+    constexpr telnetpp::option_type code() const
     {
         return code_;
     }
@@ -51,7 +41,7 @@ public:
     //* =====================================================================
     /// \brief Returns whether the option is active.
     //* =====================================================================
-    bool active() const
+    constexpr bool active() const
     {
         return state_ == internal_state::active;
     }
@@ -62,7 +52,7 @@ public:
     /// emitted by this process.
     //* =====================================================================
     template <class Continuation>
-    void activate(Continuation &&send)
+    constexpr void activate(Continuation &&send)
     {
         switch (state_)
         {
@@ -93,7 +83,7 @@ public:
     /// emitted by this process.
     //* =====================================================================
     template <class Continuation>
-    void deactivate(Continuation &&send)
+    constexpr void deactivate(Continuation &&send)
     {
         switch (state_)
         {
@@ -124,9 +114,10 @@ public:
     /// This should be called when the remote side either initiates a 
     /// negotiation request or responds to an ongoing request.
     //* =====================================================================
-    void negotiate(
+    template <class Continuation>
+    constexpr void negotiate(
         telnetpp::negotiation_type neg, 
-        continuation const &send)
+        Continuation &&send)
     {
         switch (state_)
         {
@@ -193,9 +184,8 @@ public:
     /// This should be called when a subnegotiation sequence has been received
     /// from the remote.
     //* =====================================================================
-    void subnegotiate(
-        telnetpp::bytes content,
-        continuation const &cont)
+    template <class Continuation>
+    constexpr void subnegotiate(telnetpp::bytes content, Continuation &&cont)
     {
         if (state_ == internal_state::active)
         {
@@ -216,6 +206,15 @@ public:
     /// send any Telnet elements that are emitted by this process.
     //* =====================================================================
     boost::signals2::signal<void (continuation const &)> on_state_changed;
+
+protected:
+    //* =====================================================================
+    /// Constructor
+    //* =====================================================================
+    constexpr explicit option(telnetpp::option_type code)
+      : code_(code)
+    {
+    }
 
 private:
     //* =====================================================================
@@ -238,4 +237,4 @@ private:
     internal_state        state_ = internal_state::inactive;
 };
 
-}}
+}

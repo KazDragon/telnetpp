@@ -16,7 +16,7 @@ public :
     //* =====================================================================
     /// \brief Constructor
     //* =====================================================================
-    subnegotiationless_server()
+    constexpr subnegotiationless_server()
       : server_option(Option)
     {
     }

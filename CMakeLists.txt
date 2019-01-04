@@ -39,7 +39,6 @@ if (TELNETPP_COVERAGE)
 endif()
 
 set (TELNETPP_PUBLIC_SOURCE_FILES
-    src/client_option.cpp
     src/command.cpp
     src/element.cpp
     src/negotiation.cpp
@@ -55,7 +54,6 @@ set (TELNETPP_PUBLIC_SOURCE_FILES
 #    src/options/new_environ/client.cpp
 #    src/options/new_environ/server.cpp
     src/options/terminal_type/client.cpp
-    src/server_option.cpp
     src/session.cpp
     src/subnegotiation.cpp
 )
@@ -67,6 +65,7 @@ set (TELNETPP_PUBLIC_HEADER_FILES
     include/telnetpp/element.hpp
     include/telnetpp/generator.hpp
     include/telnetpp/negotiation.hpp
+    include/telnetpp/option.hpp
     include/telnetpp/parser.hpp
     include/telnetpp/server_option.hpp
     include/telnetpp/session.hpp
@@ -124,7 +123,6 @@ set (TELNETPP_PRIVATE_HEADER_FILES
     include/telnetpp/detail/generate_helper.hpp
     include/telnetpp/detail/lambda_visitor.hpp
     include/telnetpp/detail/negotiation_router.hpp
-    include/telnetpp/detail/option.hpp
     include/telnetpp/detail/parse_helper.hpp
     include/telnetpp/detail/registration.hpp
     include/telnetpp/detail/return_default.hpp

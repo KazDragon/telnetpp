@@ -1,6 +1,6 @@
 #pragma once
 
-#include "telnetpp/detail/option.hpp"
+#include "telnetpp/option.hpp"
 
 namespace telnetpp {
 
@@ -29,22 +29,11 @@ namespace telnetpp {
 /// state.
 /// \see https://tools.ietf.org/html/std8
 //* =========================================================================
-class TELNETPP_EXPORT client_option
-  : public telnetpp::detail::option<
-        telnetpp::do_,
-        telnetpp::dont,
-        telnetpp::will,
-        telnetpp::wont
-    >
-{
-protected:
-    //* =====================================================================
-    /// \brief Constructor
-    /// \param code The option code for this option.
-    //* =====================================================================
-    explicit client_option(option_type code);
-};
-
-using client_options = gsl::span<client_option>;
+using client_option = telnetpp::option<
+    telnetpp::do_,
+    telnetpp::dont,
+    telnetpp::will,
+    telnetpp::wont
+>;
 
 }

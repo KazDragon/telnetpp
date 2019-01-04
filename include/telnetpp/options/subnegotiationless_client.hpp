@@ -16,7 +16,7 @@ public:
     //* =====================================================================
     /// \brief Constructor
     //* =====================================================================
-    subnegotiationless_client()
+    constexpr subnegotiationless_client()
       : client_option(Option)
     {
     }

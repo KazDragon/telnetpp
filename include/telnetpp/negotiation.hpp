@@ -1,6 +1,7 @@
 #pragma once
 
 #include "telnetpp/core.hpp"
+#include "telnetpp/detail/hash.hpp"
 #include <iosfwd>
 #include <utility>
 
@@ -38,6 +39,14 @@ public :
         return option_;
     }
 
+    //* =====================================================================
+    /// \brief Combine a hash of the object
+    //* =====================================================================
+    constexpr void hash_combine(std::size_t &seed) const
+    {
+        telnetpp::detail::hash_combine(seed, request_, option_);
+    }
+
 private :
     negotiation_type request_;
     option_type option_;
@@ -68,3 +77,10 @@ TELNETPP_EXPORT
 std::ostream &operator<<(std::ostream &out, negotiation const &cmd);
 
 }
+
+// This is necessary because the lookup for the recipient for a negotiation
+// in a session relies on both the request and the option type (will/wont
+// go to a different place than do/dont, for example).  Therefore, the entire
+// negotiation is the key in the lookup and needs to be hashable to go to the
+// unordered map.
+TELNETPP_MAKE_INTRUSIVE_HASH(telnetpp::negotiation);

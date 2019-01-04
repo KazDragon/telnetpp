@@ -1,6 +1,6 @@
 #pragma once
 
-#include "telnetpp/detail/option.hpp"
+#include "telnetpp/option.hpp"
 
 namespace telnetpp {
 
@@ -16,7 +16,7 @@ namespace telnetpp {
 /// RFCs, so consider this merely an implementation detail of this library.
 /// \par Usage
 /// server_option provides a general interface to enable the implementation
-/// of the serverlient sides of all Telnet options. There are two customization
+/// of the server sides of all Telnet options. There are two customization
 /// points that must be filled in before an implementation is complete:
 /// \li the derived class must call the constructor, passing in a value
 /// that is the Option Code for the feature being implemented.
@@ -29,22 +29,11 @@ namespace telnetpp {
 /// state.
 /// \see https://tools.ietf.org/html/std8
 //* =========================================================================
-class TELNETPP_EXPORT server_option
-  : public telnetpp::detail::option<
-        telnetpp::will,
-        telnetpp::wont,
-        telnetpp::do_,
-        telnetpp::dont
-    >
-{
-protected:
-    //* =====================================================================
-    /// \brief Constructor
-    /// \param code The option code for this option.
-    //* =====================================================================
-    explicit server_option(option_type code);
-};
-
-using server_options = gsl::span<server_option>;
+using server_option = telnetpp::option<
+    telnetpp::will,
+    telnetpp::wont,
+    telnetpp::do_,
+    telnetpp::dont
+>;
 
 }

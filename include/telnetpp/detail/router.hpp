@@ -3,6 +3,7 @@
 #include "telnetpp/detail/return_default.hpp"
 #include <functional>
 #include <map>
+#include <unordered_map>
 #include <type_traits>
 #include <utility>
 
@@ -59,7 +60,7 @@ public :
     using message_type = Message;
     using function_type = std::function<Function>;
     using result_type = typename function_type::result_type;
-    using registered_functions_map_type = std::map<
+    using registered_functions_map_type = std::unordered_map<
         key_type,
         function_type
     >;

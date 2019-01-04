@@ -101,42 +101,29 @@ public :
     session();
 
     //* =====================================================================
-    /// \brief Sends non-Telnet data
+    /// \brief Sends a Telnet data element.  Translates the element into a
+    /// sequence of bytes, that is then sent to the continuation.
     /// \param content The data to send
     /// \param send_continuation A continuation that is used to send the 
     /// resultant stream of bytes onward.
     //* =====================================================================
     template <typename SendContinuation>
     void send(
-        telnetpp::bytes content,
+        telnetpp::element const &elem,
         SendContinuation &&send_continuation)
     {
-        telnetpp::element const elems[] = { content };
-        telnetpp::generate(elems, send_continuation);
-    }
-
-    //* =====================================================================
-    /// \brief Send a Telnet command
-    /// \param cmd The command to send
-    /// \param send_continuation A continuation that is used to send the 
-    /// resultant stream of bytes onward.
-    //* =====================================================================
-    template <typename SendContinuation>
-    void send(
-        telnetpp::command const &cmd, 
-        SendContinuation &&send_continuation)
-    {
-        telnetpp::element const elems[] = { cmd };
-        telnetpp::generate(elems, send_continuation);
+        telnetpp::generate(elem, send_continuation);
     }
 
     //* =====================================================================
     /// \brief Receive a stream of bytes.
     /// \param content The content of the data.
     /// \param data_continuation A continuation for any data received that is
-    /// not encapsulated as Telnet protocol units (i.e. plain text).
+    /// not encapsulated as Telnet protocol units (i.e. plain text).  Matches
+    /// the signature `void (telnetpp::bytes)`.
     /// \param send_continuation A continuation that is used to send any 
-    /// response that occur as a consequence of receiving the data.
+    /// response that occur as a consequence of receiving the data. Matches
+    /// the signature `void (telnetpp::element)`.
     //* =====================================================================
     template <typename DataContinuation, typename SendContinuation>
     void receive(
@@ -157,8 +144,7 @@ public :
             {
                 auto generator = [&](telnetpp::element const &elem)
                 {
-                    telnetpp::element const elems[] = { elem };
-                    telnetpp::generate(elems, send_continuation);
+                    telnetpp::generate(elem, send_continuation);
                 };
 
                 detail::visit_lambdas(

@@ -1,6 +1,5 @@
 #include "telnetpp/session.hpp"
 #include "telnetpp/detail/registration.hpp"
-//#include <numeric>
 
 namespace telnetpp {
 
@@ -43,14 +42,5 @@ void session::install(server_option &option)
     detail::register_server_option(
         option, negotiation_router_, subnegotiation_router_);
 }
-
-// ==========================================================================
-// SEND
-// ==========================================================================
-// std::vector<boost::variant<byte_stream, boost::any>> session::send(
-//     std::vector<token> const &tokens)
-// {
-//     return detail::generate(tokens);
-// }
 
 }
