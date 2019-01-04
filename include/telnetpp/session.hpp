@@ -167,7 +167,7 @@ public :
                     });
             });
 
-        unparsed_buffer_.substr(unparsed_buffer_.size() - remainder.size());
+        unparsed_buffer_.erase(0, unparsed_buffer_.size() - remainder.size());
     }
 
     //* =====================================================================

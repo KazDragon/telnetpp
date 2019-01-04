@@ -1,6 +1,8 @@
 #include "telnetpp/options/echo/server.hpp"
 #include <gtest/gtest.h>
 
+using namespace telnetpp::literals;
+
 TEST(echo_server_test, option_is_echo)
 {
     telnetpp::options::echo::server server;
@@ -14,7 +16,7 @@ TEST(echo_server_test, subnegotiation_returns_nothing)
     server.negotiate(telnetpp::do_, [](auto &&){});
     assert(server.active());
 
-    static constexpr telnetpp::byte const content[] = { 0x00 };
+    static auto const content = "\x00"_tb;
 
     std::vector<telnetpp::element> const expected_elements = {
     };

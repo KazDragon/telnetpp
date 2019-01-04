@@ -3,7 +3,7 @@
 #include "telnetpp/detail/router.hpp"
 #include "telnetpp/subnegotiation.hpp"
 #include "telnetpp/element.hpp"
-#include <vector>
+#include <functional>
 
 namespace telnetpp { namespace detail {
 

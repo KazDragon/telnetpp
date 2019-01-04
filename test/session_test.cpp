@@ -3,6 +3,8 @@
 #include "telnetpp/options/echo/server.hpp"
 #include <gtest/gtest.h>
 
+using namespace telnetpp::literals;
+
 namespace {
 
 class fake_client_option : public telnetpp::client_option
@@ -10,6 +12,27 @@ class fake_client_option : public telnetpp::client_option
 public:
     explicit fake_client_option(telnetpp::option_type option)
       : telnetpp::client_option(option)
+    {
+    }
+
+    boost::signals2::signal<
+        void (telnetpp::bytes data)
+    > on_subnegotiation;
+
+private:
+    void handle_subnegotiation(
+        telnetpp::bytes data,
+        std::function<void (telnetpp::element const &)> const &cont) override
+    {
+        on_subnegotiation(data);
+    }
+};
+
+class fake_server_option : public telnetpp::server_option
+{
+public:
+    explicit fake_server_option(telnetpp::option_type option)
+      : telnetpp::server_option(option)
     {
     }
 
@@ -366,21 +389,20 @@ TEST(session_test, unrouted_dont_results_in_wont)
         telnetpp::iac, telnetpp::dont, 0xAB
     };
 
-    std::vector<telnetpp::byte> const expected_result = {
+    telnetpp::byte_storage const expected_result = {
         telnetpp::iac, telnetpp::wont, 0xAB
     };
 
-    std::string received_content;
-    std::vector<telnetpp::byte> received_result;
+    telnetpp::byte_storage received_content;
+    telnetpp::byte_storage received_result;
     session.receive(
         content,
         [&received_content](telnetpp::bytes content, auto const &cont)
         {
-            std::transform(
+            received_content.insert(
+                received_content.end(),
                 content.begin(),
-                content.end(),
-                std::back_inserter(received_content),
-                [](auto ch) { return static_cast<char>(ch); });
+                content.end());
         },
         [&received_result](telnetpp::bytes data)
         {
@@ -390,7 +412,7 @@ TEST(session_test, unrouted_dont_results_in_wont)
                 data.end());
         });
 
-    ASSERT_EQ(std::string{}, received_content);
+    ASSERT_EQ(telnetpp::byte_storage{}, received_content);
     ASSERT_EQ(expected_result, received_result);
 }
 
@@ -442,3 +464,66 @@ TEST(session_test, non_telnet_data_can_be_sent_separately)
     ASSERT_EQ(expected_result, received_result);
 }
 
+TEST(session_test, telnet_data_can_be_received_piecemeal)
+{
+    telnetpp::session session;
+    fake_client_option client(0xD0);
+    fake_server_option server(0xD7);
+
+    telnetpp::byte_storage received_subnegotiation_content;
+    server.on_subnegotiation.connect(
+        [&](telnetpp::bytes content)
+        {
+            received_subnegotiation_content.insert(
+                received_subnegotiation_content.end(),
+                content.begin(),
+                content.end());
+        });
+    
+    session.install(client);
+    session.install(server);
+
+    static auto const content = 
+        "HELLO"
+        "\xFF\xFB\xD0"
+        "WORLD" "\xFF\xFF"
+        "\xFF\xFD\xD7"
+        "\xFF\xFA\xD7" "TEST" "\xFF\xF0"_tb;
+
+    telnetpp::byte_storage received_content;
+    telnetpp::byte_storage received_result;
+
+    for (auto ch : content)
+    {
+        telnetpp::bytes const byte_content { ch };
+        session.receive(
+            byte_content,
+            [&received_content](telnetpp::bytes content, auto const &cont)
+            {
+                received_content.insert(
+                    received_content.end(),
+                    content.begin(),
+                    content.end());
+            },
+            [&received_result](telnetpp::bytes data)
+            {
+                received_result.insert(
+                    received_result.end(),
+                    data.begin(),
+                    data.end());
+            });
+    }
+
+    static auto const expected_content = "HELLOWORLD" "\xFF"_tb;
+    static auto const expected_result =
+        "\xFF\xFD\xD0"
+        "\xFF\xFB\xD7"_tb;
+    static auto const expected_subnegotiation_content = "TEST"_tb;
+
+    ASSERT_EQ(expected_content, received_content);
+    ASSERT_EQ(expected_result, received_result);
+    ASSERT_EQ(expected_subnegotiation_content, received_subnegotiation_content);
+
+    ASSERT_TRUE(client.active());
+    ASSERT_TRUE(server.active());
+}

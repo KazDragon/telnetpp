@@ -1,6 +1,8 @@
 #include "telnetpp/client_option.hpp"
 #include <gtest/gtest.h>
 
+using namespace telnetpp::literals;
+
 namespace {
 
 class fake_client_option : public telnetpp::client_option
@@ -446,7 +448,7 @@ TEST(client_option_test, inactive_subnegotiation_is_ignored)
             subnegotiation_called = true; 
         });
 
-    constexpr telnetpp::byte const content[] = { 0x01, 0x02, 0x03 };
+    static auto const content = "\x01\x02\x03"_tb;
 
     std::vector<telnetpp::element> const expected_elements = {
     };
@@ -470,27 +472,20 @@ TEST(client_option_test, active_subnegotiation_is_handled)
     client.negotiate(telnetpp::will, [](auto &&){});
 
     bool subnegotiation_called = false;
-    std::vector<telnetpp::byte> received_content;
+    telnetpp::byte_storage received_content;
     client.on_subnegotiation.connect(
         [&subnegotiation_called, &received_content](auto &&content)
         { 
             subnegotiation_called = true; 
-            received_content.insert(
-                received_content.end(),
-                content.begin(),
-                content.end());
+            received_content.append(content.begin(), content.end());
         });
 
-    constexpr telnetpp::byte const content[] = {
-        0x01, 0x02, 0x03 
-    };
+    static auto const content = "\x01\x02\x03"_tb;
 
     std::vector<telnetpp::element> const expected_elements = {
     };
 
-    std::vector<telnetpp::byte> const expected_content = {
-        0x01, 0x02, 0x03
-    };
+    static auto const expected_content = "\x01\x02\x03"_tb;
 
     std::vector<telnetpp::element> received_elements;
     client.subnegotiate(

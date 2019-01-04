@@ -2,6 +2,7 @@
 
 #include "telnetpp/detail/export.hpp"
 #include <gsl-lite.h>
+#include <string>
 #include <cstdint>
 
 namespace telnetpp {
@@ -37,4 +38,24 @@ static constexpr command_type const iac  = 255; // Interpret As Command
 // structure, e.g. a std::vector, or std::basic_string<byte>.
 using bytes = gsl::span<byte const>;
 
+// Where necessary, bytes are stored in this type, which has the small
+// string optimization, meaning that most cases will not cause an allocation.
+using byte_storage = std::basic_string<byte>;
+
+namespace literals {
+
+// A simple function to convert from string literals to stored bytes.
+inline byte_storage operator ""_tb(char const *text, size_t length)
+{
+    byte_storage result;
+    result.reserve(length);
+
+    for (auto ch : gsl::span<char const>{text, length})
+    {
+        result.push_back(static_cast<telnetpp::byte>(ch));
+    }
+
+    return result;
 }
+
+}}

@@ -6,7 +6,9 @@
 namespace telnetpp { namespace options { namespace new_environ {
     namespace detail {
 
-void append_escaped(
-    telnetpp::byte_stream &stream, std::string const &data);
+//* =========================================================================
+/// \brief Appends escaped text to the content.
+//* =========================================================================
+void append_escaped(telnetpp::byte_storage &storage, telnetpp::bytes content);
 
 }}}}

@@ -2,7 +2,6 @@
 
 #include "telnetpp/core.hpp"
 #include "telnetpp/element.hpp"
-#include <boost/container/small_vector.hpp>
 #include <algorithm>
 #include <cassert>
 
@@ -87,22 +86,16 @@ static void emit_subnegotiation(parser_state &state, Continuation &&cont)
     {
         // In the case that the subnegotiation has any escaped characters,
         // (e.g. a value of 0xFF is escaped as 0xFF, 0xFF), then we must 
-        // present a new span with those escaped characters omitted.  Since
-        // most subnegotiations are small, we use a boost::small_vector here
-        // to prevent any costly memory allocations.
-        constexpr std::size_t small_subnegotiation = 16;
-        boost::container::small_vector<
-            telnetpp::byte, 
-            small_subnegotiation
-        > small_content;
-        small_content.reserve(content.size() - 1);
+        // present a new span with those escaped characters omitted.  
+        telnetpp::byte_storage storage;
+        storage.reserve(content.size() - 1);
 
         bool escape = false;
         for (auto const &byte : content)
         {
             if (escape)
             {
-                small_content.push_back(byte);
+                storage.push_back(byte);
                 escape = false;
             }
             else if (byte == telnetpp::iac)
@@ -111,11 +104,11 @@ static void emit_subnegotiation(parser_state &state, Continuation &&cont)
             }
             else
             {
-                small_content.push_back(byte);
+                storage.push_back(byte);
             }
         }
 
-        cont(telnetpp::subnegotiation{state.id, small_content});
+        cont(telnetpp::subnegotiation{state.id, storage});
     }
     else
     {
