@@ -1,309 +1,541 @@
 #include "telnetpp/options/new_environ/server.hpp"
-#include "expect_elements.hpp"
 #include <gtest/gtest.h>
 
-TEST(new_environ_server_test, option_is_new_environ)
+using namespace telnetpp::literals;
+
+namespace {
+
+class in_an_active_new_environ_server : public testing::Test
 {
-    telnetpp::options::new_environ::server server;
-    ASSERT_EQ(39, server.option());
+public:
+    in_an_active_new_environ_server()
+    {
+        server_.negotiate(telnetpp::do_, [](auto &&){});
+        assert(server_.active());
+    }
+
+protected:
+    telnetpp::options::new_environ::server server_;
+};
+
 }
 
-TEST(new_environ_server_test, receiving_request_with_no_content_and_no_cached_variables_returns_empty_list)
+TEST(a_new_environ_server, has_option_code_new_environ)
 {
     telnetpp::options::new_environ::server server;
-    server.activate();
-    server.negotiate(telnetpp::do_);
-
-    expect_elements(
-        {
-            telnetpp::subnegotiation(server.option(), { 0x00 })
-        },
-        server.subnegotiate({0x01}));
+    ASSERT_EQ(39, server.option_code());
 }
 
-TEST(new_environ_server_test, receiving_request_with_no_content_and_one_cached_variable_returns_variable)
+TEST_F(in_an_active_new_environ_server, receiving_request_with_no_content_and_no_cached_variables_sends_empty_list)
 {
-    telnetpp::options::new_environ::server server;
-    server.set_variable("USER", "TEST");
-    server.activate();
-    server.negotiate(telnetpp::do_);
+    static auto const expected_subnegotiation_content = "\x00"_tb;
+    static auto const expected_responses = std::vector<telnetpp::element> {
+        telnetpp::subnegotiation{
+            server_.option_code(), 
+            expected_subnegotiation_content
+        }
+    };
 
-    expect_elements(
+    static auto const request_subnegotiation_content = "\x01"_tb;
+
+    std::vector<telnetpp::element> received_responses;
+    server_.subnegotiate(
+        request_subnegotiation_content,
+        [&](telnetpp::element const &elem)
         {
-            telnetpp::subnegotiation(
-                server.option(),
-                { 0x00,
-                  0x00, 'U', 'S', 'E', 'R',
-                  0x01, 'T', 'E', 'S', 'T'
-                })
-        },
-        server.subnegotiate({0x01}));
+            received_responses.push_back(elem);
+
+            ASSERT_EQ(expected_responses[0], elem);
+        });
+
+    ASSERT_EQ(size_t{1}, received_responses.size());
 }
 
-TEST(new_environ_server_test, receiving_request_with_no_content_and_one_cached_user_variable_returns_all_variables)
+TEST_F(in_an_active_new_environ_server, receiving_request_with_no_content_and_one_cached_variable_sends_variable)
 {
-    telnetpp::options::new_environ::server server;
-    server.set_user_variable("TEST", "VALUE");
-    server.activate();
-    server.negotiate(telnetpp::do_);
+    static auto const name = "USER"_tb;
+    static auto const value = "TEST"_tb;
 
-    expect_elements(
+    server_.set_variable(name, value, [](auto &&){});
+
+    static auto const expected_subnegotiation_content = 
+        "\x00"
+        "\x00" "USER"
+        "\x01" "TEST"_tb;
+
+    static auto const expected_responses = std::vector<telnetpp::element> {
+        telnetpp::subnegotiation{
+            server_.option_code(), 
+            expected_subnegotiation_content
+        }
+    };
+
+    static auto const request_subnegotiation_content = "\x01"_tb;
+
+    std::vector<telnetpp::element> received_responses;
+    server_.subnegotiate(
+        request_subnegotiation_content,
+        [&](telnetpp::element const &elem)
         {
-            telnetpp::subnegotiation(
-                server.option(),
-                { 0x00,
-                  0x03, 'T', 'E', 'S', 'T',
-                  0x01, 'V', 'A', 'L', 'U', 'E'
-                })
-        },
-        server.subnegotiate({0x01}));
+            received_responses.push_back(elem);
+
+            ASSERT_EQ(expected_responses[0], elem);
+        });
+
+    ASSERT_EQ(size_t{1}, received_responses.size());
 }
 
-TEST(new_environ_server_test, receiving_request_with_no_content_and_one_cached_variable_with_empty_value_returns_all_variables)
+TEST_F(in_an_active_new_environ_server, receiving_request_with_no_content_and_one_cached_user_variable_sends_all_variables)
 {
-    telnetpp::options::new_environ::server server;
-    server.set_variable("USER", "");
-    server.activate();
-    server.negotiate(telnetpp::do_);
+    static auto const name = "USER"_tb;
+    static auto const value = "TEST"_tb;
 
-    expect_elements(
+    server_.set_user_variable(name, value, [](auto &&){});
+
+    static auto const expected_subnegotiation_content = 
+        "\x00"
+        "\x03" "USER"
+        "\x01" "TEST"_tb;
+
+    static auto const expected_responses = std::vector<telnetpp::element> {
+        telnetpp::subnegotiation{
+            server_.option_code(), 
+            expected_subnegotiation_content
+        }
+    };
+
+    static auto const request_subnegotiation_content = "\x01"_tb;
+
+    std::vector<telnetpp::element> received_responses;
+    server_.subnegotiate(
+        request_subnegotiation_content,
+        [&](telnetpp::element const &elem)
         {
-            telnetpp::subnegotiation(
-                server.option(),
-                { 0x00,
-                  0x00, 'U', 'S', 'E', 'R',
-                  0x01
-                })
-        },
-        server.subnegotiate({0x01}));
+            received_responses.push_back(elem);
+
+            ASSERT_EQ(expected_responses[0], elem);
+        });
+
+    ASSERT_EQ(size_t{1}, received_responses.size());
 }
 
-TEST(new_environ_server_test, receiving_request_with_no_content_and_one_deleted_variable_returns_no_variables)
+TEST_F(in_an_active_new_environ_server, receiving_request_with_no_content_and_one_cached_variable_with_empty_value_sends_all_variables)
 {
-    telnetpp::options::new_environ::server server;
-    server.set_variable("USER", "TEST");
-    server.delete_variable("USER");
-    server.activate();
-    server.negotiate(telnetpp::do_);
+    static auto const name = "USER"_tb;
+    static auto const value = ""_tb;
 
-    expect_elements(
+    server_.set_variable(name, value, [](auto &&){});
+
+    static auto const expected_subnegotiation_content = 
+        "\x00"
+        "\x00" "USER"
+        "\x01"_tb;
+
+    static auto const expected_responses = std::vector<telnetpp::element> {
+        telnetpp::subnegotiation{
+            server_.option_code(), 
+            expected_subnegotiation_content
+        }
+    };
+
+    static auto const request_subnegotiation_content = "\x01"_tb;
+
+    std::vector<telnetpp::element> received_responses;
+    server_.subnegotiate(
+        request_subnegotiation_content,
+        [&](telnetpp::element const &elem)
         {
-            telnetpp::subnegotiation(
-                server.option(),
-                { 0x00,
-                })
-        },
-        server.subnegotiate({0x01}));
+            received_responses.push_back(elem);
+
+            ASSERT_EQ(expected_responses[0], elem);
+        });
+
+    ASSERT_EQ(size_t{1}, received_responses.size());
 }
 
-TEST(new_environ_server_test, receiving_request_with_no_content_and_one_deleted_uservariable_returns_no_variables)
+TEST_F(in_an_active_new_environ_server, receiving_request_with_no_content_and_one_deleted_variable_sends_no_variables)
 {
-    telnetpp::options::new_environ::server server;
-    server.set_user_variable("TTYPE", "XTERM");
-    server.delete_user_variable("TTYPE");
-    server.activate();
-    server.negotiate(telnetpp::do_);
+    static auto const name = "USER"_tb;
+    static auto const value = "TEST"_tb;
 
-    expect_elements(
+    server_.set_variable(name, value, [](auto &&){});
+    server_.delete_variable(name, [](auto &&){});
+
+    static auto const expected_subnegotiation_content = "\x00"_tb;
+    static auto const expected_responses = std::vector<telnetpp::element> {
+        telnetpp::subnegotiation{
+            server_.option_code(), 
+            expected_subnegotiation_content
+        }
+    };
+
+    static auto const request_subnegotiation_content = "\x01"_tb;
+
+    std::vector<telnetpp::element> received_responses;
+    server_.subnegotiate(
+        request_subnegotiation_content,
+        [&](telnetpp::element const &elem)
         {
-            telnetpp::subnegotiation(
-                server.option(),
-                { 0x00,
-                })
-        },
-        server.subnegotiate({0x01}));
+            received_responses.push_back(elem);
+
+            ASSERT_EQ(expected_responses[0], elem);
+        });
+
+    ASSERT_EQ(size_t{1}, received_responses.size());
 }
 
-TEST(new_environ_server_test, receiving_request_with_no_content_and_multiple_cached_variables_returns_all_variables)
+TEST_F(in_an_active_new_environ_server, receiving_request_with_no_content_and_one_deleted_uservariable_sends_no_variables)
 {
-    telnetpp::options::new_environ::server server;
-    server.set_variable("PRINTER", "LPT1");
-    server.set_variable("USER", "TEST");
-    server.set_user_variable("LOCALE", "EN_UK");
-    server.set_user_variable("TTYPE", "XTERM");
-    server.activate();
-    server.negotiate(telnetpp::do_);
+    static auto const name = "TTYPE"_tb;
+    static auto const value = "XTERM"_tb;
 
-    expect_elements(
+    server_.set_user_variable(name, value, [](auto &&){});
+    server_.delete_user_variable(name, [](auto &&){});
+
+    static auto const expected_subnegotiation_content = "\x00"_tb;
+    static auto const expected_responses = std::vector<telnetpp::element> {
+        telnetpp::subnegotiation{
+            server_.option_code(), 
+            expected_subnegotiation_content
+        }
+    };
+
+    static auto const request_subnegotiation_content = "\x01"_tb;
+
+    std::vector<telnetpp::element> received_responses;
+    server_.subnegotiate(
+        request_subnegotiation_content,
+        [&](telnetpp::element const &elem)
         {
-            telnetpp::subnegotiation(
-                server.option(),
-                { 0x00,
-                  0x00, 'P', 'R', 'I', 'N', 'T', 'E', 'R',
-                  0x01, 'L', 'P', 'T', '1',
-                  0x00, 'U', 'S', 'E', 'R',
-                  0x01, 'T', 'E', 'S', 'T',
-                  0x03, 'L', 'O', 'C', 'A', 'L', 'E',
-                  0x01, 'E', 'N', '_', 'U', 'K',
-                  0x03, 'T', 'T', 'Y', 'P', 'E',
-                  0x01, 'X', 'T', 'E', 'R', 'M'
-                })
-        },
-        server.subnegotiate({0x01}));
+            received_responses.push_back(elem);
+
+            ASSERT_EQ(expected_responses[0], elem);
+        });
+
+    ASSERT_EQ(size_t{1}, received_responses.size());
 }
 
-TEST(new_environ_server_test, modifying_a_variable_with_active_server_returns_variable_modification)
+TEST_F(in_an_active_new_environ_server, receiving_request_with_no_content_and_multiple_cached_variables_sends_all_variables)
 {
-    telnetpp::options::new_environ::server server;
-    server.set_variable("USER", "TEST");
-    server.activate();
-    server.negotiate(telnetpp::do_);
+    static auto const name0 = "PRINTER"_tb;
+    static auto const value0 = "LPT1"_tb;
+    static auto const name1 = "USER"_tb;
+    static auto const value1 = "TEST"_tb;
+    static auto const name2 = "LOCALE"_tb;
+    static auto const value2 = "EN_GB"_tb;
+    static auto const name3 = "TTYPE"_tb;
+    static auto const value3 = "XTERM"_tb;
 
-    expect_elements(
+    server_.set_variable(name0, value0, [](auto &&){});
+    server_.set_variable(name1, value1, [](auto &&){});
+    server_.set_user_variable(name2, value2, [](auto &&){});
+    server_.set_user_variable(name3, value3, [](auto &&){});
+
+    static auto const expected_subnegotiation_content = 
+        "\x00"
+        "\x00" "PRINTER" "\x01" "LPT1"
+        "\x00" "USER"    "\x01" "TEST"
+        "\x03" "LOCALE"  "\x01" "EN_GB"
+        "\x03" "TTYPE"   "\x01" "XTERM"_tb;
+
+    static auto const expected_responses = std::vector<telnetpp::element> {
+        telnetpp::subnegotiation{
+            server_.option_code(), 
+            expected_subnegotiation_content
+        }
+    };
+
+    static auto const request_subnegotiation_content = "\x01"_tb;
+
+    std::vector<telnetpp::element> received_responses;
+    server_.subnegotiate(
+        request_subnegotiation_content,
+        [&](telnetpp::element const &elem)
         {
-            telnetpp::subnegotiation(
-                server.option(),
-                { 0x02,
-                  0x00, 'U', 'S', 'E', 'R',
-                  0x01, 'F', 'R', 'E', 'D'
-                })
-        },
-        server.set_variable("USER", "FRED"));
+            received_responses.push_back(elem);
+
+            ASSERT_EQ(expected_responses[0], elem);
+        });
+
+    ASSERT_EQ(size_t{1}, received_responses.size());
 }
 
-TEST(new_environ_server_test, deleting_a_variable_with_active_server_returns_variable_deletion)
+TEST_F(in_an_active_new_environ_server, modifying_a_variable_sends_variable_modification)
 {
-    telnetpp::options::new_environ::server server;
-    server.set_variable("USER", "TEST");
-    server.activate();
-    server.negotiate(telnetpp::do_);
+    static auto const name = "USER"_tb;
+    static auto const old_value = "FRED"_tb;
+    static auto const new_value = "BOB"_tb;
 
-    expect_elements(
+    server_.set_variable(name, old_value, [](auto &&){});
+
+    std::vector<telnetpp::element> received_responses;
+    server_.set_variable(
+        name,
+        new_value,
+        [&](telnetpp::element const &received_element)
         {
-            telnetpp::subnegotiation(
-                server.option(),
-                { 0x02,
-                  0x00, 'U', 'S', 'E', 'R'
-                })
-        },
-        server.delete_variable("USER"));
+            static auto const expected_subnegotiation_content = 
+                "\x02"
+                "\x00" "USER" "\x01" "BOB"_tb;
+
+            static telnetpp::element const expected_element = {
+                telnetpp::subnegotiation{
+                    server_.option_code(),
+                    expected_subnegotiation_content
+                }
+            };
+
+            ASSERT_EQ(expected_element, received_element);
+
+            received_responses.push_back(received_element);
+        });
+
+    ASSERT_EQ(size_t{1}, received_responses.size());
 }
 
-TEST(new_environ_server_test, modifying_a_user_variable_with_active_server_returns_variable_modification)
+TEST_F(in_an_active_new_environ_server, deleting_a_variable_sends_variable_deletion)
 {
-    telnetpp::options::new_environ::server server;
-    server.set_variable("TEST", "VALUE");
-    server.activate();
-    server.negotiate(telnetpp::do_);
+    static auto const name = "USER"_tb;
+    static auto const value = "FRED"_tb;
 
-    expect_elements(
+    server_.set_variable(name, value, [](auto &&){});
+
+    std::vector<telnetpp::element> received_responses;
+    server_.delete_variable(
+        name,
+        [&](telnetpp::element const &received_element)
         {
-            telnetpp::subnegotiation(
-                server.option(),
-                { 0x02,
-                  0x03, 'T', 'E', 'S', 'T',
-                  0x01, 'R', 'E', 'S', 'U', 'L', 'T'
-                })
-        },
-        server.set_user_variable("TEST", "RESULT"));
+            static auto const expected_subnegotiation_content = 
+                "\x02"
+                "\x00" "USER"_tb;
+
+            static telnetpp::element const expected_element = {
+                telnetpp::subnegotiation{
+                    server_.option_code(),
+                    expected_subnegotiation_content
+                }
+            };
+
+            ASSERT_EQ(expected_element, received_element);
+
+            received_responses.push_back(received_element);
+        });
+
+    ASSERT_EQ(size_t{1}, received_responses.size());
 }
 
-TEST(new_environ_server_test, deleting_a_user_variable_with_active_server_returns_variable_deletion)
+TEST_F(in_an_active_new_environ_server, modifying_a_user_variable_sends_variable_modification)
 {
-    telnetpp::options::new_environ::server server;
-    server.set_variable("TEST", "VALUE");
-    server.activate();
-    server.negotiate(telnetpp::do_);
+    static auto const name = "TEST"_tb;
+    static auto const old_value = "VALUE"_tb;
+    static auto const new_value = "RESULT"_tb;
 
-    expect_elements(
+    server_.set_user_variable(name, old_value, [](auto &&){});
+
+    std::vector<telnetpp::element> received_responses;
+    server_.set_user_variable(
+        name,
+        new_value,
+        [&](telnetpp::element const &received_element)
         {
-            telnetpp::subnegotiation(
-                server.option(),
-                { 0x02,
-                  0x03, 'T', 'E', 'S', 'T'
-                })
-        },
-        server.delete_user_variable("TEST"));
+            static auto const expected_subnegotiation_content = 
+                "\x02"
+                "\x03" "TEST" "\x01" "RESULT"_tb;
+
+            static telnetpp::element const expected_element = {
+                telnetpp::subnegotiation{
+                    server_.option_code(),
+                    expected_subnegotiation_content
+                }
+            };
+
+            ASSERT_EQ(expected_element, received_element);
+
+            received_responses.push_back(received_element);
+        });
+
+    ASSERT_EQ(size_t{1}, received_responses.size());
 }
 
-TEST(new_environ_server_test, requesting_nonexistent_variable_rturns_empty_result)
+TEST_F(in_an_active_new_environ_server, deleting_a_user_variable_sends_variable_deletion)
 {
-    telnetpp::options::new_environ::server server;
-    server.set_user_variable("TEST", "VALUE");
-    server.activate();
-    server.negotiate(telnetpp::do_);
+    static auto const name = "TEST"_tb;
+    static auto const value = "VALUE"_tb;
 
-    expect_elements(
+    server_.set_user_variable(name, value, [](auto &&){});
+
+    std::vector<telnetpp::element> received_responses;
+    server_.delete_user_variable(
+        name,
+        [&](telnetpp::element const &received_element)
         {
-            telnetpp::subnegotiation(
-                server.option(),
-                { 0x00
-                })
-        },
-        server.subnegotiate({0x01, 0x03, 'F', 'A', 'I', 'L'}));
+            static auto const expected_subnegotiation_content = 
+                "\x02"
+                "\x03" "TEST"_tb;
+
+            static telnetpp::element const expected_element = {
+                telnetpp::subnegotiation{
+                    server_.option_code(),
+                    expected_subnegotiation_content
+                }
+            };
+
+            ASSERT_EQ(expected_element, received_element);
+
+            received_responses.push_back(received_element);
+        });
+
+    ASSERT_EQ(size_t{1}, received_responses.size());
 }
 
-TEST(new_environ_server_test, requesting_existent_variables_returns_variables)
+TEST_F(in_an_active_new_environ_server, requesting_nonexistent_variable_rturns_empty_result)
 {
-    telnetpp::options::new_environ::server server;
-    server.set_variable("USER", "TEST");
-    server.set_variable("PRINTER", "LPT1");
-    server.set_user_variable("TEST", "VALUE");
-    server.set_user_variable("FOO", "BAR");
-    server.activate();
-    server.negotiate(telnetpp::do_);
+    static auto const name = "TEST"_tb;
+    static auto const value = "VALUE"_tb;
 
-    expect_elements(
+    server_.set_user_variable(name, value, [](auto &&){});
+
+    static auto const subnegotiation_content = 
+        "\x01\x03" "FAIL"_tb;
+
+    std::vector<telnetpp::element> received_responses;
+    server_.subnegotiate(
+        subnegotiation_content,
+        [&](telnetpp::element const &received_element)
         {
-            telnetpp::subnegotiation(
-                server.option(),
-                { 0x00,
-                  0x00, 'U', 'S', 'E', 'R',
-                  0x01, 'T', 'E', 'S', 'T',
-                  0x03, 'T', 'E', 'S', 'T',
-                  0x01, 'V', 'A', 'L', 'U', 'E'
-                })
-        },
-        server.subnegotiate(
-            { 0x01,
-              0x03, 'T', 'E', 'S', 'T',
-              0x00, 'U', 'S', 'E', 'R'
-            }));
+            static auto const expected_subnegotiation_content = 
+                "\x00"_tb;
+
+            static telnetpp::element const expected_element = {
+                telnetpp::subnegotiation{
+                    server_.option_code(),
+                    expected_subnegotiation_content
+                }
+            };
+
+            ASSERT_EQ(expected_element, received_element);
+
+            received_responses.push_back(received_element);
+        });
+
+    ASSERT_EQ(size_t{1}, received_responses.size());
 }
 
-TEST(new_environ_server_test, names_and_values_with_control_characters_are_escaped_properly)
+TEST_F(in_an_active_new_environ_server, requesting_existent_variables_sends_variables)
 {
-    telnetpp::options::new_environ::server server;
-    server.set_variable("USER", "\x01""ABC");
-    server.set_user_variable(std::string("\x00""DEF", 4), "\x02""GHI");
-    server.activate();
-    server.negotiate(telnetpp::do_);
+    static auto const name0 = "PRINTER"_tb;
+    static auto const value0 = "LPT1"_tb;
+    static auto const name1 = "USER"_tb;
+    static auto const value1 = "TEST"_tb;
+    static auto const name2 = "LOCALE"_tb;
+    static auto const value2 = "EN_GB"_tb;
+    static auto const name3 = "TTYPE"_tb;
+    static auto const value3 = "XTERM"_tb;
 
-    expect_elements(
+    server_.set_variable(name0, value0, [](auto &&){});
+    server_.set_variable(name1, value1, [](auto &&){});
+    server_.set_user_variable(name2, value2, [](auto &&){});
+    server_.set_user_variable(name3, value3, [](auto &&){});
+
+    static auto const subnegotiation_content = 
+        "\x01"
+        "\x03" "TTYPE"
+        "\x00" "USER"_tb;
+
+    std::vector<telnetpp::element> received_responses;
+    server_.subnegotiate(
+        subnegotiation_content,
+        [&](telnetpp::element const &received_element)
         {
-            telnetpp::subnegotiation(
-                server.option(),
-                {
-                    0x00,
-                    0x00, 'U', 'S', 'E', 'R',
-                    0x01, 0x02, 0x01, 'A', 'B', 'C',
-                    0x03, 0x02, 0x00, 'D', 'E', 'F',
-                    0x01, 0x02, 0x02, 'G', 'H', 'I'
-                })
-        },
-        server.subnegotiate({0x01}));
+            static auto const expected_subnegotiation_content = 
+                "\x00"
+                "\x03" "TTYPE" "\x01" "XTERM"
+                "\x00" "USER"  "\x01" "TEST"_tb;
+
+            static telnetpp::element const expected_element = {
+                telnetpp::subnegotiation{
+                    server_.option_code(),
+                    expected_subnegotiation_content
+                }
+            };
+
+            ASSERT_EQ(expected_element, received_element);
+
+            received_responses.push_back(received_element);
+        });
+
+    ASSERT_EQ(size_t{1}, received_responses.size());
 }
 
-TEST(new_environ_server_test, requests_with_escaped_control_characters_are_handled_correctly)
+TEST_F(in_an_active_new_environ_server, names_and_values_with_control_characters_are_escaped_properly)
 {
-    telnetpp::options::new_environ::server server;
-    server.set_user_variable(std::string("\x00\x01\x02\x03", 4), "GOOD");
-    server.activate();
-    server.negotiate(telnetpp::do_);
+    static auto const name0 = "USER"_tb;
+    static auto const value0 = "\x01" "ABC"_tb;
+    static auto const name1 = "\x00" "DEF"_tb;
+    static auto const value1 = "\x02" "GHI"_tb;
 
-    expect_elements(
+    server_.set_variable(name0, value0, [](auto &&){});
+    server_.set_user_variable(name1, value1, [](auto &&){});
+
+    static auto const subnegotiation_content = 
+        "\x01"_tb;
+
+    std::vector<telnetpp::element> received_responses;
+    server_.subnegotiate(
+        subnegotiation_content,
+        [&](telnetpp::element const &received_element)
         {
-            telnetpp::subnegotiation(
-                server.option(),
-                {
-                    0x00,
-                    0x03, 0x02, 0x00, 0x02, 0x01, 0x02, 0x02, 0x02, 0x03,
-                    0x01, 'G', 'O', 'O', 'D'
-                })
-        },
-        server.subnegotiate(
-            { 0x01,
-              0x03, 0x02, 0x00, 0x02, 0x01, 0x02, 0x02, 0x02, 0x03
-            }));
+            static auto const expected_subnegotiation_content = 
+                "\x00"
+                "\x00" "USER" "\x01" "\x02\x01" "ABC"
+                "\x03" "\x02\x00" "DEF" "\x01" "\x02\x02" "GHI"_tb;
 
+            static telnetpp::element const expected_element = {
+                telnetpp::subnegotiation{
+                    server_.option_code(),
+                    expected_subnegotiation_content
+                }
+            };
+
+            ASSERT_EQ(expected_element, received_element);
+
+            received_responses.push_back(received_element);
+        });
+
+    ASSERT_EQ(size_t{1}, received_responses.size());
+}
+
+TEST_F(in_an_active_new_environ_server, requests_with_escaped_control_characters_are_handled_correctly)
+{
+    static auto const name = "\x01\x02\x03\x04" "GOOD"_tb;
+    static auto const value = "VALUE"_tb;
+
+    server_.set_user_variable(name, value, [](auto &&){});
+
+    static auto const subnegotiation_content = 
+        "\x01\x03" "\x02\x01\x02\x02\x02\x03\x04" "GOOD"_tb;
+
+    std::vector<telnetpp::element> received_responses;
+    server_.subnegotiate(
+        subnegotiation_content,
+        [&](telnetpp::element const &received_element)
+        {
+            static auto const expected_subnegotiation_content = 
+                "\x00"
+                "\x03" "\x02\x01\x02\x02\x02\x03\x04" "GOOD"
+                "\x01" "VALUE"_tb;
+
+            static telnetpp::element const expected_element = {
+                telnetpp::subnegotiation{
+                    server_.option_code(),
+                    expected_subnegotiation_content
+                }
+            };
+
+            ASSERT_EQ(expected_element, received_element);
+
+            received_responses.push_back(received_element);
+        });
+
+    ASSERT_EQ(size_t{1}, received_responses.size());
 }

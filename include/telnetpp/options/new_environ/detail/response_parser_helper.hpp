@@ -19,11 +19,6 @@ struct parsing_state
     response rsp;
 };
 
-inline telnetpp::options::new_environ::variable_type byte_to_type(byte value)
-{
-    return value == detail::var ? variable_type::var : variable_type::uservar;
-}
-
 template <typename Continuation>
 void parse_is_or_info(telnetpp::bytes::iterator current, parsing_state &state, Continuation &&cont)
 {

@@ -1,7 +1,9 @@
 #include "telnetpp/options/new_environ/server.hpp"
+#include "telnetpp/options/new_environ/detail/for_each_request.hpp"
 #include "telnetpp/options/new_environ/detail/protocol.hpp"
-#include "telnetpp/options/new_environ/detail/request_parser.hpp"
 #include "telnetpp/options/new_environ/detail/stream.hpp"
+#include <numeric>
+#include <utility>
 
 namespace telnetpp { namespace options { namespace new_environ {
 
@@ -10,58 +12,15 @@ namespace {
 // ==========================================================================
 // TYPE_TO_BYTE
 // ==========================================================================
-static byte type_to_byte(
-    telnetpp::options::new_environ::variable_type const &type)
+static byte type_to_byte(variable_type const &type)
 {
     return type == variable_type::var
          ? telnetpp::options::new_environ::detail::var
          : telnetpp::options::new_environ::detail::uservar;
 }
 
-// ==========================================================================
-// VARIABLE_WAS_REQUESTED
-// ==========================================================================
-static bool variable_was_requested(
-    std::vector<request> const &requests,
-    variable_type        const &type,
-    std::string          const &name)
-{
-    if (requests.empty())
-    {
-        return true;
-    }
-
-    for (auto const &request : requests)
-    {
-        if (request.type == type && request.name == name)
-        {
-            return true;
-        }
-    }
-
-    return false;
 }
 
-// ==========================================================================
-// APPEND_VARIABLE
-// ==========================================================================
-static byte_stream &append_variable(
-    byte_stream                                     &stream,
-    variable_type                                    type,
-    std::pair<std::string const, std::string> const &variable)
-{
-    std::string const &name = variable.first;
-    std::string const &val  = variable.second;
-
-    stream.push_back(type_to_byte(type));
-    detail::append_escaped(stream, name);
-    stream.push_back(detail::value);
-    detail::append_escaped(stream, val);
-
-    return stream;
-}
-
-}
 
 // ==========================================================================
 // CONSTRUCTOR
@@ -72,100 +31,106 @@ server::server()
 }
 
 // ==========================================================================
-// SET_VARIABLE
-// ==========================================================================
-std::vector<telnetpp::token> server::set_variable(
-    std::string const &name, std::string const &value)
-{
-    variables_[name] = value;
-
-    byte_stream result = { detail::info };
-    append_variable(result, variable_type::var, {name, value});
-
-    return { telnetpp::element{
-        telnetpp::subnegotiation(option(), result)
-    }};
-}
-
-// ==========================================================================
-// DELETE_VARIABLE
-// ==========================================================================
-std::vector<telnetpp::token> server::delete_variable(std::string const &name)
-{
-    variables_.erase(name);
-
-    byte_stream result = { detail::info, detail::var };
-    detail::append_escaped(result, name);
-
-    return { telnetpp::element{
-        telnetpp::subnegotiation(option(), result)
-    }};
-}
-
-// ==========================================================================
-// SET_USER_VARIABLE
-// ==========================================================================
-std::vector<telnetpp::token> server::set_user_variable(
-    std::string const &name, std::string const &value)
-{
-    user_variables_[name] = value;
-
-    byte_stream result = { detail::info };
-    append_variable(result, variable_type::uservar, {name, value});
-
-    return { telnetpp::element{
-        telnetpp::subnegotiation(option(), result)
-    }};
-}
-
-// ==========================================================================
-// DELETE_USER_VARIABLE
-// ==========================================================================
-std::vector<telnetpp::token> server::delete_user_variable(
-    std::string const &name)
-{
-    user_variables_.erase(name);
-
-    byte_stream result = { detail::info, detail::uservar };
-    detail::append_escaped(result, name);
-
-    return { telnetpp::element{
-        telnetpp::subnegotiation(option(), result)
-    }};
-}
-
-// ==========================================================================
 // HANDLE_SUBNEGOTIATION
 // ==========================================================================
-std::vector<telnetpp::token> server::handle_subnegotiation(
-    byte_stream const &content)
+void server::handle_subnegotiation(
+    telnetpp::bytes data,
+    continuation const &cont)
 {
-    auto const &requests = detail::parse_requests(content);
+    telnetpp::byte_storage response{
+        telnetpp::options::new_environ::detail::is
+    };
 
-    byte_stream result = { detail::is };
-
-    for (auto &variable : variables_)
+    if (data.size() == 1)
     {
-        if (variable_was_requested(
-            requests, variable_type::var, variable.first))
-        {
-            append_variable(result, variable_type::var, variable);
-        }
-    }
+        // It can be assumed that this is an empty "SEND" subnegotiation.
+        // This is interpreted to have the meaning "Send all the things".
+        std::accumulate(
+            variables_.begin(),
+            variables_.end(),
+            std::ref(response),
+            [&](auto &&storage, auto &&variable) -> telnetpp::byte_storage &
+            {
+                this->append_variable(
+                    response, variable_type::var, 
+                    variable.first, variable.second);
+                return storage;
+            });
 
-    for (auto &variable : user_variables_)
+        std::accumulate(
+            user_variables_.begin(),
+            user_variables_.end(),
+            std::ref(response),
+            [&](auto &&storage, auto &&variable) -> telnetpp::byte_storage &
+            {
+                this->append_variable(
+                    response, variable_type::uservar, 
+                    variable.first, variable.second);
+                return storage;
+            });
+    }
+    else
     {
-        if (variable_was_requested(
-            requests, variable_type::uservar, variable.first))
-        {
-            append_variable(result, variable_type::uservar, variable);
-        }
-    }
+        detail::for_each_request(
+            data,
+            [&](request const &req)
+            {
+                if (req.type == variable_type::var)
+                {
+                    auto it = variables_.find(req.name);
 
-    return { telnetpp::element{
-        telnetpp::subnegotiation{option(), result}
-    }};
+                    if (it != variables_.end())
+                    {
+                        this->append_variable(
+                            response, variable_type::var,
+                            req.name, it->second);
+                    }
+                }
+                else
+                {
+                    auto it = user_variables_.find(req.name);
+
+                    if (it != user_variables_.end())
+                    {
+                        this->append_variable(
+                            response, variable_type::uservar,
+                            req.name, it->second);
+                    }
+                }
+            });
+    }
+    
+    cont(telnetpp::subnegotiation{
+        option_code(),
+        response
+    });
 }
 
+// ==========================================================================
+// APPEND_VARIABLE
+// ==========================================================================
+void server::append_variable(
+    telnetpp::byte_storage &storage,
+    variable_type           type,
+    telnetpp::bytes         name)
+{
+    storage.push_back(type_to_byte(type));
+    detail::append_escaped(storage, name);
+}
+
+// ==========================================================================
+// APPEND_VARIABLE
+// ==========================================================================
+void server::append_variable(
+    telnetpp::byte_storage &storage,
+    variable_type           type,
+    telnetpp::bytes         name,
+    telnetpp::bytes         value)
+{
+    append_variable(storage, type, name);
+    storage.push_back(detail::value);
+    detail::append_escaped(storage, value);
+}
 
 }}}
+

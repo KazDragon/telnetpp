@@ -1,5 +1,5 @@
 #include "telnetpp/options/new_environ/client.hpp"
-#include "telnetpp/options/new_environ/detail/response_parser.hpp"
+#include "telnetpp/options/new_environ/detail/for_each_response.hpp"
 
 namespace telnetpp { namespace options { namespace new_environ {
 
@@ -18,7 +18,7 @@ void client::handle_subnegotiation(
     telnetpp::bytes data,
     continuation const &cont)
 {
-    detail::parse_responses(
+    detail::for_each_response(
       data,
       [&](response const &rsp)
       {

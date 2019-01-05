@@ -52,12 +52,12 @@ set (TELNETPP_PUBLIC_SOURCE_FILES
     src/options/naws/client.cpp
     src/options/naws/server.cpp
     src/options/new_environ/client.cpp
-#    src/options/new_environ/server.cpp
+    src/options/new_environ/server.cpp
     src/options/terminal_type/client.cpp
     src/session.cpp
     src/subnegotiation.cpp
 )
-#
+
 set (TELNETPP_PUBLIC_HEADER_FILES
     include/telnetpp/client_option.hpp
     include/telnetpp/command.hpp
@@ -84,7 +84,7 @@ set (TELNETPP_PUBLIC_HEADER_FILES
     include/telnetpp/options/naws/client.hpp
     include/telnetpp/options/naws/server.hpp
     include/telnetpp/options/new_environ/client.hpp
-#    include/telnetpp/options/new_environ/server.hpp
+    include/telnetpp/options/new_environ/server.hpp
     include/telnetpp/options/terminal_type/client.hpp
     include/telnetpp/options/subnegotiationless_client.hpp
     include/telnetpp/options/subnegotiationless_server.hpp
@@ -111,7 +111,6 @@ set (TELNETPP_PUBLIC_HEADER_FILES
 set (TELNETPP_PRIVATE_SOURCE_FILES
 #    src/options/msdp/detail/decoder.cpp
 #    src/options/msdp/detail/encoder.cpp
-#    src/options/new_environ/detail/request_parser.cpp
     src/options/new_environ/detail/stream.cpp
     src/detail/registration.cpp
 )
@@ -134,8 +133,9 @@ set (TELNETPP_PRIVATE_HEADER_FILES
 #    include/telnetpp/options/msdp/detail/protocol.hpp
     include/telnetpp/options/naws/detail/protocol.hpp
     include/telnetpp/options/new_environ/detail/protocol.hpp
-#    include/telnetpp/options/new_environ/detail/request_parser.hpp
-    include/telnetpp/options/new_environ/detail/response_parser.hpp
+    include/telnetpp/options/new_environ/detail/for_each_request.hpp
+    include/telnetpp/options/new_environ/detail/for_each_response.hpp
+    include/telnetpp/options/new_environ/detail/request_parser_helper.hpp
     include/telnetpp/options/new_environ/detail/response_parser_helper.hpp
     include/telnetpp/options/new_environ/detail/stream.hpp
     include/telnetpp/options/suppress_ga/detail/protocol.hpp
@@ -244,7 +244,7 @@ if (TELNETPP_WITH_TESTS)
         test/naws_client_test.cpp
         test/naws_server_test.cpp
         test/new_environ_client_test.cpp
-    #    test/new_environ_server_test.cpp
+        test/new_environ_server_test.cpp
         test/negotiation_router_test.cpp
         test/parser_test.cpp
         test/q_method_test.cpp

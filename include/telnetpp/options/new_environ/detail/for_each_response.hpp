@@ -6,7 +6,7 @@ namespace telnetpp { namespace options { namespace new_environ {
     namespace detail {
 
 template <typename Continuation>
-void parse_responses(telnetpp::bytes content, Continuation &&cont)
+void for_each_response(telnetpp::bytes content, Continuation &&cont)
 {
     parsing_state state;
 

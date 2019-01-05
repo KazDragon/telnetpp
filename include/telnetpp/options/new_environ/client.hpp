@@ -1,44 +1,13 @@
 #pragma once
 
 #include "telnetpp/client_option.hpp"
+#include "telnetpp/options/new_environ/protocol.hpp"
 #include "telnetpp/options/new_environ/detail/protocol.hpp"
 #include "telnetpp/options/new_environ/detail/stream.hpp"
 #include <numeric>
 #include <string>
 
 namespace telnetpp { namespace options { namespace new_environ {
-
-//* =========================================================================
-/// \brief An enumeration of the type of variables that NEW_ENVIRON handles.
-//* =========================================================================
-enum class variable_type
-{
-    var,
-    uservar
-};
-
-//* =========================================================================
-/// \brief A request that is made of the remote server.
-//* =========================================================================
-struct request
-{
-    variable_type          type;
-    telnetpp::byte_storage name;
-};
-
-using requests = gsl::span<request const>;
-
-//* =========================================================================
-/// \brief A response that is received from the remote server.
-//* =========================================================================
-struct response
-{
-    variable_type                           type;
-    telnetpp::byte_storage                  name;
-    boost::optional<telnetpp::byte_storage> value;
-};
-
-using responses = gsl::span<response const>;
 
 //* =========================================================================
 /// \brief An implementation of the client side of the Telnet New-Environ
