@@ -4,7 +4,7 @@
 TEST(naws_server_test, option_is_naws)
 {
     telnetpp::options::naws::server server;
-    ASSERT_EQ(31, server.code());
+    ASSERT_EQ(31, server.option_code());
 }
 
 TEST(naws_server_test, activation_with_no_screen_size_sends_nothing)
@@ -56,7 +56,7 @@ TEST(naws_server_test, activation_with_screen_size_sends_screen_size)
     };
 
     std::vector<telnetpp::element> const expected_result = {
-        telnetpp::subnegotiation{server.code(), expected_content}
+        telnetpp::subnegotiation{server.option_code(), expected_content}
     };
 
     std::vector<telnetpp::element> received_result;
@@ -86,7 +86,7 @@ TEST(naws_server_test, setting_screen_size_when_activated_sends_screen_size)
     };
 
     std::vector<telnetpp::element> const expected_result = {
-        telnetpp::subnegotiation{server.code(), expected_content}
+        telnetpp::subnegotiation{server.option_code(), expected_content}
     };
 
     std::vector<telnetpp::element> received_result;

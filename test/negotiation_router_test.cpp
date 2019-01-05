@@ -85,12 +85,12 @@ TEST(negotiation_router_test, activating_option_returns_activation_sequence)
         router, telnetpp::dont, server);
 
     std::vector<telnetpp::element> const expected_result = {
-        telnetpp::negotiation{telnetpp::wont, server.code()}
+        telnetpp::negotiation{telnetpp::wont, server.option_code()}
     };
 
     std::vector<telnetpp::element> received_result;
     router(
-        telnetpp::negotiation{telnetpp::dont, server.code()},
+        telnetpp::negotiation{telnetpp::dont, server.option_code()},
         [&received_result](telnetpp::element const &elem)
         {
             received_result.push_back(elem);

@@ -4,7 +4,7 @@
 TEST(naws_client_test, option_is_naws)
 {
     telnetpp::options::naws::client client;
-    ASSERT_EQ(31, client.code());
+    ASSERT_EQ(31, client.option_code());
 }
 
 TEST(naws_client_test, valid_subnegotiation_signals_window_size_change)

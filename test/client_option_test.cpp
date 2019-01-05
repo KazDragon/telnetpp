@@ -31,7 +31,7 @@ private:
 TEST(client_option_test, code_returns_option_code)
 {
     fake_client_option client{21};
-    ASSERT_EQ(telnetpp::option_type{21}, client.code());
+    ASSERT_EQ(telnetpp::option_type{21}, client.option_code());
 }
 
 TEST(client_option_test, deactivated_negotiate_will_sends_do_with_signal)

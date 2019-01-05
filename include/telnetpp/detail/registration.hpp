@@ -35,7 +35,7 @@ void register_route_from_negotiation_to_option(
     NegotiableOption   &option)
 {
     route.register_route(
-        negotiation{request, option.code()},
+        negotiation{request, option.option_code()},
         [&option, request](auto &&neg, auto &&cont)
         {
             return option.negotiate(request, cont);
@@ -50,7 +50,7 @@ void register_route_from_subnegotiation_to_option(
     subnegotiation_router &route,
     SubnegotiableOption   &option)
 {
-    route.register_route(option.code(),
+    route.register_route(option.option_code(),
         [&option](auto &&sub, auto &&cont)
         {
             return option.subnegotiate(sub.content(), cont);

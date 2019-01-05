@@ -27,7 +27,7 @@ public :
             detail::send
         };
 
-        send(telnetpp::subnegotiation{code(), request_content});
+        send(telnetpp::subnegotiation{option_code(), request_content});
     }
 
     boost::signals2::signal<

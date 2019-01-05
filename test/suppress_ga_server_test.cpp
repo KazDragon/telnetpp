@@ -4,7 +4,7 @@
 TEST(suppress_ga_server_test, option_is_suppress_ga)
 {
     telnetpp::options::suppress_ga::server server;
-    ASSERT_EQ(3, server.code());
+    ASSERT_EQ(3, server.option_code());
 }
 
 TEST(suppress_ga_server_test, subnegotiation_returns_nothing)

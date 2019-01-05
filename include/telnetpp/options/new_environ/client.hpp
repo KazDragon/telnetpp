@@ -71,7 +71,7 @@ public:
                 return content;
             });
 
-        cont(telnetpp::subnegotiation{code(), request_content});
+        cont(telnetpp::subnegotiation{option_code(), request_content});
     }
 
     //* =====================================================================

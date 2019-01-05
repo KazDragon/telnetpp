@@ -33,7 +33,7 @@ public:
     //* =====================================================================
     /// Returns the code for the option.
     //* =====================================================================
-    constexpr telnetpp::option_type code() const
+    constexpr telnetpp::option_type option_code() const
     {
         return code_;
     }

@@ -131,7 +131,7 @@ TEST(subnegotiation_router_test, routing_subnegotiation_returns_subnegotiation_r
         });
 
     router(telnetpp::subnegotiation{
-        client.code(), 
+        client.option_code(), 
         expected_subnegotiation},
         [](auto &&){});
 

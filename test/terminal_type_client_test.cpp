@@ -4,7 +4,7 @@
 TEST(terminal_type_client_test, option_is_terminal_type)
 {
     telnetpp::options::terminal_type::client client;
-    ASSERT_EQ(24, client.code());
+    ASSERT_EQ(24, client.option_code());
 }
 
 TEST(terminal_type_client_test, requesting_terminal_type_sends_terminal_type_request)
@@ -19,7 +19,7 @@ TEST(terminal_type_client_test, requesting_terminal_type_sends_terminal_type_req
     };
 
     std::vector<telnetpp::element> const expected_elements = {
-        telnetpp::subnegotiation{client.code(), expected_content}
+        telnetpp::subnegotiation{client.option_code(), expected_content}
     };
 
     std::vector<telnetpp::element> received_elements;

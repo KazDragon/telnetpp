@@ -145,11 +145,11 @@ TEST(session_test, reception_of_negotiation_routes_to_installed_client_option)
     session.install(client);
 
     telnetpp::byte const content[] = {
-        telnetpp::iac, telnetpp::will, client.code()
+        telnetpp::iac, telnetpp::will, client.option_code()
     };
 
     std::vector<telnetpp::byte> const expected_result = {
-        telnetpp::iac, telnetpp::do_, client.code()
+        telnetpp::iac, telnetpp::do_, client.option_code()
     };
 
     std::string received_content;
@@ -184,11 +184,11 @@ TEST(session_test, reception_of_negotiation_routes_to_installed_server_option)
     session.install(server);
 
     telnetpp::byte const content[] = {
-        telnetpp::iac, telnetpp::do_, server.code()
+        telnetpp::iac, telnetpp::do_, server.option_code()
     };
 
     std::vector<telnetpp::byte> const expected_result = {
-        telnetpp::iac, telnetpp::will, server.code()
+        telnetpp::iac, telnetpp::will, server.option_code()
     };
 
     std::string received_content;
@@ -239,7 +239,7 @@ TEST(session_test, reception_of_subnegotiation_routes_to_installed_client_option
         });
 
     telnetpp::byte const content[] = {
-        telnetpp::iac, telnetpp::sb, client.code(),
+        telnetpp::iac, telnetpp::sb, client.option_code(),
         'T', 'E', 'S', 'T',
         telnetpp::iac, telnetpp::se
     };

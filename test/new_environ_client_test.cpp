@@ -25,7 +25,7 @@ protected:
 TEST(new_environ_client_test, option_is_new_environ)
 {
     telnetpp::options::new_environ::client client;
-    ASSERT_EQ(39, client.code());
+    ASSERT_EQ(39, client.option_code());
 }
 
 TEST_F(in_an_active_new_environ_client, requesting_no_variables_requests_empty_list)
@@ -43,7 +43,7 @@ TEST_F(in_an_active_new_environ_client, requesting_no_variables_requests_empty_l
             };
 
             telnetpp::element const expected_result{
-                telnetpp::subnegotiation{client_.code(), expected_content}
+                telnetpp::subnegotiation{client_.option_code(), expected_content}
             };
 
             ASSERT_EQ(expected_result, elem);
@@ -75,7 +75,7 @@ TEST_F(in_an_active_new_environ_client, requesting_one_var_variable_requests_use
             ;
 
             telnetpp::element const expected_result{
-                telnetpp::subnegotiation{client_.code(), expected_content}
+                telnetpp::subnegotiation{client_.option_code(), expected_content}
             };
 
             ASSERT_EQ(expected_result, elem);
@@ -107,7 +107,7 @@ TEST_F(in_an_active_new_environ_client, requesting_one_user_variable_requests_us
             ;
 
             telnetpp::element const expected_result{
-                telnetpp::subnegotiation{client_.code(), expected_content}
+                telnetpp::subnegotiation{client_.option_code(), expected_content}
             };
 
             ASSERT_EQ(expected_result, elem);
@@ -146,7 +146,7 @@ TEST_F(in_an_active_new_environ_client, requesting_two_variables_requests_two_va
             ;
 
             telnetpp::element const expected_result{
-                telnetpp::subnegotiation{client_.code(), expected_content}
+                telnetpp::subnegotiation{client_.option_code(), expected_content}
             };
 
             ASSERT_EQ(expected_result, elem);
@@ -178,7 +178,7 @@ TEST_F(in_an_active_new_environ_client, requesting_uservar_with_var_in_name_is_e
             ;
 
             telnetpp::element const expected_result{
-                telnetpp::subnegotiation{client_.code(), expected_content}
+                telnetpp::subnegotiation{client_.option_code(), expected_content}
             };
 
             ASSERT_EQ(expected_result, elem);
@@ -210,7 +210,7 @@ TEST_F(in_an_active_new_environ_client, requesting_uservar_with_value_in_name_is
             ;
 
             telnetpp::element const expected_result{
-                telnetpp::subnegotiation{client_.code(), expected_content}
+                telnetpp::subnegotiation{client_.option_code(), expected_content}
             };
 
             ASSERT_EQ(expected_result, elem);
@@ -242,7 +242,7 @@ TEST_F(in_an_active_new_environ_client, requesting_uservar_with_esc_in_name_is_e
             ;
 
             telnetpp::element const expected_result{
-                telnetpp::subnegotiation{client_.code(), expected_content}
+                telnetpp::subnegotiation{client_.option_code(), expected_content}
             };
 
             ASSERT_EQ(expected_result, elem);
@@ -274,7 +274,7 @@ TEST_F(in_an_active_new_environ_client, requesting_uservar_with_uservar_in_name_
             ;
 
             telnetpp::element const expected_result{
-                telnetpp::subnegotiation{client_.code(), expected_content}
+                telnetpp::subnegotiation{client_.option_code(), expected_content}
             };
 
             ASSERT_EQ(expected_result, elem);

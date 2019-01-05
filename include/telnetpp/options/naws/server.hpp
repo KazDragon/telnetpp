@@ -60,7 +60,7 @@ private:
                 byte(window_size_->second & 0xFF)
             };
 
-            send(telnetpp::subnegotiation(code(), content));
+            send(telnetpp::subnegotiation(option_code(), content));
         }
     }
 

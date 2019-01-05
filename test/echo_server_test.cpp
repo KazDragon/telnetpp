@@ -6,7 +6,7 @@ using namespace telnetpp::literals;
 TEST(echo_server_test, option_is_echo)
 {
     telnetpp::options::echo::server server;
-    ASSERT_EQ(1, server.code());
+    ASSERT_EQ(1, server.option_code());
 }
 
 TEST(echo_server_test, subnegotiation_returns_nothing)

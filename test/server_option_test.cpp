@@ -29,7 +29,7 @@ private:
 TEST(server_option_test, code_returns_option_code)
 {
     fake_server_option server{21};
-    ASSERT_EQ(telnetpp::option_type{21}, server.code());
+    ASSERT_EQ(telnetpp::option_type{21}, server.option_code());
 }
 
 TEST(server_option_test, deactivated_negotiate_do_sends_will_with_signal)
