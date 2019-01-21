@@ -1,15 +1,11 @@
 #include "telnetpp/options/msdp/client.hpp"
-#include "expect_elements.hpp"
 #include <gtest/gtest.h>
+
+using namespace telnetpp::literals;
 
 namespace {
 
-static void activate_msdp_client(telnetpp::options::msdp::client &client)
-{
-    client.activate();
-    client.negotiate(telnetpp::will);
-}
-
+/*
 static void register_msdp_client_variable_reception(
     telnetpp::options::msdp::client &client,
     std::vector<telnetpp::options::msdp::variable> &variables)
@@ -21,42 +17,52 @@ static void register_msdp_client_variable_reception(
             return {};
         });
 }
+*/
+
+class in_an_activated_msdp_client : public testing::Test
+{
+protected:
+    in_an_activated_msdp_client()
+    {
+        client_.negotiate(telnetpp::will, [](auto &&){});
+        assert(client_.active());
+    }
+    
+    telnetpp::options::msdp::client client_;
+};
 
 }
 
-TEST(msdp_client_test, option_is_msdp)
+TEST(msdddp_client_test, option_is_msdp)
 {
     telnetpp::options::msdp::client client;
-
-    ASSERT_EQ(69, client.option());
+    ASSERT_EQ(69, client.option_code());
 }
 
-TEST(msdp_client_test, send_with_empty_list_sends_nothing)
+TEST_F(in_an_activated_msdp_client, send_with_variable_sends_simple_variable)
 {
-    telnetpp::options::msdp::client client;
-    activate_msdp_client(client);
+    auto const var_name  = "var"_tb;
+    auto const var_value = "val"_tb;
+    telnetpp::options::msdp::variable const var{var_name, var_value};
 
-    expect_elements(
-        {},
-        client.send({}));
-}
-
-TEST(msdp_client_test, send_with_variable_sends_simple_variable)
-{
-    telnetpp::options::msdp::client client;
-    activate_msdp_client(client);
-
-    expect_elements(
+    client_.send(
+        var,
+        [this](telnetpp::elements data)
         {
-            telnetpp::subnegotiation{
-                client.option(),
-                { 1, 'v', 'a', 'r', 2, 'v', 'a', 'l' }
-            }
-        },
-        client.send({ { "var", "val" } }));
+            ASSERT_EQ(size_t{1}, data.size());
+
+            auto const expected_content = "\x01" "var" "\x02" "val"_tb;
+            auto const expected_subnegotiation = telnetpp::subnegotiation{
+                client_.option_code(),
+                expected_content
+            };
+
+            ASSERT_EQ(telnetpp::element{expected_subnegotiation}, data[0]);
+        });
 }
 
-TEST(msdp_client_test, send_with_array_sends_array_variable)
+/*
+TEST_F(in_an_activated_msdp_client, send_with_array_sends_array_variable)
 {
     telnetpp::options::msdp::client client;
     activate_msdp_client(client);
@@ -69,7 +75,7 @@ TEST(msdp_client_test, send_with_array_sends_array_variable)
     expect_elements(
         {
             telnetpp::subnegotiation{
-                client.option(),
+                client.option_code(),
                 { 1, 'v', 'a', 'r',
                   2,
                       5,
@@ -82,7 +88,7 @@ TEST(msdp_client_test, send_with_array_sends_array_variable)
         client.send({ variable }));
 }
 
-TEST(msdp_client_test, send_with_table_sends_table_variable)
+TEST_F(in_an_activated_msdp_client, send_with_table_sends_table_variable)
 {
     telnetpp::options::msdp::client client;
     activate_msdp_client(client);
@@ -98,7 +104,7 @@ TEST(msdp_client_test, send_with_table_sends_table_variable)
     expect_elements(
         {
             telnetpp::subnegotiation{
-                client.option(),
+                client.option_code(),
                 { 1, 'v', 'a', 'r',
                   2,  3,
                           1, 't', 'b', 'l',
@@ -113,7 +119,7 @@ TEST(msdp_client_test, send_with_table_sends_table_variable)
         client.send({ variable }));
 }
 
-TEST(msdp_client_test, send_with_many_items_sends_many_items)
+TEST_F(in_an_activated_msdp_client, send_with_many_items_sends_many_items)
 {
     telnetpp::options::msdp::client client;
     activate_msdp_client(client);
@@ -135,7 +141,7 @@ TEST(msdp_client_test, send_with_many_items_sends_many_items)
     expect_elements(
         {
             telnetpp::subnegotiation{
-                client.option(),
+                client.option_code(),
                 { 1, 's', 'v', 'a', 'r',
                   2, 's', 'v', 'a', 'l',
                   1, 'a', 'v', 'a', 'r',
@@ -156,7 +162,7 @@ TEST(msdp_client_test, send_with_many_items_sends_many_items)
         client.send({ variable0, variable1, variable2 }));
 }
 
-TEST(msdp_client_test, receiving_no_variables_does_nothing)
+TEST_F(in_an_activated_msdp_client, receiving_no_variables_does_nothing)
 {
     telnetpp::options::msdp::client client;
 
@@ -175,7 +181,7 @@ TEST(msdp_client_test, receiving_no_variables_does_nothing)
     ASSERT_FALSE(called);
 }
 
-TEST(msdp_client_test, receiving_a_variable_reports_an_array_of_one_variable)
+TEST_F(in_an_activated_msdp_client, receiving_a_variable_reports_an_array_of_one_variable)
 {
     telnetpp::options::msdp::client client;
     std::vector<telnetpp::options::msdp::variable> variables;
@@ -194,7 +200,7 @@ TEST(msdp_client_test, receiving_a_variable_reports_an_array_of_one_variable)
     ASSERT_EQ(expected, variables[0]);
 }
 
-TEST(msdp_client_test, receiving_two_variables_reports_an_array_of_two_variable)
+TEST_F(in_an_activated_msdp_client, receiving_two_variables_reports_an_array_of_two_variable)
 {
     telnetpp::options::msdp::client client;
     std::vector<telnetpp::options::msdp::variable> variables;
@@ -217,7 +223,7 @@ TEST(msdp_client_test, receiving_two_variables_reports_an_array_of_two_variable)
     ASSERT_EQ(expected1, variables[1]);
 }
 
-TEST(msdp_client_test, receiving_empty_array_variable_reports_empty_array)
+TEST_F(in_an_activated_msdp_client, receiving_empty_array_variable_reports_empty_array)
 {
     telnetpp::options::msdp::client client;
     std::vector<telnetpp::options::msdp::variable> variables;
@@ -239,7 +245,7 @@ TEST(msdp_client_test, receiving_empty_array_variable_reports_empty_array)
     ASSERT_EQ(expected, variables[0]);
 }
 
-TEST(msdp_client_test, receiving_array_variable_with_one_element_reports_array)
+TEST_F(in_an_activated_msdp_client, receiving_array_variable_with_one_element_reports_array)
 {
     telnetpp::options::msdp::client client;
     std::vector<telnetpp::options::msdp::variable> variables;
@@ -262,7 +268,7 @@ TEST(msdp_client_test, receiving_array_variable_with_one_element_reports_array)
     ASSERT_EQ(expected, variables[0]);
 }
 
-TEST(msdp_client_test, receiving_array_variable_with_two_elements_reports_array)
+TEST_F(in_an_activated_msdp_client, receiving_array_variable_with_two_elements_reports_array)
 {
     telnetpp::options::msdp::client client;
     std::vector<telnetpp::options::msdp::variable> variables;
@@ -286,7 +292,7 @@ TEST(msdp_client_test, receiving_array_variable_with_two_elements_reports_array)
     ASSERT_EQ(expected, variables[0]);
 }
 
-TEST(msdp_client_test, receiving_array_variable_then_string_reports_array_and_string)
+TEST_F(in_an_activated_msdp_client, receiving_array_variable_then_string_reports_array_and_string)
 {
     telnetpp::options::msdp::client client;
     std::vector<telnetpp::options::msdp::variable> variables;
@@ -314,7 +320,7 @@ TEST(msdp_client_test, receiving_array_variable_then_string_reports_array_and_st
     ASSERT_EQ(expected1, variables[1]);
 }
 
-TEST(msdp_client_test, receiving_empty_table_reports_empty_table)
+TEST_F(in_an_activated_msdp_client, receiving_empty_table_reports_empty_table)
 {
     telnetpp::options::msdp::client client;
     std::vector<telnetpp::options::msdp::variable> variables;
@@ -335,7 +341,7 @@ TEST(msdp_client_test, receiving_empty_table_reports_empty_table)
     ASSERT_EQ(expected, variables[0]);
 }
 
-TEST(msdp_client_test, receiving_table_with_one_value_returns_table_with_value)
+TEST_F(in_an_activated_msdp_client, receiving_table_with_one_value_returns_table_with_value)
 {
     telnetpp::options::msdp::client client;
     std::vector<telnetpp::options::msdp::variable> variables;
@@ -361,7 +367,7 @@ TEST(msdp_client_test, receiving_table_with_one_value_returns_table_with_value)
     ASSERT_EQ(expected, variables[0]);
 }
 
-TEST(msdp_client_test, receiving_table_with_one_array_value_returns_table_with_value)
+TEST_F(in_an_activated_msdp_client, receiving_table_with_one_array_value_returns_table_with_value)
 {
     telnetpp::options::msdp::client client;
     std::vector<telnetpp::options::msdp::variable> variables;
@@ -389,7 +395,7 @@ TEST(msdp_client_test, receiving_table_with_one_array_value_returns_table_with_v
     ASSERT_EQ(expected, variables[0]);
 }
 
-TEST(msdp_client_test, receiving_table_with_one_table_value_returns_table_with_value)
+TEST_F(in_an_activated_msdp_client, receiving_table_with_one_table_value_returns_table_with_value)
 {
     telnetpp::options::msdp::client client;
     std::vector<telnetpp::options::msdp::variable> variables;
@@ -422,23 +428,13 @@ TEST(msdp_client_test, receiving_table_with_one_table_value_returns_table_with_v
     ASSERT_EQ(expected, variables[0]);
 }
 
-TEST(msdp_client_test, receiving_table_with_many_values_returns_table_with_values)
+TEST_F(in_an_activated_msdp_client, receiving_table_with_many_values_returns_table_with_values)
 {
     telnetpp::options::msdp::client client;
     std::vector<telnetpp::options::msdp::variable> variables;
 
     register_msdp_client_variable_reception(client, variables);
     activate_msdp_client(client);
-
-    /*
-     { "tbl" : {
-         "var0" : {
-             "in" : [ "val0", "val1" ],
-             "var1" : "val1",
-             "var2" : [ "arr0", "arr1" ]
-         }
-     }}
-    */
 
     client.subnegotiate({
         1, 't', 'b', 'l',
@@ -473,7 +469,7 @@ TEST(msdp_client_test, receiving_table_with_many_values_returns_table_with_value
     ASSERT_EQ(expected, variables[0]);
 }
 
-TEST(msdp_client_test, receiving_many_table_values_returns_many_tables)
+TEST_F(in_an_activated_msdp_client, receiving_many_table_values_returns_many_tables)
 {
     telnetpp::options::msdp::client client;
     std::vector<telnetpp::options::msdp::variable> variables;
@@ -509,3 +505,4 @@ TEST(msdp_client_test, receiving_many_table_values_returns_many_tables)
     ASSERT_EQ(expected0, variables[0]);
     ASSERT_EQ(expected1, variables[1]);
 }
+*/

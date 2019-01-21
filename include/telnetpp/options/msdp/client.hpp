@@ -1,6 +1,7 @@
 #pragma once
 
 #include "telnetpp/options/msdp/variable.hpp"
+#include "telnetpp/options/msdp/detail/encoder.hpp"
 #include "telnetpp/client_option.hpp"
 
 namespace telnetpp { namespace options { namespace msdp {
@@ -17,27 +18,45 @@ public :
     client();
 
     //* =====================================================================
-    /// \brief Send a list of variables to the remote server.
+    /// \brief Send a variables to the remote server.
     //* =====================================================================
-    std::vector<telnetpp::token> send(std::vector<variable> const &variables);
+    template <typename Continuation>
+    void send(variable const &var, Continuation &&cont)
+    {
+        detail::encode(
+            var,
+            [&](telnetpp::bytes data)
+            {
+                auto const elem = telnetpp::element{telnetpp::subnegotiation{
+                    option_code(),
+                    data
+                }};
+                
+                telnetpp::elements elems = { elem };
+                cont(elems);
+            });
+    }
 
     //* =====================================================================
     /// \fn on_receive
     /// \brief Register for a signal whenever a list of variables is received
     /// from the remote server.
     //* =====================================================================
+    /*
     boost::signals2::signal<
         std::vector<telnetpp::token> (std::vector<variable> const &),
         telnetpp::token_combiner
     > on_receive;
+    */
 
 private :
     //* =====================================================================
-    /// \brief Handle a negotiation that has been received in the active
-    /// state.
+    /// \brief Called when a subnegotiation is received while the option is
+    /// active.  Override for option-specific functionality.
     //* =====================================================================
-    std::vector<telnetpp::token> handle_subnegotiation(
-        byte_stream const &content) override;
+    void handle_subnegotiation(
+        telnetpp::bytes data,
+        continuation const &cont) override;
 };
 
 }}}

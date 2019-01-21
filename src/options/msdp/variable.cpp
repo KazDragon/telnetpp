@@ -13,9 +13,11 @@ variable::variable()
 // ==========================================================================
 // CONSTRUCTOR
 // ==========================================================================
-variable::variable(std::string const &name, value_type const &value)
-  : name(name),
-    value(value)
+variable::variable(
+    telnetpp::bytes name, 
+    string_value value)
+  : name{name.begin(), name.end()},
+    value{value}
 {
 }
 
@@ -23,10 +25,10 @@ variable::variable(std::string const &name, value_type const &value)
 // CONSTRUCTOR
 // ==========================================================================
 variable::variable(
-    std::string const &name,
-    std::initializer_list<std::string> const &il)
-  : name(name),
-    value(il)
+    telnetpp::bytes name,
+    array_value array_values)
+  : name{name.begin(), name.end()},
+    value(array_values)
 {
 }
 
@@ -34,11 +36,41 @@ variable::variable(
 // CONSTRUCTOR
 // ==========================================================================
 variable::variable(
-    std::string const &name,
-    std::initializer_list<variable> const &il)
-  : name(name),
-    value(std::vector<variable>{il})
+    telnetpp::bytes name,
+    table_value table_values)
+  : name{name.begin(), name.end()},
+    value(table_values)
 {
+}
+
+/*
+// ==========================================================================
+// OPERATOR==
+// ==========================================================================
+bool operator<(variable const &lhs, variable const &rhs)
+{
+    auto const &lhs_value = lhs.value;
+    
+    if (lhs.name != rhs.name)
+    {
+        return lhs.name < rhs.name;
+    }
+    
+    return detail::visit_lambdas<bool>(
+        rhs.value,
+        [&lhs_value](string_value const &str)
+        {
+            return false;
+        },
+        [&lhs_value](array_value const &arr)
+        {
+            return false;
+        },
+        [&lhs_value](object_value const &obj)
+        {
+            // TODO: unpack types here to give ordering.
+            return true; 
+        });
 }
 
 // ==========================================================================
@@ -65,5 +97,6 @@ bool operator!=(variable const &lhs, variable const &rhs)
 {
     return !(lhs == rhs);
 }
+*/
 
 }}}

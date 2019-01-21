@@ -2,13 +2,15 @@
 
 #include "telnetpp/core.hpp"
 #include <boost/variant.hpp>
-#include <initializer_list>
 #include <string>
-#include <vector>
 
 namespace telnetpp { namespace options { namespace msdp {
 
 struct variable;
+
+using string_value = telnetpp::byte_storage;
+using array_value  = std::basic_string<string_value>;
+using table_value  = std::basic_string<variable>;
 
 //* =========================================================================
 /// \class telnetpp::options::msdp::value_type
@@ -16,9 +18,9 @@ struct variable;
 /// an array of telnetpp::options::msdp::variable.
 //* =========================================================================
 using value_type = boost::variant<
-    std::string,
-    std::vector<std::string>,
-    boost::recursive_wrapper<std::vector<variable>>
+    string_value,
+    array_value,
+    boost::recursive_wrapper<table_value>
 >;
 
 //* =========================================================================
@@ -36,38 +38,38 @@ struct TELNETPP_EXPORT variable
     //* =====================================================================
     /// \brief Constructor
     //* =====================================================================
-    variable(
-        std::string const &name,
-        value_type const &value);
+    variable(telnetpp::bytes name, string_value value);
 
     //* =====================================================================
     /// \brief Constructor
     //* =====================================================================
-    variable(
-        std::string const &name,
-        std::initializer_list<std::string> const &array_values);
+    variable(telnetpp::bytes name, array_value array_values);
 
     //* =====================================================================
     /// \brief Constructor
     //* =====================================================================
-    variable(
-        std::string const &name,
-        std::initializer_list<variable> const &table_values);
+    variable(telnetpp::bytes name, table_value table_values);
 
-    std::string name;
-    value_type  value;
+    telnetpp::byte_storage name;
+    value_type value;
 };
+
+//* =========================================================================
+/// \brief Less-than operator.
+//* =========================================================================
+//TELNETPP_EXPORT
+//bool operator<(variable const &lhs, variable const &rhs);
 
 //* =========================================================================
 /// \brief Equality operator.
 //* =========================================================================
-TELNETPP_EXPORT
-bool operator==(variable const &lhs, variable const &rhs);
+//TELNETPP_EXPORT
+//bool operator==(variable const &lhs, variable const &rhs);
 
 //* =========================================================================
 /// \brief Inequality operator.
 //* =========================================================================
-TELNETPP_EXPORT
-bool operator!=(variable const &lhs, variable const &rhs);
+//TELNETPP_EXPORT
+//bool operator!=(variable const &lhs, variable const &rhs);
 
 }}}

@@ -1,6 +1,6 @@
 #include "telnetpp/options/msdp/client.hpp"
-#include "telnetpp/options/msdp/detail/decoder.hpp"
-#include "telnetpp/options/msdp/detail/encoder.hpp"
+// #include "telnetpp/options/msdp/detail/decoder.hpp"
+// #include "telnetpp/options/msdp/detail/encoder.hpp"
 #include "telnetpp/options/msdp/detail/protocol.hpp"
 
 namespace telnetpp { namespace options { namespace msdp {
@@ -13,6 +13,7 @@ client::client()
 {
 }
 
+/*
 // ==========================================================================
 // SEND
 // ==========================================================================
@@ -28,13 +29,16 @@ std::vector<telnetpp::token> client::send(
 
     return { telnetpp::element{ telnetpp::subnegotiation(option(), result) } };
 }
+*/
 
 // ==========================================================================
 // HANDLE_SUBNEGOTIATION
 // ==========================================================================
-std::vector<telnetpp::token> client::handle_subnegotiation(
-    byte_stream const &content)
+void client::handle_subnegotiation(
+    telnetpp::bytes data,
+    continuation const &cont)
 {
+    /*
     auto result = detail::decode(content);
 
     if (result.empty())
@@ -43,6 +47,7 @@ std::vector<telnetpp::token> client::handle_subnegotiation(
     }
 
     return on_receive(result);
+    */
 }
 
 }}}
