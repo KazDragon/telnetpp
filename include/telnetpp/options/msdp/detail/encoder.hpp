@@ -25,6 +25,16 @@ void encode(
         {
             storage += val;
         },
+        [&](telnetpp::options::msdp::array_value const &arr)
+        {
+            storage.push_back(telnetpp::options::msdp::detail::array_open);
+            for(auto const &val : arr)
+            {
+                storage.push_back(telnetpp::options::msdp::detail::val);
+                storage += val;
+            }
+            storage.push_back(telnetpp::options::msdp::detail::array_close);
+        },
         [&](auto &&)
         {
         });

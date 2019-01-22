@@ -1,6 +1,7 @@
 #pragma once
 
 #include "telnetpp/core.hpp"
+#include <boost/container/small_vector.hpp>
 #include <boost/variant.hpp>
 #include <string>
 
@@ -9,8 +10,8 @@ namespace telnetpp { namespace options { namespace msdp {
 struct variable;
 
 using string_value = telnetpp::byte_storage;
-using array_value  = std::basic_string<string_value>;
-using table_value  = std::basic_string<variable>;
+using array_value  = boost::container::small_vector<string_value, 4>;
+using table_value  = boost::container::small_vector<variable, 4>;
 
 //* =========================================================================
 /// \class telnetpp::options::msdp::value_type

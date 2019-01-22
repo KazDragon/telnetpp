@@ -33,7 +33,7 @@ protected:
 
 }
 
-TEST(msdddp_client_test, option_is_msdp)
+TEST(msdp_client_test, option_is_msdp)
 {
     telnetpp::options::msdp::client client;
     ASSERT_EQ(69, client.option_code());
@@ -61,33 +61,41 @@ TEST_F(in_an_activated_msdp_client, send_with_variable_sends_simple_variable)
         });
 }
 
-/*
 TEST_F(in_an_activated_msdp_client, send_with_array_sends_array_variable)
 {
-    telnetpp::options::msdp::client client;
-    activate_msdp_client(client);
-
-    auto variable = telnetpp::options::msdp::variable{
-        "var",
-        { "val0", "val1" }
+    auto const var_name = "var"_tb;
+    auto const var_value0 = "val0"_tb;
+    auto const var_value1 = "val1"_tb;
+    
+    auto const var = telnetpp::options::msdp::variable{
+        var_name,
+        telnetpp::options::msdp::array_value{ var_value0, var_value1 }
     };
 
-    expect_elements(
+    client_.send(
+        var,
+        [this](telnetpp::elements data)
         {
-            telnetpp::subnegotiation{
-                client.option_code(),
-                { 1, 'v', 'a', 'r',
-                  2,
-                      5,
-                          2, 'v', 'a', 'l', '0',
-                          2, 'v', 'a', 'l', '1',
-                      6
-                }
-            }
-        },
-        client.send({ variable }));
+            ASSERT_EQ(size_t{1}, data.size());
+
+            auto const expected_content = 
+                "\x01" "var" 
+                "\x02"
+                    "\x05" 
+                        "\x02" "val0"
+                        "\x02" "val1"
+                    "\x06"_tb;
+        
+            auto const expected_subnegotiation = telnetpp::subnegotiation{
+                client_.option_code(),
+                expected_content
+            };
+
+            ASSERT_EQ(telnetpp::element{expected_subnegotiation}, data[0]);
+        });
 }
 
+/*
 TEST_F(in_an_activated_msdp_client, send_with_table_sends_table_variable)
 {
     telnetpp::options::msdp::client client;

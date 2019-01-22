@@ -11,7 +11,8 @@ class ConanTelnetpp(ConanFile):
     generators = "cmake"
     exports = "*", "!build", "!.vscode"
     description = ""
-    requires = ("boost_signals2/[>=1.69]@bincrafters/stable",
+    requires = ("boost_container/[>=1.69]@bincrafters/stable",
+                "boost_signals2/[>=1.69]@bincrafters/stable",
                 "boost_variant/[>=1.69]@bincrafters/stable",
                 "gsl-lite/[>=0.26]@nonstd-lite/stable")
     options = {"shared": [True, False], "withTests": [True, False]}
