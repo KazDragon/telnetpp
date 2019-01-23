@@ -95,38 +95,51 @@ TEST_F(in_an_activated_msdp_client, send_with_array_sends_array_variable)
         });
 }
 
-/*
 TEST_F(in_an_activated_msdp_client, send_with_table_sends_table_variable)
 {
-    telnetpp::options::msdp::client client;
-    activate_msdp_client(client);
+    auto const var_name = "var"_tb;
+    auto const tbl_name   = "tbl"_tb;
+    auto const tbl_value0 = "val0"_tb;
+    auto const tbl_value1 = "val1"_tb;
 
-    auto variable = telnetpp::options::msdp::variable{
-        "var",
-        {{
-            "tbl",
-            { "val0", "val1" }
-        }}
+    auto inner_var = telnetpp::options::msdp::table_value{};
+    inner_var.emplace_back(
+        tbl_name, 
+        telnetpp::options::msdp::array_value{ tbl_value0, tbl_value1 });
+        
+    auto var = telnetpp::options::msdp::variable{
+        var_name,
+        { inner_var }
     };
 
-    expect_elements(
+    client_.send(
+        var,
+        [this](telnetpp::elements data)
         {
-            telnetpp::subnegotiation{
-                client.option_code(),
-                { 1, 'v', 'a', 'r',
-                  2,  3,
-                          1, 't', 'b', 'l',
-                          2, 5,
-                                  2, 'v', 'a', 'l', '0',
-                                  2, 'v', 'a', 'l', '1',
-                             6,
-                      4
-                }
-            }
-        },
-        client.send({ variable }));
+            ASSERT_EQ(size_t{1}, data.size());
+
+            auto const expected_content = 
+                "\x01" "var" 
+                "\x02"
+                    "\x03" 
+                        "\x01" "tbl"
+                        "\x02"
+                            "\x05" 
+                                "\x02" "val0"
+                                "\x02" "val1"
+                            "\x06"
+                    "\x04"_tb;
+        
+            auto const expected_subnegotiation = telnetpp::subnegotiation{
+                client_.option_code(),
+                expected_content
+            };
+
+            ASSERT_EQ(telnetpp::element{expected_subnegotiation}, data[0]);
+        });
 }
 
+/*
 TEST_F(in_an_activated_msdp_client, send_with_many_items_sends_many_items)
 {
     telnetpp::options::msdp::client client;

@@ -110,7 +110,7 @@ set (TELNETPP_PUBLIC_HEADER_FILES
 
 set (TELNETPP_PRIVATE_SOURCE_FILES
 #    src/options/msdp/detail/decoder.cpp
-#    src/options/msdp/detail/encoder.cpp
+    src/options/msdp/detail/encoder.cpp
     src/options/new_environ/detail/stream.cpp
     src/detail/registration.cpp
 )
