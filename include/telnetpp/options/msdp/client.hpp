@@ -42,12 +42,9 @@ public :
     /// \brief Register for a signal whenever a list of variables is received
     /// from the remote server.
     //* =====================================================================
-    /*
     boost::signals2::signal<
-        std::vector<telnetpp::token> (std::vector<variable> const &),
-        telnetpp::token_combiner
+        void (variable const &, continuation const &)
     > on_receive;
-    */
 
 private :
     //* =====================================================================

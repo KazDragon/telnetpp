@@ -3,6 +3,7 @@
 #include "telnetpp/core.hpp"
 #include <boost/container/small_vector.hpp>
 #include <boost/variant.hpp>
+#include <iosfwd>
 #include <string>
 
 namespace telnetpp { namespace options { namespace msdp {
@@ -56,21 +57,21 @@ struct TELNETPP_EXPORT variable
 };
 
 //* =========================================================================
-/// \brief Less-than operator.
-//* =========================================================================
-//TELNETPP_EXPORT
-//bool operator<(variable const &lhs, variable const &rhs);
-
-//* =========================================================================
 /// \brief Equality operator.
 //* =========================================================================
-//TELNETPP_EXPORT
-//bool operator==(variable const &lhs, variable const &rhs);
+TELNETPP_EXPORT
+bool operator==(variable const &lhs, variable const &rhs);
 
 //* =========================================================================
 /// \brief Inequality operator.
 //* =========================================================================
-//TELNETPP_EXPORT
-//bool operator!=(variable const &lhs, variable const &rhs);
+TELNETPP_EXPORT
+bool operator!=(variable const &lhs, variable const &rhs);
+
+//* =========================================================================
+/// \brief Stream Output operator.
+//* =========================================================================
+TELNETPP_EXPORT
+std::ostream &operator<<(std::ostream &out, variable const &var);
 
 }}}

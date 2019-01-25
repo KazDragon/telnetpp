@@ -43,36 +43,6 @@ variable::variable(
 {
 }
 
-/*
-// ==========================================================================
-// OPERATOR==
-// ==========================================================================
-bool operator<(variable const &lhs, variable const &rhs)
-{
-    auto const &lhs_value = lhs.value;
-    
-    if (lhs.name != rhs.name)
-    {
-        return lhs.name < rhs.name;
-    }
-    
-    return detail::visit_lambdas<bool>(
-        rhs.value,
-        [&lhs_value](string_value const &str)
-        {
-            return false;
-        },
-        [&lhs_value](array_value const &arr)
-        {
-            return false;
-        },
-        [&lhs_value](object_value const &obj)
-        {
-            // TODO: unpack types here to give ordering.
-            return true; 
-        });
-}
-
 // ==========================================================================
 // OPERATOR==
 // ==========================================================================
@@ -97,6 +67,37 @@ bool operator!=(variable const &lhs, variable const &rhs)
 {
     return !(lhs == rhs);
 }
-*/
+
+// ==========================================================================
+// OPERATOR<<
+// ==========================================================================
+std::ostream &operator<<(std::ostream &out, variable const &var)
+{
+    out << "var[" << reinterpret_cast<char const *>(var.name.c_str()) << "=";
+    
+    detail::visit_lambdas(
+        var.value,
+        [&](string_value const &sv)
+        {
+            out << "\"" << reinterpret_cast<char const *>(sv.c_str()) << "\"";
+        },
+        [&](array_value const &av)
+        {
+            out << "[";
+            
+            for (auto const &item : av)
+            {
+                out << reinterpret_cast<char const *>(item.c_str()) << ",";
+            }
+            
+            out << "]";
+        },
+        [](auto &&)
+        {
+            
+        });
+        
+    return out << "]";
+}
 
 }}}
