@@ -110,6 +110,24 @@ private :
     }
 
     // ======================================================================
+    // OPEN_VARIABLE
+    // ======================================================================
+    void open_variable()
+    {
+        if (current_var_.empty())
+        {
+            var_ = variable{};
+            current_var_.push_back(&var_);
+        }
+        else
+        {
+            auto &outer_var = value_as_table();
+            outer_var.push_back(variable{});
+            current_var_.push_back(&outer_var.back());
+        }
+    }
+
+    // ======================================================================
     // CLOSE_VARIABLE
     // ======================================================================
     void close_variable()
@@ -128,10 +146,21 @@ private :
     // ======================================================================
     void parse_idle(byte data)
     {
-        if (data == telnetpp::options::msdp::detail::var)
+        switch (data)
         {
-            current_var_.push_back(&var_);
-            state_ = state::name;
+            case telnetpp::options::msdp::detail::var:
+                open_variable();
+                state_ = state::name;
+                break;
+                
+            case telnetpp::options::msdp::detail::table_close:
+                close_variable();
+                state_ = state::idle;
+                break;
+                
+            default:
+                assert(!"unhandled");
+                break;
         }
     }
 
@@ -162,11 +191,20 @@ private :
                 value() = array_value{};
                 state_ = state::array;
                 break;
+
+            case telnetpp::options::msdp::detail::table_open:
+                value() = table_value{};
+                state_ = state::idle;
+                break;
+                
+            case telnetpp::options::msdp::detail::table_close:
+                close_variable();
+                state_ = state::idle;
+                break;
                 
             case telnetpp::options::msdp::detail::var:
                 close_variable(); 
-                
-                current_var_.push_back(&var_);
+                open_variable();
                 state_ = state::name;
                 break;
                 

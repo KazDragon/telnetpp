@@ -265,114 +265,122 @@ TEST_F(in_an_activated_msdp_client, receiving_array_variable_then_string_reports
     ASSERT_EQ(expected1, received_variables_[1]);
 }
 
-/*
 TEST_F(in_an_activated_msdp_client, receiving_empty_table_reports_empty_table)
 {
-    telnetpp::options::msdp::client client;
-    std::vector<telnetpp::options::msdp::variable> variables;
+    auto const subnegotiation_content =
+        "\x01" "tbl"
+        "\x02" "\x03"
+               "\x04"_tb;
 
-    register_msdp_client_variable_reception(client, variables);
-    activate_msdp_client(client);
+    client_.subnegotiate(subnegotiation_content, [](auto &&){});
 
-    client.subnegotiate({
-        1, 't', 'b', 'l',
-        2, 3, 4
-    });
+    auto const var_name  = "tbl"_tb;
+    auto const var_value = telnetpp::options::msdp::table_value{};
+    telnetpp::options::msdp::variable expected{ var_name, var_value };
 
-    telnetpp::options::msdp::variable expected(
-        "tbl",
-        std::vector<telnetpp::options::msdp::variable>{});
-
-    ASSERT_EQ(size_t{1}, variables.size());
-    ASSERT_EQ(expected, variables[0]);
+    ASSERT_EQ(size_t{1}, received_variables_.size());
+    ASSERT_EQ(expected, received_variables_[0]);
 }
 
-TEST_F(in_an_activated_msdp_client, receiving_table_with_one_value_returns_table_with_value)
+TEST_F(in_an_activated_msdp_client, receiving_table_with_one_string_value_returns_table_with_value)
 {
-    telnetpp::options::msdp::client client;
-    std::vector<telnetpp::options::msdp::variable> variables;
+    auto const subnegotiation_content =
+        "\x01" "tbl"
+        "\x02" "\x03"
+                      "\x01" "var"
+                      "\x02" "val"
+               "\x04"_tb;
 
-    register_msdp_client_variable_reception(client, variables);
-    activate_msdp_client(client);
+    client_.subnegotiate(subnegotiation_content, [](auto &&){});
 
-    client.subnegotiate({
-        1, 't', 'b', 'l',
-        2, 3,
-               1, 'v', 'a', 'r',
-               2, 'v', 'a', 'l',
-           4
-    });
+    auto const inner_var_name = "var"_tb;
+    auto const inner_var_value = "val"_tb;
+    auto const inner_var = telnetpp::options::msdp::variable{inner_var_name, inner_var_value};
 
-    telnetpp::options::msdp::variable expected(
-        "tbl",
-        std::vector<telnetpp::options::msdp::variable>{
-            { "var", "val" }
-        });
+    auto const var_name  = "tbl"_tb;
+    auto var_value = telnetpp::options::msdp::table_value{};
+    var_value.push_back(inner_var);
+    
+    telnetpp::options::msdp::variable expected{var_name, var_value};
 
-    ASSERT_EQ(size_t{1}, variables.size());
-    ASSERT_EQ(expected, variables[0]);
+    ASSERT_EQ(size_t{1}, received_variables_.size());
+    ASSERT_EQ(expected, received_variables_[0]);
 }
 
 TEST_F(in_an_activated_msdp_client, receiving_table_with_one_array_value_returns_table_with_value)
 {
-    telnetpp::options::msdp::client client;
-    std::vector<telnetpp::options::msdp::variable> variables;
+    auto const subnegotiation_content =
+        "\x01" "tbl"
+        "\x02" "\x03"
+                      "\x01" "arr"
+                      "\x02" "\x05" 
+                                    "\x02" "val0"
+                                    "\x02" "val1"
+                                    "\x02" "val2"
+                             "\x06"
+               "\x04"_tb;
 
-    register_msdp_client_variable_reception(client, variables);
-    activate_msdp_client(client);
+    client_.subnegotiate(subnegotiation_content, [](auto &&){});
 
-    client.subnegotiate({
-        1, 't', 'b', 'l',
-        2, 3,
-               1, 'v', 'a', 'r',
-               2, 5, 2, 'v', 'a', 'l', '0',
-                     2, 'v', 'a', 'l', '1',
-                  6,
-           4
-    });
+    auto const inner_var_name = "arr"_tb;
+    auto const inner_var_value0 = "val0"_tb;
+    auto const inner_var_value1 = "val1"_tb;
+    auto const inner_var_value2 = "val2"_tb;
+    
+    auto const inner_array_value = telnetpp::options::msdp::array_value{
+        inner_var_value0, inner_var_value1, inner_var_value2
+    };
+    auto const inner_var = telnetpp::options::msdp::variable{inner_var_name, inner_array_value};
 
-    telnetpp::options::msdp::variable expected(
-        "tbl",
-        std::vector<telnetpp::options::msdp::variable>{
-            { "var", std::vector<std::string>{ "val0", "val1" } }
-        });
+    auto const var_name  = "tbl"_tb;
+    auto var_value = telnetpp::options::msdp::table_value{};
+    var_value.push_back(inner_var);
+    
+    telnetpp::options::msdp::variable expected{var_name, var_value};
 
-    ASSERT_EQ(size_t{1}, variables.size());
-    ASSERT_EQ(expected, variables[0]);
+    ASSERT_EQ(size_t{1}, received_variables_.size());
+    ASSERT_EQ(expected, received_variables_[0]);
 }
 
 TEST_F(in_an_activated_msdp_client, receiving_table_with_one_table_value_returns_table_with_value)
 {
-    telnetpp::options::msdp::client client;
-    std::vector<telnetpp::options::msdp::variable> variables;
+    auto const subnegotiation_content =
+        "\x01" "tbl"
+        "\x02" "\x03"
+                      "\x01" "in"
+                      "\x02" "\x03" 
+                                    "\x01" "var"
+                                    "\x02" "val"
+                             "\x04"
+               "\x04"_tb;
 
-    register_msdp_client_variable_reception(client, variables);
-    activate_msdp_client(client);
+    client_.subnegotiate(subnegotiation_content, [](auto &&){});
 
-    client.subnegotiate({
-        1, 't', 'b', 'l',
-        2, 3,
-               1, 'v', 'a', 'r',
-               2, 3,
-                     1, 'i', 'n',
-                     2, 5, 2, 'v', 'a', 'l', '0',
-                           2, 'v', 'a', 'l', '1',
-                        6,
-                  4,
-           4
-    });
+    auto const inner_inner_var_name = "var"_tb;
+    auto const inner_inner_var_value = "val"_tb;
+    auto const inner_inner_var = telnetpp::options::msdp::variable{
+        inner_inner_var_name, inner_inner_var_value
+    };
+    
+    auto const inner_table = telnetpp::options::msdp::table_value{
+        inner_inner_var
+    };
 
-    telnetpp::options::msdp::variable expected(
-        "tbl",
-        std::vector<telnetpp::options::msdp::variable>{
-            { "var", std::vector<telnetpp::options::msdp::variable>{
-                { "in", std::vector<std::string>{ "val0", "val1" } }
-            }}
-        });
+    auto const inner_var_name = "in"_tb;
+    auto const inner_var = telnetpp::options::msdp::variable{
+        inner_var_name, inner_table
+    };
+    
+    auto const var_name  = "tbl"_tb;
+    auto const var_table = telnetpp::options::msdp::table_value{inner_var};
 
-    ASSERT_EQ(size_t{1}, variables.size());
-    ASSERT_EQ(expected, variables[0]);
+    telnetpp::options::msdp::variable expected{var_name, var_table};
+
+    ASSERT_EQ(size_t{1}, received_variables_.size());
+    ASSERT_EQ(expected, received_variables_[0]);
 }
+
+/*
 
 TEST_F(in_an_activated_msdp_client, receiving_table_with_many_values_returns_table_with_values)
 {

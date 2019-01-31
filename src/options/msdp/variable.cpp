@@ -73,7 +73,7 @@ bool operator!=(variable const &lhs, variable const &rhs)
 // ==========================================================================
 std::ostream &operator<<(std::ostream &out, variable const &var)
 {
-    out << "var[" << reinterpret_cast<char const *>(var.name.c_str()) << "=";
+    out << reinterpret_cast<char const *>(var.name.c_str()) << "=";
     
     detail::visit_lambdas(
         var.value,
@@ -92,12 +92,19 @@ std::ostream &operator<<(std::ostream &out, variable const &var)
             
             out << "]";
         },
-        [](auto &&)
+        [&](table_value const &tv)
         {
+            out << "{";
             
+            for (auto const &inner_var :tv)
+            {
+                out << inner_var << ",";
+            }
+
+            out << "}";
         });
         
-    return out << "]";
+    return out;
 }
 
 }}}
