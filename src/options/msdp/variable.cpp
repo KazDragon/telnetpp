@@ -17,7 +17,18 @@ variable::variable(
     telnetpp::bytes name, 
     string_value value)
   : name{name.begin(), name.end()},
-    value{value}
+    value{std::move(value)}
+{
+}
+
+// ==========================================================================
+// CONSTRUCTOR
+// ==========================================================================
+variable::variable(
+    telnetpp::byte_storage name, 
+    string_value value)
+  : name{std::move(name)},
+    value{std::move(value)}
 {
 }
 
@@ -28,7 +39,18 @@ variable::variable(
     telnetpp::bytes name,
     array_value array_values)
   : name{name.begin(), name.end()},
-    value(array_values)
+    value{array_values}
+{
+}
+
+// ==========================================================================
+// CONSTRUCTOR
+// ==========================================================================
+variable::variable(
+    telnetpp::byte_storage name,
+    array_value array_values)
+  : name{std::move(name)},
+    value{std::move(array_values)}
 {
 }
 
@@ -39,7 +61,18 @@ variable::variable(
     telnetpp::bytes name,
     table_value table_values)
   : name{name.begin(), name.end()},
-    value(table_values)
+    value{std::move(table_values)}
+{
+}
+
+// ==========================================================================
+// CONSTRUCTOR
+// ==========================================================================
+variable::variable(
+    telnetpp::byte_storage name,
+    table_value table_values)
+  : name{std::move(name)},
+    value{std::move(table_values)}
 {
 }
 

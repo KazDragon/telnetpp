@@ -45,13 +45,28 @@ struct TELNETPP_EXPORT variable
     //* =====================================================================
     /// \brief Constructor
     //* =====================================================================
+    variable(telnetpp::byte_storage name, string_value value);
+
+    //* =====================================================================
+    /// \brief Constructor
+    //* =====================================================================
     variable(telnetpp::bytes name, array_value array_values);
+
+    //* =====================================================================
+    /// \brief Constructor
+    //* =====================================================================
+    variable(telnetpp::byte_storage name, array_value array_values);
 
     //* =====================================================================
     /// \brief Constructor
     //* =====================================================================
     variable(telnetpp::bytes name, table_value table_values);
 
+    //* =====================================================================
+    /// \brief Constructor
+    //* =====================================================================
+    variable(telnetpp::byte_storage name, table_value table_values);
+    
     telnetpp::byte_storage name;
     value_type value;
 };

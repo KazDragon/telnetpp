@@ -159,7 +159,6 @@ private :
                 break;
                 
             default:
-                assert(!"unhandled");
                 break;
         }
     }
@@ -212,27 +211,6 @@ private :
                 value_as_string() += data;
                 break;
         }
-        /*
-        assert(!result_.empty());
-
-        switch (data)
-        {
-            case telnetpp::options::msdp::detail::table_open :
-                value() = std::vector<variable>{};
-                stack_.push_back(&value_as_table());
-                state_ = state::idle;
-                break;
-
-            case telnetpp::options::msdp::detail::table_close :
-                // Never pop the root of the stack.
-                if (stack_.size() > 1)
-                {
-                    stack_.pop_back();
-                }
-                state_ = state::idle;
-                break;
-        }
-        */
     }
 
     // ======================================================================
