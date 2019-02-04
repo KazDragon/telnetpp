@@ -240,7 +240,6 @@ if (TELNETPP_WITH_TESTS)
     #    test/mccp_server_test.cpp
         test/msdp_client_test.cpp
         test/msdp_server_test.cpp
-    #    test/msdp_server_robustness_test.cpp
         test/naws_client_test.cpp
         test/naws_server_test.cpp
         test/new_environ_client_test.cpp
