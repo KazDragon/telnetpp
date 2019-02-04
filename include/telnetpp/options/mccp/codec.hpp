@@ -32,7 +32,7 @@ class decompressor;
 //* =========================================================================
 class TELNETPP_EXPORT codec : boost::noncopyable
 {
-public :
+public:
     //* =====================================================================
     /// \brief Constructor
     //* =====================================================================
@@ -60,7 +60,7 @@ public :
     //* =====================================================================
     telnetpp::byte_stream receive(byte data);
 
-private :
+private:
     struct impl;
     std::shared_ptr<impl> pimpl_;
 };

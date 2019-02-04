@@ -10,7 +10,7 @@ namespace telnetpp {
 //* =========================================================================
 class TELNETPP_EXPORT command
 {
-public :
+public:
     //* =====================================================================
     /// \brief Constructor
     //* =====================================================================
@@ -27,7 +27,7 @@ public :
         return command_;
     }
 
-private :
+private:
     command_type command_;
 };
 

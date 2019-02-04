@@ -11,7 +11,7 @@ namespace telnetpp { namespace options { namespace terminal_type {
 /// Type option.
 //* =========================================================================
 class TELNETPP_EXPORT client : public telnetpp::client_option {
-public :
+public:
     //* =====================================================================
     /// CONSTRUCTOR
     //* =====================================================================
@@ -34,7 +34,7 @@ public :
         void (telnetpp::bytes, continuation const &)
     > on_terminal_type;
 
-private :
+private:
     //* =====================================================================
     /// \brief Called when a subnegotiation is received while the option is
     /// active.  Override for option-specific functionality.

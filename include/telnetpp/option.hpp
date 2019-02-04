@@ -33,7 +33,7 @@ public:
     //* =====================================================================
     /// Returns the code for the option.
     //* =====================================================================
-    constexpr telnetpp::option_type option_code() const
+    constexpr telnetpp::option_type option_code() const noexcept
     {
         return code_;
     }
@@ -41,7 +41,7 @@ public:
     //* =====================================================================
     /// \brief Returns whether the option is active.
     //* =====================================================================
-    constexpr bool active() const
+    constexpr bool active() const noexcept
     {
         return state_ == internal_state::active;
     }
@@ -211,7 +211,7 @@ protected:
     //* =====================================================================
     /// Constructor
     //* =====================================================================
-    constexpr explicit option(telnetpp::option_type code)
+    constexpr explicit option(telnetpp::option_type code) noexcept
       : code_(code)
     {
     }

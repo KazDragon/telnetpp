@@ -12,7 +12,7 @@ namespace telnetpp { namespace options {
 template <option_type Option>
 class subnegotiationless_server : public telnetpp::server_option
 {
-public :
+public:
     //* =====================================================================
     /// \brief Constructor
     //* =====================================================================
@@ -21,7 +21,7 @@ public :
     {
     }
 
-private :
+private:
     //* =====================================================================
     /// \brief Called when a subnegotiation is received while the option is
     /// active.  Override for option-specific functionality.

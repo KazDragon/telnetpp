@@ -16,7 +16,7 @@
 template <class Option>
 class an_option_being_deactivated : public testing::Test
 {
-public :
+public:
     an_option_being_deactivated()
     {
         option_.activate([](auto &&){});
@@ -24,10 +24,10 @@ public :
         option_.deactivate([](auto &&){});
     }
 
-protected :
+protected:
     class option : public Option
     {
-    public :
+    public:
         option()
           : Option(0)
         {
@@ -96,16 +96,16 @@ TEST_F(a_server_option_being_deactivated, ignores_deactivate_requests)
 template <class Option>
 class an_option_being_activated : public testing::Test
 {
-public :
+public:
     an_option_being_activated()
     {
         option_.activate([](auto &&){});
     }
 
-protected :
+protected:
     class option : public Option
     {
-    public :
+    public:
         option()
           : Option(0)
         {

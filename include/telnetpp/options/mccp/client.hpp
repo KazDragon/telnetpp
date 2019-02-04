@@ -10,13 +10,13 @@ namespace telnetpp { namespace options { namespace mccp {
 //* =========================================================================
 class TELNETPP_EXPORT client : public telnetpp::client_option
 {
-public :
+public:
     //* =====================================================================
     /// \brief Constructor
     //* =====================================================================
     client();
 
-private :
+private:
     //* =====================================================================
     /// \brief Handle a negotiation that has been received in the active
     /// state.

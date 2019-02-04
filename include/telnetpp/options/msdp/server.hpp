@@ -11,7 +11,7 @@ namespace telnetpp { namespace options { namespace msdp {
 //* =========================================================================
 class TELNETPP_EXPORT server : public telnetpp::server_option
 {
-public :
+public:
     //* =====================================================================
     /// \brief Constructor
     //* =====================================================================
@@ -46,7 +46,7 @@ public :
         void (variable const &, continuation const &)
     > on_receive;
 
-private :
+private:
     //* =====================================================================
     /// \brief Called when a subnegotiation is received while the option is
     /// active.  Override for option-specific functionality.

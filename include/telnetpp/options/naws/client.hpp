@@ -9,7 +9,7 @@ namespace telnetpp { namespace options { namespace naws {
 /// \brief An implementation of the client side of the Telnet NAWS option.
 //* =========================================================================
 class TELNETPP_EXPORT client : public telnetpp::client_option {
-public :
+public:
     using window_dimension = std::uint16_t;
 
     //* =====================================================================
@@ -21,7 +21,7 @@ public :
         void (window_dimension, window_dimension, continuation const &)
     > on_window_size_changed;
 
-private :
+private:
     //* =====================================================================
     /// \brief Called when a subnegotiation is received while the option is
     /// active.  Override for option-specific functionality.

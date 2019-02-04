@@ -3,7 +3,7 @@
 
 class fake_decompressor : public telnetpp::options::mccp::decompressor
 {
-public :
+public:
     //* =====================================================================
     /// \brief Decompress the given byte, and return a tuple of the
     /// decompressed data and a boolean that is set to true if this was the

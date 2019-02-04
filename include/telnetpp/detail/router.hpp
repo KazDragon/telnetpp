@@ -55,7 +55,7 @@ template <
 >
 class router
 {
-public :
+public:
     using key_type = Key;
     using message_type = Message;
     using function_type = std::function<Function>;
@@ -136,7 +136,7 @@ public :
         return detail::return_default_constructed<result_type>{}();
     }
 
-private :
+private:
     registered_functions_map_type registered_functions_;
     function_type                 unregistered_route_;
 };

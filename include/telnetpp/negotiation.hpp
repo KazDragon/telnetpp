@@ -12,7 +12,7 @@ namespace telnetpp {
 //* =========================================================================
 class TELNETPP_EXPORT negotiation
 {
-public :
+public:
     //* =====================================================================
     /// \brief Constructor
     //* =====================================================================
@@ -47,7 +47,7 @@ public :
         telnetpp::detail::hash_combine(seed, request_, option_);
     }
 
-private :
+private:
     negotiation_type request_;
     option_type option_;
 };

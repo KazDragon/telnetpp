@@ -12,7 +12,7 @@ namespace {
 
 class output_token_visitor : public boost::static_visitor<>
 {
-public :
+public:
     output_token_visitor(
         std::vector<telnetpp::stream_token> &tokens,
         compressor &co,
@@ -71,7 +71,7 @@ public :
         }
     }
 
-private :
+private:
     std::vector<telnetpp::stream_token> &tokens_;
     compressor &compressor_;
     decompressor &decompressor_;

@@ -21,7 +21,7 @@ static std::size_t constexpr input_buffer_size = 1023;
 // ==========================================================================
 class decompressor::impl
 {
-public :
+public:
     // ======================================================================
     // CONSTRUCTOR
     // ======================================================================
@@ -105,7 +105,7 @@ public :
         }
     }
 
-private :
+private:
     z_stream stream_ = {};
     bool     decompressing_ = false;
 };

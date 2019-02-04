@@ -12,7 +12,7 @@ namespace telnetpp {
 //* =========================================================================
 class TELNETPP_EXPORT subnegotiation
 {
-public :
+public:
     //* =====================================================================
     /// \brief Constructor
     //* =====================================================================
@@ -39,7 +39,7 @@ public :
     }
 
 
-private :
+private:
     option_type option_;
     bytes content_;
 };

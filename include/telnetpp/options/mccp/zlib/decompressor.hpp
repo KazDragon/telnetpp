@@ -11,7 +11,7 @@ namespace telnetpp { namespace options { namespace mccp { namespace zlib {
 class TELNETPP_EXPORT decompressor
   : public telnetpp::options::mccp::decompressor
 {
-public :
+public:
     //* =====================================================================
     /// \brief Constructor
     //* =====================================================================
@@ -35,7 +35,7 @@ public :
     //* =====================================================================
     void end_decompression() override;
 
-private :
+private:
     class impl;
     std::unique_ptr<impl> pimpl_;
 };

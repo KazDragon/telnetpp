@@ -10,7 +10,7 @@ namespace telnetpp { namespace options { namespace mccp {
 //* =========================================================================
 class TELNETPP_EXPORT server : public telnetpp::server_option
 {
-public :
+public:
     //* =====================================================================
     /// \brief Constructor
     //* =====================================================================
@@ -33,7 +33,7 @@ public :
     //* =====================================================================
     std::vector<telnetpp::token> end_compression();
     
-private :
+private:
     //* =====================================================================
     /// \brief Handle a negotiation that has been received in the active
     /// state.
