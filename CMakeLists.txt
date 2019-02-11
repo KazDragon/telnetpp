@@ -45,7 +45,7 @@ set (TELNETPP_PUBLIC_SOURCE_FILES
     src/options/mccp/client.cpp
 #    src/options/mccp/codec.cpp
 #    src/options/mccp/decompressor.cpp
-#    src/options/mccp/server.cpp
+    src/options/mccp/server.cpp
     src/options/msdp/client.cpp
     src/options/msdp/server.cpp
     src/options/msdp/variable.cpp
@@ -77,7 +77,7 @@ set (TELNETPP_PUBLIC_HEADER_FILES
     include/telnetpp/options/mccp/client.hpp
 #    include/telnetpp/options/mccp/codec.hpp
     include/telnetpp/options/mccp/decompressor.hpp
-#    include/telnetpp/options/mccp/server.hpp
+    include/telnetpp/options/mccp/server.hpp
     include/telnetpp/options/msdp/client.hpp
     include/telnetpp/options/msdp/server.hpp
     include/telnetpp/options/msdp/variable.hpp
@@ -127,7 +127,7 @@ set (TELNETPP_PRIVATE_HEADER_FILES
     include/telnetpp/detail/router.hpp
     include/telnetpp/detail/subnegotiation_router.hpp
     include/telnetpp/options/echo/detail/protocol.hpp
-#    include/telnetpp/options/mccp/detail/protocol.hpp
+    include/telnetpp/options/mccp/detail/protocol.hpp
     include/telnetpp/options/msdp/detail/decoder.hpp
     include/telnetpp/options/msdp/detail/encoder.hpp
     include/telnetpp/options/msdp/detail/protocol.hpp
@@ -237,7 +237,7 @@ if (TELNETPP_WITH_TESTS)
         test/generator_test.cpp
         test/mccp_client_test.cpp
     #    test/mccp_codec_test.cpp
-    #    test/mccp_server_test.cpp
+        test/mccp_server_test.cpp
         test/msdp_client_test.cpp
         test/msdp_server_test.cpp
         test/naws_client_test.cpp

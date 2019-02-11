@@ -22,7 +22,7 @@ public:
     /// compression.  Otherwise, the sequence will be sent as soon as the 
     /// option is activated.
     //* =====================================================================
-    std::vector<telnetpp::token> begin_compression();
+    //std::vector<telnetpp::token> begin_compression();
 
     //* =====================================================================
     /// \brief Requests that compression ends.
@@ -31,17 +31,18 @@ public:
     /// request to begin_compression that would auto-start compression on
     /// activation.
     //* =====================================================================
-    std::vector<telnetpp::token> end_compression();
+    //std::vector<telnetpp::token> end_compression();
     
 private:
     //* =====================================================================
-    /// \brief Handle a negotiation that has been received in the active
-    /// state.
+    /// \brief Called when a subnegotiation is received while the option is
+    /// active.  Override for option-specific functionality.
     //* =====================================================================
-    std::vector<telnetpp::token> handle_subnegotiation(
-        telnetpp::byte_stream const &content) override;
+    void handle_subnegotiation(
+        telnetpp::bytes data,
+        continuation const &cont) override;
 
-    bool compression_requested_;
+    //bool compression_requested_;
 };
 
 }}}

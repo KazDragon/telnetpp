@@ -3,8 +3,9 @@
 
 namespace telnetpp { namespace options { namespace mccp {
 
+/*
 namespace {
-    
+
 static auto const begin_compression_sequence = std::vector<telnetpp::token> {
     telnetpp::element(
         telnetpp::subnegotiation(detail::option, {})),
@@ -16,14 +17,15 @@ static auto const end_compression_sequence = std::vector<telnetpp::token> {
 };
 
 }
+*/
 
 // ==========================================================================
 // CONSTRUCTOR
 // ==========================================================================
 server::server()
-  : server_option(detail::option),
-    compression_requested_(false)
+  : server_option(detail::option)
 {
+    /*
     on_state_changed.connect(
         [this](auto const state) -> std::vector<telnetpp::token>
         {
@@ -42,11 +44,13 @@ server::server()
                 return {};
             }
         });
+    */
 }
 
 // ==========================================================================
 // BEGIN_COMPRESSION
 // ==========================================================================
+/*
 std::vector<telnetpp::token> server::begin_compression()
 {
     if (is_active())
@@ -59,10 +63,12 @@ std::vector<telnetpp::token> server::begin_compression()
         return {};
     }
 }
+*/
 
 // ==========================================================================
 // END_COMPRESSION
 // ==========================================================================
+/*
 std::vector<telnetpp::token> server::end_compression()
 {
     if (is_active())
@@ -75,14 +81,15 @@ std::vector<telnetpp::token> server::end_compression()
         return {};
     }
 }
+*/
 
 // ==========================================================================
 // HANDLE_SUBNEGOTIATION
 // ==========================================================================
-std::vector<telnetpp::token> server::handle_subnegotiation(
-    telnetpp::byte_stream const &content)
+void server::handle_subnegotiation(
+    telnetpp::bytes data,
+    continuation const &cont)
 {
-    return {};
 }
 
 }}}
