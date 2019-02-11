@@ -312,7 +312,7 @@ TEST(server_option_test, activated_activate_sends_nothing_is_active_with_signal)
     ASSERT_EQ(expected_elements, received_elements);
 }
 
-TEST(server_option_test, activated_deactivate_sends_wont_is_inactive_with_signal)
+TEST(server_option_test, activated_deactivate_sends_wont_is_inactive_no_signal)
 {
     fake_server_option server(0xA5);
     server.activate([](auto &&){});
@@ -336,7 +336,7 @@ TEST(server_option_test, activated_deactivate_sends_wont_is_inactive_with_signal
             received_elements.push_back(elem);
         });
 
-    ASSERT_TRUE(state_changed);
+    ASSERT_FALSE(state_changed);
     ASSERT_FALSE(server.active());
     ASSERT_EQ(expected_elements, received_elements);
 }

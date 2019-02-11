@@ -13,20 +13,20 @@ public:
     //* =====================================================================
     /// \brief Destructor
     //* =====================================================================
-    virtual ~compressor() {}
+    virtual ~compressor() = default;
     
     //* =====================================================================
     /// \brief Compress the given byte sequence and return the compressed
     /// sequence.
     //* =====================================================================
-    virtual telnetpp::byte_stream compress(
-        telnetpp::byte_stream const &sequence) = 0;
+    // virtual telnetpp::byte_stream compress(
+    //    telnetpp::byte_stream const &sequence) = 0;
 
     //* =====================================================================
     /// \brief Ends the compression stream.  Compressing further will cause
     /// the stream to restart.
     //* =====================================================================
-    virtual telnetpp::byte_stream end_compression() = 0;
+    // virtual telnetpp::byte_stream end_compression() = 0;
 };
 
 }}}

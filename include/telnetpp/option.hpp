@@ -51,8 +51,7 @@ public:
     /// \param send a continuation that sends the Telnet elements that are
     /// emitted by this process.
     //* =====================================================================
-    template <class Continuation>
-    constexpr void activate(Continuation &&send)
+    constexpr void activate(continuation const &send)
     {
         switch (state_)
         {
@@ -82,15 +81,13 @@ public:
     /// \param send a continuation that sends the Telnet elements that are
     /// emitted by this process.
     //* =====================================================================
-    template <class Continuation>
-    constexpr void deactivate(Continuation &&send)
+    constexpr void deactivate(continuation const &send)
     {
         switch (state_)
         {
             case internal_state::active:
                 send(telnetpp::negotiation{local_negative, code_});
                 state_ = internal_state::deactivating;
-                on_state_changed(send);
                 break;
 
             case internal_state::activating:
@@ -114,10 +111,9 @@ public:
     /// This should be called when the remote side either initiates a 
     /// negotiation request or responds to an ongoing request.
     //* =====================================================================
-    template <class Continuation>
     constexpr void negotiate(
         telnetpp::negotiation_type neg, 
-        Continuation &&send)
+        continuation const &send)
     {
         switch (state_)
         {
@@ -184,8 +180,8 @@ public:
     /// This should be called when a subnegotiation sequence has been received
     /// from the remote.
     //* =====================================================================
-    template <class Continuation>
-    constexpr void subnegotiate(telnetpp::bytes content, Continuation &&cont)
+    constexpr void subnegotiate(
+        telnetpp::bytes content, continuation const &cont)
     {
         if (state_ == internal_state::active)
         {

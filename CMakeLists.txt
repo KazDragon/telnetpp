@@ -42,7 +42,7 @@ set (TELNETPP_PUBLIC_SOURCE_FILES
     src/command.cpp
     src/element.cpp
     src/negotiation.cpp
-#    src/options/mccp/client.cpp
+    src/options/mccp/client.cpp
 #    src/options/mccp/codec.cpp
 #    src/options/mccp/decompressor.cpp
 #    src/options/mccp/server.cpp
@@ -74,9 +74,9 @@ set (TELNETPP_PUBLIC_HEADER_FILES
     include/telnetpp/version.hpp
     include/telnetpp/options/echo/client.hpp
     include/telnetpp/options/echo/server.hpp
-#    include/telnetpp/options/mccp/client.hpp
+    include/telnetpp/options/mccp/client.hpp
 #    include/telnetpp/options/mccp/codec.hpp
-#    include/telnetpp/options/mccp/decompressor.hpp
+    include/telnetpp/options/mccp/decompressor.hpp
 #    include/telnetpp/options/mccp/server.hpp
     include/telnetpp/options/msdp/client.hpp
     include/telnetpp/options/msdp/server.hpp
@@ -128,8 +128,8 @@ set (TELNETPP_PRIVATE_HEADER_FILES
     include/telnetpp/detail/subnegotiation_router.hpp
     include/telnetpp/options/echo/detail/protocol.hpp
 #    include/telnetpp/options/mccp/detail/protocol.hpp
-#    include/telnetpp/options/msdp/detail/decoder.hpp
-#    include/telnetpp/options/msdp/detail/encoder.hpp
+    include/telnetpp/options/msdp/detail/decoder.hpp
+    include/telnetpp/options/msdp/detail/encoder.hpp
     include/telnetpp/options/msdp/detail/protocol.hpp
     include/telnetpp/options/naws/detail/protocol.hpp
     include/telnetpp/options/new_environ/detail/protocol.hpp
@@ -235,7 +235,7 @@ if (TELNETPP_WITH_TESTS)
         test/echo_client_test.cpp
         test/echo_server_test.cpp
         test/generator_test.cpp
-    #    test/mccp_client_test.cpp
+        test/mccp_client_test.cpp
     #    test/mccp_codec_test.cpp
     #    test/mccp_server_test.cpp
         test/msdp_client_test.cpp

@@ -27,7 +27,7 @@ class negotiation_router
         negotiation,
         void (
             telnetpp::negotiation, 
-            std::function<void (telnetpp::element const &)>),
+            std::function<void (telnetpp::element const &)> const &),
         detail::negotiation_router_key_from_message_policy
     >
 {

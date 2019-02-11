@@ -30,20 +30,17 @@ class decompressor;
 /// Actual compression and decompression is handled by the compressor and
 /// decompressor objects passed in during construction.
 //* =========================================================================
-class TELNETPP_EXPORT codec : boost::noncopyable
+class TELNETPP_EXPORT codec final
 {
 public:
     //* =====================================================================
     /// \brief Constructor
     //* =====================================================================
-    codec(
-        std::shared_ptr<compressor> const &co,
-        std::shared_ptr<decompressor> const &dec);
-
-    //* =====================================================================
-    /// \brief Destructor
-    //* =====================================================================
-    ~codec();
+    constexpr codec(compressor &co, decompressor &dec) noexcept
+      : compressor_(co),
+        decompressor_(dec)
+    {
+    }
 
     //* =====================================================================
     /// \brief In a manner consistent with the rest of the telnetpp library,
@@ -51,18 +48,30 @@ public:
     /// compressed or uncompressed, as appropriate, that can be sent to the
     /// next lower layer.
     //* =====================================================================
-    std::vector<telnetpp::stream_token> send(
-        std::vector<telnetpp::stream_token> const &tokens);
+    template <class Continuation>
+    constexpr void send(telnetpp::bytes data, Continuation &&cont)
+    {
+        cont(data);
+    }
+    
+    // std::vector<telnetpp::stream_token> send(
+    //    std::vector<telnetpp::stream_token> const &tokens);
 
     //* =====================================================================
     /// \brief Receive a byte from the lower layer, decompress it if
     /// necessary, and return the result as a stream of bytes.
     //* =====================================================================
-    telnetpp::byte_stream receive(byte data);
+    // telnetpp::byte_stream receive(byte data);
 
 private:
-    struct impl;
-    std::shared_ptr<impl> pimpl_;
+    codec(codec const &) = delete;
+    codec &operator=(codec const &) = delete;
+
+    compressor &compressor_;
+    decompressor &decompressor_;
+    
+    bool output_compressed_ = false;
+    bool input_compressed_  = false;
 };
 
 }}}

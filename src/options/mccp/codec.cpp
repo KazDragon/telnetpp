@@ -8,6 +8,7 @@
 
 namespace telnetpp { namespace options { namespace mccp {
 
+/*
 namespace {
 
 class output_token_visitor : public boost::static_visitor<>
@@ -80,29 +81,9 @@ private:
 };
 
 }
+*/
 
-struct codec::impl
-{
-    std::shared_ptr<compressor>   compressor_;
-    std::shared_ptr<decompressor> decompressor_;
-
-    bool output_compressed_ = false;
-    bool input_compressed_  = false;
-};
-
-codec::codec(
-    std::shared_ptr<compressor> const &co,
-    std::shared_ptr<decompressor> const &dec)
-  : pimpl_(std::make_shared<impl>())
-{
-    pimpl_->compressor_ = co;
-    pimpl_->decompressor_ = dec;
-}
-
-codec::~codec()
-{
-}
-
+/*
 std::vector<telnetpp::stream_token> codec::send(
     std::vector<telnetpp::stream_token> const &tokens)
 {
@@ -135,5 +116,7 @@ telnetpp::byte_stream codec::receive(byte data)
         return { data };
     }
 }
+
+*/
 
 }}}

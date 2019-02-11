@@ -19,6 +19,48 @@ public:
     virtual ~decompressor() {}
 
     //* =====================================================================
+    /// \brief starts the decompression stream.  Calls to operator() now
+    /// assume that the input is compressed.
+    //* =====================================================================
+    void start_decompression() { engaged_ = true; }
+
+    //* =====================================================================
+    /// \brief Ends the current decompression stream.  Calls to operator()
+    /// now assume that the input is uncompressed.
+    //* =====================================================================
+    void end_decompression() { engaged_ = false; }
+    
+    //* =====================================================================
+    /// \brief Decompress data, sending the result of the decompression
+    /// to the continuation.
+    //* =====================================================================
+    template <typename Continuation>
+    void operator()(telnetpp::bytes data, Continuation &&continuation)
+    {
+        while (!data.empty())
+        {
+            if (engaged_)
+            {
+                data = decompress_chunk(
+                    data,
+                    [&](telnetpp::bytes decompressed_data, bool decompression_ended)
+                    {
+                        engaged_ = !decompression_ended;
+                        continuation(decompressed_data, decompression_ended);
+                    });
+            }
+            else
+            {
+                // Every byte might activate decompression, so they must be
+                // transmitted individually.
+                continuation(data.subspan(0, 1), false);
+                data = data.subspan(1);
+            }
+        }
+    }
+    
+private:
+    //* =====================================================================
     /// \brief Decompress the given byte, and return a tuple of the
     /// decompressed data and a boolean that is set to true if this was the
     /// end of the decompression stream.
@@ -26,13 +68,11 @@ public:
     /// passed that it could not decompress.  I.e. the stream has been
     /// corrupted or otherwise constructed in an invalid manner.
     //* =====================================================================
-    virtual std::tuple<telnetpp::byte_stream, bool> decompress(byte data) = 0;
-
-    //* =====================================================================
-    /// \brief Ends the current decompression stream.  Any further calls
-    /// to decompress continue as if the stream were created fresh.
-    //* =====================================================================
-    virtual void end_decompression() = 0;
+    virtual telnetpp::bytes decompress_chunk(
+      telnetpp::bytes data,
+      std::function<void (telnetpp::bytes, bool)> const &continuation) = 0;
+      
+    bool engaged_{false};
 };
 
 //* =========================================================================

@@ -314,7 +314,7 @@ TEST(client_option_test, activated_activate_sends_nothing_is_active_with_signal)
     ASSERT_EQ(expected_elements, received_elements);
 }
 
-TEST(client_option_test, activated_deactivate_sends_dont_is_inactive_with_signal)
+TEST(client_option_test, activated_deactivate_sends_dont_is_inactive_no_signal)
 {
     fake_client_option client(0xA5);
     client.activate([](auto &&){});
@@ -338,7 +338,7 @@ TEST(client_option_test, activated_deactivate_sends_dont_is_inactive_with_signal
             received_elements.push_back(elem);
         });
 
-    ASSERT_TRUE(state_changed);
+    ASSERT_FALSE(state_changed);
     ASSERT_FALSE(client.active());
     ASSERT_EQ(expected_elements, received_elements);
 }
