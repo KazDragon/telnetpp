@@ -91,10 +91,10 @@ set (TELNETPP_PUBLIC_HEADER_FILES
     include/telnetpp/options/suppress_ga/client.hpp
     include/telnetpp/options/suppress_ga/server.hpp
 )
-#
-## The zlib compressors for MCCP should only be compiled into the library
-## if zlib is available.
-#if (ZLIB_FOUND)
+
+# The zlib compressors for MCCP should only be compiled into the library
+# if zlib is available.
+if (TELNETPP_WITH_ZLIB)
 #    set (TELNETPP_PUBLIC_SOURCE_FILES
 #        ${TELNETPP_PUBLIC_SOURCE_FILES}
 #        src/options/mccp/zlib/compressor.cpp
@@ -106,7 +106,7 @@ set (TELNETPP_PUBLIC_HEADER_FILES
 #        include/telnetpp/options/mccp/zlib/compressor.hpp
 #        include/telnetpp/options/mccp/zlib/decompressor.hpp
 #    )
-#endif()
+endif()
 
 set (TELNETPP_PRIVATE_SOURCE_FILES
     src/options/msdp/detail/decoder.cpp
@@ -155,6 +155,13 @@ target_link_libraries(telnetpp
         CONAN_PKG::boost_signals2
         CONAN_PKG::boost_variant
 )
+
+if (TELNETPP_WITH_ZLIB)
+    target_link_libraries(telnetpp
+        PRIVATE
+            CONAN_PKG::zlib
+    )
+endif()
 
 set_target_properties(telnetpp
     PROPERTIES
@@ -255,18 +262,15 @@ if (TELNETPP_WITH_TESTS)
         test/terminal_type_client_test.cpp
     )
 
-    #    # The tests for the zlib compressors for MCCP should only be compiled into
-    #    # the executable if zlib is available.
-    #    if (ZLIB_FOUND)
+    # The tests for the zlib compressors for MCCP should only be compiled into
+    # the executable if zlib is available.
+    if (TELNETPP_WITH_ZLIB)
     #        set (telnetpp_tester_external_tests
     #            ${telnetpp_tester_external_tests}
     #            test/mccp_zlib_compressor_test.cpp
     #            test/mccp_zlib_decompressor_test.cpp
     #        )
-    #    endif()
-
-    set (telnetpp_tester_internal_tests
-    )
+    endif()
 
     # If we are building shared libraries, then we wont be able to test any of
     # the modules in the detail directory since they're not visible (this is ok,
@@ -288,9 +292,17 @@ if (TELNETPP_WITH_TESTS)
     )
 
     target_link_libraries(telnetpp_tester
-        telnetpp
-        CONAN_PKG::gtest
+        PRIVATE
+            telnetpp
+            CONAN_PKG::gtest
     )
+
+    if (TELNETPP_WITH_ZLIB)
+        target_link_libraries(telnetpp_tester
+            PRIVATE
+                CONAN_PKG::zlib
+        )
+    endif()
 
     add_test(telnetpp_test telnetpp_tester)
 endif()
