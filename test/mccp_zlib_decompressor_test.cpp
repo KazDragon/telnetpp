@@ -6,12 +6,13 @@
 
 TEST(mccp_zlib_decompressor_test, zlib_decompressor_is_decompressor)
 {
-    // This MCCP codec will rely on the decompressor interface, so
-    // zlib_decompressor must implement that.
+    // MCCP will rely on the decompressor interface, so zlib_decompressor must
+    // implement that.
     telnetpp::options::mccp::zlib::decompressor zlib_decompressor;
     telnetpp::options::mccp::decompressor &decompressor = zlib_decompressor;
 }
 
+/*
 TEST(mccp_zlib_decompressor_test, decompressing_data_returns_decompressed_data)
 {
     // As we pass a compressed byte stream through the decompressor, it
@@ -387,3 +388,4 @@ TEST(mccp_zlib_decompressor_test, corrupted_decompression_stream_throws_exceptio
     response = deflateEnd(&stream);
     assert(response == Z_DATA_ERROR);
 }
+*/

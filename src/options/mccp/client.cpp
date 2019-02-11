@@ -28,7 +28,7 @@ void client::handle_subnegotiation(
     telnetpp::bytes data,
     continuation const &cont)
 {
-    decompressor_.start_decompression();
+    decompressor_.begin_decompression();
 }
 
 }}}

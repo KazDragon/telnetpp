@@ -12,7 +12,7 @@ namespace {
 // how-to guide.  Instead, we can just use small blocks on the stack and
 // iterate in the very rare case that a single message yields a block of 1KB
 // or more.
-static std::size_t constexpr input_buffer_size = 1023;
+static constexpr std::size_t input_buffer_size = 1023;
 
 }
 
@@ -21,6 +21,7 @@ static std::size_t constexpr input_buffer_size = 1023;
 // ==========================================================================
 class decompressor::impl
 {
+/*
 public:
     // ======================================================================
     // CONSTRUCTOR
@@ -108,6 +109,7 @@ public:
 private:
     z_stream stream_ = {};
     bool     decompressing_ = false;
+*/
 };
 
 // ==========================================================================
@@ -126,6 +128,16 @@ decompressor::~decompressor()
 }
 
 // ==========================================================================
+// DECOMPRESS_CHUNK
+// ==========================================================================
+telnetpp::bytes decompressor::decompress_chunk(
+    telnetpp::bytes data,
+    continuation const &cont)
+{
+}
+
+/*
+// ==========================================================================
 // DECOMPRESS
 // ==========================================================================
 std::tuple<telnetpp::byte_stream, bool> decompressor::decompress(byte data)
@@ -140,5 +152,6 @@ void decompressor::end_decompression()
 {
     pimpl_->end_decompression();
 }
+*/
 
 }}}}

@@ -43,8 +43,7 @@ set (TELNETPP_PUBLIC_SOURCE_FILES
     src/element.cpp
     src/negotiation.cpp
     src/options/mccp/client.cpp
-#    src/options/mccp/codec.cpp
-#    src/options/mccp/decompressor.cpp
+    src/options/mccp/decompressor.cpp
     src/options/mccp/server.cpp
     src/options/msdp/client.cpp
     src/options/msdp/server.cpp
@@ -75,7 +74,6 @@ set (TELNETPP_PUBLIC_HEADER_FILES
     include/telnetpp/options/echo/client.hpp
     include/telnetpp/options/echo/server.hpp
     include/telnetpp/options/mccp/client.hpp
-#    include/telnetpp/options/mccp/codec.hpp
     include/telnetpp/options/mccp/decompressor.hpp
     include/telnetpp/options/mccp/server.hpp
     include/telnetpp/options/msdp/client.hpp
@@ -95,17 +93,17 @@ set (TELNETPP_PUBLIC_HEADER_FILES
 # The zlib compressors for MCCP should only be compiled into the library
 # if zlib is available.
 if (TELNETPP_WITH_ZLIB)
-#    set (TELNETPP_PUBLIC_SOURCE_FILES
-#        ${TELNETPP_PUBLIC_SOURCE_FILES}
+    set (TELNETPP_PUBLIC_SOURCE_FILES
+        ${TELNETPP_PUBLIC_SOURCE_FILES}
 #        src/options/mccp/zlib/compressor.cpp
-#        src/options/mccp/zlib/decompressor.cpp
-#    )
+        src/options/mccp/zlib/decompressor.cpp
+    )
 #
-#    set (TELNETPP_PUBLIC_INCLUDE_FILES
-#        ${TELNETPP_PUBLIC_SOURCE_FILES}
+    set (TELNETPP_PUBLIC_INCLUDE_FILES
+        ${TELNETPP_PUBLIC_SOURCE_FILES}
 #        include/telnetpp/options/mccp/zlib/compressor.hpp
-#        include/telnetpp/options/mccp/zlib/decompressor.hpp
-#    )
+        include/telnetpp/options/mccp/zlib/decompressor.hpp
+    )
 endif()
 
 set (TELNETPP_PRIVATE_SOURCE_FILES
@@ -243,7 +241,6 @@ if (TELNETPP_WITH_TESTS)
         test/echo_server_test.cpp
         test/generator_test.cpp
         test/mccp_client_test.cpp
-    #    test/mccp_codec_test.cpp
         test/mccp_server_test.cpp
         test/msdp_client_test.cpp
         test/msdp_server_test.cpp
@@ -265,11 +262,11 @@ if (TELNETPP_WITH_TESTS)
     # The tests for the zlib compressors for MCCP should only be compiled into
     # the executable if zlib is available.
     if (TELNETPP_WITH_ZLIB)
-    #        set (telnetpp_tester_external_tests
-    #            ${telnetpp_tester_external_tests}
+        set (telnetpp_tester_external_tests
+             ${telnetpp_tester_external_tests}
     #            test/mccp_zlib_compressor_test.cpp
-    #            test/mccp_zlib_decompressor_test.cpp
-    #        )
+            test/mccp_zlib_decompressor_test.cpp
+        )
     endif()
 
     # If we are building shared libraries, then we wont be able to test any of
