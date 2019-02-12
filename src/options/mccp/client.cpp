@@ -1,5 +1,5 @@
 #include "telnetpp/options/mccp/client.hpp"
-#include "telnetpp/options/mccp/decompressor.hpp"
+#include "telnetpp/options/mccp/codec.hpp"
 #include "telnetpp/options/mccp/detail/protocol.hpp"
 
 namespace telnetpp { namespace options { namespace mccp {
@@ -7,16 +7,16 @@ namespace telnetpp { namespace options { namespace mccp {
 // ==========================================================================
 // CONSTRUCTOR
 // ==========================================================================
-client::client(decompressor &dec)
+client::client(codec &cdc)
   : client_option(detail::option),
-    decompressor_(dec)
+    codec_(cdc)
 {
     on_state_changed.connect(
         [&](continuation const &cont)
         {
             if (!active())
             {
-                decompressor_.end_decompression();
+                codec_.finish();
             }
         });
 }
@@ -28,7 +28,7 @@ void client::handle_subnegotiation(
     telnetpp::bytes data,
     continuation const &cont)
 {
-    decompressor_.begin_decompression();
+    codec_.start();
 }
 
 }}}

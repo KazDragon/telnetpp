@@ -43,7 +43,7 @@ set (TELNETPP_PUBLIC_SOURCE_FILES
     src/element.cpp
     src/negotiation.cpp
     src/options/mccp/client.cpp
-    src/options/mccp/decompressor.cpp
+    src/options/mccp/codec.cpp
     src/options/mccp/server.cpp
     src/options/msdp/client.cpp
     src/options/msdp/server.cpp
@@ -74,7 +74,7 @@ set (TELNETPP_PUBLIC_HEADER_FILES
     include/telnetpp/options/echo/client.hpp
     include/telnetpp/options/echo/server.hpp
     include/telnetpp/options/mccp/client.hpp
-    include/telnetpp/options/mccp/decompressor.hpp
+    include/telnetpp/options/mccp/codec.hpp
     include/telnetpp/options/mccp/server.hpp
     include/telnetpp/options/msdp/client.hpp
     include/telnetpp/options/msdp/server.hpp

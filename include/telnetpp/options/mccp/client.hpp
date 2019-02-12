@@ -4,7 +4,7 @@
 
 namespace telnetpp { namespace options { namespace mccp {
 
-class decompressor;
+class codec;
 
 //* =========================================================================
 /// \brief A server option responsible for negotiating the client part of the
@@ -16,7 +16,7 @@ public:
     //* =====================================================================
     /// \brief Constructor
     //* =====================================================================
-    explicit client(decompressor &dec);
+    explicit client(codec &cdc);
 
 private:
     //* =====================================================================
@@ -27,7 +27,7 @@ private:
         telnetpp::bytes data,
         continuation const &cont) override;
         
-    decompressor &decompressor_;
+    codec &codec_;
 };
 
 }}}

@@ -8,9 +8,11 @@
 namespace telnetpp { namespace options { namespace mccp {
 
 //* =========================================================================
-/// \brief Represents an object that can decompress arbitrary byte sequences.
+/// \brief Represents an object that can transform (encode or decode)
+/// arbitrary byte sequences.  For this option, this implies compression
+/// and decompression.
 //* =========================================================================
-class decompressor
+class codec
 {
 public:
     using continuation = std::function<
@@ -20,46 +22,53 @@ public:
     //* =====================================================================
     /// \brief Destructor
     //* =====================================================================
-    virtual ~decompressor() = default;
+    virtual ~codec() = default;
 
     //* =====================================================================
-    /// \brief begins the decompression stream.  Calls to operator() now
-    /// assume that the input is compressed.
+    /// \brief Starts the transformation stream.  Calls to operator() now
+    /// assume that the input requires transformation.
     //* =====================================================================
-    void begin_decompression();
+    void start();
 
     //* =====================================================================
-    /// \brief Ends the current decompression stream.  Calls to operator()
-    /// now assume that the input is uncompressed.
+    /// \brief Finishes the current decompression stream.  Calls to 
+    /// operator() now assume that the input does not require transformation.
     //* =====================================================================
-    void end_decompression();
+    void finish();
     
     //* =====================================================================
-    /// \brief Decompress data, sending the result of the decompression
-    /// to the continuation.
+    /// \brief Transform data, if the stream is started, sending the result
+    /// of the transformation to the continuation.  If the stream is not
+    /// started, the data is passed on untransformed.
+    ///
+    /// \throws corrupted_stream_error if the data was malformed.
     //* =====================================================================
     void operator()(telnetpp::bytes data, continuation const &cont);
     
 private:
     //* =====================================================================
-    /// \brief A hook for when compression starts.
+    /// \brief A hook for when the transformation stream starts.
     //* =====================================================================
-    virtual void do_begin_decompression() {};
+    virtual void do_start() {};
 
     //* =====================================================================
-    /// \brief A hook for when compression ends.
+    /// \brief A hook for when transformation stream ends.
     //* =====================================================================
-    virtual void do_end_decompression() {};
+    virtual void do_finish() {};
 
     //* =====================================================================
-    /// \brief Decompress the given byte, and return a tuple of the
-    /// decompressed data and a boolean that is set to true if this was the
-    /// end of the decompression stream.
-    /// \throws telnetpp::options::mccp::corrupted_stream_error if data was
-    /// passed that it could not decompress.  I.e. the stream has been
-    /// corrupted or otherwise constructed in an invalid manner.
+    /// \brief Transform the given bytes, sending the transformed data
+    /// to the continuation, along with a boolean indicating whether the
+    /// transformation stream was ended inline (e.g. a compression stream
+    /// itself might indicate that compression has ended).
+    ///
+    /// \returns a subsequence of the bytes that were not transformed due to
+    /// e.g. the stream ending.
+    ///
+    /// \throws telnetpp::options::mccp::corrupted_stream_error if the data
+    /// was malformed.
     //* =====================================================================
-    virtual telnetpp::bytes decompress_chunk(
+    virtual telnetpp::bytes transform_chunk(
       telnetpp::bytes data,
       continuation const &continuation) = 0;
       

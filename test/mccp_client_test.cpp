@@ -1,5 +1,5 @@
 #include <telnetpp/options/mccp/client.hpp>
-#include <telnetpp/options/mccp/decompressor.hpp>
+#include <telnetpp/options/mccp/codec.hpp>
 #include <gtest/gtest.h>
 
 using namespace telnetpp::literals;
@@ -21,13 +21,13 @@ void compress_decompress(
     continuation(converted_data);
 }
 
-class fake_decompressor : public telnetpp::options::mccp::decompressor
+class fake_decompressor : public telnetpp::options::mccp::codec
 {
 public:
     bool end_compression_next_chunk_ = false;
 
 private:
-    telnetpp::bytes decompress_chunk(
+    telnetpp::bytes transform_chunk(
       telnetpp::bytes data,
       std::function<void (telnetpp::bytes, bool)> const &continuation) override
     {

@@ -1,35 +1,35 @@
-#include "telnetpp/options/mccp/decompressor.hpp"
+#include "telnetpp/options/mccp/codec.hpp"
 
 namespace telnetpp { namespace options { namespace mccp {
 
 // ==========================================================================
-// BEGIN_DECOMPRESSION
+// START
 // ==========================================================================
-void decompressor::begin_decompression()
+void codec::start()
 {
     engaged_ = true;
-    do_begin_decompression();
+    do_start();
 }
 
 // ==========================================================================
-// END_DECOMPRESSION
+// FINISH
 // ==========================================================================
-void decompressor::end_decompression()
+void codec::finish()
 {
     engaged_ = false; 
-    do_end_decompression();
+    do_finish();
 }
 
 // ==========================================================================
 // OPERATOR()
 // ==========================================================================
-void decompressor::operator()(telnetpp::bytes data, continuation const &cont)
+void codec::operator()(telnetpp::bytes data, continuation const &cont)
 {
     while (!data.empty())
     {
         if (engaged_)
         {
-            data = decompress_chunk(
+            data = transform_chunk(
                 data,
                 [&](telnetpp::bytes decompressed_data, bool decompression_ended)
                 {
