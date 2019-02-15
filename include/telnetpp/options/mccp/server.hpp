@@ -4,6 +4,8 @@
 
 namespace telnetpp { namespace options { namespace mccp {
 
+class codec;
+
 //* =========================================================================
 /// \brief A server option responsible for negotiating the server part of the
 /// MCCP protocol.
@@ -14,7 +16,7 @@ public:
     //* =====================================================================
     /// \brief Constructor
     //* =====================================================================
-    server();
+    server(codec &cdc);
 
     //* =====================================================================
     /// \brief Requests that compression begins.
@@ -22,7 +24,7 @@ public:
     /// compression.  Otherwise, the sequence will be sent as soon as the 
     /// option is activated.
     //* =====================================================================
-    //std::vector<telnetpp::token> begin_compression();
+    void begin_compression(continuation const &cont);
 
     //* =====================================================================
     /// \brief Requests that compression ends.
@@ -41,8 +43,9 @@ private:
     void handle_subnegotiation(
         telnetpp::bytes data,
         continuation const &cont) override;
-
-    //bool compression_requested_;
+        
+    codec &codec_;
+    bool   compression_requested_;
 };
 
 }}}

@@ -3,67 +3,34 @@
 
 namespace telnetpp { namespace options { namespace mccp {
 
-/*
-namespace {
-
-static auto const begin_compression_sequence = std::vector<telnetpp::token> {
-    telnetpp::element(
-        telnetpp::subnegotiation(detail::option, {})),
-    boost::any(telnetpp::options::mccp::detail::begin_compression{})
-};
-
-static auto const end_compression_sequence = std::vector<telnetpp::token> {
-    boost::any(telnetpp::options::mccp::detail::end_compression{})
-};
-
-}
-*/
-
 // ==========================================================================
 // CONSTRUCTOR
 // ==========================================================================
-server::server()
-  : server_option(detail::option)
+server::server(codec &cdc)
+  : server_option(detail::option),
+    codec_(cdc),
+    compression_requested_(false)
 {
-    /*
     on_state_changed.connect(
-        [this](auto const state) -> std::vector<telnetpp::token>
+        [this](auto &&cont)
         {
-            if (state == telnetpp::server_option::state::active
-             && compression_requested_)
+            if (compression_requested_)
             {
-                return begin_compression_sequence;
-            }
-            else if (state == telnetpp::server_option::state::deactivating
-                  || state == telnetpp::server_option::state::inactive)
-            {
-                return end_compression_sequence;
-            }
-            else
-            {
-                return {};
+                element compression_begin = 
+                    subnegotiation{detail::option, {}};
+                
+                cont({compression_begin});
             }
         });
-    */
 }
 
 // ==========================================================================
 // BEGIN_COMPRESSION
 // ==========================================================================
-/*
-std::vector<telnetpp::token> server::begin_compression()
+void server::begin_compression(continuation const &cont)
 {
-    if (is_active())
-    {
-        return begin_compression_sequence;
-    }
-    else
-    {
-        compression_requested_ = true;
-        return {};
-    }
+    compression_requested_ = true;
 }
-*/
 
 // ==========================================================================
 // END_COMPRESSION

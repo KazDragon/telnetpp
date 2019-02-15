@@ -1,44 +1,162 @@
 #include <telnetpp/options/mccp/server.hpp>
+#include <telnetpp/options/mccp/codec.hpp>
 #include <gtest/gtest.h>
 
-TEST(mccp_server_test, server_is_mccp)
+namespace {
+    
+// Reversible "compression" function.
+template <typename Continuation>
+void compress_decompress(
+    telnetpp::bytes data,
+    Continuation &&continuation)
 {
-    telnetpp::options::mccp::server server;
+    std::vector<telnetpp::byte> converted_data(data.size());
+    std::transform(
+        data.begin(),
+        data.end(),
+        converted_data.begin(),
+        [](auto by){return by ^ 0x55;});
+    continuation(converted_data);
+}
 
-    ASSERT_EQ(86, server.option_code());
+class fake_compressor : public telnetpp::options::mccp::codec
+{
+public:
+    bool end_compression_next_chunk_ = false;
+
+private:
+    telnetpp::bytes transform_chunk(
+      telnetpp::bytes data,
+      std::function<void (telnetpp::bytes, bool)> const &continuation) override
+    {
+        compress_decompress(
+            data,
+            [&](auto const &data)
+            {
+                continuation(data, end_compression_next_chunk_);
+            });
+
+        return telnetpp::bytes{};
+    }
+};
+
+class an_mccp_server : public testing::Test
+{
+protected:
+    fake_compressor compressor_;
+    telnetpp::options::mccp::server server_{compressor_};
+};
+
+}
+
+TEST_F(an_mccp_server, reports_mccp_option_code)
+{
+    ASSERT_EQ(86, server_.option_code());
+}
+
+TEST_F(an_mccp_server, sends_nothing_when_beginning_compression)
+{
+    auto received_data = std::vector<telnetpp::element>{};
+    server_.begin_compression(
+        [&](auto const &elem)
+        {
+            received_data.push_back(elem);
+        });
+
+    auto const expected_data = std::vector<telnetpp::element>{};
+    ASSERT_EQ(expected_data, received_data);
+}
+
+TEST_F(an_mccp_server, sends_nothing_when_being_activated_locally)
+{
+    // In particular, we mean when the confirmation of our locally initiated
+    // negotiation returns.
+    auto received_data = std::vector<telnetpp::element>{};
+    server_.activate([](auto &&){});
+    server_.negotiate(
+        telnetpp::do_, 
+        [&](auto const &elem)
+        {
+            received_data.push_back(elem);
+        });
+    assert(server_.active());
+        
+    auto const expected_data = std::vector<telnetpp::element>{};
+    ASSERT_EQ(expected_data, received_data);
+}
+
+TEST_F(an_mccp_server, sends_nothing_when_being_activated_remotely)
+{
+    // In particular, we mean apart from our confirmation of the
+    // negotiation.
+    auto received_data = std::vector<telnetpp::element>{};
+    server_.negotiate(
+        telnetpp::do_, 
+        [&](auto const &elem)
+        {
+            received_data.push_back(elem);
+        });
+    assert(server_.active());
+    
+    auto const expected_data = std::vector<telnetpp::element>{
+        telnetpp::element{telnetpp::negotiation{telnetpp::will, 86}}
+    };
+    
+    ASSERT_EQ(expected_data, received_data);
+}
+
+namespace {
+
+class an_mccp_server_with_compression_started
+  : public an_mccp_server
+{
+protected:
+    an_mccp_server_with_compression_started()
+    {
+        server_.begin_compression([](auto &&){});
+    }
+};
+
+}
+
+TEST_F(an_mccp_server_with_compression_started, sends_compression_subnegotiation_when_activated_locally)
+{
+    auto received_data = std::vector<telnetpp::element>{};
+    server_.activate([](auto &&){});
+    server_.negotiate(
+        telnetpp::do_, 
+        [&](auto const &elem)
+        {
+            received_data.push_back(elem);
+        });
+    assert(server_.active());
+        
+    auto const expected_data = std::vector<telnetpp::element>{
+        telnetpp::element{telnetpp::subnegotiation{86, {}}}
+    };
+    ASSERT_EQ(expected_data, received_data);
+}
+
+TEST_F(an_mccp_server_with_compression_started, sends_compression_subnegotiation_when_activated_remotely)
+{
+    auto received_data = std::vector<telnetpp::element>{};
+    server_.negotiate(
+        telnetpp::do_, 
+        [&](auto const &elem)
+        {
+            received_data.push_back(elem);
+        });
+    assert(server_.active());
+        
+    auto const expected_data = std::vector<telnetpp::element>{
+        telnetpp::element{telnetpp::negotiation{telnetpp::will, 86}},
+        telnetpp::element{telnetpp::subnegotiation{86, {}}}
+    };
+    ASSERT_EQ(expected_data, received_data);
 }
 
 /*
-TEST(mccp_server_test, deactivated_begin_compression_sends_nothing)
-{
-    telnetpp::options::mccp::server server;
-
-    auto const expected = std::vector<telnetpp::token> {
-    };
-
-    auto const result = server.begin_compression();
-
-    expect_tokens(expected, result);
-}
-
-TEST(mccp_server_test, deactivated_begin_compression_then_activate_locally_sends_begin_compression_sequence)
-{
-    telnetpp::options::mccp::server server;
-    server.begin_compression();
-    server.activate();
-
-    auto const expected = std::vector<telnetpp::token> {
-        telnetpp::element(telnetpp::subnegotiation(
-            server.option(), {})),
-        boost::any(telnetpp::options::mccp::detail::begin_compression{})
-    };
-
-    auto const result = server.negotiate(telnetpp::do_);
-
-    expect_tokens(expected, result);
-}
-
-TEST(mccp_server_test, deactivated_begin_compression_then_activate_remotely_sends_begin_compression_sequence)
+TEST_F(an_mccp_server, deactivated_begin_compression_then_activate_remotely_sends_begin_compression_sequence)
 {
     telnetpp::options::mccp::server server;
     server.begin_compression();
@@ -57,7 +175,7 @@ TEST(mccp_server_test, deactivated_begin_compression_then_activate_remotely_send
     expect_tokens(expected, result);
 }
 
-TEST(mccp_server_test, deactivated_end_compression_sends_nothing)
+TEST_F(an_mccp_server, deactivated_end_compression_sends_nothing)
 {
     telnetpp::options::mccp::server server;
 
@@ -69,7 +187,7 @@ TEST(mccp_server_test, deactivated_end_compression_sends_nothing)
     expect_tokens(expected, result);
 }
 
-TEST(mccp_server_test, deactivated_end_compression_then_activate_sends_nothing)
+TEST_F(an_mccp_server, deactivated_end_compression_then_activate_sends_nothing)
 {
     telnetpp::options::mccp::server server;
     server.end_compression();
@@ -83,7 +201,7 @@ TEST(mccp_server_test, deactivated_end_compression_then_activate_sends_nothing)
     expect_tokens(expected, result);
 }
 
-TEST(mccp_server_test, deactivated_begin_compression_end_compression_then_activate_sends_nothing)
+TEST_F(an_mccp_server, deactivated_begin_compression_end_compression_then_activate_sends_nothing)
 {
     telnetpp::options::mccp::server server;
     server.begin_compression();
@@ -98,7 +216,7 @@ TEST(mccp_server_test, deactivated_begin_compression_end_compression_then_activa
     expect_tokens(expected, result);
 }
 
-TEST(mccp_server_test, activated_begin_compression_sends_begin_compression_sequence)
+TEST_F(an_mccp_server, activated_begin_compression_sends_begin_compression_sequence)
 {
     telnetpp::options::mccp::server server;
     server.activate();
@@ -116,7 +234,7 @@ TEST(mccp_server_test, activated_begin_compression_sends_begin_compression_seque
     expect_tokens(expected, result);
 }
 
-TEST(mccp_server_test, activated_end_compression_sends_end_compression_token)
+TEST_F(an_mccp_server, activated_end_compression_sends_end_compression_token)
 {
     telnetpp::options::mccp::server server;
     server.activate();
@@ -132,7 +250,7 @@ TEST(mccp_server_test, activated_end_compression_sends_end_compression_token)
     expect_tokens(expected, result);
 }
 
-TEST(mccp_server_test, activated_compressed_deactivate_ends_compression)
+TEST_F(an_mccp_server, activated_compressed_deactivate_ends_compression)
 {
     telnetpp::options::mccp::server server;
     server.activate();
@@ -151,7 +269,7 @@ TEST(mccp_server_test, activated_compressed_deactivate_ends_compression)
     boost::any_cast<telnetpp::options::mccp::detail::end_compression>(token);
 }
 
-TEST(mccp_server_test, activated_compressed_negotiate_deactivation_ends_compression)
+TEST_F(an_mccp_server, activated_compressed_negotiate_deactivation_ends_compression)
 {
     telnetpp::options::mccp::server server;
     server.activate();
