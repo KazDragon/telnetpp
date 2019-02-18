@@ -33,7 +33,7 @@ public:
     /// request to begin_compression that would auto-start compression on
     /// activation.
     //* =====================================================================
-    //std::vector<telnetpp::token> end_compression();
+    void end_compression(continuation const &cont);
     
 private:
     //* =====================================================================
