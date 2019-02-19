@@ -4,12 +4,12 @@
 #include <algorithm>
 #include <random>
 
-TEST(mccp_zlib_decompressor_test, zlib_decompressor_is_decompressor)
+TEST(mccp_zlib_decompressor_test, zlib_decompressor_is_a_codec)
 {
     // MCCP will rely on the decompressor interface, so zlib_decompressor must
     // implement that.
     telnetpp::options::mccp::zlib::decompressor zlib_decompressor;
-    telnetpp::options::mccp::decompressor &decompressor = zlib_decompressor;
+    telnetpp::options::mccp::codec &decompressor = zlib_decompressor;
 }
 
 /*

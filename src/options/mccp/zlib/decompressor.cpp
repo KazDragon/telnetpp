@@ -130,7 +130,7 @@ decompressor::~decompressor()
 // ==========================================================================
 // DECOMPRESS_CHUNK
 // ==========================================================================
-telnetpp::bytes decompressor::decompress_chunk(
+telnetpp::bytes decompressor::transform_chunk(
     telnetpp::bytes data,
     continuation const &cont)
 {

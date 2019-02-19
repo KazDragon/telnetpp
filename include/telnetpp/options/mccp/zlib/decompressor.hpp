@@ -1,6 +1,6 @@
 #pragma once
 
-#include "telnetpp/options/mccp/decompressor.hpp"
+#include "telnetpp/options/mccp/codec.hpp"
 #include <memory>
 
 namespace telnetpp { namespace options { namespace mccp { namespace zlib {
@@ -9,7 +9,7 @@ namespace telnetpp { namespace options { namespace mccp { namespace zlib {
 /// \brief Represents an object that can decompress arbitrary byte sequences.
 //* =========================================================================
 class TELNETPP_EXPORT decompressor
-  : public telnetpp::options::mccp::decompressor
+  : public telnetpp::options::mccp::codec
 {
 public:
     //* =====================================================================
@@ -37,7 +37,7 @@ private:
     /// passed that it could not decompress.  I.e. the stream has been
     /// corrupted or otherwise constructed in an invalid manner.
     //* =====================================================================
-    virtual telnetpp::bytes decompress_chunk(
+    telnetpp::bytes transform_chunk(
       telnetpp::bytes data,
       continuation const &cont) override;
 
