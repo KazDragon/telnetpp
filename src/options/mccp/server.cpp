@@ -17,11 +17,8 @@ server::server(codec &cdc)
         {
             if (compression_requested_)
             {
-                element compression_begin = 
-                    subnegotiation{detail::option, {}};
-                
+                element compression_begin = subnegotiation{detail::option, {}};
                 cont({compression_begin});
-                
                 codec_.start();
             }
         });
@@ -33,6 +30,13 @@ server::server(codec &cdc)
 void server::begin_compression(continuation const &cont)
 {
     compression_requested_ = true;
+
+    if (active())
+    {
+        element compression_begin = subnegotiation{detail::option, {}};
+        cont({compression_begin});
+        codec_.start();
+    }
 }
 
 // ==========================================================================
@@ -40,17 +44,16 @@ void server::begin_compression(continuation const &cont)
 // ==========================================================================
 void server::end_compression(continuation const &cont)
 {
-    /*
-    if (is_active())
+    compression_requested_ = false;
+
+    if (active())
     {
-        return end_compression_sequence;
+        codec_.finish(
+            [&](auto const &data, bool)
+            {
+                cont(data);
+            });
     }
-    else
-    {
-        compression_requested_ = false;
-        return {};
-    }
-*/
 }
 
 // ==========================================================================

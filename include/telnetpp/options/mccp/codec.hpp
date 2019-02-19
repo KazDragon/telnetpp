@@ -34,7 +34,7 @@ public:
     /// \brief Finishes the current decompression stream.  Calls to 
     /// operator() now assume that the input does not require transformation.
     //* =====================================================================
-    void finish();
+    void finish(continuation const &cont);
     
     //* =====================================================================
     /// \brief Transform data, if the stream is started, sending the result
@@ -54,7 +54,7 @@ private:
     //* =====================================================================
     /// \brief A hook for when transformation stream ends.
     //* =====================================================================
-    virtual void do_finish() {};
+    virtual void do_finish(continuation const &cont) {};
 
     //* =====================================================================
     /// \brief Transform the given bytes, sending the transformed data

@@ -16,7 +16,11 @@ client::client(codec &cdc)
         {
             if (!active())
             {
-                codec_.finish();
+                codec_.finish(
+                    [&](auto const &data, bool)
+                    {
+                        cont(data);
+                    });
             }
         });
 }
