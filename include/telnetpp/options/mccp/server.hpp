@@ -24,7 +24,7 @@ public:
     /// compression.  Otherwise, the sequence will be sent as soon as the 
     /// option is activated.
     //* =====================================================================
-    void begin_compression(continuation const &cont);
+    void start_compression(continuation const &cont);
 
     //* =====================================================================
     /// \brief Requests that compression ends.
@@ -33,7 +33,7 @@ public:
     /// request to begin_compression that would auto-start compression on
     /// activation.
     //* =====================================================================
-    void end_compression(continuation const &cont);
+    void finish_compression(continuation const &cont);
     
 private:
     //* =====================================================================
@@ -45,7 +45,7 @@ private:
         continuation const &cont) override;
         
     codec &codec_;
-    bool   compression_requested_;
+    bool   compression_active_;
 };
 
 }}}

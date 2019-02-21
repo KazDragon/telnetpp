@@ -44,6 +44,8 @@ private:
 
     void do_finish(continuation const &cont) override
     {
+        auto const marker = "end"_tb;
+        cont(marker, true);
         finished_ = true;
     }
 };
@@ -83,7 +85,20 @@ TEST_F(an_mccp_server, reports_mccp_option_code)
 TEST_F(an_mccp_server, sends_nothing_when_beginning_compression)
 {
     auto received_data = std::vector<telnetpp::element>{};
-    server_.begin_compression(
+    server_.start_compression(
+        [&](auto const &elem)
+        {
+            received_data.push_back(elem);
+        });
+
+    auto const expected_data = std::vector<telnetpp::element>{};
+    ASSERT_EQ(expected_data, received_data);
+}
+
+TEST_F(an_mccp_server, sends_nothing_when_finishing_compression)
+{
+    auto received_data = std::vector<telnetpp::element>{};
+    server_.finish_compression(
         [&](auto const &elem)
         {
             received_data.push_back(elem);
@@ -133,66 +148,74 @@ TEST_F(an_mccp_server, sends_nothing_when_being_activated_remotely)
 
 namespace {
 
-class an_mccp_server_with_compression_started
-  : public an_mccp_server
+class an_active_mccp_server : public an_mccp_server
 {
 protected:
-    an_mccp_server_with_compression_started()
-    {
-        server_.begin_compression([](auto &&){});
-    }
-};
-
-}
-
-TEST_F(an_mccp_server_with_compression_started, sends_compression_subnegotiation_when_activated_locally)
-{
-    auto received_data = std::vector<telnetpp::element>{};
-    server_.activate([](auto &&){});
-    server_.negotiate(
-        telnetpp::do_, 
-        [&](auto const &elem)
-        {
-            received_data.push_back(elem);
-        });
-    assert(server_.active());
-        
-    auto const expected_data = std::vector<telnetpp::element>{
-        telnetpp::element{telnetpp::subnegotiation{86, {}}}
-    };
-    ASSERT_EQ(expected_data, received_data);
-}
-
-TEST_F(an_mccp_server_with_compression_started, sends_compression_subnegotiation_when_activated_remotely)
-{
-    auto received_data = std::vector<telnetpp::element>{};
-    server_.negotiate(
-        telnetpp::do_, 
-        [&](auto const &elem)
-        {
-            received_data.push_back(elem);
-        });
-    assert(server_.active());
-        
-    auto const expected_data = std::vector<telnetpp::element>{
-        telnetpp::element{telnetpp::negotiation{telnetpp::will, 86}},
-        telnetpp::element{telnetpp::subnegotiation{86, {}}}
-    };
-    ASSERT_EQ(expected_data, received_data);
-}
-
-namespace {
-
-class an_mccp_server_activated_with_compression_started
-  : public an_mccp_server_with_compression_started
-{
-protected:
-    an_mccp_server_activated_with_compression_started()
+    an_active_mccp_server()
     {
         server_.negotiate(
             telnetpp::do_, 
             [&](auto const &elem){});
         assert(server_.active());
+    }
+};
+
+}
+
+TEST_F(an_active_mccp_server, sends_empty_subnegotiation_when_beginning_compression)
+{
+    auto const expected = std::vector<telnetpp::element> {
+        telnetpp::subnegotiation{server_.option_code(), {}}
+    };
+    
+    auto received = std::vector<telnetpp::element>{};
+    server_.start_compression(
+        [&](auto const &element)
+        {
+            received.push_back(element);
+        });
+        
+    ASSERT_EQ(expected, received);
+}
+
+TEST_F(an_active_mccp_server, sends_nothing_when_finishing_compression)
+{
+    auto const expected_data = std::vector<telnetpp::byte>{};
+    
+    server_.finish_compression(
+        [&](auto const &elements)
+        {
+            auto const &data = boost::get<telnetpp::bytes>(elements);
+            sent_data_.insert(
+                sent_data_.end(),
+                data.begin(),
+                data.end());
+        });
+        
+    ASSERT_EQ(expected_data, sent_data_);
+}
+
+TEST_F(an_active_mccp_server, sends_data_uncompressed)
+{
+    auto const test_data = "test_data"_tb;
+    send_data(test_data);
+
+    auto const expected_data = std::vector<telnetpp::byte>{
+        test_data.begin(), test_data.end()
+    };
+
+    ASSERT_EQ(expected_data, sent_data_);
+}
+
+namespace {
+
+class an_mccp_server_activated_with_compression_started 
+  : public an_active_mccp_server
+{
+protected:
+    an_mccp_server_activated_with_compression_started()
+    {
+        server_.start_compression([&](auto const &elem){});
     }
 };
 
@@ -220,46 +243,6 @@ TEST_F(an_mccp_server_activated_with_compression_started, sends_compressed_data)
     ASSERT_EQ(expected_data, sent_data_);
 }
 
-TEST_F(an_mccp_server, sends_nothing_when_ending_compression)
-{
-    auto received_data = std::vector<telnetpp::element>{};
-    server_.end_compression(
-        [&](auto const &elem)
-        {
-            received_data.push_back(elem);
-        });
-
-    auto const expected_data = std::vector<telnetpp::element>{};
-    ASSERT_EQ(expected_data, received_data);
-}
-
-namespace {
-
-class an_active_mccp_server : public an_mccp_server
-{
-protected:
-    an_active_mccp_server()
-    {
-        server_.negotiate(
-            telnetpp::do_, 
-            [&](auto const &elem){});
-        assert(server_.active());
-    }
-};
-
-}
-
-TEST_F(an_active_mccp_server, sends_data_uncompressed)
-{
-    auto const test_data = "test_data"_tb;
-    send_data(test_data);
-
-    auto const expected_data = std::vector<telnetpp::byte>{
-        test_data.begin(), test_data.end()
-    };
-
-    ASSERT_EQ(expected_data, sent_data_);
-}
 
 namespace {
 
@@ -269,7 +252,7 @@ class an_active_mccp_server_with_compression_started
 protected:
     an_active_mccp_server_with_compression_started()
     {
-        server_.begin_compression([](auto &&){});
+        server_.start_compression([](auto &&){});
     }
 };
 
@@ -301,7 +284,7 @@ TEST_F(an_active_mccp_server_with_compression_started, sends_data_compressed)
 
 TEST_F(an_active_mccp_server_with_compression_started, sends_compression_end_when_compression_is_ended)
 {
-    server_.end_compression([](auto &&){});
+    server_.finish_compression([](auto &&){});
     ASSERT_TRUE(compressor_.finished_);
 }
 
@@ -317,7 +300,7 @@ TEST_F(an_mccp_server, activated_end_compression_sends_end_compression_token)
         boost::any(telnetpp::options::mccp::detail::end_compression{})
     };
 
-    auto const result = server.end_compression();
+    auto const result = server.finish_compression();
 
     expect_tokens(expected, result);
 }
@@ -327,7 +310,7 @@ TEST_F(an_mccp_server, activated_compressed_deactivate_ends_compression)
     telnetpp::options::mccp::server server;
     server.activate();
     server.negotiate(telnetpp::do_);
-    server.begin_compression();
+    server.start_compression();
 
     // If we end compression, we expect two tokens to be output.  The first
     // will be the (compressed) WONT MCCP negotiation.  Since the only valid
@@ -346,7 +329,7 @@ TEST_F(an_mccp_server, activated_compressed_negotiate_deactivation_ends_compress
     telnetpp::options::mccp::server server;
     server.activate();
     server.negotiate(telnetpp::do_);
-    server.begin_compression();
+    server.start_compression();
 
     // If we end compression, we expect two tokens to be output.  The first
     // will be the (compressed) WONT MCCP negotiation.  Since the only valid
