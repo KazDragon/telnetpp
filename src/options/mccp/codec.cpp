@@ -16,8 +16,8 @@ void codec::start()
 // ==========================================================================
 void codec::finish(continuation const &cont)
 {
-    engaged_ = false; 
     do_finish(cont);
+    engaged_ = false; 
 }
 
 // ==========================================================================
