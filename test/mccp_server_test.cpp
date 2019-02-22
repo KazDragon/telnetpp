@@ -1,5 +1,6 @@
 #include <telnetpp/options/mccp/server.hpp>
 #include <telnetpp/options/mccp/codec.hpp>
+#include <telnetpp/detail/lambda_visitor.hpp>
 #include <gtest/gtest.h>
 
 using namespace telnetpp::literals;
@@ -311,6 +312,59 @@ TEST_F(an_active_mccp_server_with_compression_started, sends_compression_end_com
 
 TEST_F(an_active_mccp_server_with_compression_started, sends_compression_end_compressed_and_negotiation_uncompressed)
 {
+    server_.negotiate(
+        telnetpp::dont,
+        [this](telnetpp::element const &element)
+        {
+            telnetpp::detail::visit_lambdas(
+                element,
+                [this](telnetpp::bytes data)
+                {
+                    send_data(data);
+                },
+                [this](telnetpp::negotiation neg)
+                {
+                    telnetpp::byte const output[] = {
+                        telnetpp::iac,
+                        neg.request(),
+                        neg.option()
+                    };
+                    
+                    send_data(output);
+                },
+                [](auto &&)
+                {
+                    FAIL();
+                });
+        });
+        
+    std::vector<telnetpp::byte> const expected_data = [&]()
+    {
+        std::vector<telnetpp::byte> data;
+        
+        auto const end_data = "end"_tb;
+        compress_decompress(
+            end_data,
+            [&](auto const &bytes)
+            {
+                data.insert(data.end(), bytes.begin(), bytes.end());
+            });
+            
+        telnetpp::byte const neg_data[] = {
+            telnetpp::iac,
+            telnetpp::wont,
+            server_.option_code()
+        };
+        
+        using std::begin;
+        using std::end;
+        
+        data.insert(data.end(), begin(neg_data), end(neg_data));
+        return data;
+    }();
+    
+    ASSERT_EQ(expected_data, sent_data_);
+    ASSERT_TRUE(compressor_.finished_);
 }
 
 /*

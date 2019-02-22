@@ -150,9 +150,9 @@ public:
                 }
                 else
                 {
-                    send(telnetpp::negotiation{local_negative, code_});
                     state_ = internal_state::inactive;
                     on_state_changed(send);
+                    send(telnetpp::negotiation{local_negative, code_});
                 }
                 break;
 

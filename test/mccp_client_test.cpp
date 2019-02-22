@@ -17,7 +17,7 @@ void compress_decompress(
         data.begin(),
         data.end(),
         converted_data.begin(),
-        [](auto by){return by ^ 0xAA;});
+        [](auto by){return by ^ 0x20;});
     continuation(converted_data);
 }
 
