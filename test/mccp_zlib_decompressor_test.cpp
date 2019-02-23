@@ -4,12 +4,59 @@
 #include <algorithm>
 #include <random>
 
-TEST(a_zlib_decompressor, is_a_codec)
+using namespace telnetpp::literals;
+
+namespace {
+
+class a_zlib_decompressor : public testing::Test
+{
+protected:
+    telnetpp::options::mccp::zlib::decompressor zlib_decompressor_;
+};
+
+}
+
+TEST_F(a_zlib_decompressor, is_a_codec)
 {
     // MCCP will rely on the codec interface, so zlib_decompressor must
     // implement that.
-    telnetpp::options::mccp::zlib::decompressor zlib_decompressor;
-    telnetpp::options::mccp::codec &decompressor = zlib_decompressor;
+    telnetpp::options::mccp::codec &decompressor = zlib_decompressor_;
+}
+
+namespace {
+
+class an_unstarted_zlib_decompressor : public a_zlib_decompressor
+{
+protected:
+    void decompress_data(telnetpp::bytes data)
+    {
+        zlib_decompressor_(
+            data,
+            [&](telnetpp::bytes data, bool decompression_ended)
+            {
+                decompression_ended_ = decompression_ended;
+                received_data_.insert(
+                    received_data_.end(), data.begin(), data.end());
+            });
+    }
+
+    std::vector<telnetpp::byte> received_data_;
+    bool decompression_ended_ = false;
+};
+
+}
+
+TEST_F(an_unstarted_zlib_decompressor, does_not_decompress_data)
+{
+    auto const data = "test_data"_tb;
+
+    decompress_data(data);
+
+    auto const expected_data = std::vector<telnetpp::byte>{
+        data.begin(), data.end()
+    };
+
+    ASSERT_EQ(expected_data, received_data_);
 }
 
 /*
