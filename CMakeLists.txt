@@ -29,13 +29,13 @@ include(GenerateExportHeader)
 find_package(Doxygen)
 
 if (TELNETPP_SANITIZE)
-    list(APPEND CMAKE_CXX_FLAGS "-fsanitize=${TELNETPP_SANITIZE}")
-    list(APPEND CMAKE_EXE_LINKER_FLAGS "-fsanitize=${TELNETPP_SANITIZE}")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=${TELNETPP_SANITIZE}")
+    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -fsanitize=${TELNETPP_SANITIZE}")
 endif()
 
 if (TELNETPP_COVERAGE)
-    list(APPEND CMAKE_CXX_FLAGS "--coverage -g -O0")
-    list(APPEND CMAKE_EXE_LINKER_FLAGS "--coverage")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --coverage -g -O0")
+    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} --coverage")
 endif()
 
 set (TELNETPP_PUBLIC_SOURCE_FILES

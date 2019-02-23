@@ -22,20 +22,28 @@ public:
     //* =====================================================================
     ~decompressor() override;
 
-    //* =====================================================================
-    /// \brief Ends the current decompression stream.  Any further calls
-    /// to decompress continue as if the stream were created fresh.
-    //* =====================================================================
-    //void end_decompression() override;
-
 private:
     //* =====================================================================
-    /// \brief Decompress the given byte, and return a tuple of the
-    /// decompressed data and a boolean that is set to true if this was the
-    /// end of the decompression stream.
-    /// \throws telnetpp::options::mccp::corrupted_stream_error if data was
-    /// passed that it could not decompress.  I.e. the stream has been
-    /// corrupted or otherwise constructed in an invalid manner.
+    /// \brief A hook for when the transformation stream starts.
+    //* =====================================================================
+    void do_start() override;
+
+    //* =====================================================================
+    /// \brief A hook for when transformation stream ends.
+    //* =====================================================================
+    void do_finish(continuation const &cont) override;
+
+    //* =====================================================================
+    /// \brief Transform the given bytes, sending the transformed data
+    /// to the continuation, along with a boolean indicating whether the
+    /// transformation stream was ended inline (e.g. a compression stream
+    /// itself might indicate that compression has ended).
+    ///
+    /// \returns a subsequence of the bytes that were not transformed due to
+    /// e.g. the stream ending.
+    ///
+    /// \throws telnetpp::options::mccp::corrupted_stream_error if the data
+    /// was malformed.
     //* =====================================================================
     telnetpp::bytes transform_chunk(
       telnetpp::bytes data,
