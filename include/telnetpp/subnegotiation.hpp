@@ -1,7 +1,6 @@
 #pragma once
 
 #include "telnetpp/core.hpp"
-#include <gsl-lite.h>
 #include <iosfwd>
 #include <utility>
 

@@ -8,7 +8,35 @@
 namespace telnetpp {
 
 //* =========================================================================
-/// \exclude
+/// \brief An class that encapsulates one side of a Telnet option.
+///
+/// A Telnet option comprises two essential parts: an activation sequence,
+/// whereby a client and a server agree upon whether the option is active
+/// or not, and a subnegotiation handler in which the option-specific
+/// protocol is exchanged.
+///
+/// \par Inheritance
+///
+/// For most options, only handle_subnegotiation need be overridden.  This
+/// is where the option-specific protocol contained in the subnegotiations
+/// is received.
+///
+/// An option may require auxiliary classes in order to be useful.  See
+/// the documentation accompanying those options for more information.
+///
+/// \par Usage
+///
+/// The easiest way to use an option is to install it in a session.  A
+/// session is used to automatically route relevant messages to and from
+/// an option.  See telnetpp::session for more information.
+///
+/// \par Note
+///
+/// Most functions that telnetpp::option exposes could potentially require
+/// that data be transmitted to the remote.  To allow the user to specify
+/// exactly how that occurs, telnetpp::option uses continuations: functions
+/// where the caller specifies how the result of the operation should be
+/// used.
 //* =========================================================================
 template <
     telnetpp::command_type LocalPositive,
@@ -20,10 +48,10 @@ class option
 public:
     using continuation = std::function<void (telnetpp::element const &)>;
 
-    static constexpr telnetpp::command_type const local_positive  = LocalPositive;
-    static constexpr telnetpp::command_type const local_negative  = LocalNegative;
-    static constexpr telnetpp::command_type const remote_positive = RemotePositive;
-    static constexpr telnetpp::command_type const remote_negative = RemoteNegative;
+    static constexpr auto local_positive  = LocalPositive;
+    static constexpr auto local_negative  = LocalNegative;
+    static constexpr auto remote_positive = RemotePositive;
+    static constexpr auto remote_negative = RemoteNegative;
 
     //* =====================================================================
     /// Destructor
@@ -51,7 +79,8 @@ public:
     /// \param send a continuation that sends the Telnet elements that are
     /// emitted by this process.
     //* =====================================================================
-    constexpr void activate(continuation const &send)
+    template <typename Continuation>
+    constexpr void activate(Continuation &&send)
     {
         switch (state_)
         {
@@ -81,7 +110,8 @@ public:
     /// \param send a continuation that sends the Telnet elements that are
     /// emitted by this process.
     //* =====================================================================
-    constexpr void deactivate(continuation const &send)
+    template <typename Continuation>
+    constexpr void deactivate(Continuation &&send)
     {
         switch (state_)
         {
@@ -111,9 +141,10 @@ public:
     /// This should be called when the remote side either initiates a 
     /// negotiation request or responds to an ongoing request.
     //* =====================================================================
+    template <typename Continuation>
     constexpr void negotiate(
         telnetpp::negotiation_type neg, 
-        continuation const &send)
+        Continuation &&send)
     {
         switch (state_)
         {
@@ -176,7 +207,7 @@ public:
     }
 
     //* =====================================================================
-    /// \brief Negotiate with the option.
+    /// \brief Subnegotiate with the option.
     /// This should be called when a subnegotiation sequence has been received
     /// from the remote.
     //* =====================================================================

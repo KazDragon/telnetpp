@@ -17,79 +17,152 @@ namespace telnetpp {
 /// \par Overview
 /// The session is the heart of the library, and ties all of the other
 /// components together.  It manages all of the options that a session
-/// wishes to implement and ensures that data flows to them as appropriate.
-/// \par Construction
-/// Session's constructor takes one parameter, which is a function that
-/// takes a string and returns a vector of tokens.  This function is called
-/// when data has been received by the session and did not belong to the
-/// Telnet protocol, i.e. application data.  In practice, this is where most
-/// of the dataflow of an application takes place.  It's possible that there
-/// is an immediate response to this data, and that is encapsulated in the
-/// return value.  Note that the return value can include Telnet elements.
+/// wishes to implement and ensures that data flows to them appropriately.
+///
+/// \par Sending and Receiving Plain Data
+///
+/// The first part of using a telnetpp::session is understanding how to send
+/// and receive data.  Even if no options are used during a session, this is
+/// still necessary because some data needs special handling.
+///
+/// \note According to the Telnet protocol, the 0xFF byte has to be transmitted
+/// as IAC IAC (0xFF 0xFF) so that it is not understood to be part of a Telnet
+/// protocol sequence.  Likewise, it is necessary to parse IAC IAC into a 
+/// single 0xFF byte.
+///
+/// Sending data uses the telnetpp::session::send function.  This handles any
+/// such special sequences and then passes that data onto the continuation
+/// supplied.  Example:
+///
+/// \code
+/// // A user-specified function for sending bytes to the remote.
+/// void my_socket_send(telnetpp::bytes data);
+///
+/// telnetpp::session session;
+/// session.send(
+///     message,
+///     [](telnetpp::bytes data)
+///     {
+///         using telnetpp::literals;
+///         auto const message = "Hello" "\xFF" "World"_tb;
+///
+///         // Sends "Hello\xFF\xFFWorld" to socket_send.
+///         // Notice the duplicated \xFF byte as required by the Telnet 
+///         //protocol.
+///         my_socket_send(data);
+///     });
+/// \endcode
+/// 
+/// \note telnetpp::session::send takes a telnetpp::element as its first
+/// parameter, but that can be implicitly constructed from the message type
+/// shown above.
+///
+/// \par
+///
+/// Receiving data works in a similar way, but it is important to note that
+/// any data received could conceivably require that data be sent, and so
+/// a send continuation similar to the one above must also be attached.
 /// Example:
+///
 /// \code
-///     std::vector<telnetpp::token> app_fn(std::string const &text)
-///     {
-///         if (text == "COMPRESS")
-///         {
-///             // This MCCP option returns a vector<token>
-///             return mccp_server.begin_compression();
-///         }
-///         else if (text == "ECHO")
-///         {
-///             // Just return some string to be sent.
-///             return { telnetpp::element("Echo!") };
-///         }
-///         ...
-///     }
+/// // A user-specified function for sending bytes to the remote.
+/// void my_socket_send(telnetpp::bytes data);
 ///
-///     ...
+/// // A user-specified function used for receiving bytes sent from the
+/// // remote.
+/// int my_socket_receive(telnetpp::byte *buffer, int size);
 ///
-///     telnetpp::session session(app_fn);
+/// // A user-specified function that transmits data up to the application
+/// // Note that the second argument is used to tell the application how
+/// // it may send a respond to the data it receives.
+/// void my_application_receive(
+///     telnetpp::bytes data,
+///     std::function<void (telnetpp::bytes)> const &send);
+///
+/// telnetpp::session session;
+///
+/// telnetpp::byte my_buffer[1024];
+/// int amount_received = my_socket_receive(my_buffer, 1024);
+///
+/// session.receive(
+///     telnetpp::bytes{my_buffer, amount_received},
+///     // Receive continuation - how to pass on non-Telnet data
+///     // to an upper layer
+///     my_application_receive,
+///     // Send continuation - how to send responses to the
+///     // messages received.
+///     my_socket_send);
+///
 /// \endcode
-/// \par Installation
-/// It is possible to "install" handlers into the session.  The most basic
-/// installation is for handling Telnet commands, such as "Are You There?".
-/// It is also possible to install client- and server options into the
-/// session, which ensures that any negotiations or subnegotiations that are
-/// tagged as belonging to those options are forwarded to those option
-/// handlers.
+///
+/// \par Using Telnet Options
+/// 
+/// Now that we can send and receive data over a Telnet connection, the next
+/// step is to install some options.  This allows the session to automatically
+/// route messages to and from these options as part of the normal data flow.  
+/// Example:
+///
 /// \code
-///     std::vector<telnetpp::token> ayt_handler(telnetpp::command const &)
-///     {
-///         return { telnetpp::element("Yes, I'm here.") };
-///     }
+/// telnetpp::options::echo::client echo_client;
+/// telnetpp::options::naws::server naws_server;
 ///
-///     telnetpp::options::echo::server echo_server;
-///
-///     ...
-///
-///     session.install(telnetpp::ayt, ayt_handler);
-///     session.install(echo_server);
+/// telnetpp::session session;
+/// session.install(echo_client);
+/// session.install(naws_server);
 /// \endcode
-/// \par Sending
-/// The send() function is used to convert all telnetpp::elements contained
-/// in the tokens into sequences of bytes.  Note: even if you know the tokens
-/// contain only plain strings, they must still pass through this function,
-/// since it's necessary to escape any 0xFF bytes so that they are not
-/// received as Telnet commands by the remote side.  After this operation is
-/// complete, the application must write the byte streams over the actual
-/// data connection itself.
-/// \par Receiving
-/// The receive() function is used to receive data that has been read from
-/// the remote connection and route it to the correct handler, be it the
-/// installed options or command handlers, or the text handler registered in
-/// the constructor.  Note: receiving data frequently has an immediate
-/// response.  For example, receving bytes that amount to an option
-/// negotiation will result in a reply to that negotiation.  For this reason,
-/// the usual pattern for receiving is to immediately send() the result of
-/// the call to receive, and then write that result to the data connection.
+///
+/// With these options installed, the normal message as implemented above
+/// will automatically activate or deactivate the options if this is
+/// requested by the remote.  It is, of course, just fine if you want to
+/// activate these options yourself.  Because this necessarily involves
+/// transmitting Telnet protocol data, we can forward the responses via
+/// the session object and the code we developed during sending and 
+/// receiving above.  Example:
+///
 /// \code
-///     void recv(telnetpp::byte_stream const &data)
+/// naws_server.activate(
+///     [&](telnetpp::element const &elem)
 ///     {
-///         my_lower_layer_write(
-///             session.send(session.receive(data)));
-///     }
+///         // Will transmit IAC WILL NAWS to the remote
+///         session.send(elem, my_socket_send);
+///     });
+/// \endcode
+///
+/// Likewise, any functions that cause option-specific negotiation
+/// (subnegotiations) to occur use a similar pattern:
+///
+/// \code
+/// naws_server.set_window_size(
+///     80, 24,
+///     [&](telnetpp::element const &elem)
+///     {
+///         // Will transmit IAC SB NAWS 00 80 00 24 IAC SE to the
+///         // remote, assuming that the option is active.
+///         session.send(elem, my_socket_send);
+///     });
+/// \endcode
+///
+/// \par Using Telnet Commands
+///
+/// There also exist a small number of Telnet commands, such as AYT (Are You
+/// There), BRK (Break) and NOP (No Operation).  These can be sent using the
+/// telnetpp::session::send function in a similar way to plain text.  Example:
+///
+/// \code
+/// session.send(telnetpp::command{telnetpp::ayt}, my_socket_send);
+/// \endcode
+///
+/// They can also have handlers registered in order to respond to them:
+///
+/// \code
+/// session.install(
+///     telnetpp::command{telnetpp::ayt},
+///     [&]()
+///     {
+///         using telnetpp::literals;
+///         auto const message = "Yes, I'm here"_tb;
+///         session.send(message, my_socket_send);
+///     });
 /// \endcode
 //* =========================================================================
 class TELNETPP_EXPORT session
@@ -105,7 +178,8 @@ public:
     /// sequence of bytes, that is then sent to the continuation.
     /// \param content The data to send
     /// \param send_continuation A continuation that is used to send the 
-    /// resultant stream of bytes onward.
+    /// resultant stream of bytes onward.  Matches the signature
+    /// `void (telnetpp::bytes)`.
     //* =====================================================================
     template <typename SendContinuation>
     void send(
@@ -118,17 +192,17 @@ public:
     //* =====================================================================
     /// \brief Receive a stream of bytes.
     /// \param content The content of the data.
-    /// \param data_continuation A continuation for any data received that is
-    /// not encapsulated as Telnet protocol units (i.e. plain text).  Matches
-    /// the signature `void (telnetpp::bytes)`.
+    /// \param receive_continuation A continuation for any data received that
+    /// is not encapsulated as Telnet protocol units (i.e. plain text).  
+    /// Matches the signature `void (telnetpp::bytes, SendContinuation &&)`.
     /// \param send_continuation A continuation that is used to send any 
     /// response that occur as a consequence of receiving the data. Matches
-    /// the signature `void (telnetpp::element)`.
+    /// the signature `void (telnetpp::bytes)`.
     //* =====================================================================
-    template <typename DataContinuation, typename SendContinuation>
+    template <typename ReceiveContinuation, typename SendContinuation>
     void receive(
         telnetpp::bytes content,
-        DataContinuation &&data_continuation,
+        ReceiveContinuation &&receive_continuation,
         SendContinuation &&send_continuation)
     {
         // TODO: The vast majority of the time, a packet will be completely 
@@ -151,7 +225,12 @@ public:
                     elem,
                     [&](telnetpp::bytes content)
                     {
-                        data_continuation(content, generator);
+                        receive_continuation(
+                            content, 
+                            [&](telnetpp::bytes data)
+                            {
+                                generator(data);
+                            });
                     },
                     [&](telnetpp::command const &cmd)
                     {
@@ -174,9 +253,7 @@ public:
     /// \brief Installs a handler for the given command.
     //* =====================================================================
     template <typename Continuation>
-    void install(
-        telnetpp::command_type cmd,
-        Continuation &&cont)
+    void install(telnetpp::command_type cmd, Continuation &&cont)
     {
         command_router_.register_route(cmd, cont);
     }
