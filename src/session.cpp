@@ -21,7 +21,7 @@ session::session()
               ? telnetpp::dont
               : telnetpp::wont;
 
-            cont(telnetpp::negotiation{result, negotiation.option()});
+            cont(telnetpp::negotiation{result, negotiation.option_code()});
         });
 }
 

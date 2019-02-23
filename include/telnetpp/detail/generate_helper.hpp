@@ -59,7 +59,7 @@ constexpr void generate_negotiation(
     telnetpp::byte const data[] = {
         telnetpp::iac,
         neg.request(),
-        neg.option()
+        neg.option_code()
     };
 
     cont(data);

@@ -327,7 +327,7 @@ TEST_F(an_active_mccp_server_with_compression_started, sends_compression_end_com
                     telnetpp::byte const output[] = {
                         telnetpp::iac,
                         neg.request(),
-                        neg.option()
+                        neg.option_code()
                     };
                     
                     send_data(output);
@@ -366,43 +366,3 @@ TEST_F(an_active_mccp_server_with_compression_started, sends_compression_end_com
     ASSERT_EQ(expected_data, sent_data_);
     ASSERT_TRUE(compressor_.finished_);
 }
-
-/*
-TEST_F(an_mccp_server, activated_compressed_deactivate_ends_compression)
-{
-    telnetpp::options::mccp::server server;
-    server.activate();
-    server.negotiate(telnetpp::do_);
-    server.start_compression();
-
-    // If we end compression, we expect two tokens to be output.  The first
-    // will be the (compressed) WONT MCCP negotiation.  Since the only valid
-    // response to this is DONT MCCP by the client, the second token will
-    // be an end_compression token, as we can assume that the client will
-    // immediately end compression upon reception of the negotiation.
-    auto const result = server.deactivate();
-
-    ASSERT_EQ(size_t{2}, result.size());
-    auto const &token = boost::get<boost::any>(result[1]);
-    boost::any_cast<telnetpp::options::mccp::detail::end_compression>(token);
-}
-
-TEST_F(an_mccp_server, activated_compressed_negotiate_deactivation_ends_compression)
-{
-    telnetpp::options::mccp::server server;
-    server.activate();
-    server.negotiate(telnetpp::do_);
-    server.start_compression();
-
-    // If we end compression, we expect two tokens to be output.  The first
-    // will be the (compressed) WONT MCCP negotiation.  Since the only valid
-    // response to this is DONT MCCP by the client, the second token will
-    // be an end_compression token, as we can assume that the client will
-    // immediately end compression upon reception of the negotiation.
-    auto const result = server.negotiate(telnetpp::dont);
-
-    ASSERT_EQ(size_t{2}, result.size());
-    auto const &token = boost::get<boost::any>(result[1]);
-    boost::any_cast<telnetpp::options::mccp::detail::end_compression>(token);
-}
-*/

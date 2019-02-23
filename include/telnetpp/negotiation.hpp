@@ -32,9 +32,9 @@ public:
     }
 
     //* =====================================================================
-    /// \brief Returns the option (e.g. echo, naws) of this negotiation
+    /// \brief Returns the option code (e.g. echo, naws) of this negotiation
     //* =====================================================================
-    constexpr option_type option() const noexcept
+    constexpr option_type option_code() const noexcept
     {
         return option_;
     }
@@ -58,7 +58,7 @@ private:
 constexpr bool operator==(negotiation const &lhs, negotiation const &rhs) noexcept
 {
     return lhs.request() == rhs.request()
-        && lhs.option() == rhs.option();
+        && lhs.option_code() == rhs.option_code();
 }
 
 //* =========================================================================
@@ -67,7 +67,8 @@ constexpr bool operator==(negotiation const &lhs, negotiation const &rhs) noexce
 constexpr bool operator<(negotiation const &lhs, negotiation const &rhs) noexcept
 {
     return lhs.request() < rhs.request()
-        || (!(rhs.request() < lhs.request()) && lhs.option() < rhs.option());
+        || (!(rhs.request() < lhs.request())
+           && lhs.option_code() < rhs.option_code());
 }
 
 //* =========================================================================
@@ -80,7 +81,7 @@ std::ostream &operator<<(std::ostream &out, negotiation const &cmd);
 
 // This is necessary because the lookup for the recipient for a negotiation
 // in a session relies on both the request and the option type (will/wont
-// go to a different place than do/dont, for example).  Therefore, the entire
+// go to a different place than do/don't, for example).  Therefore, the entire
 // negotiation is the key in the lookup and needs to be hashable to go to the
 // unordered map.
 TELNETPP_MAKE_INTRUSIVE_HASH(telnetpp::negotiation);
