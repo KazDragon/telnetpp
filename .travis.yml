@@ -30,9 +30,25 @@ matrix:
     env:
       - MATRIX_EVAL="CC=gcc-5 && CXX=g++-5 && CONFIG=Debug && SHARED=0"
 
+  - <<: *linux_gcc
+    env:
+      - MATRIX_EVAL="CC=gcc-5 && CXX=g++-5 && CONFIG=Debug && SHARED=0 && SANITIZE=address"
+
+  - <<: *linux_gcc
+    env:
+      - MATRIX_EVAL="CC=gcc-5 && CXX=g++-5 && CONFIG=Debug && SHARED=0 && COVERAGE=ON"
+
+  - <<: *linux_gcc
+    env:
+      - MATRIX_EVAL="CC=gcc-5 && CXX=g++-5 && CONFIG=Debug && SHARED=1"
+
   - <<: *linux_clang
     env:
      - MATRIX_EVAL="CC=clang-4.0 && CXX=clang++-4.0 && CONFIG=Debug && SHARED=0"
+
+  - <<: *linux_clang
+    env:
+     - MATRIX_EVAL="CC=clang-4.0 && CXX=clang++-4.0 && CONFIG=Debug && SHARED=1"
 
 #  - os: linux
 #    dist: trusty
