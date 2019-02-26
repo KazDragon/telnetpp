@@ -8,6 +8,7 @@ namespace telnetpp { namespace options { namespace msdp { namespace detail {
 //* =========================================================================
 /// \brief Decode a byte stream into a list of MSDP variables.
 //* =========================================================================
+TELNETPP_EXPORT
 void decode(
     telnetpp::bytes data, 
     std::function<

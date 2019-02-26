@@ -12,7 +12,7 @@ namespace telnetpp { namespace options { namespace mccp {
 /// arbitrary byte sequences.  For this option, this implies compression
 /// and decompression.
 //* =========================================================================
-class codec
+class TELNETPP_EXPORT codec
 {
 public:
     using continuation = std::function<

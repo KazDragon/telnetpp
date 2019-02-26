@@ -9,6 +9,7 @@ namespace telnetpp { namespace options { namespace msdp { namespace detail {
 //* =========================================================================
 /// \brief Encode a list of MSDP variables into a sequence of bytes.
 //* =========================================================================
+TELNETPP_EXPORT
 void encode_variable(
     telnetpp::options::msdp::variable const &var,
     telnetpp::byte_storage &storage);

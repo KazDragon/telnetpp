@@ -10,6 +10,7 @@ namespace telnetpp { namespace options { namespace new_environ {
 //* =========================================================================
 /// \brief Appends escaped text to the content.
 //* =========================================================================
+TELNETPP_EXPORT
 void append_escaped(telnetpp::byte_storage &storage, telnetpp::bytes content);
 
 //* =========================================================================
