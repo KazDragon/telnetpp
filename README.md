@@ -8,17 +8,14 @@
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/63ec54845f2c41f1899706c61f1c316b)](https://www.codacy.com/app/KazDragon/telnetpp?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=KazDragon/telnetpp&amp;utm_campaign=Badge_Grade)
 
 [![Github Issues](https://img.shields.io/github/issues/KazDragon/telnetpp.svg)](https://github.com/KazDragon/telnetpp/issues)
-[![Stories in Ready](https://badge.waffle.io/KazDragon/telnetpp.png?label=ready&title=Stories%20In%20Ready)](https://waffle.io/KazDragon/telnetpp)
-[![Stories in Progress](https://badge.waffle.io/KazDragon/telnetpp.png?label=in%20progress&title=Stories%20In%20Progress)](https://waffle.io/KazDragon/telnetpp)
 
 [![Gitter](https://badges.gitter.im/KazDragon/telnetpp.svg)](https://gitter.im/KazDragon/telnetpp?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
-[![This is a forkable respository](https://img.shields.io/badge/forkable-yes-brightgreen.svg)](https://basicallydan.github.io/forkability/?u=KazDragon&r=telnetpp)
 
 Telnet++ is an implementation of the Telnet Session Layer protocol that is used primarily to negotiate a feature set between a client and server, the former of which is usually some kind of text-based terminal,  Commonly used terminals include Xterm, PuTTY, and a whole host of Telnet-enabled MUD clients including Tintin++, MushClient, and more.
 
 # Requirements
 
-Telnet++ requires a C++14 compiler and the Boost Libraries.  It also uses Google Test for its testing suite, which is compiled optionally.
+Telnet++ requires a C++14 compiler and the Conan package manager.
 
 # Features / Roadmap / Progress
 
@@ -41,13 +38,10 @@ Telnet++ requires a C++14 compiler and the Boost Libraries.  It also uses Google
   * [x] MCCP - the Mud Client Compression Protocol (see http://tintin.sourceforge.net/mccp/)
 5. [x] Structures to hide the complexity of the layer (e.g. routers, parsers, generators).
   * [x] Session class that understands all of the helper structures and how to convert to and from a stream of bytes.
-  * [x] A byte_converter, which converts a stream of tokens into streams of bytes.
 
 # Status
 
 Telnet++ is automatically tested with Clang and G++ 5.2.
-
-For further information about the working status of Telnet++, to report any bugs, or to make any feature requests, visit the [Waffle board](https://waffle.io/KazDragon/telnetpp)
 
 # The Basics
 
