@@ -13,6 +13,10 @@ if (POLICY CMP0063)
 endif()
 
 option(TELNETPP_WITH_TESTS "Build with tests included" False)
+option(TELNETPP_WITH_ZLIB "Build using ZLib" False)
+message("Building Telnet++ with config: ${CMAKE_BUILD_TYPE}")
+message("Building Telnet++ with tests: ${TELNETPP_WITH_TESTS}")
+message("Building Telnet++ with zlib: ${TELNETPP_WITH_ZLIB}")
 
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 conan_basic_setup(TARGETS NO_OUTPUT_DIRS)
@@ -95,13 +99,13 @@ set (TELNETPP_PUBLIC_HEADER_FILES
 if (TELNETPP_WITH_ZLIB)
     set (TELNETPP_PUBLIC_SOURCE_FILES
         ${TELNETPP_PUBLIC_SOURCE_FILES}
-#        src/options/mccp/zlib/compressor.cpp
+        src/options/mccp/zlib/compressor.cpp
         src/options/mccp/zlib/decompressor.cpp
     )
-#
+
     set (TELNETPP_PUBLIC_INCLUDE_FILES
         ${TELNETPP_PUBLIC_SOURCE_FILES}
-#        include/telnetpp/options/mccp/zlib/compressor.hpp
+        include/telnetpp/options/mccp/zlib/compressor.hpp
         include/telnetpp/options/mccp/zlib/decompressor.hpp
     )
 endif()
@@ -263,8 +267,8 @@ if (TELNETPP_WITH_TESTS)
     # the executable if zlib is available.
     if (TELNETPP_WITH_ZLIB)
         set (telnetpp_tester_external_tests
-             ${telnetpp_tester_external_tests}
-    #            test/mccp_zlib_compressor_test.cpp
+            ${telnetpp_tester_external_tests}
+            test/mccp_zlib_compressor_test.cpp
             test/mccp_zlib_decompressor_test.cpp
         )
     endif()

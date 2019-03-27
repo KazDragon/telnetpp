@@ -1,6 +1,6 @@
 #pragma once
 
-#include "telnetpp/options/mccp/compressor.hpp"
+#include "telnetpp/options/mccp/codec.hpp"
 #include <memory>
 
 //* =========================================================================
@@ -13,7 +13,7 @@ namespace telnetpp { namespace options { namespace mccp { namespace zlib {
 //* =========================================================================
 /// \brief Represents an object that can compress arbitrary byte sequences.
 //* =========================================================================
-class TELNETPP_EXPORT compressor : public telnetpp::options::mccp::compressor
+class TELNETPP_EXPORT compressor : public telnetpp::options::mccp::codec
 {
 public:
     //* =====================================================================
@@ -27,20 +27,32 @@ public:
     ~compressor() override;
 
     //* =====================================================================
-    /// \brief Compress the given byte sequence and return the compressed
-    /// sequence.
+    /// \brief A hook for when the transformation stream starts.
     //* =====================================================================
-    telnetpp::byte_stream compress(
-        telnetpp::byte_stream const &sequence) override;
+    void do_start() override;
 
     //* =====================================================================
-    /// \brief Ends the compression stream.  Compressing further will cause
-    /// the stream to restart.
+    /// \brief A hook for when transformation stream ends.
     //* =====================================================================
-    telnetpp::byte_stream end_compression() override;
+    void do_finish(continuation const &cont) override;
 
-private:
-    struct impl;
+    //* =====================================================================
+    /// \brief Transform the given bytes, sending the transformed data
+    /// to the continuation, along with a boolean indicating whether the
+    /// transformation stream was ended inline (e.g. a compression stream
+    /// itself might indicate that compression has ended).
+    ///
+    /// \returns a subsequence of the bytes that were not transformed due to
+    /// e.g. the stream ending.
+    ///
+    /// \throws telnetpp::options::mccp::corrupted_stream_error if the data
+    /// was malformed.
+    //* =====================================================================
+    telnetpp::bytes transform_chunk(
+      telnetpp::bytes data,
+      continuation const &cont) override;
+
+    class impl;
     std::unique_ptr<impl> pimpl_;
 };
 
