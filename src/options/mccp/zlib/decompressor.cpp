@@ -1,4 +1,5 @@
 #include "telnetpp/options/mccp/zlib/decompressor.hpp"
+#include <boost/optional.hpp>
 #include <zlib.h>
 #include <cassert>
 
@@ -12,102 +13,42 @@ namespace {
 // how-to guide.  Instead, we can just use small blocks on the stack and
 // iterate in the very rare case that a single message yields a block of 1KB
 // or more.
-static std::size_t constexpr input_buffer_size = 1023;
+static constexpr std::size_t receive_buffer_size = 1024;
 
 }
 
 // ==========================================================================
 // DECOMPRESSOR::IMPL
 // ==========================================================================
-class decompressor::impl
+struct decompressor::impl
 {
-public :
-    // ======================================================================
-    // CONSTRUCTOR
-    // ======================================================================
-    impl() = default;
+    boost::optional<z_stream> stream;
 
     // ======================================================================
-    // COPY CONSTRUCTOR
+    // CONSTRUCT_STREAM
     // ======================================================================
-    impl(impl const &) = delete;
-
-    // ======================================================================
-    // COPY ASSIGNMENT
-    // ======================================================================
-    impl &operator=(impl const &) = delete;
-
-    ~impl()
+    void construct_stream()
     {
-        if (decompressing_)
-        {
-            auto response = inflateEnd(&stream_);
-            assert(response == Z_OK);
-        }
+        assert(stream == boost::none);
+
+        stream = z_stream{};
+
+        auto result = inflateInit(stream.get_ptr());
+        assert(result == Z_OK);
     }
 
     // ======================================================================
-    // DECOMPRESS
+    // DESTROY_STREAM
     // ======================================================================
-    std::tuple<telnetpp::byte_stream, bool> decompress(byte data)
+    void destroy_stream()
     {
-        if (!decompressing_)
-        {
-            auto result = inflateInit(&stream_);
-            assert(result == Z_OK);
-            
-            decompressing_ = true;
-        }
+        assert(stream != boost::none);
 
-        std::tuple<telnetpp::byte_stream, bool> result;
-        auto &decompressed_stream = std::get<0>(result);
-        auto &is_end_of_stream    = std::get<1>(result);
+        auto result = inflateEnd(stream.get_ptr());
+        assert(result == Z_OK || result == Z_STREAM_ERROR);
 
-        byte input_buffer[input_buffer_size];
-
-        stream_.avail_in  = 1;
-        stream_.next_in   = &data;
-        stream_.avail_out = input_buffer_size;
-        stream_.next_out  = input_buffer;
-
-        auto response = inflate(&stream_, Z_SYNC_FLUSH);
-
-        if (response == Z_DATA_ERROR)
-        {
-            throw corrupted_stream_error(
-                "Inflation of byte in ZLib stream yielded Z_DATA_ERROR");
-        }
-
-        assert(response == Z_OK || response == Z_STREAM_END);
-
-        // Error in stream yields Z_DATA_ERROR
-        is_end_of_stream = response == Z_STREAM_END;
-
-        decompressed_stream.insert(
-            decompressed_stream.end(),
-            input_buffer,
-            stream_.next_out);
-
-        return result;
+        stream = boost::none;
     }
-
-    // ======================================================================
-    // END_DECOMPRESSION
-    // ======================================================================
-    void end_decompression()
-    {
-        if (decompressing_)
-        {
-            auto result = inflateEnd(&stream_);
-            assert(result == Z_OK);
-
-            decompressing_ = false;
-        }
-    }
-
-private :
-    z_stream stream_ = {};
-    bool     decompressing_ = false;
 };
 
 // ==========================================================================
@@ -123,22 +64,74 @@ decompressor::decompressor()
 // ==========================================================================
 decompressor::~decompressor()
 {
+    if(pimpl_->stream)
+    {
+        pimpl_->destroy_stream();
+    }
 }
 
 // ==========================================================================
-// DECOMPRESS
+// DO_START
 // ==========================================================================
-std::tuple<telnetpp::byte_stream, bool> decompressor::decompress(byte data)
+void decompressor::do_start()
 {
-    return pimpl_->decompress(data);
 }
 
 // ==========================================================================
-// END_DECOMPRESSION
+// DO_FINISH
 // ==========================================================================
-void decompressor::end_decompression()
+void decompressor::do_finish(continuation const &cont)
 {
-    pimpl_->end_decompression();
+    if(pimpl_->stream)
+    {
+        pimpl_->destroy_stream();
+    }
+}
+
+// ==========================================================================
+// DECOMPRESS_CHUNK
+// ==========================================================================
+telnetpp::bytes decompressor::transform_chunk(
+    telnetpp::bytes data,
+    continuation const &cont)
+{
+    if (!pimpl_->stream)
+    {
+        pimpl_->construct_stream();
+    }
+
+    byte receive_buffer[receive_buffer_size];
+
+    pimpl_->stream->avail_in  = data.size();
+    pimpl_->stream->next_in   = const_cast<telnetpp::byte *>(data.data());
+    pimpl_->stream->avail_out = receive_buffer_size;
+    pimpl_->stream->next_out  = receive_buffer;
+
+    auto response = inflate(pimpl_->stream.get_ptr(), Z_SYNC_FLUSH);
+
+    if (response == Z_DATA_ERROR)
+    {
+        throw corrupted_stream_error(
+            "Inflation of byte in ZLib stream yielded Z_DATA_ERROR");
+    }
+
+    assert(response == Z_OK || response == Z_STREAM_END);
+
+    auto const received_data = telnetpp::bytes{
+        receive_buffer, pimpl_->stream->next_out
+    };
+
+    bool const stream_ended = response == Z_STREAM_END;
+    data = data.subspan(data.size() - pimpl_->stream->avail_in);
+
+    if (stream_ended)
+    {
+        pimpl_->destroy_stream();
+    }
+
+    cont(received_data, stream_ended);
+
+    return data;
 }
 
 }}}}

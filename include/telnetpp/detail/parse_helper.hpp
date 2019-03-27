@@ -2,10 +2,15 @@
 
 #include "telnetpp/core.hpp"
 #include "telnetpp/element.hpp"
+#include <algorithm>
+#include <cassert>
 
 namespace telnetpp { namespace detail {
 
-enum class parse_state
+//* =========================================================================
+/// \exclude
+//* =========================================================================
+enum class parsing_state
 {
     idle,
     iac,
@@ -15,15 +20,262 @@ enum class parse_state
     subnegotiation_content_iac
 };
 
-struct parse_temps
+//* =========================================================================
+/// \exclude
+//* =========================================================================
+struct parser_state
 {
-    std::vector<telnetpp::element> elements;
-    byte_stream                    subnegotiation_content;
+    constexpr parser_state(bytes::iterator begin)
+      : last_parsed(begin),
+        token_begin(begin),
+        token_end(begin)
+    {
+    }
 
-    parse_state                    state = parse_state::idle;
-    byte                           id;
+    parsing_state   current_state = parsing_state::idle;
+    bytes::iterator last_parsed;
+    bytes::iterator token_begin;
+    bytes::iterator token_end;
+    byte            id    = 0;
+    bool            has_escape = false;
 };
 
-void parse_helper(parse_temps &temps, byte data);
+//* =========================================================================
+/// \exclude
+//* =========================================================================
+template <typename Continuation>
+static constexpr void emit_bytes(parser_state &state, Continuation &&cont)
+{
+    if (state.token_begin != state.token_end)
+    {
+        cont(bytes{state.token_begin, state.token_end});
+    }
+
+    state.last_parsed = state.token_begin = state.token_end;
+}
+
+//* =========================================================================
+/// \exclude
+//* =========================================================================
+template <typename Continuation>
+static constexpr void emit_command(parser_state &state, Continuation &&cont)
+{
+    cont(telnetpp::command{*state.token_end++});
+    state.last_parsed = state.token_begin = state.token_end;
+}
+
+//* =========================================================================
+/// \exclude
+//* =========================================================================
+template <typename Continuation>
+static constexpr void emit_negotiation(parser_state &state, Continuation &&cont)
+{
+    cont(telnetpp::negotiation{*state.token_begin, *state.token_end});
+    state.last_parsed = state.token_begin = ++state.token_end;
+}
+
+//* =========================================================================
+/// \exclude
+//* =========================================================================
+template <typename Continuation>
+static void emit_subnegotiation(parser_state &state, Continuation &&cont)
+{
+    telnetpp::bytes content{state.token_begin, state.token_end};
+
+    if (state.has_escape)
+    {
+        // In the case that the subnegotiation has any escaped characters,
+        // (e.g. a value of 0xFF is escaped as 0xFF, 0xFF), then we must 
+        // present a new span with those escaped characters omitted.  
+        telnetpp::byte_storage storage;
+        storage.reserve(content.size() - 1);
+
+        bool escape = false;
+        for (auto const &byte : content)
+        {
+            if (escape)
+            {
+                storage.push_back(byte);
+                escape = false;
+            }
+            else if (byte == telnetpp::iac)
+            {
+                escape = true;
+            }
+            else
+            {
+                storage.push_back(byte);
+            }
+        }
+
+        cont(telnetpp::subnegotiation{state.id, storage});
+    }
+    else
+    {
+        cont(telnetpp::subnegotiation{state.id, content});
+    }
+
+    state.has_escape = false;
+    std::advance(state.token_end, 2);
+    state.last_parsed = state.token_begin = state.token_end;
+}
+
+//* =========================================================================
+/// \exclude
+//* =========================================================================
+template <typename Continuation>
+static constexpr void parse_idle(
+    parser_state &state, byte data, Continuation &&cont)
+{
+    switch (data)
+    {
+        case telnetpp::iac:
+            emit_bytes(state, cont);
+            ++state.token_end;
+            state.current_state = parsing_state::iac;
+            break;
+
+        default:
+            ++state.token_end;
+            break;
+    }
+}
+
+//* =========================================================================
+/// \exclude
+//* =========================================================================
+template <typename Continuation>
+static constexpr void parse_iac(
+    parser_state &state, byte data, Continuation &&cont)
+{
+    switch (data)
+    {
+        case telnetpp::iac:
+            ++state.token_begin;
+            ++state.token_end;
+            state.current_state = parsing_state::idle;
+            break;
+            
+        case telnetpp::sb:
+            ++state.token_end;
+            state.current_state = parsing_state::subnegotiation;
+            break;
+
+        case telnetpp::will: // fall-through
+        case telnetpp::wont: // fall-through
+        case telnetpp::do_:  // fall-through
+        case telnetpp::dont:
+            ++state.token_begin;
+            ++state.token_end;
+            state.current_state = parsing_state::negotiation;
+            break;
+
+        default :
+            emit_command(state, cont);
+            state.current_state = parsing_state::idle;
+            break;
+    }
+}
+
+//* =========================================================================
+/// \exclude
+//* =========================================================================
+template <typename Continuation>
+static constexpr void parse_negotiation(
+    parser_state &state, byte data, Continuation &&cont)
+{
+    emit_negotiation(state, cont);
+    state.current_state = parsing_state::idle;
+}
+
+//* =========================================================================
+/// \exclude
+//* =========================================================================
+template <typename Continuation>
+static constexpr void parse_subnegotiation(
+    parser_state &state, byte data, Continuation &&cont)
+{
+    state.id = data;
+    state.token_begin = ++state.token_end;
+    state.current_state = parsing_state::subnegotiation_content;
+}
+
+//* =========================================================================
+/// \exclude
+//* =========================================================================
+template <typename Continuation>
+static constexpr void parse_subnegotiation_content(
+    parser_state &state, byte data, Continuation &&cont)
+{
+    if (data == telnetpp::iac)
+    {
+        state.current_state = parsing_state::subnegotiation_content_iac;
+    }
+    else
+    {
+        ++state.token_end;
+    }
+}
+
+//* =========================================================================
+/// \exclude
+//* =========================================================================
+template <typename Continuation>
+static constexpr void parse_subnegotiation_content_iac(
+    parser_state &state, byte data, Continuation &&cont)
+{
+    if (data == telnetpp::se)
+    {
+        emit_subnegotiation(state, cont);
+        state.current_state = parsing_state::idle;
+    }
+    else
+    {
+        state.has_escape = true;
+        ++state.token_end;
+        ++state.token_end;
+        state.current_state = parsing_state::subnegotiation_content;
+    }
+}
+
+//* =========================================================================
+/// \exclude
+//* =========================================================================
+template <typename Continuation>
+static constexpr void parse_byte(
+    parser_state &state, bytes::iterator data, Continuation &&cont)
+{
+    switch (state.current_state)
+    {
+        case parsing_state::idle:
+            parse_idle(state, *data, cont);
+            break;
+
+        case parsing_state::iac:
+            parse_iac(state, *data, cont);
+            break;
+
+        case parsing_state::negotiation:
+            parse_negotiation(state, *data, cont);
+            break;
+
+        case parsing_state::subnegotiation:
+            parse_subnegotiation(state, *data, cont);
+            break;
+
+        case parsing_state::subnegotiation_content:
+            parse_subnegotiation_content(state, *data, cont);
+            break;
+
+        case parsing_state::subnegotiation_content_iac:
+            parse_subnegotiation_content_iac(state, *data, cont);
+            break;
+
+        default :
+            assert(!"Telnet parser in invalid state");
+            break;
+    }
+}
 
 }}
+

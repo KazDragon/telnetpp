@@ -2,7 +2,7 @@
 
 #include "telnetpp/core.hpp"
 #include <iosfwd>
-#include <vector>
+#include <utility>
 
 namespace telnetpp {
 
@@ -11,32 +11,47 @@ namespace telnetpp {
 //* =========================================================================
 class TELNETPP_EXPORT subnegotiation
 {
-public :
+public:
     //* =====================================================================
     /// \brief Constructor
     //* =====================================================================
-    subnegotiation(option_type option, byte_stream content);
+    constexpr subnegotiation(option_type option, bytes content) noexcept
+      : option_(std::move(option)),
+        content_(std::move(content))
+    {
+    }
 
     //* =====================================================================
     /// \brief Returns the option for this subnegotiation.
     //* =====================================================================
-    option_type option() const;
+    constexpr option_type option() const noexcept
+    {
+        return option_;
+    }
 
     //* =====================================================================
     /// \brief Returns the content for this subnegotiation.
     //* =====================================================================
-    byte_stream const &content() const;
+    constexpr bytes content() const noexcept
+    {
+        return content_;
+    }
 
-private :
+
+private:
     option_type option_;
-    byte_stream content_;
+    bytes content_;
 };
 
 //* =========================================================================
 /// \brief Comparison function for subnegotiations
 //* =========================================================================
 TELNETPP_EXPORT
-bool operator==(subnegotiation const &lhs, subnegotiation const &rhs);
+constexpr bool operator==(subnegotiation const &lhs, subnegotiation const &rhs) noexcept
+{
+    return lhs.option() == rhs.option()
+        && lhs.content() == rhs.content();
+}
 
 //* =========================================================================
 /// \brief Stream output for subnegotiations

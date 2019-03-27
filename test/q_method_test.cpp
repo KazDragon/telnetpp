@@ -13,30 +13,30 @@
 // Rule 1: a client/server must remember whether it is being disabled (in
 // addition to whether it is being enabled.)  It must not send any further
 // negotiations until the previous negotiation is complete.
-template <class Option, telnetpp::negotiation_type PositiveResponse>
+template <class Option>
 class an_option_being_deactivated : public testing::Test
 {
-public :
+public:
     an_option_being_deactivated()
     {
-        option_.activate();
-        option_.negotiate(PositiveResponse);
-        option_.deactivate();
+        option_.activate([](auto &&){});
+        option_.negotiate(Option::remote_positive, [](auto &&){});
+        option_.deactivate([](auto &&){});
     }
 
-protected :
+protected:
     class option : public Option
     {
-    public :
+    public:
         option()
           : Option(0)
         {
         }
 
-        std::vector<telnetpp::token> handle_subnegotiation(
-            telnetpp::byte_stream const &content) override
+        void handle_subnegotiation(
+            telnetpp::bytes content,
+            typename Option::continuation const &cont) override
         {
-            return {};
         }
     };
 
@@ -44,56 +44,77 @@ protected :
 };
 
 using a_client_option_being_deactivated =
-    an_option_being_deactivated<telnetpp::client_option, telnetpp::will>;
+    an_option_being_deactivated<telnetpp::client_option>;
 using a_server_option_being_deactivated =
-    an_option_being_deactivated<telnetpp::server_option, telnetpp::do_>;
+    an_option_being_deactivated<telnetpp::server_option>;
 
 TEST_F(a_client_option_being_deactivated, ignores_activate_requests)
 {
-    auto result = option_.activate();
-    ASSERT_EQ(0u, result.size());
+    bool called = false;
+    auto cont = [&called](auto &&cont){ 
+        called = true; 
+    };
+
+    option_.activate(cont);
+    ASSERT_FALSE(called);
 }
 
 TEST_F(a_client_option_being_deactivated, ignores_deactivate_requests)
 {
-    auto result = option_.deactivate();
-    ASSERT_EQ(0u, result.size());
+    bool called = false;
+    auto cont = [&called](auto &&cont){ 
+        called = true; 
+    };
+
+    option_.deactivate(cont);
+    ASSERT_FALSE(called);
 }
 
 TEST_F(a_server_option_being_deactivated, ignores_activate_requests)
 {
-    auto result = option_.activate();
-    ASSERT_EQ(0u, result.size());
+    bool called = false;
+    auto cont = [&called](auto &&cont){ 
+        called = true; 
+    };
+
+    option_.activate(cont);
+    ASSERT_FALSE(called);
 }
 
 TEST_F(a_server_option_being_deactivated, ignores_deactivate_requests)
 {
-    auto result = option_.deactivate();
-    ASSERT_EQ(0u, result.size());
+    bool called = false;
+    auto cont = [&called](auto &&cont){ 
+        called = true; 
+    };
+
+    option_.deactivate(cont);
+    ASSERT_FALSE(called);
 }
+
 
 template <class Option>
 class an_option_being_activated : public testing::Test
 {
-public :
+public:
     an_option_being_activated()
     {
-        option_.activate();
+        option_.activate([](auto &&){});
     }
 
-protected :
+protected:
     class option : public Option
     {
-    public :
+    public:
         option()
           : Option(0)
         {
         }
 
-        std::vector<telnetpp::token> handle_subnegotiation(
-            telnetpp::byte_stream const &content) override
+        void handle_subnegotiation(
+            telnetpp::bytes content,
+            typename Option::continuation const &cont) override
         {
-            return {};
         }
     };
 
@@ -103,30 +124,49 @@ protected :
 using a_client_option_being_activated =
     an_option_being_activated<telnetpp::client_option>;
 using a_server_option_being_activated =
-    an_option_being_activated<telnetpp::server_option>;
 
 TEST_F(a_client_option_being_activated, ignores_activate_requests)
 {
-    auto result = option_.activate();
-    ASSERT_EQ(0u, result.size());
+    bool called = false;
+    auto cont = [&called](auto &&cont){ 
+        called = true; 
+    };
+
+    option_.activate(cont);
+    ASSERT_FALSE(called);
 }
 
 TEST_F(a_client_option_being_activated, ignores_deactivate_requests)
 {
-    auto result = option_.deactivate();
-    ASSERT_EQ(0u, result.size());
+    bool called = false;
+    auto cont = [&called](auto &&cont){ 
+        called = true; 
+    };
+
+    option_.deactivate(cont);
+    ASSERT_FALSE(called);
 }
 
 TEST_F(a_server_option_being_activated, ignores_activate_requests)
 {
-    auto result = option_.activate();
-    ASSERT_EQ(0u, result.size());
+    bool called = false;
+    auto cont = [&called](auto &&cont){ 
+        called = true; 
+    };
+
+    option_.activate(cont);
+    ASSERT_FALSE(called);
 }
 
 TEST_F(a_server_option_being_activated, ignores_deactivate_requests)
 {
-    auto result = option_.deactivate();
-    ASSERT_EQ(0u, result.size());
+    bool called = false;
+    auto cont = [&called](auto &&cont){ 
+        called = true; 
+    };
+
+    option_.deactivate(cont);
+    ASSERT_FALSE(called);
 }
 
 // Rule 2: Prohibit new requests before completing old negotiation.

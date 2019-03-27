@@ -13,9 +13,11 @@ variable::variable()
 // ==========================================================================
 // CONSTRUCTOR
 // ==========================================================================
-variable::variable(std::string const &name, value_type const &value)
-  : name(name),
-    value(value)
+variable::variable(
+    telnetpp::bytes name, 
+    string_value value)
+  : name{name.begin(), name.end()},
+    value{std::move(value)}
 {
 }
 
@@ -23,10 +25,10 @@ variable::variable(std::string const &name, value_type const &value)
 // CONSTRUCTOR
 // ==========================================================================
 variable::variable(
-    std::string const &name,
-    std::initializer_list<std::string> const &il)
-  : name(name),
-    value(il)
+    telnetpp::byte_storage name, 
+    string_value value)
+  : name{std::move(name)},
+    value{std::move(value)}
 {
 }
 
@@ -34,10 +36,43 @@ variable::variable(
 // CONSTRUCTOR
 // ==========================================================================
 variable::variable(
-    std::string const &name,
-    std::initializer_list<variable> const &il)
-  : name(name),
-    value(std::vector<variable>{il})
+    telnetpp::bytes name,
+    array_value array_values)
+  : name{name.begin(), name.end()},
+    value{array_values}
+{
+}
+
+// ==========================================================================
+// CONSTRUCTOR
+// ==========================================================================
+variable::variable(
+    telnetpp::byte_storage name,
+    array_value array_values)
+  : name{std::move(name)},
+    value{std::move(array_values)}
+{
+}
+
+// ==========================================================================
+// CONSTRUCTOR
+// ==========================================================================
+variable::variable(
+    telnetpp::bytes name,
+    table_value table_values)
+  : name{name.begin(), name.end()},
+    value{std::move(table_values)}
+{
+}
+
+// ==========================================================================
+// CONSTRUCTOR
+// ==========================================================================
+variable::variable(
+    telnetpp::byte_storage name,
+    table_value table_values)
+  : name{std::move(name)},
+    value{std::move(table_values)}
 {
 }
 
@@ -64,6 +99,45 @@ bool operator==(variable const &lhs, variable const &rhs)
 bool operator!=(variable const &lhs, variable const &rhs)
 {
     return !(lhs == rhs);
+}
+
+// ==========================================================================
+// OPERATOR<<
+// ==========================================================================
+std::ostream &operator<<(std::ostream &out, variable const &var)
+{
+    out << reinterpret_cast<char const *>(var.name.c_str()) << "=";
+    
+    detail::visit_lambdas(
+        var.value,
+        [&](string_value const &sv)
+        {
+            out << "\"" << reinterpret_cast<char const *>(sv.c_str()) << "\"";
+        },
+        [&](array_value const &av)
+        {
+            out << "[";
+            
+            for (auto const &item : av)
+            {
+                out << reinterpret_cast<char const *>(item.c_str()) << ",";
+            }
+            
+            out << "]";
+        },
+        [&](table_value const &tv)
+        {
+            out << "{";
+            
+            for (auto const &inner_var :tv)
+            {
+                out << inner_var << ",";
+            }
+
+            out << "}";
+        });
+        
+    return out;
 }
 
 }}}

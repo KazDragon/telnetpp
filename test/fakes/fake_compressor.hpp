@@ -2,7 +2,7 @@
 
 class fake_compressor : public telnetpp::options::mccp::compressor
 {
-public :
+public:
     //* =====================================================================
     /// \brief Compress the given byte sequence and return the compressed
     /// sequence.

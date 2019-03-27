@@ -12,26 +12,25 @@ namespace telnetpp { namespace options {
 template <option_type Option>
 class subnegotiationless_server : public telnetpp::server_option
 {
-public :
+public:
     //* =====================================================================
     /// \brief Constructor
     //* =====================================================================
-    subnegotiationless_server()
+    constexpr subnegotiationless_server() noexcept
       : server_option(Option)
     {
     }
 
-private :
+private:
     //* =====================================================================
-    /// \brief Handle a negotiation that has been received in the active
-    /// state.
+    /// \brief Called when a subnegotiation is received while the option is
+    /// active.  Override for option-specific functionality.
     //* =====================================================================
-    std::vector<telnetpp::token> handle_subnegotiation(
-        telnetpp::byte_stream const &content) override
+    void handle_subnegotiation(
+        telnetpp::bytes content,
+        continuation const &cont) override
     {
-        return {};
     }
-
 };
 
 }}

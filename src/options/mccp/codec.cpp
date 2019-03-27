@@ -1,139 +1,58 @@
 #include "telnetpp/options/mccp/codec.hpp"
-#include "telnetpp/options/mccp/compressor.hpp"
-#include "telnetpp/options/mccp/decompressor.hpp"
-#include "telnetpp/options/mccp/detail/protocol.hpp"
-#include <functional>
-#include <numeric>
-#include <vector>
 
 namespace telnetpp { namespace options { namespace mccp {
 
-namespace {
-
-class output_token_visitor : public boost::static_visitor<>
+// ==========================================================================
+// START
+// ==========================================================================
+void codec::start()
 {
-public :
-    output_token_visitor(
-        std::vector<telnetpp::stream_token> &tokens,
-        compressor &co,
-        decompressor &dec,
-        bool &output_compressed,
-        bool &input_compressed)
-      : tokens_(tokens),
-        compressor_(co),
-        decompressor_(dec),
-        output_compressed_(output_compressed),
-        input_compressed_(input_compressed)
-    {
-    }
+    engaged_ = true;
+    do_start();
+}
 
-    void operator()(boost::any const &any)
+// ==========================================================================
+// FINISH
+// ==========================================================================
+void codec::finish(continuation const &cont)
+{
+    do_finish(cont);
+    engaged_ = false; 
+}
+
+// ==========================================================================
+// OPERATOR()
+// ==========================================================================
+void codec::operator()(telnetpp::bytes data, continuation const &cont)
+{
+    while (!data.empty())
     {
-        if (any.type() == typeid(detail::end_compression))
+        if (engaged_)
         {
-            if (output_compressed_)
-            {
-                tokens_.push_back(compressor_.end_compression());
-                output_compressed_ = false;
-            }
-        }
-        else if (any.type() == typeid(detail::begin_compression))
-        {
-            output_compressed_ = true;
-        }
-        else if (any.type() == typeid(detail::end_decompression))
-        {
-            if (input_compressed_)
-            {
-                decompressor_.end_decompression();
-                input_compressed_ = false;
-            }
-        }
-        else if (any.type() == typeid(detail::begin_decompression))
-        {
-            input_compressed_ = true;
+            data = transform_chunk(
+                data,
+                [&](telnetpp::bytes decompressed_data, bool decompression_ended)
+                {
+                    engaged_ = !decompression_ended;
+                    cont(decompressed_data, decompression_ended);
+                });
         }
         else
         {
-            tokens_.push_back(any);
+            // Every byte might activate decompression, so they must be
+            // transmitted individually.
+            cont(data.subspan(0, 1), false);
+            data = data.subspan(1);
         }
     }
-
-    void operator()(telnetpp::byte_stream const &stream)
-    {
-        if (output_compressed_)
-        {
-            tokens_.push_back(compressor_.compress(stream));
-        }
-        else
-        {
-            tokens_.push_back(stream);
-        }
-    }
-
-private :
-    std::vector<telnetpp::stream_token> &tokens_;
-    compressor &compressor_;
-    decompressor &decompressor_;
-    bool &output_compressed_;
-    bool &input_compressed_;
-};
-
 }
 
-struct codec::impl
+// ==========================================================================
+// CORRUPTED_STREAM_ERROR::CONSTRUCTOR
+// ==========================================================================
+corrupted_stream_error::corrupted_stream_error(char const *what_arg)
+  : domain_error(what_arg)
 {
-    std::shared_ptr<compressor>   compressor_;
-    std::shared_ptr<decompressor> decompressor_;
-
-    bool output_compressed_ = false;
-    bool input_compressed_  = false;
-};
-
-codec::codec(
-    std::shared_ptr<compressor> const &co,
-    std::shared_ptr<decompressor> const &dec)
-  : pimpl_(std::make_shared<impl>())
-{
-    pimpl_->compressor_ = co;
-    pimpl_->decompressor_ = dec;
-}
-
-codec::~codec()
-{
-}
-
-std::vector<telnetpp::stream_token> codec::send(
-    std::vector<telnetpp::stream_token> const &tokens)
-{
-    auto result = std::vector<telnetpp::stream_token>{};
-    output_token_visitor visitor(
-        result,
-        *pimpl_->compressor_,
-        *pimpl_->decompressor_,
-        pimpl_->output_compressed_,
-        pimpl_->input_compressed_);
-
-    for (auto const &token : tokens)
-    {
-        boost::apply_visitor(visitor, token);
-    }
-
-    return result;
-}
-
-telnetpp::byte_stream codec::receive(byte data)
-{
-    if (pimpl_->input_compressed_)
-    {
-        auto const &result = pimpl_->decompressor_->decompress(data);
-        pimpl_->input_compressed_ = !std::get<1>(result);
-        return std::get<0>(result);
-    }
-    else
-    {
-        return { data };
-    }
 }
 
 }}}

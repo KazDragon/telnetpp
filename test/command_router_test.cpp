@@ -4,7 +4,16 @@
 TEST(command_router_test, when_nothing_is_registered_router_sinks_data)
 {
     telnetpp::detail::command_router router;
-    router(telnetpp::command(telnetpp::ayt));
+
+    bool called = false;
+    router(
+        telnetpp::command(telnetpp::ayt),
+        [&called](auto &&...)
+        {
+            called = true;
+        });
+
+    ASSERT_FALSE(called);
 }
 
 TEST(command_router_test, message_with_registered_key_goes_to_registered_function)
@@ -15,21 +24,20 @@ TEST(command_router_test, message_with_registered_key_goes_to_registered_functio
     telnetpp::command expected(telnetpp::ayt);
     bool unregistered_route_called = false;
 
-    router.register_route(expected,
-        [&cmd](auto &&new_command) -> std::vector<telnetpp::token>
+    router.register_route(
+        telnetpp::ayt,
+        [&cmd](auto &&new_command, auto &&cont)
         {
             cmd = new_command;
-            return {};
         });
 
     router.set_unregistered_route(
-        [&unregistered_route_called](auto &&) -> std::vector<telnetpp::token>
+        [&unregistered_route_called](auto &&, auto &&cont)
         {
             unregistered_route_called = true;
-            return {};
         });
 
-    router(expected);
+    router(expected, [](auto &&...){});
 
     ASSERT_EQ(expected, cmd);
     ASSERT_EQ(false, unregistered_route_called);
@@ -44,21 +52,20 @@ TEST(command_router_test, message_with_unregistered_key_goes_to_unregistered_fun
 
     bool registered_route_called = false;
 
-    router.register_route(unexpected,
-        [&registered_route_called](auto &&) -> std::vector<telnetpp::token>
+    router.register_route(
+        telnetpp::ao,
+        [&registered_route_called](auto &&, auto &&)
         {
             registered_route_called = true;
-            return {};
         });
 
     router.set_unregistered_route(
-        [&cmd](auto &&new_command) -> std::vector<telnetpp::token>
+        [&cmd](auto &&new_command, auto &&)
         {
             cmd = new_command;
-            return {};
         });
 
-    router(expected);
+    router(expected, [](auto &&...){});
 
     ASSERT_EQ(false, registered_route_called);
     ASSERT_EQ(expected, cmd);

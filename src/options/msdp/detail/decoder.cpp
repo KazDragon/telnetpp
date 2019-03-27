@@ -1,6 +1,5 @@
 #include "telnetpp/options/msdp/detail/decoder.hpp"
 #include "telnetpp/options/msdp/detail/protocol.hpp"
-#include <algorithm>
 #include <cassert>
 #include <functional>
 
@@ -12,13 +11,13 @@ using variable = telnetpp::options::msdp::variable;
 
 class parser
 {
-public :
+public:
     // ======================================================================
     // CONSTRUCTOR
     // ======================================================================
-    parser()
+    explicit parser(std::function<void (variable const &)> const &cont)
+      : cont_(cont)
     {
-        stack_.push_back(&result_);
     }
 
     // ======================================================================
@@ -26,8 +25,6 @@ public :
     // ======================================================================
     void operator()(byte data)
     {
-        assert(!stack_.empty());
-
         switch (state_)
         {
             case state::idle:
@@ -50,25 +47,26 @@ public :
                 assert(!"invalid state");
                 break;
         }
-
-        assert(!stack_.empty());
     }
 
     // ======================================================================
-    // RESULT
+    // FINISH
     // ======================================================================
-    std::vector<variable> result() const
+    void finish()
     {
-        return result_;
+        if (!var_.name.empty())
+        {
+            cont_(var_);
+        }
     }
 
-private :
+private:
     // ======================================================================
     // TOP
     // ======================================================================
     auto &top()
     {
-        return *stack_.back();
+        return *current_var_.back();
     }
 
     // ======================================================================
@@ -76,7 +74,7 @@ private :
     // ======================================================================
     auto &value()
     {
-        return top().back().value;
+        return top().value;
     }
 
     // ======================================================================
@@ -84,7 +82,7 @@ private :
     // ======================================================================
     auto &value_as_string()
     {
-        return boost::get<std::string>(value());
+        return boost::get<string_value>(value());
     }
 
     // ======================================================================
@@ -92,7 +90,7 @@ private :
     // ======================================================================
     auto &value_as_array()
     {
-        return boost::get<std::vector<std::string>>(value());
+        return boost::get<array_value>(value());
     }
 
     // ======================================================================
@@ -100,7 +98,7 @@ private :
     // ======================================================================
     auto &value_as_table()
     {
-        return boost::get<std::vector<variable>>(value());
+        return boost::get<table_value>(value());
     }
 
     // ======================================================================
@@ -108,18 +106,60 @@ private :
     // ======================================================================
     auto &name()
     {
-        return top().back().name;
+        return top().name;
     }
 
+    // ======================================================================
+    // OPEN_VARIABLE
+    // ======================================================================
+    void open_variable()
+    {
+        if (current_var_.empty())
+        {
+            var_ = variable{};
+            current_var_.push_back(&var_);
+        }
+        else
+        {
+            auto &outer_var = value_as_table();
+            outer_var.push_back(variable{});
+            current_var_.push_back(&outer_var.back());
+        }
+    }
+
+    // ======================================================================
+    // CLOSE_VARIABLE
+    // ======================================================================
+    void close_variable()
+    {
+        current_var_.pop_back();
+        
+        if (current_var_.empty())
+        {
+            cont_(var_);
+            var_ = {};
+        }
+    }
+    
     // ======================================================================
     // PARSE_IDLE
     // ======================================================================
     void parse_idle(byte data)
     {
-        if (data == telnetpp::options::msdp::detail::var)
+        switch (data)
         {
-            top().push_back({});
-            state_ = state::name;
+            case telnetpp::options::msdp::detail::var:
+                open_variable();
+                state_ = state::name;
+                break;
+                
+            case telnetpp::options::msdp::detail::table_close:
+                close_variable();
+                state_ = state::idle;
+                break;
+                
+            default:
+                break;
         }
     }
 
@@ -128,16 +168,14 @@ private :
     // ======================================================================
     void parse_name(byte data)
     {
-        assert(!result_.empty());
-
         if (data == telnetpp::options::msdp::detail::val)
         {
             state_ = state::value;
-            value() = std::string{};
+            value() = string_value{};
         }
         else
         {
-            name() += char(data);
+            name() += data;
         }
     }
 
@@ -146,37 +184,31 @@ private :
     // ======================================================================
     void parse_value(byte data)
     {
-        assert(!result_.empty());
-
         switch (data)
         {
-            case telnetpp::options::msdp::detail::var :
-                top().push_back({});
-                state_ = state::name;
-                break;
-
-            case telnetpp::options::msdp::detail::table_open :
-                value() = std::vector<variable>{};
-                stack_.push_back(&value_as_table());
-                state_ = state::idle;
-                break;
-
-            case telnetpp::options::msdp::detail::table_close :
-                // Never pop the root of the stack.
-                if (stack_.size() > 1)
-                {
-                    stack_.pop_back();
-                }
-                state_ = state::idle;
-                break;
-
-            case telnetpp::options::msdp::detail::array_open :
-                value() = std::vector<std::string>{};
+            case telnetpp::options::msdp::detail::array_open:
+                value() = array_value{};
                 state_ = state::array;
                 break;
 
-            default :
-                value_as_string() += char(data);
+            case telnetpp::options::msdp::detail::table_open:
+                value() = table_value{};
+                state_ = state::idle;
+                break;
+                
+            case telnetpp::options::msdp::detail::table_close:
+                close_variable();
+                state_ = state::idle;
+                break;
+                
+            case telnetpp::options::msdp::detail::var:
+                close_variable(); 
+                open_variable();
+                state_ = state::name;
+                break;
+                
+            default:
+                value_as_string() += data;
                 break;
         }
     }
@@ -189,6 +221,7 @@ private :
         switch (data)
         {
             case telnetpp::options::msdp::detail::array_close :
+                close_variable();
                 state_ = state::idle;
                 break;
 
@@ -197,7 +230,7 @@ private :
                 break;
 
             default :
-                value_as_array().back() += char(data);
+                value_as_array().back() += data;
                 break;
         }
     }
@@ -210,9 +243,11 @@ private :
         array,
     };
 
-    std::vector<std::vector<variable> *> stack_;
-    std::vector<variable>                result_;
-    state                                state_ = state::idle;
+    variable var_;
+    std::vector<variable *> current_var_;
+
+    state state_ = state::idle;
+    std::function<void (variable const &)> cont_;
 };
 
 }
@@ -220,16 +255,18 @@ private :
 // ==========================================================================
 // DECODE
 // ==========================================================================
-std::vector<variable> decode(telnetpp::byte_stream const &stream)
+void decode(
+    telnetpp::bytes data, 
+    std::function<void (variable const &)> const &cont)
 {
-    using std::begin;
-    using std::end;
+    parser parse{cont};
 
-    parser parse;
-
-    std::for_each(begin(stream), end(stream), std::ref(parse));
-
-    return parse.result();
+    for (auto const &by : data)
+    {
+        parse(by);
+    }
+    
+    parse.finish();
 }
 
 }}}}

@@ -1,68 +1,93 @@
 #pragma once
 
-#include "telnetpp/element.hpp"
-#include <boost/optional.hpp>
-#include <boost/utility.hpp>
-#include <memory>
-#include <vector>
+#include "telnetpp/core.hpp"
+#include <boost/exception/all.hpp>
+#include <tuple>
+#include <stdexcept>
 
 namespace telnetpp { namespace options { namespace mccp {
 
-class compressor;
-class decompressor;
-
 //* =========================================================================
-/// \brief A class responsible for compressing and decompressing data for the
-/// MCCP server option.
-///
-/// In the mccp::codec class, control flow is managed by interleaving
-/// certain tags within the data stream.
-///
-/// In particular, the begin_compression tag will cause all data from the
-/// next token to be sent in a compressed format.  The end_compression tag
-/// ends this process.
-///
-/// Additionally, sending a begin_decompression tag will cause all data from
-/// the next token to be received in a compressed format, and will be returned
-/// in a decompressed format.  This can be cancelled by either sending an
-/// end_decompression tag, or if the compressed stream is marked as finished.
-///
-/// Actual compression and decompression is handled by the compressor and
-/// decompressor objects passed in during construction.
+/// \brief Represents an object that can transform (encode or decode)
+/// arbitrary byte sequences.  For this option, this implies compression
+/// and decompression.
 //* =========================================================================
-class TELNETPP_EXPORT codec : boost::noncopyable
+class TELNETPP_EXPORT codec
 {
-public :
-    //* =====================================================================
-    /// \brief Constructor
-    //* =====================================================================
-    codec(
-        std::shared_ptr<compressor> const &co,
-        std::shared_ptr<decompressor> const &dec);
+public:
+    using continuation = std::function<
+        void (telnetpp::bytes data, bool continuation_ended)
+    >;
 
     //* =====================================================================
     /// \brief Destructor
     //* =====================================================================
-    ~codec();
+    virtual ~codec() = default;
 
     //* =====================================================================
-    /// \brief In a manner consistent with the rest of the telnetpp library,
-    /// interprets the stream and returns a similar stream that is either
-    /// compressed or uncompressed, as appropriate, that can be sent to the
-    /// next lower layer.
+    /// \brief Starts the transformation stream.  Calls to operator() now
+    /// assume that the input requires transformation.
     //* =====================================================================
-    std::vector<telnetpp::stream_token> send(
-        std::vector<telnetpp::stream_token> const &tokens);
+    void start();
 
     //* =====================================================================
-    /// \brief Receive a byte from the lower layer, decompress it if
-    /// necessary, and return the result as a stream of bytes.
+    /// \brief Finishes the current decompression stream.  Calls to 
+    /// operator() now assume that the input does not require transformation.
     //* =====================================================================
-    telnetpp::byte_stream receive(byte data);
+    void finish(continuation const &cont);
+    
+    //* =====================================================================
+    /// \brief Transform data, if the stream is started, sending the result
+    /// of the transformation to the continuation.  If the stream is not
+    /// started, the data is passed on untransformed.
+    ///
+    /// \throws corrupted_stream_error if the data was malformed.
+    //* =====================================================================
+    void operator()(telnetpp::bytes data, continuation const &cont);
+    
+private:
+    //* =====================================================================
+    /// \brief A hook for when the transformation stream starts.
+    //* =====================================================================
+    virtual void do_start() {};
 
-private :
-    struct impl;
-    std::shared_ptr<impl> pimpl_;
+    //* =====================================================================
+    /// \brief A hook for when transformation stream ends.
+    //* =====================================================================
+    virtual void do_finish(continuation const &cont) {};
+
+    //* =====================================================================
+    /// \brief Transform the given bytes, sending the transformed data
+    /// to the continuation, along with a boolean indicating whether the
+    /// transformation stream was ended inline (e.g. a compression stream
+    /// itself might indicate that compression has ended).
+    ///
+    /// \returns a subsequence of the bytes that were not transformed due to
+    /// e.g. the stream ending.
+    ///
+    /// \throws telnetpp::options::mccp::corrupted_stream_error if the data
+    /// was malformed.
+    //* =====================================================================
+    virtual telnetpp::bytes transform_chunk(
+      telnetpp::bytes data,
+      continuation const &continuation) = 0;
+      
+    bool engaged_{false};
+};
+
+//* =========================================================================
+/// \brief An exception that is thrown in the case that a stream of data
+/// cannot be decompressed.
+//* =========================================================================
+class corrupted_stream_error
+  : virtual std::domain_error,
+    virtual boost::exception
+{
+public:
+    //* =====================================================================
+    /// Constructor
+    //* =====================================================================
+    explicit corrupted_stream_error(char const *what_arg);
 };
 
 }}}

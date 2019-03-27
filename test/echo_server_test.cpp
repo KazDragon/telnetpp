@@ -1,21 +1,33 @@
 #include "telnetpp/options/echo/server.hpp"
-#include "expect_elements.hpp"
 #include <gtest/gtest.h>
+
+using namespace telnetpp::literals;
 
 TEST(echo_server_test, option_is_echo)
 {
     telnetpp::options::echo::server server;
-    ASSERT_EQ(1, server.option());
+    ASSERT_EQ(1, server.option_code());
 }
 
 TEST(echo_server_test, subnegotiation_returns_nothing)
 {
     telnetpp::options::echo::server server;
-    server.activate();
-    server.negotiate(telnetpp::do_);
+    server.activate([](auto &&){});
+    server.negotiate(telnetpp::do_, [](auto &&){});
+    assert(server.active());
 
-    assert(server.is_active());
+    static auto const content = "\x00"_tb;
 
+    std::vector<telnetpp::element> const expected_elements = {
+    };
 
-    expect_elements({}, server.subnegotiate({ 0x00 }));
+    std::vector<telnetpp::element> received_elements;
+    server.subnegotiate(
+        content, 
+        [&received_elements](telnetpp::element const &elem)
+        {
+            received_elements.push_back(elem);
+        });
+
+    ASSERT_EQ(expected_elements, received_elements);
 }

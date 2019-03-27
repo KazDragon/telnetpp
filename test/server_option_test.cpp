@@ -1,406 +1,506 @@
 #include "telnetpp/server_option.hpp"
-#include "expect_elements.hpp"
 #include <gtest/gtest.h>
 
 namespace {
 
 class fake_server_option : public telnetpp::server_option
 {
-public :
+public:
     explicit fake_server_option(telnetpp::option_type option)
       : telnetpp::server_option(option)
     {
     }
 
     boost::signals2::signal<
-        std::vector<telnetpp::token> (telnetpp::byte_stream const &content),
-        telnetpp::token_combiner
+        void (telnetpp::bytes data)
     > on_subnegotiation;
 
-private :
-    std::vector<telnetpp::token> handle_subnegotiation(
-        telnetpp::byte_stream const &content)
+private:
+    void handle_subnegotiation(
+        telnetpp::bytes data,
+        std::function<void (telnetpp::element const &)> const &cont) override
     {
-        return on_subnegotiation(content);
+        on_subnegotiation(data);
     }
 };
 
 }
 
-TEST(server_option_test, option_returns_option)
+TEST(server_option_test, code_returns_option_code)
 {
-    fake_server_option server(21);
-    ASSERT_EQ(telnetpp::option_type(21), server.option());
+    fake_server_option server{21};
+    ASSERT_EQ(telnetpp::option_type{21}, server.option_code());
 }
 
-TEST(server_option_test, deactivated_negotiate_do_responds_with_wont_no_signal)
+TEST(server_option_test, deactivated_negotiate_do_sends_will_with_signal)
 {
     fake_server_option server(0xA5);
 
-    bool called = false;
+    bool state_changed = false;
     server.on_state_changed.connect(
-        [&called](telnetpp::server_option::state) -> std::vector<telnetpp::token>
-        {
-            called = true;
-            return {};
+        [&state_changed](auto &&)
+        { 
+            state_changed = true; 
         });
 
-    expect_tokens(
-        { telnetpp::element(telnetpp::negotiation(telnetpp::wont, 0xA5)) },
-        server.negotiate(telnetpp::do_));
+    std::vector<telnetpp::element> const expected_elements = {
+        telnetpp::element{telnetpp::negotiation{telnetpp::will, 0xA5}}
+    };
 
-    ASSERT_EQ(false, server.is_active());
-    ASSERT_EQ(false, called);
+    std::vector<telnetpp::element> received_elements;
+    server.negotiate(
+        telnetpp::do_, 
+        [&received_elements](telnetpp::element const &elem)
+        {
+            received_elements.push_back(elem);
+        });
+
+    ASSERT_TRUE(state_changed);
+    ASSERT_TRUE(server.active());
+    ASSERT_EQ(expected_elements, received_elements);
 }
 
-
-TEST(server_option_test, deactivated_negotiate_dont_responds_with_wont_no_signal)
+TEST(server_option_test, deactivated_negotiate_dont_sends_wont_no_signal)
 {
     fake_server_option server(0xA5);
 
-    bool called = false;
+    bool state_changed = false;
     server.on_state_changed.connect(
-        [&called](telnetpp::server_option::state) -> std::vector<telnetpp::token>
-        {
-            called = true;
-            return {};
+        [&state_changed](auto &&)
+        { 
+            state_changed = true; 
         });
 
-    expect_tokens(
-        { telnetpp::element(telnetpp::negotiation(telnetpp::wont, 0xA5)) },
-        server.negotiate(telnetpp::dont));
+    std::vector<telnetpp::element> const expected_elements = {
+        telnetpp::negotiation{telnetpp::wont, 0xA5}
+    };
 
-    ASSERT_EQ(false, server.is_active());
-    ASSERT_EQ(false, called);
+    std::vector<telnetpp::element> received_elements;
+    server.negotiate(
+        telnetpp::dont, 
+        [&received_elements](telnetpp::element const &elem)
+        {
+            received_elements.push_back(elem);
+        });
+
+    ASSERT_FALSE(state_changed);
+    ASSERT_FALSE(server.active());
+    ASSERT_EQ(expected_elements, received_elements);
 }
 
-TEST(server_option_test, deactivated_activate_responds_with_will_and_activating)
+TEST(server_option_test, deactivated_activate_sends_will_no_signal)
 {
     fake_server_option server(0xA5);
 
-    auto state = telnetpp::server_option::state::inactive;
-    bool called = false;
+    bool state_changed = false;
     server.on_state_changed.connect(
-        [&called, &state](telnetpp::server_option::state new_state)
-            -> std::vector<telnetpp::token>
-        {
-            called = true;
-            state = new_state;
-            return {};
+        [&state_changed](auto &&)
+        { 
+            state_changed = true; 
         });
 
-    expect_tokens(
-        { telnetpp::element(telnetpp::negotiation(telnetpp::will, 0xA5)) },
-        server.activate());
+    std::vector<telnetpp::element> const expected_elements = {
+        telnetpp::negotiation{telnetpp::will, 0xA5}
+    };
 
-    ASSERT_EQ(false, server.is_active());
-    ASSERT_EQ(true, called);
-    ASSERT_EQ(telnetpp::server_option::state::activating, state);
+    std::vector<telnetpp::element> received_elements;
+    server.activate(
+        [&received_elements](telnetpp::element const &elem)
+        {
+            received_elements.push_back(elem);
+        });
+
+    ASSERT_FALSE(state_changed);
+    ASSERT_FALSE(server.active());
+    ASSERT_EQ(expected_elements, received_elements);
 }
 
-TEST(server_option_test, deactivated_deactivate_responds_with_nothing_with_signal)
+TEST(server_option_test, deactivated_deactivate_sends_nothing_with_signal)
 {
     fake_server_option server(0xA5);
 
-    bool called = false;
+    bool state_changed = false;
     server.on_state_changed.connect(
-        [&called](telnetpp::server_option::state) -> std::vector<telnetpp::token>
-        {
-            called = true;
-            return {};
+        [&state_changed](auto &&)
+        { 
+            state_changed = true; 
         });
 
-    expect_tokens({}, server.deactivate());
+    std::vector<telnetpp::element> const expected_elements = {
+    };
 
-    ASSERT_EQ(false, server.is_active());
-    ASSERT_EQ(true, called);
+    std::vector<telnetpp::element> received_elements;
+    server.deactivate(
+        [&received_elements](telnetpp::element const &elem)
+        {
+            received_elements.push_back(elem);
+        });
+
+    ASSERT_TRUE(state_changed);
+    ASSERT_FALSE(server.active());
+    ASSERT_EQ(expected_elements, received_elements);
 }
 
-TEST(server_option_test, activatable_deactivated_negotiate_will_responds_with_do_with_signal)
+TEST(server_option_test, activating_negotiate_do_sends_nothing_is_active_with_signal)
 {
     fake_server_option server(0xA5);
-    server.set_activatable();
+    server.activate([](auto &&){});
 
-    bool called = false;
+    bool state_changed = false;
     server.on_state_changed.connect(
-        [&called](telnetpp::server_option::state) -> std::vector<telnetpp::token>
-        {
-            called = true;
-            return {};
+        [&state_changed](auto &&)
+        { 
+            state_changed = true; 
         });
 
-    expect_tokens(
-        { telnetpp::element(telnetpp::negotiation(telnetpp::will, 0xA5)) },
-        server.negotiate(telnetpp::do_));
+    std::vector<telnetpp::element> const expected_elements = {
+    };
 
-    ASSERT_EQ(true, called);
-    ASSERT_EQ(true, server.is_active());
+    std::vector<telnetpp::element> received_elements;
+    server.negotiate(
+        telnetpp::do_,
+        [&received_elements](telnetpp::element const &elem)
+        {
+            received_elements.push_back(elem);
+        });
 
+    ASSERT_TRUE(state_changed);
+    ASSERT_TRUE(server.active());
+    ASSERT_EQ(expected_elements, received_elements);
 }
 
-TEST(server_option_test, activatable_deactivated_negotiate_wont_responds_with_dont_no_signal)
+TEST(server_option_test, activating_negotiate_dont_sends_nothing_is_inactive_with_signal)
 {
     fake_server_option server(0xA5);
-    server.set_activatable();
+    server.activate([](auto &&){});
 
-    bool called = false;
+    bool state_changed = false;
     server.on_state_changed.connect(
-        [&called](telnetpp::server_option::state) -> std::vector<telnetpp::token>
-        {
-            called = true;
-            return {};
+        [&state_changed](auto &&)
+        { 
+            state_changed = true; 
         });
 
-    expect_tokens(
-        { telnetpp::element(telnetpp::negotiation(telnetpp::wont, 0xA5)) },
-        server.negotiate(telnetpp::dont));
+    std::vector<telnetpp::element> const expected_elements = {
+    };
 
-    ASSERT_EQ(false, called);
-    ASSERT_EQ(false, server.is_active());
+    std::vector<telnetpp::element> received_elements;
+    server.negotiate(
+        telnetpp::dont,
+        [&received_elements](telnetpp::element const &elem)
+        {
+            received_elements.push_back(elem);
+        });
 
+    ASSERT_TRUE(state_changed);
+    ASSERT_FALSE(server.active());
+    ASSERT_EQ(expected_elements, received_elements);
 }
 
-TEST(server_option_test, activating_negotiate_do_responds_with_nothing_is_active_with_signal)
+TEST(server_option_test, activating_activate_sends_nothing_no_signal)
 {
     fake_server_option server(0xA5);
-    server.activate();
+    server.activate([](auto &&){});
 
-    bool called = false;
+    bool state_changed = false;
     server.on_state_changed.connect(
-        [&called](telnetpp::server_option::state) -> std::vector<telnetpp::token>
-        {
-            called = true;
-            return {};
+        [&state_changed](auto &&)
+        { 
+            state_changed = true; 
         });
 
-    expect_tokens({}, server.negotiate(telnetpp::do_));
-    ASSERT_EQ(true, server.is_active());
-    ASSERT_EQ(true, called);
+    std::vector<telnetpp::element> const expected_elements = {
+    };
+
+    std::vector<telnetpp::element> received_elements;
+    server.activate(
+        [&received_elements](telnetpp::element const &elem)
+        {
+            received_elements.push_back(elem);
+        });
+
+    ASSERT_FALSE(state_changed);
+    ASSERT_FALSE(server.active());
+    ASSERT_EQ(expected_elements, received_elements);
 }
 
-TEST(server_option_test, activating_negotiate_dont_responds_with_nothing_is_inactive_with_signal)
+TEST(server_option_test, activated_negotiate_do_sends_will_is_active_no_signal)
 {
     fake_server_option server(0xA5);
-    server.activate();
+    server.activate([](auto &&){});
+    server.negotiate(telnetpp::do_, [](auto &&){});
 
-    bool called = false;
+    bool state_changed = false;
     server.on_state_changed.connect(
-        [&called](telnetpp::server_option::state) -> std::vector<telnetpp::token>
-        {
-            called = true;
-            return {};
+        [&state_changed](auto &&)
+        { 
+            state_changed = true; 
         });
 
-    expect_tokens({}, server.negotiate(telnetpp::dont));
-    ASSERT_EQ(false, server.is_active());
-    ASSERT_EQ(true, called);
+    std::vector<telnetpp::element> const expected_elements = {
+        telnetpp::negotiation{telnetpp::will, 0xA5}
+    };
+
+    std::vector<telnetpp::element> received_elements;
+    server.negotiate(
+        telnetpp::do_,
+        [&received_elements](telnetpp::element const &elem)
+        {
+            received_elements.push_back(elem);
+        });
+
+    ASSERT_FALSE(state_changed);
+    ASSERT_TRUE(server.active());
+    ASSERT_EQ(expected_elements, received_elements);
 }
 
-TEST(server_option_test, activating_activate_responds_with_nothing_no_signal)
+TEST(server_option_test, activated_negotiate_dont_sends_wont_is_inactive_with_signal)
 {
     fake_server_option server(0xA5);
-    server.activate();
+    server.activate([](auto &&){});
+    server.negotiate(telnetpp::do_, [](auto &&){});
 
-    bool called = false;
+    bool state_changed = false;
     server.on_state_changed.connect(
-        [&called](telnetpp::server_option::state) -> std::vector<telnetpp::token>
-        {
-            called = true;
-            return {};
+        [&state_changed](auto &&)
+        { 
+            state_changed = true; 
         });
 
-    expect_tokens({}, server.activate());
-    ASSERT_EQ(false, server.is_active());
-    ASSERT_EQ(false, called);
+    std::vector<telnetpp::element> const expected_elements = {
+        telnetpp::negotiation{telnetpp::wont, 0xA5}
+    };
+
+    std::vector<telnetpp::element> received_elements;
+    server.negotiate(
+        telnetpp::dont,
+        [&received_elements](telnetpp::element const &elem)
+        {
+            received_elements.push_back(elem);
+        });
+
+    ASSERT_TRUE(state_changed);
+    ASSERT_FALSE(server.active());
+    ASSERT_EQ(expected_elements, received_elements);
 }
 
-TEST(server_option_test, activated_negotiate_do_responds_with_will_is_active_no_signal)
+TEST(server_option_test, activated_activate_sends_nothing_is_active_with_signal)
 {
     fake_server_option server(0xA5);
-    server.activate();
-    server.negotiate(telnetpp::do_);
+    server.activate([](auto &&){});
+    server.negotiate(telnetpp::do_, [](auto &&){});
 
-    bool called = false;
+    bool state_changed = false;
     server.on_state_changed.connect(
-        [&called](telnetpp::server_option::state) -> std::vector<telnetpp::token>
-        {
-            called = true;
-            return {};
+        [&state_changed](auto &&)
+        { 
+            state_changed = true; 
         });
 
-    expect_tokens(
-        { telnetpp::element(telnetpp::negotiation(telnetpp::will, 0xA5)) },
-        server.negotiate(telnetpp::do_));
-    ASSERT_EQ(true, server.is_active());
-    ASSERT_EQ(false, called);
+    std::vector<telnetpp::element> const expected_elements = {
+    };
+
+    std::vector<telnetpp::element> received_elements;
+    server.activate(
+        [&received_elements](telnetpp::element const &elem)
+        {
+            received_elements.push_back(elem);
+        });
+
+    ASSERT_TRUE(state_changed);
+    ASSERT_TRUE(server.active());
+    ASSERT_EQ(expected_elements, received_elements);
 }
 
-TEST(server_option_test, activated_negotiate_dont_responds_with_wont_is_inactive_with_signal)
+TEST(server_option_test, activated_deactivate_sends_wont_is_inactive_no_signal)
 {
     fake_server_option server(0xA5);
-    server.activate();
-    server.negotiate(telnetpp::do_);
+    server.activate([](auto &&){});
+    server.negotiate(telnetpp::do_, [](auto &&){});
 
-    auto state = telnetpp::server_option::state::inactive;
-    bool called = false;
+    bool state_changed = false;
     server.on_state_changed.connect(
-        [&called, &state](telnetpp::server_option::state new_state)
-            -> std::vector<telnetpp::token>
-        {
-            called = true;
-            state = new_state;
-            return {};
+        [&state_changed](auto &&)
+        { 
+            state_changed = true; 
         });
 
-    expect_tokens(
-        { telnetpp::element(telnetpp::negotiation(telnetpp::wont, 0xA5)) },
-        server.negotiate(telnetpp::dont));
-    ASSERT_EQ(false, server.is_active());
-    ASSERT_EQ(true, called);
-    ASSERT_EQ(telnetpp::server_option::state::inactive, state);
+    std::vector<telnetpp::element> const expected_elements = {
+        telnetpp::negotiation{telnetpp::wont, 0xA5}
+    };
+
+    std::vector<telnetpp::element> received_elements;
+    server.deactivate(
+        [&received_elements](telnetpp::element const &elem)
+        {
+            received_elements.push_back(elem);
+        });
+
+    ASSERT_FALSE(state_changed);
+    ASSERT_FALSE(server.active());
+    ASSERT_EQ(expected_elements, received_elements);
 }
 
-TEST(server_option_test, activated_activate_responds_with_nothing_is_active_with_signal)
+TEST(server_option_test, deactivating_negotiate_do_sends_nothing_is_active_with_signal)
 {
+    // Note: this transition is explicitly disallowed in the protocol 
+    // specification.  However, it is included here to specify what our
+    // behaviour is in the case that the remote is not acting according to 
+    // spec.  The implementation currently chooses to be lenient and allow the
+    // remote to cancel an option's deactivation.
     fake_server_option server(0xA5);
-    server.activate();
-    server.negotiate(telnetpp::do_);
+    server.activate([](auto &&){});
+    server.negotiate(telnetpp::do_, [](auto &&){});
+    server.deactivate([](auto &&){});
 
-    bool called = false;
+    bool state_changed = false;
     server.on_state_changed.connect(
-        [&called](telnetpp::server_option::state) -> std::vector<telnetpp::token>
-        {
-            called = true;
-            return {};
+        [&state_changed](auto &&)
+        { 
+            state_changed = true; 
         });
 
-    expect_tokens({}, server.activate());
-    ASSERT_EQ(true, server.is_active());
-    ASSERT_EQ(true, called);
+    std::vector<telnetpp::element> const expected_elements = {
+    };
+
+    std::vector<telnetpp::element> received_elements;
+    server.negotiate(
+        telnetpp::do_,
+        [&received_elements](telnetpp::element const &elem)
+        {
+            received_elements.push_back(elem);
+        });
+
+    ASSERT_TRUE(state_changed);
+    ASSERT_TRUE(server.active());
+    ASSERT_EQ(expected_elements, received_elements);
 }
 
-TEST(server_option_test, activated_deactive_responds_with_wont_is_inactive_with_signal)
+TEST(server_option_test, deactivating_negotiate_dont_sends_nothing_is_inactive_with_signal)
 {
     fake_server_option server(0xA5);
-    server.activate();
-    server.negotiate(telnetpp::do_);
+    server.activate([](auto &&){});
+    server.negotiate(telnetpp::do_, [](auto &&){});
+    server.deactivate([](auto &&){});
 
-    auto state = telnetpp::server_option::state::inactive;
-    bool called = false;
+    bool state_changed = false;
     server.on_state_changed.connect(
-        [&called, &state](telnetpp::server_option::state new_state)
-            -> std::vector<telnetpp::token>
-        {
-            called = true;
-            state = new_state;
-            return {};
+        [&state_changed](auto &&)
+        { 
+            state_changed = true; 
         });
 
-    expect_tokens(
-        { telnetpp::element(telnetpp::negotiation(telnetpp::wont, 0xA5)) },
-        server.deactivate());
-    ASSERT_EQ(false, server.is_active());
-    ASSERT_EQ(true, called);
-    ASSERT_EQ(telnetpp::server_option::state::deactivating, state);
+    std::vector<telnetpp::element> const expected_elements = {
+    };
+
+    std::vector<telnetpp::element> received_elements;
+    server.negotiate(
+        telnetpp::dont,
+        [&received_elements](telnetpp::element const &elem)
+        {
+            received_elements.push_back(elem);
+        });
+
+    ASSERT_TRUE(state_changed);
+    ASSERT_FALSE(server.active());
+    ASSERT_EQ(expected_elements, received_elements);
 }
 
-TEST(server_option_test, deactivating_negotiate_do_responds_with_nothing_is_active_with_signal)
+TEST(server_option_test, deactivating_deactivate_sends_nothing_is_inactive_no_signal)
 {
     fake_server_option server(0xA5);
-    server.activate();
-    server.negotiate(telnetpp::do_);
-    server.deactivate();
+    server.activate([](auto &&){});
+    server.negotiate(telnetpp::do_, [](auto &&){});
+    server.deactivate([](auto &&){});
 
-    bool called = false;
+    bool state_changed = false;
     server.on_state_changed.connect(
-        [&called](telnetpp::server_option::state) -> std::vector<telnetpp::token>
-        {
-            called = true;
-            return {};
+        [&state_changed](auto &&)
+        { 
+            state_changed = true; 
         });
 
-    expect_tokens({}, server.negotiate(telnetpp::do_));
-    ASSERT_EQ(true, server.is_active());
-    ASSERT_EQ(true, called);
-}
+    std::vector<telnetpp::element> const expected_elements = {
+    };
 
-TEST(server_option_test, deactivating_negotiate_dont_responds_with_nothing_is_inactive_with_signal)
-{
-    fake_server_option server(0xA5);
-    server.activate();
-    server.negotiate(telnetpp::do_);
-    server.deactivate();
-
-    bool called = false;
-    server.on_state_changed.connect(
-        [&called](telnetpp::server_option::state) -> std::vector<telnetpp::token>
+    std::vector<telnetpp::element> received_elements;
+    server.deactivate(
+        [&received_elements](telnetpp::element const &elem)
         {
-            called = true;
-            return {};
+            received_elements.push_back(elem);
         });
 
-    expect_tokens({}, server.negotiate(telnetpp::dont));
-    ASSERT_EQ(false, server.is_active());
-    ASSERT_EQ(true, called);
-}
-
-TEST(server_option_test, deactivating_deactivate_responds_with_nothing_is_inactive_no_signal)
-{
-    fake_server_option server(0xA5);
-    server.activate();
-    server.negotiate(telnetpp::do_);
-    server.deactivate();
-
-    bool called = false;
-    server.on_state_changed.connect(
-        [&called](telnetpp::server_option::state) -> std::vector<telnetpp::token>
-        {
-            called = true;
-            return {};
-        });
-
-    expect_tokens({}, server.deactivate());
-    ASSERT_EQ(false, server.is_active());
-    ASSERT_EQ(false, called);
+    ASSERT_FALSE(state_changed);
+    ASSERT_FALSE(server.active());
+    ASSERT_EQ(expected_elements, received_elements);
 }
 
 TEST(server_option_test, inactive_subnegotiation_is_ignored)
 {
     fake_server_option server(0xA5);
 
-    bool called = false;
+    bool subnegotiation_called = false;
     server.on_subnegotiation.connect(
-        [&called](auto) -> std::vector<telnetpp::token>
-        {
-            called = true;
-            return {};
+        [&subnegotiation_called](auto &&)
+        { 
+            subnegotiation_called = true; 
         });
 
-    server.subnegotiate({0x01, 0x02, 0x03});
+    constexpr telnetpp::byte const content[] = { 0x01, 0x02, 0x03 };
 
-    ASSERT_EQ(false, called);
+    std::vector<telnetpp::element> const expected_elements = {
+    };
+
+    std::vector<telnetpp::element> received_elements;
+    server.subnegotiate(
+        content,
+        [&received_elements](telnetpp::element const &elem)
+        {
+            received_elements.push_back(elem);
+        });
+
+    ASSERT_FALSE(subnegotiation_called);
+    ASSERT_EQ(expected_elements, received_elements);
 }
 
 TEST(server_option_test, active_subnegotiation_is_handled)
 {
     fake_server_option server(0xA5);
-    server.activate();
-    server.negotiate(telnetpp::do_);
+    server.activate([](auto &&){});
+    server.negotiate(telnetpp::do_, [](auto &&){});
 
-    bool called = false;
-    telnetpp::byte_stream content;
-
+    bool subnegotiation_called = false;
+    std::vector<telnetpp::byte> received_content;
     server.on_subnegotiation.connect(
-        [&called, &content](telnetpp::byte_stream const &new_content)
-            -> std::vector<telnetpp::token>
-        {
-            called = true;
-            content = new_content;
-            return {};
+        [&subnegotiation_called, &received_content](auto &&content)
+        { 
+            subnegotiation_called = true; 
+            received_content.insert(
+                received_content.end(),
+                content.begin(),
+                content.end());
         });
 
-    server.subnegotiate({0x01, 0x02, 0x03});
+    constexpr telnetpp::byte const content[] = {
+        0x01, 0x02, 0x03 
+    };
 
-    ASSERT_EQ(true, called);
-    ASSERT_EQ(size_t(3), content.size());
+    std::vector<telnetpp::element> const expected_elements = {
+    };
+
+    std::vector<telnetpp::byte> const expected_content = {
+        0x01, 0x02, 0x03
+    };
+
+    std::vector<telnetpp::element> received_elements;
+    server.subnegotiate(
+        content,
+        [&received_elements](telnetpp::element const &elem)
+        {
+            received_elements.push_back(elem);
+        });
+
+    ASSERT_TRUE(subnegotiation_called);
+    ASSERT_EQ(expected_elements, received_elements);
+    ASSERT_EQ(expected_content, received_content);
 }

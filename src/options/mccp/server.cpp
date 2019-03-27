@@ -1,45 +1,29 @@
 #include "telnetpp/options/mccp/server.hpp"
+#include "telnetpp/options/mccp/codec.hpp"
 #include "telnetpp/options/mccp/detail/protocol.hpp"
 
 namespace telnetpp { namespace options { namespace mccp {
 
-namespace {
-    
-static auto const begin_compression_sequence = std::vector<telnetpp::token> {
-    telnetpp::element(
-        telnetpp::subnegotiation(detail::option, {})),
-    boost::any(telnetpp::options::mccp::detail::begin_compression{})
-};
-
-static auto const end_compression_sequence = std::vector<telnetpp::token> {
-    boost::any(telnetpp::options::mccp::detail::end_compression{})
-};
-
-}
-
 // ==========================================================================
 // CONSTRUCTOR
 // ==========================================================================
-server::server()
+server::server(codec &cdc)
   : server_option(detail::option),
-    compression_requested_(false)
+    codec_(cdc),
+    compression_active_(false)
 {
     on_state_changed.connect(
-        [this](auto const state) -> std::vector<telnetpp::token>
+        [this](auto &&cont)
         {
-            if (state == telnetpp::server_option::state::active
-             && compression_requested_)
+            if (compression_active_)
             {
-                return begin_compression_sequence;
-            }
-            else if (state == telnetpp::server_option::state::deactivating
-                  || state == telnetpp::server_option::state::inactive)
-            {
-                return end_compression_sequence;
-            }
-            else
-            {
-                return {};
+                codec_.finish(
+                    [&](auto const &data, bool)
+                    {
+                        cont(data);
+                    });
+                    
+                compression_active_ = false;
             }
         });
 }
@@ -47,42 +31,41 @@ server::server()
 // ==========================================================================
 // BEGIN_COMPRESSION
 // ==========================================================================
-std::vector<telnetpp::token> server::begin_compression()
+void server::start_compression(continuation const &cont)
 {
-    if (is_active())
+    if (active())
     {
-        return begin_compression_sequence;
-    }
-    else
-    {
-        compression_requested_ = true;
-        return {};
+        element compression_start = subnegotiation{detail::option, {}};
+        cont({compression_start});
+        codec_.start();
+        compression_active_ = true;
     }
 }
 
 // ==========================================================================
 // END_COMPRESSION
 // ==========================================================================
-std::vector<telnetpp::token> server::end_compression()
+void server::finish_compression(continuation const &cont)
 {
-    if (is_active())
+    if (active() && compression_active_)
     {
-        return end_compression_sequence;
-    }
-    else
-    {
-        compression_requested_ = false;
-        return {};
+        codec_.finish(
+            [&](auto const &data, bool)
+            {
+                cont(data);
+            });
+            
+        compression_active_ = false;
     }
 }
 
 // ==========================================================================
 // HANDLE_SUBNEGOTIATION
 // ==========================================================================
-std::vector<telnetpp::token> server::handle_subnegotiation(
-    telnetpp::byte_stream const &content)
+void server::handle_subnegotiation(
+    telnetpp::bytes data,
+    continuation const &cont)
 {
-    return {};
 }
 
 }}}

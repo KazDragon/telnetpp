@@ -4,17 +4,19 @@
 
 namespace telnetpp { namespace options { namespace mccp {
 
+class codec;
+
 //* =========================================================================
 /// \brief A server option responsible for negotiating the server part of the
 /// MCCP protocol.
 //* =========================================================================
 class TELNETPP_EXPORT server : public telnetpp::server_option
 {
-public :
+public:
     //* =====================================================================
     /// \brief Constructor
     //* =====================================================================
-    server();
+    server(codec &cdc);
 
     //* =====================================================================
     /// \brief Requests that compression begins.
@@ -22,7 +24,7 @@ public :
     /// compression.  Otherwise, the sequence will be sent as soon as the 
     /// option is activated.
     //* =====================================================================
-    std::vector<telnetpp::token> begin_compression();
+    void start_compression(continuation const &cont);
 
     //* =====================================================================
     /// \brief Requests that compression ends.
@@ -31,17 +33,19 @@ public :
     /// request to begin_compression that would auto-start compression on
     /// activation.
     //* =====================================================================
-    std::vector<telnetpp::token> end_compression();
+    void finish_compression(continuation const &cont);
     
-private :
+private:
     //* =====================================================================
-    /// \brief Handle a negotiation that has been received in the active
-    /// state.
+    /// \brief Called when a subnegotiation is received while the option is
+    /// active.  Override for option-specific functionality.
     //* =====================================================================
-    std::vector<telnetpp::token> handle_subnegotiation(
-        telnetpp::byte_stream const &content) override;
-
-    bool compression_requested_;
+    void handle_subnegotiation(
+        telnetpp::bytes data,
+        continuation const &cont) override;
+        
+    codec &codec_;
+    bool   compression_active_;
 };
 
 }}}

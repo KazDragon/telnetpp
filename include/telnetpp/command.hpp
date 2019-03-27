@@ -10,11 +10,11 @@ namespace telnetpp {
 //* =========================================================================
 class TELNETPP_EXPORT command
 {
-public :
+public:
     //* =====================================================================
     /// \brief Constructor
     //* =====================================================================
-    explicit constexpr command(command_type command)
+    explicit constexpr command(command_type command) noexcept
       : command_(command)
     {
     }
@@ -22,19 +22,19 @@ public :
     //* =====================================================================
     /// \brief Returns the value of the command.
     //* =====================================================================
-    constexpr command_type value() const
+    constexpr command_type value() const noexcept
     {
         return command_;
     }
 
-private :
+private:
     command_type command_;
 };
 
 //* =========================================================================
 /// \brief Comparison function for commands
 //* =========================================================================
-constexpr bool operator==(command const &lhs, command const &rhs)
+constexpr bool operator==(command const &lhs, command const &rhs) noexcept
 {
     return lhs.value() == rhs.value();
 }
@@ -42,7 +42,7 @@ constexpr bool operator==(command const &lhs, command const &rhs)
 //* =========================================================================
 /// \brief Comparison function for commands
 //* =========================================================================
-constexpr bool operator<(command const &lhs, command const &rhs)
+constexpr bool operator<(command const &lhs, command const &rhs) noexcept
 {
     return lhs.value() < rhs.value();
 }

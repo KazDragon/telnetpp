@@ -1,129 +1,47 @@
 #include "telnetpp/options/msdp/detail/encoder.hpp"
 #include "telnetpp/options/msdp/detail/protocol.hpp"
 #include "telnetpp/detail/lambda_visitor.hpp"
-#include <algorithm>
-#include <iterator>
-#include <numeric>
 
 using variable = telnetpp::options::msdp::variable;
 
 namespace telnetpp { namespace options { namespace msdp { namespace detail {
 
-namespace {
-
-static void append_name(
-    telnetpp::byte_stream &stream, std::string const &name);
-
-static void append_value(
-    telnetpp::byte_stream &stream, value_type const &value);
-
-static telnetpp::byte_stream &append_variable(
-    telnetpp::byte_stream &stream, variable const &variable);
-
 // ==========================================================================
-// APPEND_NAME
+// ENCODE_VARIABLE
 // ==========================================================================
-static void append_name(telnetpp::byte_stream &stream, std::string const &name)
+void encode_variable(
+    telnetpp::options::msdp::variable const &var,
+    telnetpp::byte_storage &storage)
 {
-    using std::begin;
-    using std::end;
-
-    stream.push_back(telnetpp::options::msdp::detail::var);
-    stream.insert(end(stream), begin(name), end(name));
-}
-
-// ==========================================================================
-// APPEND_STRING_VALUE
-// ==========================================================================
-static void append_string_value(
-    telnetpp::byte_stream &stream,
-    std::string const &string_value)
-{
-    using std::begin;
-    using std::end;
-
-    stream.push_back(telnetpp::options::msdp::detail::val);
-    stream.insert(end(stream), begin(string_value), end(string_value));
-}
-
-// ==========================================================================
-// APPEND_ARRAY_VALUE
-// ==========================================================================
-static void append_array_value(
-    telnetpp::byte_stream &stream,
-    std::vector<std::string> const &array_value)
-{
-    stream.push_back(telnetpp::options::msdp::detail::val);
-    stream.push_back(telnetpp::options::msdp::detail::array_open);
-    std::for_each(array_value.begin(), array_value.end(),
-        [&stream](auto const &value){append_value(stream, value);});
-    stream.push_back(telnetpp::options::msdp::detail::array_close);
-}
-
-// ==========================================================================
-// APPEND_TABLE_VALUE
-// ==========================================================================
-static void append_table_value(
-    telnetpp::byte_stream& stream,
-    std::vector<variable> const &table)
-{
-    stream.push_back(telnetpp::options::msdp::detail::val);
-    stream.push_back(telnetpp::options::msdp::detail::table_open);
-    std::for_each(table.begin(), table.end(),
-        [&stream](auto const &variable)
-        {
-            append_variable(stream, variable);
-        });
-    stream.push_back(telnetpp::options::msdp::detail::table_close);
-}
-
-// ==========================================================================
-// APPEND_VALUE
-// ==========================================================================
-static void append_value(
-    telnetpp::byte_stream &stream, value_type const &value)
-{
+    storage.push_back(telnetpp::options::msdp::detail::var);
+    storage += var.name;
+    storage.push_back(telnetpp::options::msdp::detail::val);
+    
     telnetpp::detail::visit_lambdas(
-        value,
-        [&stream](std::string const &string_value)
+        var.value,
+        [&](telnetpp::options::msdp::string_value const &val)
         {
-            append_string_value(stream, string_value);
+            storage += val;
         },
-        [&stream](std::vector<std::string> const &array_value)
+        [&](telnetpp::options::msdp::array_value const &arr)
         {
-            append_array_value(stream, array_value);
+            storage.push_back(telnetpp::options::msdp::detail::array_open);
+            for(auto const &val : arr)
+            {
+                storage.push_back(telnetpp::options::msdp::detail::val);
+                storage += val;
+            }
+            storage.push_back(telnetpp::options::msdp::detail::array_close);
         },
-        [&stream](std::vector<variable> const &table_value)
+        [&](telnetpp::options::msdp::table_value const &tbl)
         {
-            append_table_value(stream, table_value);
+            for (auto const &val : tbl)
+            {
+                storage.push_back(telnetpp::options::msdp::detail::table_open);
+                encode_variable(val, storage);
+                storage.push_back(telnetpp::options::msdp::detail::table_close);
+            }
         });
-}
-
-// ==========================================================================
-// APPEND_VARIABLE
-// ==========================================================================
-static telnetpp::byte_stream &append_variable(
-    telnetpp::byte_stream &stream,
-    variable const &variable)
-{
-    append_name(stream, variable.name);
-    append_value(stream, variable.value);
-
-    return stream;
-}
-
-}
-
-// ==========================================================================
-// ENCODE
-// ==========================================================================
-telnetpp::byte_stream encode(std::vector<variable> const &variables)
-{
-    return std::accumulate(
-        variables.begin(),
-        variables.end(),
-        telnetpp::byte_stream{},
-        append_variable);
 }
 
 }}}}

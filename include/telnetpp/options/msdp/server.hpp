@@ -1,6 +1,7 @@
 #pragma once
 
 #include "telnetpp/options/msdp/variable.hpp"
+#include "telnetpp/options/msdp/detail/encoder.hpp"
 #include "telnetpp/server_option.hpp"
 
 namespace telnetpp { namespace options { namespace msdp {
@@ -10,34 +11,49 @@ namespace telnetpp { namespace options { namespace msdp {
 //* =========================================================================
 class TELNETPP_EXPORT server : public telnetpp::server_option
 {
-public :
+public:
     //* =====================================================================
     /// \brief Constructor
     //* =====================================================================
     server();
 
     //* =====================================================================
-    /// \brief Send a list of variables to the remote client.
+    /// \brief Send a variables to the remote server.
     //* =====================================================================
-    std::vector<telnetpp::token> send(std::vector<variable> const &variables);
+    template <typename Continuation>
+    void send(variable const &var, Continuation &&cont)
+    {
+        detail::encode(
+            var,
+            [&](telnetpp::bytes data)
+            {
+                auto const elem = telnetpp::element{telnetpp::subnegotiation{
+                    option_code(),
+                    data
+                }};
+                
+                telnetpp::elements elems = { elem };
+                cont(elems);
+            });
+    }
 
     //* =====================================================================
     /// \fn on_receive
     /// \brief Register for a signal whenever a list of variables is received
-    /// from the remote client.
+    /// from the remote server.
     //* =====================================================================
     boost::signals2::signal<
-        std::vector<telnetpp::token> (std::vector<variable> const &),
-        telnetpp::token_combiner
+        void (variable const &, continuation const &)
     > on_receive;
 
-private :
+private:
     //* =====================================================================
-    /// \brief Handle a negotiation that has been received in the active
-    /// state.
+    /// \brief Called when a subnegotiation is received while the option is
+    /// active.  Override for option-specific functionality.
     //* =====================================================================
-    std::vector<telnetpp::token> handle_subnegotiation(
-        byte_stream const &content) override;
+    void handle_subnegotiation(
+        telnetpp::bytes data,
+        continuation const &cont) override;
 };
 
 }}}

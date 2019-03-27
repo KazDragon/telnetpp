@@ -3,6 +3,7 @@
 #include "telnetpp/detail/return_default.hpp"
 #include <functional>
 #include <map>
+#include <unordered_map>
 #include <type_traits>
 #include <utility>
 
@@ -49,21 +50,20 @@ namespace telnetpp { namespace detail {
 template <
     class Key,
     class Message,
-    class Result,
+    class Function,
     class KeyFromMessagePolicy
 >
 class router
 {
-public :
-    typedef Key                                    key_type;
-    typedef Message                                message_type;
-    typedef Result                                 result_type;
-    typedef std::function<Result (Message const&)> function_type;
-    typedef std::map
-    <
+public:
+    using key_type = Key;
+    using message_type = Message;
+    using function_type = std::function<Function>;
+    using result_type = typename function_type::result_type;
+    using registered_functions_map_type = std::unordered_map<
         key_type,
         function_type
-    > registered_functions_map_type;
+    >;
 
     //* =====================================================================
     /// \brief Register a route for messages with a particular key.
@@ -71,13 +71,13 @@ public :
     /// Register a route that will later on be taken by any message received
     /// that contains the specified key.
     //* =====================================================================
-    template <typename KeyType, typename Function>
+    template <typename KeyType, typename Continuation>
     void register_route(
-        KeyType  &&key,
-        Function &&function)
+        KeyType      &&key,
+        Continuation &&cont)
     {
         registered_functions_[std::forward<KeyType>(key)] =
-            std::forward<Function>(function);
+            std::forward<Continuation>(cont);
     }
 
     //* =====================================================================
@@ -98,10 +98,10 @@ public :
     /// Register a route that will be taken by any message received that has
     /// a key for which a route has not been registered.
     //* =====================================================================
-    template <typename Function>
-    void set_unregistered_route(Function &&route)
+    template <typename Continuation>
+    void set_unregistered_route(Continuation &&cont)
     {
-        unregistered_route_ = std::forward<Function>(route);
+        unregistered_route_ = std::forward<Continuation>(cont);
     }
 
     //* =====================================================================
@@ -112,26 +112,31 @@ public :
     /// an unregistered route, then the message will be forwarded to that
     /// handler instead.
     //* =====================================================================
-    Result operator()(Message const& message) const
+    template <typename MessageType, typename... Args>
+    result_type operator()(MessageType &&message, Args &&... args) const
     {
         auto iter = registered_functions_.find(
             KeyFromMessagePolicy::key_from_message(message));
 
         if (iter != registered_functions_.end())
         {
-            return iter->second(message);
+            return iter->second(
+                std::forward<MessageType>(message), 
+                std::forward<Args>(args)...);
         }
-        else if (unregistered_route_ != nullptr)
+        else if (unregistered_route_)
         {
-            return unregistered_route_(message);
+            return unregistered_route_(
+                std::forward<MessageType>(message), 
+                std::forward<Args>(args)...);
         }
 
         // This garbage is just to return either a default-constructed Result,
         // or void if Result is void.
-        return detail::return_default_constructed<Result>{}();
+        return detail::return_default_constructed<result_type>{}();
     }
 
-private :
+private:
     registered_functions_map_type registered_functions_;
     function_type                 unregistered_route_;
 };

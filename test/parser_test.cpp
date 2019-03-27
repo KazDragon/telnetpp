@@ -1,413 +1,371 @@
-#include "telnetpp/detail/parser.hpp"
-#include "expect_elements.hpp"
+#include <telnetpp/parser.hpp>
+#include <telnetpp/element.hpp>
 #include <gtest/gtest.h>
+#include <iterator>
+#include <tuple>
+#include <vector>
 
-TEST(parser_test, empty_range_parses_to_nothing)
+using testing::ValuesIn;
+
+namespace {
+
+class parser_test : public testing::Test
 {
-    auto data = telnetpp::byte_stream{};
+protected:
+    void parse(telnetpp::bytes data)
+    {
+        remainder_ = telnetpp::parse(
+            data,
+            [this](telnetpp::element const &elem)
+            {
+                result_.push_back(elem);
+            }
+        );
+    }
 
-    auto begin = data.begin();
-    auto end   = data.end();
+    template <typename F>
+    void parse_with_check(telnetpp::bytes data, F&& check)
+    {
+        remainder_ = telnetpp::parse(
+            data,
+            [this, &check](telnetpp::element const &elem)
+            {
+                check(elem);
+                result_.push_back(elem);
+            }
+        );
+    }
 
-    auto result = telnetpp::detail::parse(begin, end);
+    std::vector<telnetpp::element> result_;
+    telnetpp::bytes remainder_;
+};
 
-    ASSERT_EQ(size_t{0}, result.size());
-    ASSERT_TRUE(begin == end);
+TEST_F(parser_test, empty_range_parses_to_nothing)
+{
+    std::vector<telnetpp::byte> data;
+
+    parse({});
+
+    ASSERT_EQ(size_t{0}, result_.size());
+    ASSERT_EQ(size_t{0}, remainder_.size());
 }
 
-TEST(parser_test, normal_character_parses_to_string)
+TEST_F(parser_test, normal_character_parses_to_span_of_character)
 {
-    auto data = telnetpp::byte_stream{ 'x' };
-    std::string expected = "x";
+    static constexpr telnetpp::byte const data[] = {'x'};
+    
+    parse(data);
 
-    auto begin = data.begin();
-    auto end   = data.end();
+    ASSERT_EQ(size_t{1}, result_.size());
+    ASSERT_EQ(size_t{0}, remainder_.size());
 
-    auto result = telnetpp::detail::parse(begin, end);
+    auto const actual = boost::get<telnetpp::bytes>(result_[0]);
+    ASSERT_EQ(size_t{1}, actual.size());
+    ASSERT_EQ('x', actual[0]);
+}
 
-    ASSERT_EQ(size_t{1}, result.size());
-    ASSERT_TRUE(begin == end);
+TEST_F(parser_test, two_normal_characters_parse_to_string)
+{
+    static constexpr telnetpp::byte const data[] = { 'x', 'y' };
+    static constexpr telnetpp::byte const expected_values[] = { 'x', 'y' };
+    static constexpr telnetpp::bytes const expected{expected_values};
 
-    std::string actual = boost::get<std::string>(result[0]);
+    parse(data);
+
+    ASSERT_EQ(size_t{1}, result_.size());
+    ASSERT_EQ(size_t{0}, remainder_.size());
+
+    auto const actual = boost::get<telnetpp::bytes>(result_[0]);
 
     ASSERT_EQ(expected, actual);
 }
 
-TEST(parser_test, two_normal_characters_parse_to_string)
+TEST_F(parser_test, lone_iac_parses_to_nothing)
 {
-    auto data = telnetpp::byte_stream{ 'x', 'y' };
-    std::string expected = "xy";
+    static constexpr telnetpp::byte const data[] = { 0xFF };
 
-    auto begin = data.begin();
-    auto end   = data.end();
+    parse(data);
 
-    auto result = telnetpp::detail::parse(begin, end);
+    ASSERT_EQ(size_t{0}, result_.size());
+    ASSERT_EQ(size_t{1}, remainder_.size());
+}
 
-    ASSERT_EQ(size_t{1}, result.size());
-    ASSERT_TRUE(begin == end);
+TEST_F(parser_test, byte_then_iac_emits_byte_only)
+{
+    static constexpr telnetpp::byte const data[] = { 'x', 0xFF };
+    static constexpr telnetpp::byte const expected_values[] = { 'x' };
+    static constexpr telnetpp::bytes const expected{expected_values};
 
-    std::string actual = boost::get<std::string>(result[0]);
+    parse(data);
+
+    ASSERT_EQ(size_t{1}, result_.size());
+    ASSERT_EQ(size_t{1}, remainder_.size());
+
+    auto const actual = boost::get<telnetpp::bytes>(result_[0]);
 
     ASSERT_EQ(expected, actual);
 }
 
-TEST(parser_test, lone_iac_parses_to_nothing)
+TEST_F(parser_test, double_iac_parses_to_iac)
 {
-    auto data = telnetpp::byte_stream{ 0xFF };
+    static constexpr telnetpp::byte const data[] = { 0xFF, 0xFF };
+    static constexpr telnetpp::byte const expected_values[] = { 0xFF };
+    static constexpr telnetpp::bytes const expected{expected_values};
 
-    auto begin = data.begin();
-    auto end   = data.end();
+    parse(data);
 
-    auto result = telnetpp::detail::parse(begin, end);
+    ASSERT_EQ(size_t{1}, result_.size());
+    ASSERT_EQ(size_t{0}, remainder_.size());
+
+    auto const actual = boost::get<telnetpp::bytes>(result_[0]);
+
+    ASSERT_EQ(expected, actual);
+}
+
+using command_test_data = std::tuple<
+    telnetpp::bytes,  // bytes for command
+    telnetpp::command // resultant command
+>;
+
+class for_non_negotiating_commands 
+  : public testing::TestWithParam<command_test_data>
+{
+};
+
+TEST_P(for_non_negotiating_commands, as_the_only_element)
+{
+    auto const &param            = GetParam();
+    auto const &data             = std::get<0>(param);
+    auto const &expected_command = std::get<1>(param);
+
+    std::vector<telnetpp::element> result;
+    auto const remainder = telnetpp::parse(
+        data,
+        [&result](telnetpp::element const &elem)
+        {
+            result.push_back(elem);
+        });
+
+    ASSERT_EQ(size_t{1}, result.size());
+    ASSERT_EQ(size_t{0}, remainder.size());
+
+    auto const actual = boost::get<telnetpp::command>(result[0]);
+
+    ASSERT_EQ(expected_command, actual);
+}
+
+constexpr telnetpp::byte const nop_bytes[] = { 0xFF, 0xF1 };
+constexpr telnetpp::byte const dm_bytes[]  = { 0xFF, 0xF2 };
+constexpr telnetpp::byte const brk_bytes[] = { 0xFF, 0xF3 };
+constexpr telnetpp::byte const ip_bytes[]  = { 0xFF, 0xF4 };
+constexpr telnetpp::byte const ao_bytes[]  = { 0xFF, 0xF5 };
+constexpr telnetpp::byte const ayt_bytes[] = { 0xFF, 0xF6 };
+constexpr telnetpp::byte const ec_bytes[]  = { 0xFF, 0xF7 };
+constexpr telnetpp::byte const el_bytes[]  = { 0xFF, 0xF8 };
+constexpr telnetpp::byte const ga_bytes[]  = { 0xFF, 0xF9 };
+
+INSTANTIATE_TEST_CASE_P(
+    commands_are_parsed_to_command_objects,
+    for_non_negotiating_commands,
+    ValuesIn(
+    {
+        command_test_data{nop_bytes, telnetpp::command(telnetpp::nop)},
+        command_test_data{dm_bytes,  telnetpp::command(telnetpp::dm)},
+        command_test_data{brk_bytes, telnetpp::command(telnetpp::brk)},
+        command_test_data{ip_bytes,  telnetpp::command(telnetpp::ip)},
+        command_test_data{ao_bytes,  telnetpp::command(telnetpp::ao)},
+        command_test_data{ayt_bytes, telnetpp::command(telnetpp::ayt)},
+        command_test_data{ec_bytes,  telnetpp::command(telnetpp::ec)},
+        command_test_data{el_bytes,  telnetpp::command(telnetpp::el)},
+        command_test_data{ga_bytes,  telnetpp::command(telnetpp::ga)},
+    })
+);
+
+class for_incomplete_negotiations
+ : public testing::TestWithParam<telnetpp::bytes>
+{
+};
+
+TEST_P(for_incomplete_negotiations, as_the_only_element)
+{
+    auto const &data = GetParam();
+
+    std::vector<telnetpp::element> result;
+    auto const remainder = telnetpp::parse(
+        data,
+        [&result](telnetpp::element const &elem)
+        {
+            result.push_back(elem);
+        });
+
     ASSERT_EQ(size_t{0}, result.size());
-    ASSERT_TRUE(begin == data.begin());
+    ASSERT_EQ(data.size(), remainder.size());
 }
 
-TEST(parser_test, double_iac_parses_to_iac)
+constexpr telnetpp::byte const iac_will[] = { 0xFF, 0xFB };
+constexpr telnetpp::byte const iac_wont[] = { 0xFF, 0xFC };
+constexpr telnetpp::byte const iac_do[]   = { 0xFF, 0xFD };
+constexpr telnetpp::byte const iac_dont[] = { 0xFF, 0xFE };
+
+constexpr telnetpp::byte const iac_sb[]   = { 0xFF, 0xFA };
+constexpr telnetpp::byte const iac_sb_option[] = { 0xFF, 0xFA, 0x00 };
+constexpr telnetpp::byte const iac_sb_option_iac[] = { 0xFF, 0xFA, 0x00, 0xFF };
+
+INSTANTIATE_TEST_CASE_P(
+    negotiations_remain_unparsed,
+    for_incomplete_negotiations,
+    ValuesIn(
+    {
+        telnetpp::bytes{ iac_will },
+        telnetpp::bytes{ iac_wont },
+        telnetpp::bytes{ iac_do, },
+        telnetpp::bytes{ iac_dont },
+
+        telnetpp::bytes{ iac_sb },
+        telnetpp::bytes{ iac_sb_option },
+        telnetpp::bytes{ iac_sb_option_iac },
+    })
+);
+
+TEST_F(parser_test, sb_option_iac_se_parses_to_empty_subnegotiation)
 {
-    auto data = telnetpp::byte_stream{ 0xFF, 0xFF };
-    auto expected = std::string("\xFF");
-
-    auto begin = data.begin();
-    auto end   = data.end();
-
-    auto result = telnetpp::detail::parse(begin, end);
-    ASSERT_EQ(size_t{1}, result.size());
-    ASSERT_EQ(expected, boost::get<std::string>(result[0]));
-    ASSERT_TRUE(begin == end);
-}
-
-TEST(parser_test, iac_nop_parses_to_command)
-{
-    auto data = telnetpp::byte_stream{ 0xFF, 0xF1 };
-    auto expected = telnetpp::command(telnetpp::nop);
-
-    auto begin = data.begin();
-    auto end   = data.end();
-
-    auto result = telnetpp::detail::parse(begin, end);
-    ASSERT_EQ(size_t{1}, result.size());
-    ASSERT_EQ(expected, boost::get<telnetpp::command>(result[0]));
-    ASSERT_TRUE(begin == end);
-}
-
-TEST(parser_test, iac_dm_parses_to_command)
-{
-    auto data = telnetpp::byte_stream{ 0xFF, 0xF2 };
-    auto expected = telnetpp::command(telnetpp::dm);
-
-    auto begin = data.begin();
-    auto end   = data.end();
-
-    auto result = telnetpp::detail::parse(begin, end);
-    ASSERT_EQ(size_t{1}, result.size());
-    ASSERT_EQ(expected, boost::get<telnetpp::command>(result[0]));
-    ASSERT_TRUE(begin == end);
-}
-
-TEST(parser_test, iac_brk_parses_to_command)
-{
-    auto data = telnetpp::byte_stream{ 0xFF, 0xF3 };
-    auto expected = telnetpp::command(telnetpp::brk);
-
-    auto begin = data.begin();
-    auto end   = data.end();
-
-    auto result = telnetpp::detail::parse(begin, end);
-    ASSERT_EQ(size_t{1}, result.size());
-    ASSERT_EQ(expected, boost::get<telnetpp::command>(result[0]));
-    ASSERT_TRUE(begin == end);
-}
-
-TEST(parser_test, iac_ip_parses_to_command)
-{
-    auto data = telnetpp::byte_stream{ 0xFF, 0xF4 };
-    auto expected = telnetpp::command(telnetpp::ip);
-
-    auto begin = data.begin();
-    auto end   = data.end();
-
-    auto result = telnetpp::detail::parse(begin, end);
-    ASSERT_EQ(size_t{1}, result.size());
-    ASSERT_EQ(expected, boost::get<telnetpp::command>(result[0]));
-    ASSERT_TRUE(begin == end);
-}
-
-TEST(parser_test, iac_ao_parses_to_command)
-{
-    auto data = telnetpp::byte_stream{ 0xFF, 0xF5 };
-    auto expected = telnetpp::command(telnetpp::ao);
-
-    auto begin = data.begin();
-    auto end   = data.end();
-
-    auto result = telnetpp::detail::parse(begin, end);
-    ASSERT_EQ(size_t{1}, result.size());
-    ASSERT_EQ(expected, boost::get<telnetpp::command>(result[0]));
-    ASSERT_TRUE(begin == end);
-}
-
-TEST(parser_test, iac_ayt_parses_to_command)
-{
-    auto data = telnetpp::byte_stream{ 0xFF, 0xF6 };
-    auto expected = telnetpp::command(telnetpp::ayt);
-
-    auto begin = data.begin();
-    auto end   = data.end();
-
-    auto result = telnetpp::detail::parse(begin, end);
-    ASSERT_EQ(size_t{1}, result.size());
-    ASSERT_EQ(expected, boost::get<telnetpp::command>(result[0]));
-    ASSERT_TRUE(begin == end);
-}
-
-TEST(parser_test, iac_ec_parses_to_command)
-{
-    auto data = telnetpp::byte_stream{ 0xFF, 0xF7 };
-    auto expected = telnetpp::command(telnetpp::ec);
-
-    auto begin = data.begin();
-    auto end   = data.end();
-
-    auto result = telnetpp::detail::parse(begin, end);
-    ASSERT_EQ(size_t{1}, result.size());
-    ASSERT_EQ(expected, boost::get<telnetpp::command>(result[0]));
-    ASSERT_TRUE(begin == end);
-}
-
-TEST(parser_test, iac_el_parses_to_command)
-{
-    auto data = telnetpp::byte_stream{ 0xFF, 0xF8 };
-    auto expected = telnetpp::command(telnetpp::el);
-
-    auto begin = data.begin();
-    auto end   = data.end();
-
-    auto result = telnetpp::detail::parse(begin, end);
-    ASSERT_EQ(size_t{1}, result.size());
-    ASSERT_EQ(expected, boost::get<telnetpp::command>(result[0]));
-    ASSERT_TRUE(begin == end);
-}
-
-TEST(parser_test, iac_ga_parses_to_command)
-{
-    auto data = telnetpp::byte_stream{ 0xFF, 0xF9 };
-    auto expected = telnetpp::command(telnetpp::ga);
-
-    auto begin = data.begin();
-    auto end   = data.end();
-
-    auto result = telnetpp::detail::parse(begin, end);
-    ASSERT_EQ(size_t{1}, result.size());
-    ASSERT_EQ(expected, boost::get<telnetpp::command>(result[0]));
-    ASSERT_TRUE(begin == end);
-}
-
-TEST(parser_test, iac_sb_parses_to_nothing)
-{
-    auto data = telnetpp::byte_stream{ 0xFF, 0xFA };
-
-    auto begin = data.begin();
-    auto end   = data.end();
-
-    auto result = telnetpp::detail::parse(begin, end);
-    ASSERT_EQ(size_t{0}, result.size());
-    ASSERT_TRUE(begin == data.begin());
-}
-
-TEST(parser_test, iac_will_parses_to_nothing)
-{
-    auto data = telnetpp::byte_stream{ 0xFF, 0xFB };
-
-    auto begin = data.begin();
-    auto end   = data.end();
-
-    auto result = telnetpp::detail::parse(begin, end);
-    ASSERT_EQ(size_t{0}, result.size());
-    ASSERT_TRUE(begin == data.begin());
-}
-
-TEST(parser_test, iac_wont_parses_to_nothing)
-{
-    auto data = telnetpp::byte_stream{ 0xFF, 0xFC };
-
-    auto begin = data.begin();
-    auto end   = data.end();
-
-    auto result = telnetpp::detail::parse(begin, end);
-    ASSERT_EQ(size_t{0}, result.size());
-    ASSERT_TRUE(begin == data.begin());
-}
-
-TEST(parser_test, iac_do_parses_to_nothing)
-{
-    auto data = telnetpp::byte_stream{ 0xFF, 0xFD };
-
-    auto begin = data.begin();
-    auto end   = data.end();
-
-    auto result = telnetpp::detail::parse(begin, end);
-    ASSERT_EQ(size_t{0}, result.size());
-    ASSERT_TRUE(begin == data.begin());
-
-}
-
-TEST(parser_test, iac_dont_parses_to_nothing)
-{
-    auto data = telnetpp::byte_stream{ 0xFF, 0xFE };
-
-    auto begin = data.begin();
-    auto end   = data.end();
-
-    auto result = telnetpp::detail::parse(begin, end);
-    ASSERT_EQ(size_t{0}, result.size());
-    ASSERT_TRUE(begin == data.begin());
-}
-
-TEST(parser_test, will_negotiation_parses_to_negotiation)
-{
-    auto data = telnetpp::byte_stream{ 0xFF, 0xFB, 0xAB };
-    auto expected = telnetpp::negotiation(telnetpp::will, 0xAB);
-
-    auto begin = data.begin();
-    auto end   = data.end();
-
-    auto result = telnetpp::detail::parse(begin, end);
-    ASSERT_EQ(size_t{1}, result.size());
-    ASSERT_EQ(
-        expected, boost::get<telnetpp::negotiation>(result[0]));
-    ASSERT_TRUE(begin == end);
-}
-
-TEST(parser_test, wont_negotiation_parses_to_negotiation)
-{
-    auto data = telnetpp::byte_stream{ 0xFF, 0xFC, 0xBC };
-    auto expected = telnetpp::negotiation(telnetpp::wont, 0xBC);
-
-    auto begin = data.begin();
-    auto end   = data.end();
-
-    auto result = telnetpp::detail::parse(begin, end);
-    ASSERT_EQ(size_t{1}, result.size());
-    ASSERT_EQ(
-        expected, boost::get<telnetpp::negotiation>(result[0]));
-    ASSERT_TRUE(begin == end);
-}
-
-TEST(parser_test, do_negotiation_parses_to_negotiation)
-{
-    auto data = telnetpp::byte_stream{ 0xFF, 0xFD, 0xCD };
-    auto expected = telnetpp::negotiation(telnetpp::do_, 0xCD);
-
-    auto begin = data.begin();
-    auto end   = data.end();
-
-    auto result = telnetpp::detail::parse(begin, end);
-    ASSERT_EQ(size_t{1}, result.size());
-    ASSERT_EQ(
-        expected, boost::get<telnetpp::negotiation>(result[0]));
-    ASSERT_TRUE(begin == end);
-}
-
-TEST(parser_test, dont_negotiation_parses_to_negotiation)
-{
-    auto data = telnetpp::byte_stream{ 0xFF, 0xFE, 0xDE };
-    auto expected = telnetpp::negotiation(telnetpp::dont, 0xDE);
-
-    auto begin = data.begin();
-    auto end   = data.end();
-
-    auto result = telnetpp::detail::parse(begin, end);
-    ASSERT_EQ(size_t{1}, result.size());
-    ASSERT_EQ(
-        expected, boost::get<telnetpp::negotiation>(result[0]));
-    ASSERT_TRUE(begin == end);
-}
-
-TEST(parser_test, sb_option_parses_to_nothing)
-{
-    auto data = telnetpp::byte_stream{ 0xFF, 0xFA, 0xAA };
-
-    auto begin = data.begin();
-    auto end   = data.end();
-
-    auto result = telnetpp::detail::parse(begin, end);
-    ASSERT_EQ(size_t{0}, result.size());
-    ASSERT_TRUE(begin == data.begin());
-}
-
-TEST(parser_test, sb_option_iac_parses_to_nothing)
-{
-    auto data = telnetpp::byte_stream{ 0xFF, 0xFA, 0xAA, 0xFF };
-
-    auto begin = data.begin();
-    auto end   = data.end();
-
-    auto result = telnetpp::detail::parse(begin, end);
-    ASSERT_EQ(size_t{0}, result.size());
-    ASSERT_TRUE(begin == data.begin());
-}
-
-TEST(parser_test, sb_option_iac_se_parses_to_empty_subnegotiation)
-{
-    auto data = telnetpp::byte_stream{
+    static constexpr telnetpp::byte const data[] = { 
         0xFF, 0xFA, 0xAA, 0xFF, 0xF0
     };
-    auto expected = telnetpp::subnegotiation(0xAA, {});
 
-    auto begin = data.begin();
-    auto end   = data.end();
+    static constexpr telnetpp::subnegotiation const expected{0xAA, {}};
 
-    auto result = telnetpp::detail::parse(begin, end);
-    ASSERT_EQ(size_t{1}, result.size());
-    ASSERT_EQ(
-        expected,
-        boost::get<telnetpp::subnegotiation>(result[0]));
-    ASSERT_TRUE(begin == end);
+    parse(data);
+
+    ASSERT_EQ(size_t{1}, result_.size());
+    ASSERT_EQ(size_t{0}, remainder_.size());
+
+    auto const actual = boost::get<telnetpp::subnegotiation>(result_[0]);
+
+    ASSERT_EQ(expected, actual);
 }
 
-TEST(parser_test, subnegotiation_with_content_parses_to_subnegotation)
+TEST_F(parser_test, subnegotiation_with_content_parses_to_subnegotation)
 {
-    auto data = telnetpp::byte_stream{
+    static constexpr telnetpp::byte const data[] = { 
         0xFF, 0xFA, 0xAB, 0x01, 0x02, 0x03, 0xFF, 0xF0
     };
-    auto expected = telnetpp::subnegotiation(
-        0xAB, { 0x01, 0x02, 0x03 });
 
-    auto begin = data.begin();
-    auto end   = data.end();
+    static constexpr telnetpp::byte const expected_content[] = {
+        0x01, 0x02, 0x03
+    };
 
-    auto result = telnetpp::detail::parse(begin, end);
-    ASSERT_EQ(size_t{1}, result.size());
-    ASSERT_EQ(
-        expected,
-        boost::get<telnetpp::subnegotiation>(result[0]));
-    ASSERT_TRUE(begin == end);
+    static constexpr telnetpp::subnegotiation const expected{
+        0xAB, 
+        expected_content
+    };
+
+    parse(data);
+
+    ASSERT_EQ(size_t{1}, result_.size());
+    ASSERT_EQ(size_t{0}, remainder_.size());
+
+    auto const actual = boost::get<telnetpp::subnegotiation>(result_[0]);
+
+    ASSERT_EQ(expected, actual);
 }
 
-TEST(parser_test, subnegotiation_with_iac_iac_parses_to_iac)
+TEST_F(parser_test, subnegotiation_with_iac_iac_parses_to_iac)
 {
-    auto data = telnetpp::byte_stream{
+    static constexpr telnetpp::byte const data[] = { 
         0xFF, 0xFA, 0xAC, 0x01, 0xFF, 0xFF, 0x02, 0x03, 0xFF, 0xF0
     };
-    auto expected = telnetpp::subnegotiation(
-        0xAC, { 0x01, 0xFF, 0x02, 0x03 });
 
-    auto begin = data.begin();
-    auto end   = data.end();
+    // It is expected that the subnegotiation contains a really
+    // short-lived temporary due to it necessarily having to
+    // be transformed.  So it needs to be checked in line rather
+    // than being stored and checked afterwards.
+    parse_with_check(
+        data,
+        [](telnetpp::element const &elem)
+        {
+            static constexpr telnetpp::byte const expected_content[] = {
+                0x01, 0xFF, 0x02, 0x03
+            };
 
-    auto result = telnetpp::detail::parse(begin, end);
-    ASSERT_EQ(size_t{1}, result.size());
-    ASSERT_EQ(
-        expected,
-        boost::get<telnetpp::subnegotiation>(result[0]));
-    ASSERT_TRUE(begin == end);
+            static constexpr telnetpp::subnegotiation const expected{
+                0xAC, 
+                expected_content
+            };
+
+            auto const actual = boost::get<telnetpp::subnegotiation>(elem);
+            ASSERT_EQ(expected, actual);
+        });
+
+    ASSERT_EQ(size_t{1}, result_.size());
+    ASSERT_EQ(size_t{0}, remainder_.size());
 }
 
-TEST(parser_test, many_elements_parses_to_many_elements)
+using negotiation_test_data = std::tuple<
+    telnetpp::bytes,      // bytes for negotiation
+    telnetpp::negotiation // expected resultant negotiation
+>;
+
+class for_complete_negotiations
+  : public testing::TestWithParam<negotiation_test_data>
 {
-    telnetpp::byte data[] = {
-        'a', 'b', 'c', 0xFF, 0xFF, // string: abc\xFF\xFF
+};
+
+TEST_P(for_complete_negotiations, as_the_only_element)
+{
+    auto const &param                = GetParam();
+    auto const &data                 = std::get<0>(param);
+    auto const &expected_negotiation = std::get<1>(param);
+
+    std::vector<telnetpp::element> result;
+    auto const remainder = telnetpp::parse(
+        data,
+        [&result](telnetpp::element const &elem)
+        {
+            result.push_back(elem);
+        });
+
+    ASSERT_EQ(size_t{1}, result.size());
+    ASSERT_EQ(size_t{0}, remainder.size());
+
+    auto const actual = boost::get<telnetpp::negotiation>(result[0]);
+
+    ASSERT_EQ(expected_negotiation, actual);
+}
+
+constexpr telnetpp::byte const will_negotiation[] = { 0xFF, 0xFB, 0xAB };
+constexpr telnetpp::byte const wont_negotiation[] = { 0xFF, 0xFC, 0xBC };
+constexpr telnetpp::byte const do_negotiation[]   = { 0xFF, 0xFD, 0xCD };
+constexpr telnetpp::byte const dont_negotiation[] = { 0xFF, 0xFE, 0xDE };
+
+INSTANTIATE_TEST_CASE_P(
+    negotiations_are_parsed_to_negotiation_objects,
+    for_complete_negotiations,
+    ValuesIn(
+    {
+        negotiation_test_data {
+            telnetpp::bytes{ will_negotiation },
+            telnetpp::negotiation{ telnetpp::will, 0xAB }
+        },
+        negotiation_test_data {
+            telnetpp::bytes{ wont_negotiation },
+            telnetpp::negotiation{ telnetpp::wont, 0xBC }
+        },
+        negotiation_test_data {
+            telnetpp::bytes{ do_negotiation },
+            telnetpp::negotiation{ telnetpp::do_,  0xCD }
+        },
+        negotiation_test_data {
+            telnetpp::bytes{ dont_negotiation },
+            telnetpp::negotiation{ telnetpp::dont, 0xDE }
+        },
+    })
+);
+
+TEST_F(parser_test, many_elements_parses_to_many_elements)
+{
+    static constexpr telnetpp::byte const data[] = {
+        'a', 'b', 'c',             // string: abc
         0xFF, 0xF1,                // command: NOP
         0xFF, 0xF6,                // command: AYT
         'd',                       // string: d
@@ -419,27 +377,42 @@ TEST(parser_test, many_elements_parses_to_many_elements)
                                    // subnegotiation: 0xFF[]
         'g', 'h',                  // string: gh
         0xFF, 0xFC, 0xFF,          // negotiation: WONT 0xFF
-        0xFF, 0xFF, 0xFF, 0xFF, 'i'// text: \xFF\xFFi
+        'i'                        // text: i
     };
 
-    auto begin = std::begin(data);
-    auto end   = std::end(data);
+    static constexpr telnetpp::byte const expected_values0[] = { 'a', 'b', 'c' };
+    static constexpr telnetpp::bytes const expected0{expected_values0};
+    static constexpr telnetpp::command const expected1{telnetpp::nop};
+    static constexpr telnetpp::command const expected2{telnetpp::ayt};
+    static constexpr telnetpp::byte const expected_values3[] = { 'd' };
+    static constexpr telnetpp::bytes const expected3{expected_values3};
+    static constexpr telnetpp::negotiation const expected4{telnetpp::will, 0x00};
+    static constexpr telnetpp::negotiation const expected5{telnetpp::dont, 0x01};
+    static constexpr telnetpp::byte const expected_content6[] = { 'e', 'f' };
+    static constexpr telnetpp::subnegotiation const expected6{ 0x20, expected_content6 };
+    static constexpr telnetpp::subnegotiation const expected7{ 0xFF, {}};
+    static constexpr telnetpp::byte const expected_values8[] = { 'g', 'h' };
+    static constexpr telnetpp::bytes const expected8{expected_values8};
+    static constexpr telnetpp::negotiation const expected9 = {telnetpp::wont, 0xFF};
+    static constexpr telnetpp::byte const expected_value10 = { 'i' };
+    static constexpr telnetpp::bytes const expected10{expected_value10};
 
-    expect_elements(
-        {
-            std::string("abc\xFF"),
-            telnetpp::command(telnetpp::nop),
-            telnetpp::command(telnetpp::ayt),
-            std::string("d"),
-            telnetpp::negotiation(telnetpp::will, 0x00),
-            telnetpp::negotiation(telnetpp::dont, 0x01),
-            telnetpp::subnegotiation(0x20, {'e', 'f'}),
-            telnetpp::subnegotiation(0xFF, {}),
-            std::string("gh"),
-            telnetpp::negotiation(telnetpp::wont, 0xFF),
-            std::string("\xFF\xFFi")
-        },
-        telnetpp::detail::parse(begin, end));
+    parse(data);
 
-    ASSERT_TRUE(begin == end);
+    ASSERT_EQ(size_t{11}, result_.size());
+    ASSERT_EQ(size_t{0}, remainder_.size());
+
+    ASSERT_EQ(expected0, boost::get<decltype(expected0)>(result_[0]));
+    ASSERT_EQ(expected1, boost::get<decltype(expected1)>(result_[1]));
+    ASSERT_EQ(expected2, boost::get<decltype(expected2)>(result_[2]));
+    ASSERT_EQ(expected3, boost::get<decltype(expected3)>(result_[3]));
+    ASSERT_EQ(expected4, boost::get<decltype(expected4)>(result_[4]));
+    ASSERT_EQ(expected5, boost::get<decltype(expected5)>(result_[5]));
+    ASSERT_EQ(expected6, boost::get<decltype(expected6)>(result_[6]));
+    ASSERT_EQ(expected7, boost::get<decltype(expected7)>(result_[7]));
+    ASSERT_EQ(expected8, boost::get<decltype(expected8)>(result_[8]));
+    ASSERT_EQ(expected9, boost::get<decltype(expected9)>(result_[9]));
+    ASSERT_EQ(expected10, boost::get<decltype(expected10)>(result_[10]));
+}
+
 }

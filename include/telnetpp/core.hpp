@@ -1,8 +1,9 @@
 #pragma once
 
 #include "telnetpp/detail/export.hpp"
-#include <boost/cstdint.hpp>
+#include <gsl-lite.h>
 #include <string>
+#include <cstdint>
 
 namespace telnetpp {
 
@@ -30,21 +31,31 @@ static constexpr command_type const do_  = 253;
 static constexpr command_type const dont = 254;
 static constexpr command_type const iac  = 255; // Interpret As Command
 
-// Originally, Telnet++ used std::vector<u8> as its stream type.
-// However, most Telnet packets tend to be small, and this means that
-// it's philosophically possible to use the Small Buffer Optimization.
-// std::vector<> is specified such that it's impossible to implement the
-// SBO, whereas std::string has the SBO for most implementations.
+// A stream of bytes in Telnet++ is exposed as a non-owning span.  It is
+// expected that the data will live for no longer than any function in
+// which it is found.  For that reason, these spans should never be stored.
+// if this is necessary, it must be converted into a longer-term data
+// structure, e.g. a std::vector, or std::basic_string<byte>.
+using bytes = gsl::span<byte const>;
 
-// This may change in future to some other type, but it will always be
-// something that models the basic standard Container concept.
+// Where necessary, bytes are stored in this type, which has the small
+// string optimization, meaning that most cases will not cause an allocation.
+using byte_storage = std::basic_string<byte>;
 
-//* =========================================================================
-/// \class telnetpp::byte_stream
-/// \brief A collection of bytes that models the Standard Library's
-/// Container concept.  This is used for transporting arrays of bytes
-/// across the library.
-//* =========================================================================
-using byte_stream = std::basic_string<byte>;
+namespace literals {
 
+// A simple function to convert from string literals to stored bytes.
+inline byte_storage operator ""_tb(char const *text, size_t length)
+{
+    byte_storage result;
+    result.reserve(length);
+
+    for (auto ch : gsl::span<char const>{text, length})
+    {
+        result.push_back(static_cast<telnetpp::byte>(ch));
+    }
+
+    return result;
 }
+
+}}

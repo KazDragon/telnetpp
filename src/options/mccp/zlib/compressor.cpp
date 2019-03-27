@@ -1,4 +1,5 @@
 #include "telnetpp/options/mccp/zlib/compressor.hpp"
+#include <boost/optional.hpp>
 #include <zlib.h>
 #include <cassert>
 
@@ -12,7 +13,7 @@ namespace {
 // how-to guide.  Instead, we can just use small blocks on the stack and
 // iterate in the very rare case that a single message yields a block of 1KB
 // or more.
-static std::size_t constexpr output_buffer_size = 1023;
+static std::size_t constexpr output_buffer_size = 1024;
 
 }
 
@@ -21,109 +22,33 @@ static std::size_t constexpr output_buffer_size = 1023;
 // ==========================================================================
 struct compressor::impl
 {
-    // ======================================================================
-    // CONSTRUCTOR
-    // ======================================================================
-    impl() = default;
+    boost::optional<z_stream> stream;
 
     // ======================================================================
-    // COPY CONSTRUCTOR
+    // CONSTRUCT_STREAM
     // ======================================================================
-    impl(impl const &) = delete;
-
-    // ======================================================================
-    // ASSIGNMENT
-    // ======================================================================
-    impl &operator=(impl const &) = delete;
-
-    // ======================================================================
-    // DESTRUCTOR
-    // ======================================================================
-    ~impl()
+    void construct_stream()
     {
-        if (compression_started_)
-        {
-            auto result = deflateEnd(&stream_);
+        assert(stream == boost::none);
 
-            // deflateEnd may return Z_OK if everything was cleaned up
-            // properly.  However, if the stream is interrupted without
-            // finishing -- i.e. end_compression is not called, then it
-            // returns Z_DATA_ERROR.  This is not an error for us.
-            assert(result == Z_OK || result == Z_DATA_ERROR);
-        }
+        stream = z_stream{};
+
+        auto result = deflateInit(stream.get_ptr(), Z_DEFAULT_COMPRESSION);
+        assert(result == Z_OK);
     }
 
     // ======================================================================
-    // COMPRESS
+    // DESTROY_STREAM
     // ======================================================================
-    telnetpp::byte_stream compress(telnetpp::byte_stream const &sequence)
+    void destroy_stream()
     {
-        if (!compression_started_)
-        {
-            auto result = deflateInit(&stream_, Z_DEFAULT_COMPRESSION);
-            assert(result == Z_OK);
-            compression_started_ = true;
-        }
+        assert(stream != boost::none);
 
-        telnetpp::byte_stream compressed_data;
+        auto result = deflateEnd(stream.get_ptr());
+        assert(result == Z_OK || result == Z_STREAM_ERROR || Z_DATA_ERROR);
 
-        stream_.avail_in  = sequence.size();
-        stream_.next_in   = const_cast<byte *>(sequence.data());
-
-        do
-        {
-            byte output_buffer[output_buffer_size];
-
-            stream_.avail_out = output_buffer_size;
-            stream_.next_out  = output_buffer;
-
-            auto result = deflate(&stream_, Z_SYNC_FLUSH);
-            assert(result == Z_OK);
-
-            compressed_data.insert(
-                compressed_data.end(),
-                output_buffer,
-                stream_.next_out);
-        } while (stream_.avail_out == 0);
-
-        return compressed_data;
+        stream = boost::none;
     }
-
-    // ======================================================================
-    // END_COMPRESSION
-    // ======================================================================
-    telnetpp::byte_stream end_compression()
-    {
-        if (compression_started_)
-        {
-            byte input_buffer[1] = {};
-            byte output_buffer[output_buffer_size];
-
-            stream_.avail_in  = 0;
-            stream_.next_in   = input_buffer;
-            stream_.avail_out = output_buffer_size;
-            stream_.next_out  = output_buffer;
-
-            auto result = deflate(&stream_, Z_FINISH);
-            assert(result == Z_STREAM_END);
-
-            auto const response =
-                telnetpp::byte_stream(output_buffer, stream_.next_out);
-
-            result = deflateEnd(&stream_);
-            assert(result == Z_OK);
-            compression_started_ = false;
-
-            return response;
-        }
-        else
-        {
-            return {};
-        }
-    }
-
-    bool     compression_started_ = false;
-    z_stream stream_ = {};
 };
 
 // ==========================================================================
@@ -139,31 +64,75 @@ compressor::compressor()
 // ==========================================================================
 compressor::~compressor()
 {
-}
-
-// ==========================================================================
-// COMPRESS
-// ==========================================================================
-telnetpp::byte_stream compressor::compress(
-    telnetpp::byte_stream const &sequence)
-{
-    if (sequence.empty())
+    if (pimpl_->stream)
     {
-        return {};
-    }
-    else
-    {
-        return pimpl_->compress(sequence);
+        pimpl_->destroy_stream();
     }
 }
 
 // ==========================================================================
-// END_COMPRESSION
+// DO_START
 // ==========================================================================
-telnetpp::byte_stream compressor::end_compression()
+void compressor::do_start()
 {
-    return pimpl_->end_compression();
 }
 
+// ==========================================================================
+// DO_FINISH
+// ==========================================================================
+void compressor::do_finish(continuation const &cont)
+{
+    if (!pimpl_->stream)
+    {
+        pimpl_->construct_stream();
+    }
+
+    byte output_buffer[output_buffer_size];
+    pimpl_->stream->avail_in  = 0;
+    pimpl_->stream->next_in   = nullptr;
+    pimpl_->stream->avail_out = output_buffer_size;
+    pimpl_->stream->next_out  = output_buffer;
+
+    auto response = deflate(pimpl_->stream.get_ptr(), Z_FINISH);
+    assert(response == Z_STREAM_END);
+
+    auto const output_data = telnetpp::bytes{
+        output_buffer, pimpl_->stream->next_out
+    };
+
+    cont(output_data, true);
+
+    pimpl_->destroy_stream();
+}
+
+// ==========================================================================
+// DECOMPRESS_CHUNK
+// ==========================================================================
+telnetpp::bytes compressor::transform_chunk(
+    telnetpp::bytes data,
+    continuation const &cont)
+{
+    if (!pimpl_->stream)
+    {
+        pimpl_->construct_stream();
+    }
+
+    byte output_buffer[output_buffer_size];
+    pimpl_->stream->avail_in  = data.size();
+    pimpl_->stream->next_in   = const_cast<telnetpp::byte *>(data.data());
+    pimpl_->stream->avail_out = output_buffer_size;
+    pimpl_->stream->next_out  = output_buffer;
+
+    auto response = deflate(pimpl_->stream.get_ptr(), Z_SYNC_FLUSH);
+    assert(response == Z_OK);
+    
+    auto const output_data = telnetpp::bytes{
+        output_buffer, pimpl_->stream->next_out
+    };
+
+    cont(output_data, false);
+
+    return {};
+}
 
 }}}}

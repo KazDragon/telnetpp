@@ -4,27 +4,29 @@
 TEST(naws_client_test, option_is_naws)
 {
     telnetpp::options::naws::client client;
-    ASSERT_EQ(31, client.option());
+    ASSERT_EQ(31, client.option_code());
 }
 
 TEST(naws_client_test, valid_subnegotiation_signals_window_size_change)
 {
     telnetpp::options::naws::client client;
-    client.activate();
-    client.negotiate(telnetpp::will);
+    client.negotiate(telnetpp::will, [](auto &&){});
+    assert(client.active());
 
     telnetpp::options::naws::client::window_dimension width = 0, height = 0;
 
     client.on_window_size_changed.connect(
-        [&width, &height](auto new_width, auto new_height)
-            -> std::vector<telnetpp::token>
+        [&width, &height](auto new_width, auto new_height, auto &&cont)
         {
             width = new_width;
             height = new_height;
-            return {};
         });
 
-    client.subnegotiate({0x01, 0x02, 0x03, 0x04});
+    static constexpr telnetpp::byte const content[] = {
+        0x01, 0x02, 0x03, 0x04
+    };
+
+    client.subnegotiate(content, [](auto &&){});
 
     telnetpp::options::naws::client::window_dimension const expected_width =
         0x01 << 8 | 0x02;
@@ -38,18 +40,21 @@ TEST(naws_client_test, valid_subnegotiation_signals_window_size_change)
 TEST(naws_client_test, short_subnegotiation_is_ignored)
 {
     telnetpp::options::naws::client client;
-    client.activate();
-    client.negotiate(telnetpp::will);
+    client.negotiate(telnetpp::will, [](auto &&){});
+    assert(client.active());
 
     bool called = false;
     client.on_window_size_changed.connect(
-        [&called](auto &&, auto&&) -> std::vector<telnetpp::token>
+        [&called](auto &&, auto&&, auto &&)
         {
             called = true;
-            return {};
         });
 
-   client.subnegotiate({0x01, 0x02, 0x03});
+    static constexpr telnetpp::byte const content[] = {
+        0x01, 0x02, 0x03
+    };
+
+    client.subnegotiate(content, [](auto &&){});
 
    ASSERT_EQ(false, called);
 }

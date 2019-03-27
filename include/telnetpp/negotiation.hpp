@@ -1,6 +1,7 @@
 #pragma once
 
 #include "telnetpp/core.hpp"
+#include "telnetpp/detail/hash.hpp"
 #include <iosfwd>
 #include <utility>
 
@@ -11,11 +12,11 @@ namespace telnetpp {
 //* =========================================================================
 class TELNETPP_EXPORT negotiation
 {
-public :
+public:
     //* =====================================================================
     /// \brief Constructor
     //* =====================================================================
-    constexpr negotiation(negotiation_type request, option_type option)
+    constexpr negotiation(negotiation_type request, option_type option) noexcept
       : request_(request),
         option_(option)
     {
@@ -25,20 +26,28 @@ public :
     /// \brief Returns the request (will, wont, do, dont) of this
     /// negotiation.
     //* =====================================================================
-    constexpr negotiation_type request() const
+    constexpr negotiation_type request() const noexcept
     {
         return request_;
     }
 
     //* =====================================================================
-    /// \brief Returns the option (e.g. echo, naws) of this negotiation
+    /// \brief Returns the option code (e.g. echo, naws) of this negotiation
     //* =====================================================================
-    constexpr option_type option() const
+    constexpr option_type option_code() const noexcept
     {
         return option_;
     }
 
-private :
+    //* =====================================================================
+    /// \brief Combine a hash of the object
+    //* =====================================================================
+    constexpr void hash_combine(std::size_t &seed) const
+    {
+        telnetpp::detail::hash_combine(seed, request_, option_);
+    }
+
+private:
     negotiation_type request_;
     option_type option_;
 };
@@ -46,19 +55,20 @@ private :
 //* =========================================================================
 /// \brief Comparison function for negotiations
 //* =========================================================================
-constexpr bool operator==(negotiation const &lhs, negotiation const &rhs)
+constexpr bool operator==(negotiation const &lhs, negotiation const &rhs) noexcept
 {
     return lhs.request() == rhs.request()
-        && lhs.option() == rhs.option();
+        && lhs.option_code() == rhs.option_code();
 }
 
 //* =========================================================================
 /// \brief Ordering function for negotiations
 //* =========================================================================
-constexpr bool operator<(negotiation const &lhs, negotiation const &rhs)
+constexpr bool operator<(negotiation const &lhs, negotiation const &rhs) noexcept
 {
     return lhs.request() < rhs.request()
-        || (!(rhs.request() < lhs.request()) && lhs.option() < rhs.option());
+        || (!(rhs.request() < lhs.request())
+           && lhs.option_code() < rhs.option_code());
 }
 
 //* =========================================================================
@@ -68,3 +78,10 @@ TELNETPP_EXPORT
 std::ostream &operator<<(std::ostream &out, negotiation const &cmd);
 
 }
+
+// This is necessary because the lookup for the recipient for a negotiation
+// in a session relies on both the request and the option type (will/wont
+// go to a different place than do/don't, for example).  Therefore, the entire
+// negotiation is the key in the lookup and needs to be hashable to go to the
+// unordered map.
+TELNETPP_MAKE_INTRUSIVE_HASH(telnetpp::negotiation);

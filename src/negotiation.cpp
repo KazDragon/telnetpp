@@ -22,7 +22,7 @@ std::ostream &operator<<(std::ostream &out, negotiation const &neg)
             break;
     }
 
-    return out << ",0x" << std::hex << int(neg.option()) << "]";
+    return out << ",0x" << std::hex << int(neg.option_code()) << "]";
 }
 
 }

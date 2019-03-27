@@ -4,26 +4,30 @@
 
 namespace telnetpp { namespace options { namespace mccp {
 
+class codec;
+
 //* =========================================================================
 /// \brief A server option responsible for negotiating the client part of the
 /// MCCP protocol.
 //* =========================================================================
 class TELNETPP_EXPORT client : public telnetpp::client_option
 {
-public :
+public:
     //* =====================================================================
     /// \brief Constructor
     //* =====================================================================
-    client();
+    explicit client(codec &cdc);
 
-private :
+private:
     //* =====================================================================
-    /// \brief Handle a negotiation that has been received in the active
-    /// state.
+    /// \brief Called when a subnegotiation is received while the option is
+    /// active.  Override for option-specific functionality.
     //* =====================================================================
-    virtual std::vector<telnetpp::token> handle_subnegotiation(
-        telnetpp::byte_stream const &content);
-
+    void handle_subnegotiation(
+        telnetpp::bytes data,
+        continuation const &cont) override;
+        
+    codec &codec_;
 };
 
 }}}

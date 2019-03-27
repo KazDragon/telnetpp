@@ -8,17 +8,14 @@
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/63ec54845f2c41f1899706c61f1c316b)](https://www.codacy.com/app/KazDragon/telnetpp?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=KazDragon/telnetpp&amp;utm_campaign=Badge_Grade)
 
 [![Github Issues](https://img.shields.io/github/issues/KazDragon/telnetpp.svg)](https://github.com/KazDragon/telnetpp/issues)
-[![Stories in Ready](https://badge.waffle.io/KazDragon/telnetpp.png?label=ready&title=Stories%20In%20Ready)](https://waffle.io/KazDragon/telnetpp)
-[![Stories in Progress](https://badge.waffle.io/KazDragon/telnetpp.png?label=in%20progress&title=Stories%20In%20Progress)](https://waffle.io/KazDragon/telnetpp)
 
 [![Gitter](https://badges.gitter.im/KazDragon/telnetpp.svg)](https://gitter.im/KazDragon/telnetpp?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
-[![This is a forkable respository](https://img.shields.io/badge/forkable-yes-brightgreen.svg)](https://basicallydan.github.io/forkability/?u=KazDragon&r=telnetpp)
 
 Telnet++ is an implementation of the Telnet Session Layer protocol that is used primarily to negotiate a feature set between a client and server, the former of which is usually some kind of text-based terminal,  Commonly used terminals include Xterm, PuTTY, and a whole host of Telnet-enabled MUD clients including Tintin++, MushClient, and more.
 
 # Requirements
 
-Telnet++ requires a C++14 compiler and the Boost Libraries.  It also uses Google Test for its testing suite, which is compiled optionally.
+Telnet++ requires a C++14 compiler and the Conan package manager.
 
 # Features / Roadmap / Progress
 
@@ -41,13 +38,10 @@ Telnet++ requires a C++14 compiler and the Boost Libraries.  It also uses Google
   * [x] MCCP - the Mud Client Compression Protocol (see http://tintin.sourceforge.net/mccp/)
 5. [x] Structures to hide the complexity of the layer (e.g. routers, parsers, generators).
   * [x] Session class that understands all of the helper structures and how to convert to and from a stream of bytes.
-  * [x] A byte_converter, which converts a stream of tokens into streams of bytes.
 
 # Status
 
 Telnet++ is automatically tested with Clang and G++ 5.2.
-
-For further information about the working status of Telnet++, to report any bugs, or to make any feature requests, visit the [Waffle board](https://waffle.io/KazDragon/telnetpp)
 
 # The Basics
 
@@ -75,43 +69,31 @@ Subnegotiations are represented by the telnetpp::subnegotiation class.
 
 # Dataflow: Elements, Tokens and Streams
 
-A telnetpp::element is a Boost.Variant that may contain a command, a negotiation, a subnegotiation, or just a plain text string representing non-Telnet-specific input/output.
-
-Furthermore, it is also possible to send objects of any other type using Boost.Any.  The main structure used to pass information around the library is therefore the telnetpp::token, which is a Boost.Variant that may contain either a Boost.Any or a telnetpp::element.
-
-![Diagram of token contents](doc/img/telnet-token.png?raw-true)
-
-When communicating with the lower byte-streaming layer, telnetpp::elements are transformed into byte streams, which are represented by the u8stream type.
-
-After a telnetpp::token passes through the Telnet layer, this results in a telnetpp::stream_token, which is a Boost.Variant of a telnetpp::u8stream and a Boost.Any.  This enables layers above Telnet to talk to layers below Telnet.
-
-Finally, when the telnetpp::stream_token has passed through any lower layers, any Boost.Any instances remaining can be filtered out and converted into a telnetpp::u8stream, which can be sent across the data channel proper.
+A telnetpp::element is a Boost.Variant that may contain a command, a negotiation, a subnegotiation, or just a plain sequence of bytes representing non-Telnet-specific input/output.
 
 # Stream-Unaware
 
-The Telnet++ library does not impose any requirement on any kind of data stream API.  In order to accomplish this, most parts of the API do not actually send any data; rather, they return the data to be sent, usually in the form of either collections of tokens, or as streams (described above).
+The Telnet++ library does not impose any requirement on any kind of data stream API.  In order to accomplish this, it makes heavy use of continuation functions.  See the telnetpp::session class for an in-depth explanation of how this works.
 
 # Options
 
 As alluded to earlier, each distinct feature is represented by either a telnetpp::client_option or a telnetpp::server_option.  These both enjoy the same API; they only differ in the underlying protocol.  The user needs to know little about which actual negotiations and commands are sent.  There are two key functions and one signal for the option classes:
 
 * activate() - this is used to request activation on the remote side.
-* set_activatable() - this is used to allow the option to be activated from the remote side.
+* deactive() - this is used to request deactivation on the remote side.
 * on_state_changed - this is a signal that is called when the option is either being activated, active, being deactivated, or has become inactive.
 
 # Session
 
-All of the above can be quite complicated to manage, so Telnet++ provides the telnetpp::session class.  This can be used to manage an entire Telnet feature set for a connection.  This is accomplished by simply "install"ing handlers for commands and options:
+All of the above can be quite complicated to manage, so Telnet++ provides the telnetpp::session class.  This is the key abstraction of the Telnet++ library, and is used to manage an entire Telnet feature set for a connection.  This is accomplished by "install"ing handlers for commands and options:
 
 ```
+// A user-specified function for sending bytes to the remote.
+void my_socket_send(telnetpp::bytes data);
+
 // Create a session object, which manages the inputs and outputs from my connection.  It requires
 // a function that is to be called whenever non-Telnet input is received.
-telnetpp::session session(
-    [](std::string const &text)
-      -> std::vector<telnetpp::token>
-    {
-        return app_input_received(text);
-    });
+telnetpp::session session;
 
 // An echo server (provided with Telnet++) is used to control whether a server responds to input from
 // a client by transmitting the same text back to the client.  By default, this does not happen, and
@@ -119,124 +101,51 @@ telnetpp::session session(
 // locally echos input, and the server is totally in control of what appears on the screen.
 telnetpp::options::echo::server echo_server;
 
-// This allows the client to tell the server to perform the echo.
-echo_server.set_activatable();
-
 // The session now knows we want this feature to be handled and does all the heavy lifting for us.
 session.install(echo_server);
 
+// By default, options sit there in a deactivated state unless explicitly activated either locally
+// in code or in protocol from the remote.  Here, we activate it ourselves, forwarding protocol
+// via the session, and eventually out through our user-specified function.
+echo_server.activate(
+    [&](telnetpp::element const &elem)
+    {
+        session.send(elem, my_socket_send);
+    });
+
 // Sessions just pass on commands to functions installed on a per-command basis.  Here we pass a
 // lambda to handle the Are You There command.
-session.install(telnetpp::command(telnetpp::ayt)),
-    [](telnetpp::command const &cmd) -> std::vector<telnetpp::token>
+session.install(
+    telnetpp::command{telnetpp::ayt},
+    [&]
     {
-        // Handle the Are You There command.
-        return {}; // Or whatever tokens you want...
+        // We respond here by forwarding plain text as a sequence of bytes via the session.
+        using telnetpp::literals;
+        auto const message = "Yes, I'm here"_tb;
+        
+        session.send(message, my_socket_send);
     });
 ```
 
-After this is done, the session can be used to both receive data from lower layers and to send information from higher layers.  Incoming data received in bytes is arranged into a u8stream.  This can be passed into the session's receive() function.  This converts the bytes into Telnet tokens, and these are routed appropriately to whichever settings are installed.
-
-The result of this operation is a collection of tokens that represent the responses from the settings.  As mentioned above, these tokens may also include user-defined datastructures, as long as they are wrapped in a boost::any.  This can be used to communicate from layers above the Telnet session to the layers below.
-
-The response of the session's receive() function should be sent immediately to the session's send() function.  This function transforms the Telnet structures in the response into a byte stream.  Any boost::any objects remain as they are unchanged.  This can then be passed onto the lower layer.
+Receiving data is slightly more complex in that any reception of data may require data to be sent, and so functions that receive data also have a continuation for what to do with the response.
 
 ```
-// When sending data to the lower layer, each portion of data may be either a stream of bytes,
-// or something wrapped in a boost::any.  For most usages, using telnetpp::byte_converter to
-// filters the boost::any out would suffice.  But see the appendix on MCCP below for why the
-// API exists in this way.
-void my_lower_layer_send(vector<telnetpp::stream_token> const &);
+// A user-specified function used for receiving bytes sent from the
+// remote.
+int my_socket_receive(telnetpp::byte *buffer, int size);
 
-// When receiving data from the lower layer, only bytes are expected, so the additional baggage
-// of the boost::any does not have to be handled in this direction.  However, do note that
-// some inputs (e.g. option negotiations) have immediate outputs.  Therefore, it's necessary
-// to send the response from any data received.
-void my_layer_receive(telnetpp::u8stream const &stream)
-{
-    my_lower_layer_send(session.receive(stream));
-}
+// A user-specified function that transmits data up to the application
+// Note that the second argument is used to tell the application how
+// it may send a respond to the data it receives.
+void my_application_receive(
+    telnetpp::bytes data,
+    std::function<void (telnetpp::bytes)> const &send);
+
+telnetpp::byte my_buffer[1024];
+int amount_received = my_socket_receive(my_buffer, 1024);
+
+session.receive(
+    telnetpp::bytes{my_buffer, amount_received},
+    my_application_receive,
+    my_socket_send);
 ```
-
-Finally, a session's send() function can also be used to communicate directly with options.  For example,
-
-```
-// echo_server.activate() returns the tokens necessary to begin the activation.
-// session.send() turns the elements in the tokens into bytes.
-// my_lower_layer_send() sends the streams of bytes to the connection.
-my_lower_layer_send(session.send(echo_server.activate()));
-```
-
-# Epilogue
-
-The code above: the session set-up, and the send/receive functions, are all that's necessary to use the Telnet++ library.  Further sample usage can be found in Paradice9 (see https://github.com/KazDragon/paradice9/blob/master/paradice/connection.cpp -- in particular, just search for the lines containing the telnet_session_ variable.)
-
-# Appendix: MCCP
-
-The Mud Client Compression Protocol v2 (http://tintin.sourceforge.net/mccp/) is a unique protocol in that activating it also changes the way the Telnet Protocol is carried, since it too is compressed.  This requires careful design in order to ensure that uncompressed data is not sent or received when compressed data has been sent or received, and vice versa.
-
-The following is a rough guide to how to integrate the MCCP functionality.  How it actually integrates with your application will vary.  Consider functions starting with "app" to be something in your application above the Telnet layer that receives user input, and those starting with "my" to be an interaction between the Telnet layer and a lower layer that deals with sending and receiving byte streams, such as a socket API.
-
-```
-// class variables for the connection
-telnetpp::session session(
-    [](std::string const &text) -> std::vector<telnetpp::token>
-    {
-        // forward to my application
-        return app_input_received(text);
-    });
-    
-telnetpp::options::mccp::server mccp_server;
-    
-telnetpp::options::mccp::codec mccp_codec(
-    std::make_shared<telnetpp::options::mccp::zlib_compressor>(),
-    std::make_shared<telnetpp::options::mccp::zlib_decompressor>());
-
-telnetpp::byte_converter byte_coverter;
-
-// .. in initialization function
-session.install(mccp_server);
-
-// SKIP: activation of mccp_server.
-
-// When receiving data from the lower layer, only bytes are expected, so the additional baggage
-// of the boost::any does not have to be handled in this direction.  However, do note that
-// some inputs (e.g. option negotiations) have immediate outputs.  Therefore, it's necessary
-// to send the response from any data received.
-void my_layer_receive(telnetpp::u8stream const &stream)
-{
-    my_lower_layer_send(session.send(session.receive(stream)));
-}
-
-// This function is called with the results of session.send(), meaning that any telnet
-// elements have been converted to bytes.  It has two responsibilities: it must first
-// compress (if necessary) any bytes in the data, and then it must send the data on
-// to the raw connection.
-void my_lower_layer_send(vector<telnetpp::stream_token> const &tokens)
-{
-    // NOTE: this consumes some of the Boost.Any elements present at this layer of
-    // the protocol.
-    vector<telnetpp::stream_token> const &compressed_tokens = codec.send(tokens);
-    
-    // NOTE: it can be assumed that no Boost.Any elements are present and, if they
-    // are present, they are not used.  Therefore, we can just filter them out and
-    // return the entire set as one stream of bytes.
-    telnetpp::u8stream const &stream = byte_converter.send(compressed_tokens);
-    
-    // Write the data according to whatever API is being used at the connection level.
-    my_connection.write(stream.begin(), stream.end());
-}
-
-```
-
-# Appendix: Testing
-
-Unit testing is implemented with Google Test, but this requires a separate compilation.  The easiest way I've found of doing this is roughly equivalent to this script (which is mirrored in .travis.yml):
-
-    sudo apt-get install libgtest-dev
-    mkdir gtest
-    cd gtest
-    cmake /usr/src/gtest && make
-    export GTEST_ROOT=$PWD
-
-After this, re-running cmake with Telnet++ should pick up both the Google Test includes in /usr/include and also the binary which was just built.  If GTest was not found, Telnet++ will still build; just the automatic tests will be elided.
