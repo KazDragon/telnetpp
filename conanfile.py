@@ -43,6 +43,7 @@ class ConanTelnetpp(ConanFile):
         self.copy("*.dll", dst="bin", src="bin", keep_path=False)
         self.copy("*.dylib", dst="bin", src="lib", keep_path=False)
         self.copy("*.so", dst="lib", keep_path=False)
+        self.copy("*.so.*", dst="lib", keep_path=False)
         self.copy("*.a", dst="lib", keep_path=False)
 
     def package_info(self):
