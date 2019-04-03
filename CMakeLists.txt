@@ -14,9 +14,13 @@ endif()
 
 option(TELNETPP_WITH_TESTS "Build with tests included" False)
 option(TELNETPP_WITH_ZLIB "Build using ZLib" False)
+option(TELNETPP_COVERAGE  "Build with code coverage options")
+option(TELNETPP_SANITIZE "Build using sanitizers" "")
 message("Building Telnet++ with config: ${CMAKE_BUILD_TYPE}")
 message("Building Telnet++ with tests: ${TELNETPP_WITH_TESTS}")
 message("Building Telnet++ with zlib: ${TELNETPP_WITH_ZLIB}")
+message("Building Telnet++ with code coverage: ${TELNETPP_COVERAGE}")
+message("Building Telnet++ with sanitizers: ${TELNETPP_SANITIZE}")
 
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 conan_basic_setup(TARGETS NO_OUTPUT_DIRS)
