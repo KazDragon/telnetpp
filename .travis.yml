@@ -77,6 +77,7 @@ before_install:
   - eval "${MATRIX_EVAL}"
   - export CMAKE=cmake
   - export COVERAGE=${COVERAGE:-False}
+  - export SANITIZE=${SANITIZE:-off}
 # workaround for not having lcov 1.13
   - if [ ! -d "lcov/usr/bin/lcov" ]; then
       wget http://ftp.de.debian.org/debian/pool/main/l/lcov/lcov_1.13.orig.tar.gz;
@@ -95,11 +96,10 @@ before_script:
   - cd build
   - conan remote add nonstd-lite https://api.bintray.com/conan/agauniyal/nonstd-lite
   - conan remote add bincrafters https://api.bintray.com/conan/bincrafters/public-conan
-  - conan install .. -s compiler.libcxx=libstdc++11 -s cppstd=14 -s build_type=$CONFIG -o telnetpp:shared=$SHARED -o telnetpp:withTests=True -o telnetpp:withZlib=True -o telnetpp:coverage=$COVERAGE --build=missing
-  - $CMAKE -DTELNETPP_SANITIZE=$SANITIZE ..
+  - conan install .. -s compiler.libcxx=libstdc++11 -s cppstd=14 -s build_type=$CONFIG -o telnetpp:shared=$SHARED -o telnetpp:sanitize=$SANITIZE -o telnetpp:withTests=True -o telnetpp:withZlib=True -o telnetpp:coverage=$COVERAGE --build=missing
 
 script:
-  - make
+  - conan build ..
   - if [ "$COVERAGE" == "ON" ]; then
         $LCOV --gcov-tool=gcov-5 --base-directory . --directory . --zerocounters -q;
     fi
