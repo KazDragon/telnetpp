@@ -12,6 +12,7 @@ class ConanTelnetpp(ConanFile):
     exports = "*", "!build", "!.vscode"
     description = ""
     requires = ("boost_container/[>=1.69]@bincrafters/stable",
+                "boost_exception/[>=1.69]@bincrafters/stable",
                 "boost_signals2/[>=1.69]@bincrafters/stable",
                 "boost_variant/[>=1.69]@bincrafters/stable",
                 "gsl-lite/[>=0.26]@nonstd-lite/stable")
