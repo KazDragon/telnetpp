@@ -28,166 +28,44 @@ matrix:
   include:
   - <<: *linux_gcc
     env:
-      - MATRIX_EVAL="CC=gcc-5 && CXX=g++-5 && CONFIG=Debug && SHARED=0"
+      - MATRIX_EVAL="CC=gcc-5 && CXX=g++-5 && CONFIG=Debug && SHARED=False"
 
   - <<: *linux_gcc
     env:
-      - MATRIX_EVAL="CC=gcc-5 && CXX=g++-5 && CONFIG=Debug && SHARED=1"
+      - MATRIX_EVAL="CC=gcc-5 && CXX=g++-5 && CONFIG=Debug && SHARED=True"
 
   - <<: *linux_gcc
     env:
-      - MATRIX_EVAL="CC=gcc-5 && CXX=g++-5 && CONFIG=Release && SHARED=0"
+      - MATRIX_EVAL="CC=gcc-5 && CXX=g++-5 && CONFIG=Release && SHARED=False"
 
   - <<: *linux_gcc
     env:
-      - MATRIX_EVAL="CC=gcc-5 && CXX=g++-5 && CONFIG=Release && SHARED=1"
+      - MATRIX_EVAL="CC=gcc-5 && CXX=g++-5 && CONFIG=Release && SHARED=True"
 
   - <<: *linux_gcc
     env:
-      - MATRIX_EVAL="CC=gcc-5 && CXX=g++-5 && CONFIG=Debug && SHARED=0 && SANITIZE=address"
+      - MATRIX_EVAL="CC=gcc-5 && CXX=g++-5 && CONFIG=Debug && SHARED=False && SANITIZE=address"
 
   - <<: *linux_gcc
     env:
-      - MATRIX_EVAL="CC=gcc-5 && CXX=g++-5 && CONFIG=Debug && SHARED=0 && COVERAGE=ON"
+      - MATRIX_EVAL="CC=gcc-5 && CXX=g++-5 && CONFIG=Debug && SHARED=False && COVERAGE=True"
 
   - <<: *linux_clang
     env:
-     - MATRIX_EVAL="CC=clang-4.0 && CXX=clang++-4.0 && CONFIG=Debug && SHARED=0"
+     - MATRIX_EVAL="CC=clang-4.0 && CXX=clang++-4.0 && CONFIG=Debug && SHARED=False"
 
   - <<: *linux_clang
     env:
-     - MATRIX_EVAL="CC=clang-4.0 && CXX=clang++-4.0 && CONFIG=Debug && SHARED=1"
+     - MATRIX_EVAL="CC=clang-4.0 && CXX=clang++-4.0 && CONFIG=Debug && SHARED=True"
 
   - <<: *linux_clang
     env:
-     - MATRIX_EVAL="CC=clang-4.0 && CXX=clang++-4.0 && CONFIG=Release && SHARED=0"
+     - MATRIX_EVAL="CC=clang-4.0 && CXX=clang++-4.0 && CONFIG=Release && SHARED=False"
 
   - <<: *linux_clang
     env:
-     - MATRIX_EVAL="CC=clang-4.0 && CXX=clang++-4.0 && CONFIG=Release && SHARED=1"
+     - MATRIX_EVAL="CC=clang-4.0 && CXX=clang++-4.0 && CONFIG=Release && SHARED=False"
 
-#  - os: linux
-#    dist: trusty
-#    addons:
-#      apt:
-#        sources:
-#          - ubuntu-toolchain-r-test
-#        packages:
-#          - g++-5
-#          - libgtest-dev
-#          - libboost1.55-all-dev
-#    env:
-#      - MATRIX_EVAL="CC=gcc-5 && CXX=g++-5 && CONFIG=Debug && SHARED=1"
-#
-#  - os: linux
-#    dist: trusty
-#    addons:
-#      apt:
-#        sources:
-#          - ubuntu-toolchain-r-test
-#        packages:
-#          - g++-5
-#          - libgtest-dev
-#          - libboost1.55-all-dev
-#    env:
-#      - MATRIX_EVAL="CC=gcc-5 && CXX=g++-5 && CONFIG=Release && SHARED=0"
-#
-#  - os: linux
-#    dist: trusty
-#    addons:
-#      apt:
-#        sources:
-#          - ubuntu-toolchain-r-test
-#        packages:
-#          - g++-5
-#          - libgtest-dev
-#          - libboost1.55-all-dev
-#    env:
-#      - MATRIX_EVAL="CC=gcc-5 && CXX=g++-5 && CONFIG=Release && SHARED=1"
-#
-#  - os: linux
-#    dist: trusty
-#    addons:
-#      apt:
-#        sources:
-#          - ubuntu-toolchain-r-test
-#          - llvm-toolchain-trusty-4.0
-#        packages:
-#          - clang-4.0
-#          - libgtest-dev
-#          - libboost1.55-all-dev
-#    env:
-#      - MATRIX_EVAL="CC=clang-4.0 && CXX=clang++-4.0 && CONFIG=Debug && SHARED=0"
-#
-#  - os: linux
-#    dist: trusty
-#    addons:
-#      apt:
-#        sources:
-#          - ubuntu-toolchain-r-test
-#          - llvm-toolchain-trusty-4.0
-#        packages:
-#          - clang-4.0
-#          - libgtest-dev
-#          - libboost1.55-all-dev
-#    env:
-#      - MATRIX_EVAL="CC=clang-4.0 && CXX=clang++-4.0 && CONFIG=Debug && SHARED=1"
-
-#  - os: linux
-#    dist: trusty
-#    addons:
-#     apt:
-#       sources:
-#         - ubuntu-toolchain-r-test
-#         - llvm-toolchain-trusty-4.0
-#       packages:
-#          - clang-4.0
-#          - libgtest-dev
-#          - libboost1.55-all-dev
-#    env:
-#      - MATRIX_EVAL="CC=clang-4.0 && CXX=clang++-4.0 && CONFIG=Debug && SHARED=0 && SANITIZE=address"
-
-#  - os: linux
-#    dist: trusty
-#    addons:
-#      apt:
-#        sources:
-#          - ubuntu-toolchain-r-test
-#          - llvm-toolchain-trusty-4.0
-#        packages:
-#          - clang-4.0
-#          - libgtest-dev
-#          - libboost1.55-all-dev
-#    env:
-#      - MATRIX_EVAL="CC=clang-4.0 && CXX=clang++-4.0 && CONFIG=Debug && SHARED=0 && SANITIZE=undefined"
-#
-#  - os: linux
-#    dist: trusty
-#    addons:
-#      apt:
-#        sources:
-#          - ubuntu-toolchain-r-test
-#          - llvm-toolchain-trusty-4.0
-#        packages:
-#          - clang-4.0
-#          - libgtest-dev
-#          - libboost1.55-all-dev
-#    env:
-#      - MATRIX_EVAL="CC=clang-4.0 && CXX=clang++-4.0 && CONFIG=Debug && SHARED=0 && SANITIZE=thread"
-#
-#  - os: linux
-#    dist: trusty
-#    addons:
-#      apt:
-#        sources:
-#          - ubuntu-toolchain-r-test
-#          - llvm-toolchain-trusty-4.0
-#        packages:
-#          - clang-4.0
-#          - libgtest-dev
-#          - libboost1.55-all-dev
-#    env:
-#      - MATRIX_EVAL="CC=clang-4.0 && CXX=clang++-4.0 && CONFIG=Debug && SHARED=0"
 cache:
   - apt: true
   - directories:
@@ -198,6 +76,8 @@ before_install:
 # Set up CC/CXX variables.
   - eval "${MATRIX_EVAL}"
   - export CMAKE=cmake
+  - export COVERAGE=${COVERAGE:-False}
+  - export SANITIZE=${SANITIZE:-off}
 # workaround for not having lcov 1.13
   - if [ ! -d "lcov/usr/bin/lcov" ]; then
       wget http://ftp.de.debian.org/debian/pool/main/l/lcov/lcov_1.13.orig.tar.gz;
@@ -209,19 +89,18 @@ before_install:
 # install conan for package dependencies
   - pip install --user conan
 # install coverage software
-  - if [ "$COVERAGE" == "ON" ]; then gem install coveralls-lcov; fi
+  - if [ "$COVERAGE" == "True" ]; then gem install coveralls-lcov; fi
 
 before_script:
   - mkdir build || true
   - cd build
   - conan remote add nonstd-lite https://api.bintray.com/conan/agauniyal/nonstd-lite
   - conan remote add bincrafters https://api.bintray.com/conan/bincrafters/public-conan
-  - conan install .. -s compiler.libcxx=libstdc++11 -s cppstd=14 -o telnetpp:withTests=True -o telnetpp:withZlib=True --build=missing
-  - $CMAKE -DCMAKE_BUILD_TYPE=$CONFIG -DBUILD_SHARED_LIBS=$SHARED -DTELNETPP_WITH_TESTS=True -DTELNETPP_WITH_ZLIB=True -DTELNETPP_SANITIZE=$SANITIZE -DTELNETPP_COVERAGE=$COVERAGE ..
+  - conan install .. -s compiler.libcxx=libstdc++11 -s cppstd=14 -s build_type=$CONFIG -o telnetpp:shared=$SHARED -o telnetpp:sanitize=$SANITIZE -o telnetpp:withTests=True -o telnetpp:withZlib=True -o telnetpp:coverage=$COVERAGE --build=missing
 
 script:
-  - make
-  - if [ "$COVERAGE" == "ON" ]; then
+  - conan build ..
+  - if [ "$COVERAGE" == "True" ]; then
         $LCOV --gcov-tool=gcov-5 --base-directory . --directory . --zerocounters -q;
     fi
   - make test
@@ -230,7 +109,7 @@ after_failure:
   - cat Testing/Temporary/LastTest.log
 
 after_success:
-  - if [ "$COVERAGE" == "ON" ]; then
+  - if [ "$COVERAGE" == "True" ]; then
         $LCOV --gcov-tool=gcov-5 --base-directory . --directory .  --capture --output-file coverage.info;
         $LCOV --gcov-tool=gcov-5 --remove coverage.info '*/test/*' '/usr/*' '*/.conan/*' --output-file coverage.info;
         $LCOV --gcov-tool=gcov-5 --list coverage.info;

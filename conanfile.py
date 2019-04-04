@@ -12,11 +12,12 @@ class ConanTelnetpp(ConanFile):
     exports = "*", "!build", "!.vscode"
     description = ""
     requires = ("boost_container/[>=1.69]@bincrafters/stable",
+                "boost_exception/[>=1.69]@bincrafters/stable",
                 "boost_signals2/[>=1.69]@bincrafters/stable",
                 "boost_variant/[>=1.69]@bincrafters/stable",
                 "gsl-lite/[>=0.26]@nonstd-lite/stable")
-    options = {"shared": [True, False], "withTests": [True, False], "withZlib": [True, False]}
-    default_options = {"shared": False, "withTests": False, "withZlib": True}
+    options = {"shared": [True, False], "withTests": [True, False], "withZlib": [True, False], "coverage": [True, False], "sanitize" : ["off", "address"]}
+    default_options = {"shared": False, "withTests": False, "withZlib": True, "coverage": False, "sanitize": "off"}
 
     def requirements(self):
         if (self.options.withTests):
@@ -30,6 +31,8 @@ class ConanTelnetpp(ConanFile):
         cmake.definitions["BUILD_SHARED_LIBS"] = self.options.shared
         cmake.definitions["TELNETPP_WITH_TESTS"] = self.options.withTests
         cmake.definitions["TELNETPP_WITH_ZLIB"] = self.options.withZlib
+        cmake.definitions["TELNETPP_COVERAGE"] = self.options.coverage
+        cmake.definitions["TELNETPP_SANITIZE"] = self.options.sanitize
         cmake.configure()
         return cmake
 
