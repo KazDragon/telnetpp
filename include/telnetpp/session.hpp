@@ -205,15 +205,7 @@ public:
         ReceiveContinuation &&receive_continuation,
         SendContinuation &&send_continuation)
     {
-        // TODO: The vast majority of the time, a packet will be completely 
-        // parsed and require no temporary storage.  Optimize for that case.
-        unparsed_buffer_.insert(
-            unparsed_buffer_.end(),
-            content.begin(),
-            content.end());
-
-        auto remainder = telnetpp::parse(
-            unparsed_buffer_,
+        auto const &token_handler =
             [&](telnetpp::element const &elem)
             {
                 auto generator = [&](telnetpp::element const &elem)
@@ -244,9 +236,27 @@ public:
                     {
                         subnegotiation_router_(sub, generator);
                     });
-            });
+            };
 
-        unparsed_buffer_.erase(0, unparsed_buffer_.size() - remainder.size());
+        if (unparsed_buffer_.empty())
+        {
+            auto remainder = telnetpp::parse(content, token_handler);
+            unparsed_buffer_.insert(
+                unparsed_buffer_.end(), remainder.begin(), remainder.end());
+        }
+        else
+        {
+            unparsed_buffer_.insert(
+                unparsed_buffer_.end(),
+                content.begin(),
+                content.end());
+
+            auto remainder = telnetpp::parse(
+                unparsed_buffer_,
+                token_handler);
+    
+            unparsed_buffer_.erase(0, unparsed_buffer_.size() - remainder.size());
+        }
     }
 
     //* =====================================================================
