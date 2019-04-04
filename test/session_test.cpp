@@ -273,6 +273,72 @@ TEST(session_test, reception_of_subnegotiation_routes_to_installed_client_option
     ASSERT_EQ(expected_subnegotiation, received_subnegotiation);
 }
 
+TEST(session_test, reception_of_fragmented_subnegotiation_routes_to_installed_client_option)
+{
+    telnetpp::session session;
+    fake_client_option client{0xA5};
+    client.negotiate(telnetpp::will, [](auto &&...){});
+    assert(client.active());
+
+    session.install(client);
+
+    std::vector<telnetpp::byte> const expected_subnegotiation = {
+        'T', 'E', 'S', 'T'
+    };
+    
+    std::vector<telnetpp::byte> received_subnegotiation;
+    client.on_subnegotiation.connect(
+        [&](telnetpp::bytes data)
+        {
+            received_subnegotiation.insert(
+                received_subnegotiation.end(),
+                data.begin(),
+                data.end());
+        });
+
+    telnetpp::byte const content0[] = {
+        telnetpp::iac, telnetpp::sb, client.option_code(),
+        'T', 'E'
+    };
+    
+    telnetpp::byte const content1[] = {
+        'S', 'T',
+        telnetpp::iac, telnetpp::se
+    };
+
+    std::vector<telnetpp::byte> const expected_result = {
+    };
+
+    
+    std::string received_content;
+    auto const &receive_content = 
+        [&received_content](telnetpp::bytes content, auto const &cont)
+        {
+            std::transform(
+                content.begin(),
+                content.end(),
+                std::back_inserter(received_content),
+                [](auto ch) { return static_cast<char>(ch); });
+        };
+        
+    std::vector<telnetpp::byte> received_result;
+    auto const &receive_result =
+        [&received_result](telnetpp::bytes data)
+        {
+            received_result.insert(
+                received_result.end(),
+                data.begin(),
+                data.end());
+        };
+        
+    session.receive(content0, receive_content, receive_result);
+    session.receive(content1, receive_content, receive_result);
+
+    ASSERT_EQ(std::string{}, received_content);
+    ASSERT_EQ(expected_result, received_result);
+    ASSERT_EQ(expected_subnegotiation, received_subnegotiation);
+}
+
 TEST(session_test, unrouted_will_sends_dont)
 {
     telnetpp::session session;

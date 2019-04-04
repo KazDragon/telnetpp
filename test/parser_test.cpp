@@ -270,6 +270,18 @@ TEST_F(parser_test, subnegotiation_with_content_parses_to_subnegotation)
     ASSERT_EQ(expected, actual);
 }
 
+TEST_F(parser_test, an_incomplete_subnegotiation_parses_to_nothing)
+{
+    static constexpr telnetpp::byte const data[] = {
+        0xFF, 0xFA, 0xAC, 0x01
+    };
+    
+    parse(data);
+    
+    ASSERT_TRUE(result_.empty());
+    ASSERT_EQ(sizeof(data), remainder_.size());
+}
+
 TEST_F(parser_test, subnegotiation_with_iac_iac_parses_to_iac)
 {
     static constexpr telnetpp::byte const data[] = { 
