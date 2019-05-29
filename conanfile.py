@@ -9,8 +9,8 @@ class ConanTelnetpp(ConanFile):
     license = "MIT"
     settings = "os", "arch", "compiler", "build_type"
     generators = "cmake"
-    exports = "*", "!build", "!.vscode"
-    description = ""
+    exports = "*.hpp", "*.in", "*.cpp", "CMakeLists.txt", "*.md", "LICENSE"
+    description = "A library for handling the Telnet protocol"
     requires = ("boost_container/[>=1.69]@bincrafters/stable",
                 "boost_exception/[>=1.69]@bincrafters/stable",
                 "boost_signals2/[>=1.69]@bincrafters/stable",
