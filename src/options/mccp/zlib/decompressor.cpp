@@ -89,7 +89,7 @@ void decompressor::do_finish(continuation const &cont)
 }
 
 // ==========================================================================
-// DECOMPRESS_CHUNK
+// TRANSFORM_CHUNK
 // ==========================================================================
 telnetpp::bytes decompressor::transform_chunk(
     telnetpp::bytes data,

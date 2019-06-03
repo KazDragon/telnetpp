@@ -1,5 +1,8 @@
 #include <telnetpp/options/mccp/zlib/compressor.hpp>
 #include <gtest/gtest.h>
+#include <boost/make_unique.hpp>
+#include <boost/range/algorithm/generate.hpp>
+#include <random>
 #include <zlib.h>
 #include <vector>
 
@@ -152,4 +155,52 @@ TEST_F(a_started_zlib_compressor, sends_a_stream_end_when_compression_is_ended)
     ASSERT_TRUE(compression_ended_);
 
     inflateEnd(&stream);
+}
+
+TEST_F(a_started_zlib_compressor, can_compress_large_amounts_of_data)
+{
+    // Fill a large buffer of data with random noise.  This ensures that it
+    // is difficult to compress to less than one send buffer in size (
+    // a regular pattern might well do this).
+    static std::random_device rd;
+    std::mt19937 gen(rd());
+
+    constexpr auto large_array_size = 1024 * 1024;
+    std::vector<telnetpp::byte> large_data(large_array_size);
+    boost::generate(large_data, gen);
+
+    compress_data(large_data);
+    finish_compression();
+    ASSERT_TRUE(compression_ended_);
+
+    // Now repeatedly decompress the compressed data until we have
+    // reconstituted the original large buffer.
+    z_stream stream = {};
+    auto response = inflateInit(&stream);
+    assert(response == Z_OK);
+
+    telnetpp::byte output_buffer[1024];
+    std::vector<telnetpp::byte> decompressed_data;
+
+    stream.avail_in  = received_data_.size();
+    stream.next_in   = const_cast<telnetpp::byte *>(received_data_.data());
+
+    while(stream.avail_in != 0)
+    {
+        stream.avail_out = sizeof(output_buffer);
+        stream.next_out  = output_buffer;
+
+        response = inflate(&stream, Z_SYNC_FLUSH);
+        ASSERT_TRUE(response == Z_OK || response == Z_STREAM_END);
+
+        decompressed_data.insert(
+            decompressed_data.end(),
+            output_buffer,
+            stream.next_out);
+    }
+
+    inflateEnd(&stream);
+
+    ASSERT_EQ(large_data.size(), decompressed_data.size());
+    ASSERT_EQ(large_data, decompressed_data);
 }

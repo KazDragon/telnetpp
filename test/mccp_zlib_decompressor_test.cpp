@@ -1,6 +1,7 @@
 #include <telnetpp/options/mccp/zlib/decompressor.hpp>
 #include <gtest/gtest.h>
 #include <zlib.h>
+#include <boost/range/algorithm/generate.hpp>
 #include <algorithm>
 #include <random>
 
@@ -245,4 +246,65 @@ TEST_F(a_started_zlib_decompressor, acts_as_if_a_new_stream_after_restarting_dec
     ASSERT_FALSE(decompression_ended_);
 
     deflateEnd(&stream);
+}
+
+TEST_F(a_started_zlib_decompressor, can_decompress_large_data)
+{
+    // Fill a large buffer of data with random noise.  This ensures that it
+    // is difficult to compress to less than one send buffer in size (a
+    // regular pattern might well do this).
+    static std::random_device rd;
+    std::mt19937 gen(rd());
+
+    constexpr auto large_array_size = 1024 * 1024;
+    std::vector<telnetpp::byte> large_data(large_array_size);
+    boost::generate(large_data, gen);
+
+    telnetpp::byte output_buffer[1024];
+
+    z_stream stream = {};
+    auto response = deflateInit(&stream, Z_DEFAULT_COMPRESSION);
+    assert(response == Z_OK);
+
+    stream.avail_in  = large_data.size();
+    stream.next_in   = const_cast<telnetpp::byte *>(large_data.data());
+
+    std::vector<telnetpp::byte> compressed_data;
+
+    while(stream.avail_in != 0)
+    {
+        stream.avail_out = sizeof(output_buffer);
+        stream.next_out  = output_buffer;
+
+        response = deflate(&stream, Z_SYNC_FLUSH);
+        assert(response == Z_OK);
+        
+        compressed_data.insert(
+            compressed_data.end(),
+            output_buffer,
+            stream.next_out);
+    };
+
+    do
+    {
+        // Repeatedly "finish" the stream to flush out any lingering data that
+        // is yet to be compressed.
+        stream.avail_out = sizeof(output_buffer);
+        stream.next_out  = output_buffer;
+        response = deflate(&stream, Z_FINISH);
+
+        compressed_data.insert(
+            compressed_data.end(),
+            output_buffer,
+            stream.next_out);
+    } while (response == Z_OK);
+    assert(response == Z_STREAM_END);
+
+    // Now that we have a batch of compressed data, decompress it and ensure
+    // that we have our original data back.
+    decompress_data(compressed_data);
+    deflateEnd(&stream);
+
+    ASSERT_EQ(large_data.size(), received_data_.size());
+    ASSERT_EQ(large_data, received_data_);
 }

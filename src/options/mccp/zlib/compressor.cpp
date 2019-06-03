@@ -90,23 +90,31 @@ void compressor::do_finish(continuation const &cont)
     byte output_buffer[output_buffer_size];
     pimpl_->stream->avail_in  = 0;
     pimpl_->stream->next_in   = nullptr;
-    pimpl_->stream->avail_out = output_buffer_size;
-    pimpl_->stream->next_out  = output_buffer;
 
-    auto response = deflate(pimpl_->stream.get_ptr(), Z_FINISH);
+    auto response = Z_OK;
+
+    do 
+    {
+        pimpl_->stream->avail_out = output_buffer_size;
+        pimpl_->stream->next_out  = output_buffer;
+        
+        response = deflate(pimpl_->stream.get_ptr(), Z_FINISH);
+        
+        auto const output_data = telnetpp::bytes{
+            output_buffer, pimpl_->stream->next_out
+        };
+
+        cont(output_data, true);
+    }
+    while (response == Z_OK);
+
     assert(response == Z_STREAM_END);
-
-    auto const output_data = telnetpp::bytes{
-        output_buffer, pimpl_->stream->next_out
-    };
-
-    cont(output_data, true);
 
     pimpl_->destroy_stream();
 }
 
 // ==========================================================================
-// DECOMPRESS_CHUNK
+// TRANSFORM_CHUNK
 // ==========================================================================
 telnetpp::bytes compressor::transform_chunk(
     telnetpp::bytes data,
@@ -125,14 +133,14 @@ telnetpp::bytes compressor::transform_chunk(
 
     auto response = deflate(pimpl_->stream.get_ptr(), Z_SYNC_FLUSH);
     assert(response == Z_OK);
-    
+
     auto const output_data = telnetpp::bytes{
         output_buffer, pimpl_->stream->next_out
     };
 
     cont(output_data, false);
 
-    return {};
+    return data.subspan(data.size() - pimpl_->stream->avail_in);
 }
 
 }}}}
