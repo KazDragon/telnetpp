@@ -94,7 +94,7 @@ before_install:
 before_script:
   - mkdir build || true
   - cd build
-  - conan remote add nonstd-lite https://api.bintray.com/conan/agauniyal/nonstd-lite
+  - conan remote add nonstd-lite https://api.bintray.com/conan/martinmoene/nonstd-lite
   - conan remote add bincrafters https://api.bintray.com/conan/bincrafters/public-conan
   - conan install .. -s compiler.libcxx=libstdc++11 -s cppstd=14 -s build_type=$CONFIG -o telnetpp:shared=$SHARED -o telnetpp:sanitize=$SANITIZE -o telnetpp:withTests=True -o telnetpp:withZlib=True -o telnetpp:coverage=$COVERAGE --build=missing
 
