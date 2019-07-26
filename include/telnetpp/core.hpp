@@ -1,7 +1,7 @@
 #pragma once
 
 #include "telnetpp/detail/export.hpp"
-#include <gsl-lite.h>
+#include <gsl/gsl-lite.hpp>
 #include <string>
 #include <cstdint>
 

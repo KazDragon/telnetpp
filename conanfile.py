@@ -15,7 +15,7 @@ class ConanTelnetpp(ConanFile):
                 "boost_exception/[>=1.69]@bincrafters/stable",
                 "boost_signals2/[>=1.69]@bincrafters/stable",
                 "boost_variant/[>=1.69]@bincrafters/stable",
-                "gsl-lite/[>=0.26]@nonstd-lite/stable")
+                "gsl-lite/[>=0.34]@nonstd-lite/stable")
     options = {"shared": [True, False], "withTests": [True, False], "withZlib": [True, False], "coverage": [True, False], "sanitize" : ["off", "address"]}
     default_options = {"shared": False, "withTests": False, "withZlib": True, "coverage": False, "sanitize": "off"}
 
