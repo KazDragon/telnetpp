@@ -69,8 +69,8 @@ matrix:
 cache:
   - apt: true
   - directories:
-    - .conan
-    - lcov
+    - $HOME/.conan
+    - $HOME/lcov
 
 before_install:
 # Set up CC/CXX variables.
@@ -94,8 +94,8 @@ before_install:
 before_script:
   - mkdir build || true
   - cd build
-  - conan remote add nonstd-lite https://api.bintray.com/conan/martinmoene/nonstd-lite
-  - conan remote add bincrafters https://api.bintray.com/conan/bincrafters/public-conan
+  - conan remote add nonstd-lite https://api.bintray.com/conan/martinmoene/nonstd-lite || true
+  - conan remote add bincrafters https://api.bintray.com/conan/bincrafters/public-conan || true
   - conan install .. -s compiler.libcxx=libstdc++11 -s cppstd=14 -s build_type=$CONFIG -o telnetpp:shared=$SHARED -o telnetpp:sanitize=$SANITIZE -o telnetpp:withTests=True -o telnetpp:withZlib=True -o telnetpp:coverage=$COVERAGE --build=missing
 
 script:
