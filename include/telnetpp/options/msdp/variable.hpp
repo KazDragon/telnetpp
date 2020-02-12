@@ -5,6 +5,7 @@
 #include <boost/variant.hpp>
 #include <iosfwd>
 #include <string>
+#include <ostream>
 
 namespace telnetpp { namespace options { namespace msdp {
 
