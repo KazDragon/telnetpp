@@ -1,5 +1,6 @@
 #include "telnetpp/options/msdp/detail/decoder.hpp"
 #include "telnetpp/options/msdp/detail/protocol.hpp"
+#include <vector>
 #include <cassert>
 #include <functional>
 
