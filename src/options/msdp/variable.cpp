@@ -1,5 +1,6 @@
 #include "telnetpp/options/msdp/variable.hpp"
 #include "telnetpp/detail/lambda_visitor.hpp"
+#include <ostream>
 
 namespace telnetpp { namespace options { namespace msdp {
 
