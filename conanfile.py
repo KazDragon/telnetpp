@@ -16,20 +16,17 @@ class ConanTelnetpp(ConanFile):
                 "boost_signals2/[>=1.69]@bincrafters/stable",
                 "boost_variant/[>=1.69]@bincrafters/stable",
                 "gsl-lite/[>=0.34]@nonstd-lite/stable")
-    options = {"shared": [True, False], "withTests": [True, False], "withZlib": [True, False], "coverage": [True, False], "sanitize" : ["off", "address"]}
-    default_options = {"shared": False, "withTests": False, "withZlib": True, "coverage": False, "sanitize": "off"}
+    build_requires = ("gtest/[>=1.8.1]@bincrafters/stable")
+    options = {"shared": [True, False], "withZlib": [True, False], "coverage": [True, False], "sanitize" : ["off", "address"]}
+    default_options = {"shared": False, "withZlib": True, "coverage": False, "sanitize": "off"}
 
     def requirements(self):
-        if (self.options.withTests):
-            self.requires("gtest/[>=1.8.1]@bincrafters/stable")
-
         if (self.options.withZlib):
             self.requires("zlib/[>=1.2.11]@conan/stable")
 
     def configure_cmake(self):
         cmake = CMake(self)
         cmake.definitions["BUILD_SHARED_LIBS"] = self.options.shared
-        cmake.definitions["TELNETPP_WITH_TESTS"] = self.options.withTests
         cmake.definitions["TELNETPP_WITH_ZLIB"] = self.options.withZlib
         cmake.definitions["TELNETPP_COVERAGE"] = self.options.coverage
         cmake.definitions["TELNETPP_SANITIZE"] = self.options.sanitize
