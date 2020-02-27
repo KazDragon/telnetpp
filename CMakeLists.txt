@@ -12,12 +12,10 @@ if (POLICY CMP0063)
     cmake_policy(SET CMP0063 OLD) # Do not allow hidden visibility for static libs
 endif()
 
-option(TELNETPP_WITH_TESTS "Build with tests included" False)
 option(TELNETPP_WITH_ZLIB "Build using ZLib" False)
 option(TELNETPP_COVERAGE  "Build with code coverage options")
 option(TELNETPP_SANITIZE "Build using sanitizers" "")
 message("Building Telnet++ with config: ${CMAKE_BUILD_TYPE}")
-message("Building Telnet++ with tests: ${TELNETPP_WITH_TESTS}")
 message("Building Telnet++ with zlib: ${TELNETPP_WITH_ZLIB}")
 message("Building Telnet++ with code coverage: ${TELNETPP_COVERAGE}")
 message("Building Telnet++ with sanitizers: ${TELNETPP_SANITIZE}")
@@ -239,78 +237,76 @@ install(
         lib/telnetpp-${TELNETPP_VERSION}
 )
 
-if (TELNETPP_WITH_TESTS)
-    enable_testing()
+enable_testing()
 
+set (telnetpp_tester_external_tests
+    test/client_option_test.cpp
+    test/command_router_test.cpp
+    test/echo_client_test.cpp
+    test/echo_server_test.cpp
+    test/generator_test.cpp
+    test/mccp_client_test.cpp
+    test/mccp_server_test.cpp
+    test/msdp_client_test.cpp
+    test/msdp_server_test.cpp
+    test/naws_client_test.cpp
+    test/naws_server_test.cpp
+    test/new_environ_client_test.cpp
+    test/new_environ_server_test.cpp
+    test/negotiation_router_test.cpp
+    test/parser_test.cpp
+    test/q_method_test.cpp
+    test/server_option_test.cpp
+    test/session_test.cpp
+    test/subnegotiation_router_test.cpp
+    test/suppress_ga_client_test.cpp
+    test/suppress_ga_server_test.cpp
+    test/terminal_type_client_test.cpp
+)
+
+# The tests for the zlib compressors for MCCP should only be compiled into
+# the executable if zlib is available.
+if (TELNETPP_WITH_ZLIB)
     set (telnetpp_tester_external_tests
-        test/client_option_test.cpp
-        test/command_router_test.cpp
-        test/echo_client_test.cpp
-        test/echo_server_test.cpp
-        test/generator_test.cpp
-        test/mccp_client_test.cpp
-        test/mccp_server_test.cpp
-        test/msdp_client_test.cpp
-        test/msdp_server_test.cpp
-        test/naws_client_test.cpp
-        test/naws_server_test.cpp
-        test/new_environ_client_test.cpp
-        test/new_environ_server_test.cpp
-        test/negotiation_router_test.cpp
-        test/parser_test.cpp
-        test/q_method_test.cpp
-        test/server_option_test.cpp
-        test/session_test.cpp
-        test/subnegotiation_router_test.cpp
-        test/suppress_ga_client_test.cpp
-        test/suppress_ga_server_test.cpp
-        test/terminal_type_client_test.cpp
+        ${telnetpp_tester_external_tests}
+        test/mccp_zlib_compressor_test.cpp
+        test/mccp_zlib_decompressor_test.cpp
     )
+endif()
 
-    # The tests for the zlib compressors for MCCP should only be compiled into
-    # the executable if zlib is available.
-    if (TELNETPP_WITH_ZLIB)
-        set (telnetpp_tester_external_tests
-            ${telnetpp_tester_external_tests}
-            test/mccp_zlib_compressor_test.cpp
-            test/mccp_zlib_decompressor_test.cpp
-        )
-    endif()
-
-    # If we are building shared libraries, then we wont be able to test any of
-    # the modules in the detail directory since they're not visible (this is ok,
-    # since all those are tested indirectly via other parts of the API anyway.)
-    # For a normal archive, all symbols are visible, so they can be tested directly.
-    if (BUILD_SHARED_LIBS)
-        set(telnetpp_tester_tests
-            ${telnetpp_tester_external_tests}
-        )
-    else()
-        set(telnetpp_tester_tests
-            ${telnetpp_tester_internal_tests}
-            ${telnetpp_tester_external_tests}
-        )
-    endif()
-
-    add_executable(telnetpp_tester
-        ${telnetpp_tester_tests}
+# If we are building shared libraries, then we wont be able to test any of
+# the modules in the detail directory since they're not visible (this is ok,
+# since all those are tested indirectly via other parts of the API anyway.)
+# For a normal archive, all symbols are visible, so they can be tested directly.
+if (BUILD_SHARED_LIBS)
+    set(telnetpp_tester_tests
+        ${telnetpp_tester_external_tests}
     )
+else()
+    set(telnetpp_tester_tests
+        ${telnetpp_tester_internal_tests}
+        ${telnetpp_tester_external_tests}
+    )
+endif()
 
+add_executable(telnetpp_tester
+    ${telnetpp_tester_tests}
+)
+
+target_link_libraries(telnetpp_tester
+    PRIVATE
+        telnetpp
+        CONAN_PKG::gtest
+)
+
+if (TELNETPP_WITH_ZLIB)
     target_link_libraries(telnetpp_tester
         PRIVATE
-            telnetpp
-            CONAN_PKG::gtest
+            CONAN_PKG::zlib
     )
-
-    if (TELNETPP_WITH_ZLIB)
-        target_link_libraries(telnetpp_tester
-            PRIVATE
-                CONAN_PKG::zlib
-        )
-    endif()
-
-    add_test(telnetpp_test telnetpp_tester)
 endif()
+
+add_test(telnetpp_test telnetpp_tester)
 
 # Add a rule for generating documentation
 if (DOXYGEN_FOUND)
