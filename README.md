@@ -15,7 +15,23 @@ Telnet++ is an implementation of the Telnet Session Layer protocol that is used 
 
 # Requirements
 
-Telnet++ requires a C++14 compiler and the Conan package manager.
+Telnet++ requires a C++14 compiler and uses the Conan package manager by default.  It currently uses the following libraries:
+  * Boost
+  * GSL-lite
+  * (Optionally) ZLib
+  * (For testing only) Google Test
+
+# Installation - Conan
+
+By default, the library uses [The Conan Package Manager](https://conan.io/) to manage its dependencies.  
+
+See [the rot13server example](examples/rot13server) for a minimalistic project that describes this setup.
+
+# Installation - Manual
+
+However, Telnet++ can be installed in a more direct manner.  For example, by plugging the files directly
+into a sub-project in your favourite IDE.  As long as the dependencies are satisfied (see Requirements, above),
+and the compiler is capable of understanding C++14 code, this should work.
 
 # Features / Roadmap / Progress
 
