@@ -1,0 +1,7 @@
+[requires]
+serverpp/[>=0.0.3]@kazdragon/conan-public
+telnetpp/[>=2.0.1]@kazdragon/conan-public
+boost_range/[>=1.69]@bincrafters/stable
+
+[generators]
+cmake
