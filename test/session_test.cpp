@@ -561,7 +561,7 @@ TEST(session_test, telnet_data_can_be_received_piecemeal)
 
     for (auto ch : content)
     {
-        telnetpp::bytes const byte_content { ch };
+        telnetpp::bytes const byte_content { &ch, 1 };
         session.receive(
             byte_content,
             [&received_content](telnetpp::bytes content, auto const &cont)

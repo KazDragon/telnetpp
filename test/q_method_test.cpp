@@ -124,6 +124,7 @@ protected:
 using a_client_option_being_activated =
     an_option_being_activated<telnetpp::client_option>;
 using a_server_option_being_activated =
+    an_option_being_activated<telnetpp::server_option>;
 
 TEST_F(a_client_option_being_activated, ignores_activate_requests)
 {

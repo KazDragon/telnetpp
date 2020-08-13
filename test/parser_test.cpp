@@ -406,7 +406,7 @@ TEST_F(parser_test, many_elements_parses_to_many_elements)
     static constexpr telnetpp::byte const expected_values8[] = { 'g', 'h' };
     static constexpr telnetpp::bytes const expected8{expected_values8};
     static constexpr telnetpp::negotiation const expected9 = {telnetpp::wont, 0xFF};
-    static constexpr telnetpp::byte const expected_value10 = { 'i' };
+    static constexpr telnetpp::byte const expected_value10[] = { 'i' };
     static constexpr telnetpp::bytes const expected10{expected_value10};
 
     parse(data);

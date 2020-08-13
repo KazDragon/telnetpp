@@ -48,7 +48,7 @@ TEST_F(in_an_active_new_environ_client, requesting_no_variables_requests_empty_l
 
             ASSERT_EQ(expected_result, elem);
 
-            results.push_back(elem);
+            results.push_back({&elem, 1});
         });
 
     ASSERT_EQ(size_t{1}, results.size());
@@ -80,7 +80,7 @@ TEST_F(in_an_active_new_environ_client, requesting_one_var_variable_requests_use
 
             ASSERT_EQ(expected_result, elem);
 
-            results.push_back(elem);
+            results.push_back({&elem, 1});
         });
 
     ASSERT_EQ(size_t{1}, results.size());
@@ -112,7 +112,7 @@ TEST_F(in_an_active_new_environ_client, requesting_one_user_variable_requests_us
 
             ASSERT_EQ(expected_result, elem);
 
-            results.push_back(elem);
+            results.push_back({&elem, 1});
         });
 
     ASSERT_EQ(size_t{1}, results.size());
@@ -151,7 +151,7 @@ TEST_F(in_an_active_new_environ_client, requesting_two_variables_requests_two_va
 
             ASSERT_EQ(expected_result, elem);
 
-            results.push_back(elem);
+            results.push_back({&elem, 1});
         });
 
     ASSERT_EQ(size_t{1}, results.size());
@@ -183,7 +183,7 @@ TEST_F(in_an_active_new_environ_client, requesting_uservar_with_var_in_name_is_e
 
             ASSERT_EQ(expected_result, elem);
 
-            results.push_back(elem);
+            results.push_back({&elem, 1});
         });
 
     ASSERT_EQ(size_t{1}, results.size());
@@ -215,7 +215,7 @@ TEST_F(in_an_active_new_environ_client, requesting_uservar_with_value_in_name_is
 
             ASSERT_EQ(expected_result, elem);
 
-            results.push_back(elem);
+            results.push_back({&elem, 1});
         });
 
     ASSERT_EQ(size_t{1}, results.size());
@@ -247,7 +247,7 @@ TEST_F(in_an_active_new_environ_client, requesting_uservar_with_esc_in_name_is_e
 
             ASSERT_EQ(expected_result, elem);
 
-            results.push_back(elem);
+            results.push_back({&elem, 1});
         });
 
     ASSERT_EQ(size_t{1}, results.size());
@@ -279,7 +279,7 @@ TEST_F(in_an_active_new_environ_client, requesting_uservar_with_uservar_in_name_
 
             ASSERT_EQ(expected_result, elem);
 
-            results.push_back(elem);
+            results.push_back({&elem, 1});
         });
 
     ASSERT_EQ(size_t{1}, results.size());

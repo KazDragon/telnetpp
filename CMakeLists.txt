@@ -20,8 +20,12 @@ message("Building Telnet++ with zlib: ${TELNETPP_WITH_ZLIB}")
 message("Building Telnet++ with code coverage: ${TELNETPP_COVERAGE}")
 message("Building Telnet++ with sanitizers: ${TELNETPP_SANITIZE}")
 
-include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-conan_basic_setup(TARGETS NO_OUTPUT_DIRS)
+set (CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
+if (EXISTS ${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
+    include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
+    conan_basic_setup(TARGETS NO_OUTPUT_DIRS)
+endif()
 
 # The required C++ Standard for Telnet++ is C++14.
 set(CMAKE_CXX_STANDARD 14)
@@ -155,9 +159,7 @@ add_library(telnetpp
 target_link_libraries(telnetpp
     PUBLIC
         CONAN_PKG::gsl-lite
-        CONAN_PKG::boost_container
-        CONAN_PKG::boost_signals2
-        CONAN_PKG::boost_variant
+        CONAN_PKG::boost
 )
 
 if (TELNETPP_WITH_ZLIB)
