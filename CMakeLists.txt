@@ -48,113 +48,99 @@ if (TELNETPP_COVERAGE)
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} --coverage")
 endif()
 
-set (TELNETPP_PUBLIC_SOURCE_FILES
-    src/command.cpp
-    src/element.cpp
-    src/negotiation.cpp
-    src/options/mccp/client.cpp
-    src/options/mccp/codec.cpp
-    src/options/mccp/server.cpp
-    src/options/msdp/client.cpp
-    src/options/msdp/server.cpp
-    src/options/msdp/variable.cpp
-    src/options/naws/client.cpp
-    src/options/naws/server.cpp
-    src/options/new_environ/client.cpp
-    src/options/new_environ/server.cpp
-    src/options/terminal_type/client.cpp
-    src/session.cpp
-    src/subnegotiation.cpp
-)
+add_library(telnetpp)
 
-set (TELNETPP_PUBLIC_HEADER_FILES
-    include/telnetpp/client_option.hpp
-    include/telnetpp/command.hpp
-    include/telnetpp/core.hpp
-    include/telnetpp/element.hpp
-    include/telnetpp/generator.hpp
-    include/telnetpp/negotiation.hpp
-    include/telnetpp/option.hpp
-    include/telnetpp/parser.hpp
-    include/telnetpp/server_option.hpp
-    include/telnetpp/session.hpp
-    include/telnetpp/subnegotiation.hpp
-    include/telnetpp/telnetpp.hpp
-    include/telnetpp/version.hpp
-    include/telnetpp/options/echo/client.hpp
-    include/telnetpp/options/echo/server.hpp
-    include/telnetpp/options/mccp/client.hpp
-    include/telnetpp/options/mccp/codec.hpp
-    include/telnetpp/options/mccp/server.hpp
-    include/telnetpp/options/msdp/client.hpp
-    include/telnetpp/options/msdp/server.hpp
-    include/telnetpp/options/msdp/variable.hpp
-    include/telnetpp/options/naws/client.hpp
-    include/telnetpp/options/naws/server.hpp
-    include/telnetpp/options/new_environ/client.hpp
-    include/telnetpp/options/new_environ/server.hpp
-    include/telnetpp/options/terminal_type/client.hpp
-    include/telnetpp/options/subnegotiationless_client.hpp
-    include/telnetpp/options/subnegotiationless_server.hpp
-    include/telnetpp/options/suppress_ga/client.hpp
-    include/telnetpp/options/suppress_ga/server.hpp
+target_sources(telnetpp
+    PRIVATE
+        include/telnetpp/client_option.hpp
+        include/telnetpp/command.hpp
+        include/telnetpp/core.hpp
+        include/telnetpp/element.hpp
+        include/telnetpp/generator.hpp
+        include/telnetpp/negotiation.hpp
+        include/telnetpp/option.hpp
+        include/telnetpp/parser.hpp
+        include/telnetpp/server_option.hpp
+        include/telnetpp/session.hpp
+        include/telnetpp/subnegotiation.hpp
+        include/telnetpp/telnetpp.hpp
+        include/telnetpp/version.hpp
+        include/telnetpp/options/echo/client.hpp
+        include/telnetpp/options/echo/server.hpp
+        include/telnetpp/options/mccp/client.hpp
+        include/telnetpp/options/mccp/codec.hpp
+        include/telnetpp/options/mccp/server.hpp
+        include/telnetpp/options/msdp/client.hpp
+        include/telnetpp/options/msdp/server.hpp
+        include/telnetpp/options/msdp/variable.hpp
+        include/telnetpp/options/naws/client.hpp
+        include/telnetpp/options/naws/server.hpp
+        include/telnetpp/options/new_environ/client.hpp
+        include/telnetpp/options/new_environ/server.hpp
+        include/telnetpp/options/terminal_type/client.hpp
+        include/telnetpp/options/subnegotiationless_client.hpp
+        include/telnetpp/options/subnegotiationless_server.hpp
+        include/telnetpp/options/suppress_ga/client.hpp
+        include/telnetpp/options/suppress_ga/server.hpp
+
+        include/telnetpp/detail/command_router.hpp
+        include/telnetpp/detail/export.hpp
+        include/telnetpp/detail/generate_helper.hpp
+        include/telnetpp/detail/lambda_visitor.hpp
+        include/telnetpp/detail/negotiation_router.hpp
+        include/telnetpp/detail/parse_helper.hpp
+        include/telnetpp/detail/registration.hpp
+        include/telnetpp/detail/return_default.hpp
+        include/telnetpp/detail/router.hpp
+        include/telnetpp/detail/subnegotiation_router.hpp
+        include/telnetpp/options/echo/detail/protocol.hpp
+        include/telnetpp/options/mccp/detail/protocol.hpp
+        include/telnetpp/options/msdp/detail/decoder.hpp
+        include/telnetpp/options/msdp/detail/encoder.hpp
+        include/telnetpp/options/msdp/detail/protocol.hpp
+        include/telnetpp/options/naws/detail/protocol.hpp
+        include/telnetpp/options/new_environ/detail/protocol.hpp
+        include/telnetpp/options/new_environ/detail/for_each_request.hpp
+        include/telnetpp/options/new_environ/detail/for_each_response.hpp
+        include/telnetpp/options/new_environ/detail/request_parser_helper.hpp
+        include/telnetpp/options/new_environ/detail/response_parser_helper.hpp
+        include/telnetpp/options/new_environ/detail/stream.hpp
+        include/telnetpp/options/suppress_ga/detail/protocol.hpp
+    
+        src/command.cpp
+        src/element.cpp
+        src/negotiation.cpp
+        src/options/mccp/client.cpp
+        src/options/mccp/codec.cpp
+        src/options/mccp/server.cpp
+        src/options/msdp/client.cpp
+        src/options/msdp/server.cpp
+        src/options/msdp/variable.cpp
+        src/options/naws/client.cpp
+        src/options/naws/server.cpp
+        src/options/new_environ/client.cpp
+        src/options/new_environ/server.cpp
+        src/options/terminal_type/client.cpp
+        src/session.cpp
+        src/subnegotiation.cpp
+
+        src/options/msdp/detail/decoder.cpp
+        src/options/msdp/detail/encoder.cpp
+        src/options/new_environ/detail/stream.cpp
+        src/detail/registration.cpp
 )
 
 # The zlib compressors for MCCP should only be compiled into the library
 # if zlib is available.
 if (TELNETPP_WITH_ZLIB)
-    set (TELNETPP_PUBLIC_SOURCE_FILES
-        ${TELNETPP_PUBLIC_SOURCE_FILES}
-        src/options/mccp/zlib/compressor.cpp
-        src/options/mccp/zlib/decompressor.cpp
-    )
-
-    set (TELNETPP_PUBLIC_INCLUDE_FILES
-        ${TELNETPP_PUBLIC_SOURCE_FILES}
-        include/telnetpp/options/mccp/zlib/compressor.hpp
-        include/telnetpp/options/mccp/zlib/decompressor.hpp
+    target_sources(telnetpp
+        PRIVATE
+            include/telnetpp/options/mccp/zlib/compressor.hpp
+            include/telnetpp/options/mccp/zlib/decompressor.hpp
+            src/options/mccp/zlib/compressor.cpp
+            src/options/mccp/zlib/decompressor.cpp
     )
 endif()
-
-set (TELNETPP_PRIVATE_SOURCE_FILES
-    src/options/msdp/detail/decoder.cpp
-    src/options/msdp/detail/encoder.cpp
-    src/options/new_environ/detail/stream.cpp
-    src/detail/registration.cpp
-)
-
-set (TELNETPP_PRIVATE_HEADER_FILES
-    include/telnetpp/detail/command_router.hpp
-    include/telnetpp/detail/export.hpp
-    include/telnetpp/detail/generate_helper.hpp
-    include/telnetpp/detail/lambda_visitor.hpp
-    include/telnetpp/detail/negotiation_router.hpp
-    include/telnetpp/detail/parse_helper.hpp
-    include/telnetpp/detail/registration.hpp
-    include/telnetpp/detail/return_default.hpp
-    include/telnetpp/detail/router.hpp
-    include/telnetpp/detail/subnegotiation_router.hpp
-    include/telnetpp/options/echo/detail/protocol.hpp
-    include/telnetpp/options/mccp/detail/protocol.hpp
-    include/telnetpp/options/msdp/detail/decoder.hpp
-    include/telnetpp/options/msdp/detail/encoder.hpp
-    include/telnetpp/options/msdp/detail/protocol.hpp
-    include/telnetpp/options/naws/detail/protocol.hpp
-    include/telnetpp/options/new_environ/detail/protocol.hpp
-    include/telnetpp/options/new_environ/detail/for_each_request.hpp
-    include/telnetpp/options/new_environ/detail/for_each_response.hpp
-    include/telnetpp/options/new_environ/detail/request_parser_helper.hpp
-    include/telnetpp/options/new_environ/detail/response_parser_helper.hpp
-    include/telnetpp/options/new_environ/detail/stream.hpp
-    include/telnetpp/options/suppress_ga/detail/protocol.hpp
-)
-
-add_library(telnetpp
-    ${TELNETPP_PUBLIC_HEADER_FILES}
-    ${TELNETPP_PUBLIC_SOURCE_FILES}
-    ${TELNETPP_PRIVATE_SOURCE_FILES}
-    ${TELNETPP_PRIVATE_INCLUDE_FILES}
-)
 
 target_link_libraries(telnetpp
     PUBLIC
@@ -180,7 +166,6 @@ target_include_directories(telnetpp
     PUBLIC
         $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
         $<INSTALL_INTERFACE:include/telnetpp-${TELNETPP_VERSION}>
-        "${Boost_INCLUDE_DIRS}"
 )
 
 generate_export_header(telnetpp
@@ -241,59 +226,43 @@ install(
 
 enable_testing()
 
-set (telnetpp_tester_external_tests
-    test/client_option_test.cpp
-    test/command_router_test.cpp
-    test/echo_client_test.cpp
-    test/echo_server_test.cpp
-    test/generator_test.cpp
-    test/mccp_client_test.cpp
-    test/mccp_server_test.cpp
-    test/msdp_client_test.cpp
-    test/msdp_server_test.cpp
-    test/naws_client_test.cpp
-    test/naws_server_test.cpp
-    test/new_environ_client_test.cpp
-    test/new_environ_server_test.cpp
-    test/negotiation_router_test.cpp
-    test/parser_test.cpp
-    test/q_method_test.cpp
-    test/server_option_test.cpp
-    test/session_test.cpp
-    test/subnegotiation_router_test.cpp
-    test/suppress_ga_client_test.cpp
-    test/suppress_ga_server_test.cpp
-    test/terminal_type_client_test.cpp
+add_executable(telnetpp_tester)
+
+target_sources(telnetpp_tester
+    PRIVATE
+        test/client_option_test.cpp
+        test/command_router_test.cpp
+        test/echo_client_test.cpp
+        test/echo_server_test.cpp
+        test/generator_test.cpp
+        test/mccp_client_test.cpp
+        test/mccp_server_test.cpp
+        test/msdp_client_test.cpp
+        test/msdp_server_test.cpp
+        test/naws_client_test.cpp
+        test/naws_server_test.cpp
+        test/new_environ_client_test.cpp
+        test/new_environ_server_test.cpp
+        test/negotiation_router_test.cpp
+        test/parser_test.cpp
+        test/q_method_test.cpp
+        test/server_option_test.cpp
+        test/session_test.cpp
+        test/subnegotiation_router_test.cpp
+        test/suppress_ga_client_test.cpp
+        test/suppress_ga_server_test.cpp
+        test/terminal_type_client_test.cpp
 )
 
 # The tests for the zlib compressors for MCCP should only be compiled into
 # the executable if zlib is available.
 if (TELNETPP_WITH_ZLIB)
-    set (telnetpp_tester_external_tests
-        ${telnetpp_tester_external_tests}
-        test/mccp_zlib_compressor_test.cpp
-        test/mccp_zlib_decompressor_test.cpp
+    target_sources(telnetpp_tester
+        PRIVATE
+            test/mccp_zlib_compressor_test.cpp
+            test/mccp_zlib_decompressor_test.cpp
     )
 endif()
-
-# If we are building shared libraries, then we wont be able to test any of
-# the modules in the detail directory since they're not visible (this is ok,
-# since all those are tested indirectly via other parts of the API anyway.)
-# For a normal archive, all symbols are visible, so they can be tested directly.
-if (BUILD_SHARED_LIBS)
-    set(telnetpp_tester_tests
-        ${telnetpp_tester_external_tests}
-    )
-else()
-    set(telnetpp_tester_tests
-        ${telnetpp_tester_internal_tests}
-        ${telnetpp_tester_external_tests}
-    )
-endif()
-
-add_executable(telnetpp_tester
-    ${telnetpp_tester_tests}
-)
 
 target_link_libraries(telnetpp_tester
     PRIVATE
