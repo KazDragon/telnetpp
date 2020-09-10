@@ -93,6 +93,11 @@ before_install:
 # install conan for package dependencies
   - pip3 install --user --upgrade setuptools
   - pip3 install --user conan
+
+# Important: conan center is rather slow when fetching Boost, and fill fail
+# a decent portion of the time unless it is given a loose timeout.
+  - conan config set general.request_timeout=120
+
 # install coverage software
   - if [ "$COVERAGE" == "True" ]; then gem install coveralls-lcov; fi
 
