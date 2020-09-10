@@ -32,5 +32,5 @@ target_include_directories(rot13_server
 target_link_libraries(rot13_server
     CONAN_PKG::serverpp
     CONAN_PKG::telnetpp
-    CONAN_PKG::boost_range
+    CONAN_PKG::boost
 )

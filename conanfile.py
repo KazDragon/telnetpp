@@ -3,7 +3,7 @@ from conans import CMake
 
 class ConanTelnetpp(ConanFile):
     name = "telnetpp"
-    version = "2.0.1"
+    version = "2.1.0"
     url = "https://github.com/KazDragon/telnetpp"
     author = "KazDragon"
     license = "MIT"
