@@ -3,10 +3,13 @@ A Simple ROT13 server showcasing Telnet++ and Server++.
 To build: you will need the Conan remotes that are registered with the following commands:
 
 ```
-conan remote add conan-center https://conan.bintray.com
-conan remote add bincrafters https://api.bintray.com/conan/bincrafters/public-conan
-conan remote add nonstd-lite https://api.bintray.com/conan/martinmoene/nonstd-lite
 conan remote add kazdragon-conan https://api.bintray.com/conan/kazdragon/conan-public
+```
+
+In addition, because Conan Center (currently) takes a while to work out where the Boost packages are, the following line is useful in order to make the build more robust:
+
+```
+conan config set general.request_timeout=120
 ```
 
 Conan packages are then installed as following:

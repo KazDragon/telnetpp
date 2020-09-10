@@ -32,7 +32,7 @@ public:
                     data
                 }};
                 
-                telnetpp::elements elems = { elem };
+                telnetpp::elements elems = { &elem, 1 };
                 cont(elems);
             });
     }
