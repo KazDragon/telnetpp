@@ -17,22 +17,26 @@ Telnet++ is an implementation of the Telnet Session Layer protocol that is used 
 # Requirements
 
 Telnet++ requires a C++14 compiler and uses the Conan package manager by default.  It currently uses the following libraries:
-  * Boost
-  * GSL-lite
+  * Boost (At least version 1.69.0)
+  * GSL-lite (Exactly version 1.34 until 1.38 is available, due to [This issue](https://github.com/gsl-lite/gsl-lite/issues/270)
   * (Optionally) ZLib
   * (For testing only) Google Test
 
+# Installation - CMake
+
+Telnet++ can be installed from source using CMake.  This requires Boost, GSL-Lite and any other dependencies to have been installed beforehand, using their own instructions, or for the call to `cmake --configure` to be adjusted appropriately (e.g. `-DBOOST_ROOT=...` or `-Dgsl-lite_DIR=...`).  If you do not wish to install into a system directory, and thus avoid the use of sudo, you can also pass `-DCMAKE_INSTALL_PREFIX=...` into the `cmake --configure` call.
+
+    git clone https://github.com/KazDragon/telnetpp.git && cd telnetpp
+    mkdir build && cd build
+    cmake --configure -DCMAKE_BUILD_TYPE=Release ..
+    cmake --build .
+    sudo cmake --install .
+
 # Installation - Conan
 
-By default, the library uses [The Conan Package Manager](https://conan.io/) to manage its dependencies.  
+You can also use [The Conan Package Manager](https://conan.io/) to install Telnet++ and its dependencies.
 
 See [the rot13server example](examples/rot13server) for a minimalistic project that describes this setup.
-
-# Installation - Manual
-
-However, Telnet++ can be installed in a more direct manner.  For example, by plugging the files directly
-into a sub-project in your favourite IDE.  As long as the dependencies are satisfied (see Requirements, above),
-and the compiler is capable of understanding C++14 code, this should work.
 
 # Features / Roadmap / Progress
 
@@ -68,7 +72,7 @@ The protocol has three basic elements, all of which are accessed by using the 0x
 
 Without needing to negotiate any capabilities, Telnet offers some out-of-the-box commands.  These include Are You There, which is usually sent by the client to provoke a response from an otherwise-busy server; Erase Line, which could be used in interative applications to cancel a set of input, and several other commands used for negotiations between options.
 
-Commands are represented by the telnetpp::command class.
+Commands are represented by the [telnetpp::command](include/telnetpp/command.hpp) class.
 
 ## Negotiations
 
@@ -76,25 +80,25 @@ The Telnet protocol describes a model whereby the client and server maintain sep
 
 The various Telnet option specifications are not consistent in what is considered a server and what is considered a client, but for the purposes of this library, the server is considered as the side of the connection that does the thing, and the client is the side of the connection that wants the thing.  That is, the server reacts to DO and DONT and sends WILL and WONT, and the client reacts to WILL and WONT and sends DO and DONT.
 
-Negotiations are represented by the telnetpp::negotiation class.
+Negotiations are represented by the [telnetpp::negotiation](include/telnetpp/negotiation.hpp) class.
 
 ## Subnegotiations
 
 After an option has been negotiated, a new channel opens up to be able to communicate in an option-specific way to the remote terminal.  These are called subnegotiations, and each protocol defines its own sub-protocol.  For example, the NAWS (Negotiate About Window Size) sends five bytes when reporting window size, the first of which represents an "IS" token, and the following four bytes represent two two-byte pairs that are the window extends.
 
-Subnegotiations are represented by the telnetpp::subnegotiation class.
+Subnegotiations are represented by the [telnetpp::subnegotiation](include/telnetpp/subnegotiation.hpp) class.
 
 # Dataflow: Elements, Tokens and Streams
 
-A telnetpp::element is a Boost.Variant that may contain a command, a negotiation, a subnegotiation, or just a plain sequence of bytes representing non-Telnet-specific input/output.
+A [telnetpp::element](include/telnetpp/element.hpp) is a Boost.Variant that may contain a command, a negotiation, a subnegotiation, or just a plain sequence of bytes representing non-Telnet-specific input/output.
 
 # Stream-Unaware
 
-The Telnet++ library does not impose any requirement on any kind of data stream API.  In order to accomplish this, it makes heavy use of continuation functions.  See the telnetpp::session class for an in-depth explanation of how this works.
+The Telnet++ library does not impose any requirement on any kind of data stream API.  In order to accomplish this, it makes heavy use of continuation functions.  See the [telnetpp::session](include/telnetpp/session.hpp) class for an in-depth explanation of how this works.
 
 # Options
 
-As alluded to earlier, each distinct feature is represented by either a telnetpp::client_option or a telnetpp::server_option.  These both enjoy the same API; they only differ in the underlying protocol.  The user needs to know little about which actual negotiations and commands are sent.  There are two key functions and one signal for the option classes:
+As alluded to earlier, each distinct feature is represented by either a [telnetpp::client_option](include/telnetpp/client_option.hpp) or a [telnetpp::server_option](include/telnetpp/server_option.hpp).  These both enjoy the same [API](include/telnetpp/option.hpp); they only differ in the underlying protocol.  The user needs to know little about which actual negotiations and commands are sent.  There are two key functions and one signal for the option classes:
 
 * activate() - this is used to request activation on the remote side.
 * deactive() - this is used to request deactivation on the remote side.
@@ -102,7 +106,7 @@ As alluded to earlier, each distinct feature is represented by either a telnetpp
 
 # Session
 
-All of the above can be quite complicated to manage, so Telnet++ provides the telnetpp::session class.  This is the key abstraction of the Telnet++ library, and is used to manage an entire Telnet feature set for a connection.  This is accomplished by "install"ing handlers for commands and options:
+All of the above can be quite complicated to manage, so Telnet++ provides the [telnetpp::session](include/telnetpp/session.hpp) class.  This is the key abstraction of the Telnet++ library, and is used to manage an entire Telnet feature set for a connection.  This is accomplished by "install"ing handlers for commands and options:
 
 ```
 // A user-specified function for sending bytes to the remote.
