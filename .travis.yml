@@ -9,10 +9,11 @@ linux_gcc: &linux_gcc
     apt:
       sources:
         - ubuntu-toolchain-r-test
+        - sourceline: 'ppa:mhier/libboost-latest'
       packages:
         - g++-5
-        - python3
-        - python3-pip
+        - libgtest-dev
+        - boost1.74
 
 linux_clang: &linux_clang
   os: linux
@@ -23,10 +24,11 @@ linux_clang: &linux_clang
       sources:
         - ubuntu-toolchain-r-test
         - llvm-toolchain-trusty-4.0
+        - sourceline: 'ppa:mhier/libboost-latest'
       packages:
         - clang-4.0
-        - python3
-        - python3-pip
+        - libgtest-dev
+        - boost1.74
 
 matrix:
   include:
@@ -73,8 +75,9 @@ matrix:
 cache:
   - apt: true
   - directories:
-    - $HOME/.conan
     - $HOME/lcov
+    - $HOME/gtest
+    - $HOME/gsl-lite
 
 before_install:
 # Set up CC/CXX variables.
@@ -82,6 +85,10 @@ before_install:
   - export CMAKE=cmake
   - export COVERAGE=${COVERAGE:-False}
   - export SANITIZE=${SANITIZE:-off}
+
+# install coverage software
+  - if [ "$COVERAGE" == "True" ]; then gem install coveralls-lcov; fi
+  
 # workaround for not having lcov 1.13
   - if [ ! -d "lcov/usr/bin/lcov" ]; then
       wget http://ftp.de.debian.org/debian/pool/main/l/lcov/lcov_1.13.orig.tar.gz;
@@ -90,24 +97,35 @@ before_install:
       DESTDIR=$HOME/lcov make -C lcov-1.13/ install;
     fi
   - export LCOV=$HOME/lcov/usr/local/bin/lcov
-# install conan for package dependencies
-  - pip3 install --user --upgrade setuptools
-  - pip3 install --user conan
 
-# Important: conan center is rather slow when fetching Boost, and fill fail
-# a decent portion of the time unless it is given a loose timeout.
-  - conan config set general.request_timeout=120
+# workaround for gtest not providing its own libraries (sigh)
+  - if [ ! -d "gtest/libgtest.a" ]; then
+      mkdir gtest || true;
+      cd gtest;
+      $CMAKE /usr/src/gtest -DCMAKE_CXX_FLAGS='-fPIC' && make;
+      cd ..;
+    fi
+  - export GTEST_ROOT=$PWD/gtest
 
-# install coverage software
-  - if [ "$COVERAGE" == "True" ]; then gem install coveralls-lcov; fi
+# install gsl-lite
+  - if [ ! -d "gsl-lite/include/gsl/gsl-lite.hpp" ]; then
+      wget https://github.com/gsl-lite/gsl-lite/archive/v0.34.0.tar.gz;
+      tar -xzf v0.34.0.tar.gz;
+      mkdir gsl-lite || true;
+      cd gsl-lite-0.34.0;
+      $CMAKE -DCMAKE_INSTALL_PREFIX=$HOME/gsl-lite .;
+      make -j2 && make install;
+      cd ..;
+    fi
+  - export GSLLITE_ROOT=$PWD/gsl-lite
 
 before_script:
   - mkdir build || true
   - cd build
-  - conan install .. -s compiler.libcxx=libstdc++11 -s cppstd=14 -s build_type=$CONFIG -o telnetpp:shared=$SHARED -o telnetpp:sanitize=$SANITIZE -o telnetpp:withZlib=True -o telnetpp:coverage=$COVERAGE --build=missing
+  - $CMAKE -DCMAKE_BUILD_TYPE=$CONFIG -DBUILD_SHARED_LIBS=$SHARED -DTELNETPP_SANITIZE=$SANITIZE -DTELNETPP_COVERAGE=$COVERAGE -Dgsl-lite_DIR=$GSLLITE_ROOT/lib/cmake/gsl-lite ..
 
 script:
-  - conan build ..
+  - make VERBOSE=1
   - if [ "$COVERAGE" == "True" ]; then
         $LCOV --gcov-tool=gcov-5 --base-directory . --directory . --zerocounters -q;
     fi

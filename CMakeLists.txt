@@ -15,20 +15,33 @@ endif()
 option(TELNETPP_WITH_ZLIB "Build using ZLib" False)
 option(TELNETPP_COVERAGE  "Build with code coverage options")
 option(TELNETPP_SANITIZE "Build using sanitizers" "")
+option(TELNETPP_WITH_TESTS "Build with tests" True)
 message("Building Telnet++ with config: ${CMAKE_BUILD_TYPE}")
 message("Building Telnet++ with zlib: ${TELNETPP_WITH_ZLIB}")
 message("Building Telnet++ with code coverage: ${TELNETPP_COVERAGE}")
 message("Building Telnet++ with sanitizers: ${TELNETPP_SANITIZE}")
+message("Building Telnet++ with tests: ${TELNETPP_WITH_TESTS}")
 
 set (CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-if (EXISTS ${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-    include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-    conan_basic_setup(TARGETS NO_OUTPUT_DIRS)
-endif()
-
 # The required C++ Standard for Telnet++ is C++14.
 set(CMAKE_CXX_STANDARD 14)
+
+# Telnet++ requires at least Boost 1.69.
+find_package(Boost 1.69.0 REQUIRED COMPONENTS container)
+
+# Telnet++ requires exactly version 0.34 of gsl-lite
+find_package(gsl-lite 0.34.0 EXACT REQUIRED)
+
+# If we are building with ZLib, then we require the ZLib library
+if (${TELNETPP_WITH_ZLIB})
+    find_package(ZLIB REQUIRED)
+endif()
+
+# If we are building with tests, then we require the GTest library
+if (${TELNETPP_WITH_TESTS})
+    find_package(GTest REQUIRED)
+endif()
 
 # When building shared objects, etc., we only want to export certain symbols.
 # Therefore, we need to generate a header suitable for declaring which
@@ -144,14 +157,15 @@ endif()
 
 target_link_libraries(telnetpp
     PUBLIC
-        CONAN_PKG::gsl-lite
-        CONAN_PKG::boost
+        Boost::boost
+        Boost::container
+        gsl::gsl-lite
 )
 
 if (TELNETPP_WITH_ZLIB)
     target_link_libraries(telnetpp
         PRIVATE
-            CONAN_PKG::zlib
+             ZLIB::ZLIB
     )
 endif()
 
@@ -224,6 +238,7 @@ install(
         lib/telnetpp-${TELNETPP_VERSION}
 )
 
+if (TELNETPP_WITH_TESTS)
 enable_testing()
 
 add_executable(telnetpp_tester)
@@ -267,17 +282,19 @@ endif()
 target_link_libraries(telnetpp_tester
     PRIVATE
         telnetpp
-        CONAN_PKG::gtest
+        GTest::GTest
+        GTest::Main
 )
 
 if (TELNETPP_WITH_ZLIB)
     target_link_libraries(telnetpp_tester
         PRIVATE
-            CONAN_PKG::zlib
+            ZLIB::ZLIB
     )
 endif()
 
 add_test(telnetpp_test telnetpp_tester)
+endif()
 
 # Add a rule for generating documentation
 if (DOXYGEN_FOUND)
