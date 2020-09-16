@@ -28,7 +28,7 @@ set (CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_CXX_STANDARD 14)
 
 # Telnet++ requires at least Boost 1.69.
-find_package(Boost 1.69.0 REQUIRED)
+find_package(Boost 1.69.0 REQUIRED COMPONENTS container)
 
 # Telnet++ requires exactly version 0.34 of gsl-lite
 find_package(gsl-lite 0.34.0 EXACT REQUIRED)
@@ -157,6 +157,8 @@ endif()
 
 target_link_libraries(telnetpp
     PUBLIC
+        Boost::boost
+        Boost::container
         gsl::gsl-lite
 )
 
@@ -176,7 +178,6 @@ set_target_properties(telnetpp
 
 target_include_directories(telnetpp
     PUBLIC
-        ${Boost_INCLUDE_DIRS}
         $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
         $<INSTALL_INTERFACE:include/telnetpp-${TELNETPP_VERSION}>
 )
