@@ -85,6 +85,10 @@ before_install:
   - export CMAKE=cmake
   - export COVERAGE=${COVERAGE:-False}
   - export SANITIZE=${SANITIZE:-off}
+
+# install coverage software
+  - if [ "$COVERAGE" == "True" ]; then gem install coveralls-lcov; fi
+  
 # workaround for not having lcov 1.13
   - if [ ! -d "lcov/usr/bin/lcov" ]; then
       wget http://ftp.de.debian.org/debian/pool/main/l/lcov/lcov_1.13.orig.tar.gz;
