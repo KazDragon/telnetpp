@@ -33,60 +33,62 @@ linux_clang: &linux_clang
 matrix:
   include:
   - <<: *linux_gcc
-    env:
-      - MATRIX_EVAL="CC=gcc-5 && CXX=g++-5 && CONFIG=Debug && SHARED=False"
+      - MATRIX_EVAL="CC=gcc-5 && CXX=5++-5 && CONFIG=Release && SHARED=False && USE_CONAN=True"
 
-  - <<: *linux_gcc
-    env:
-      - MATRIX_EVAL="CC=gcc-5 && CXX=g++-5 && CONFIG=Debug && SHARED=True"
-
-  - <<: *linux_gcc
-    env:
-      - MATRIX_EVAL="CC=gcc-5 && CXX=g++-5 && CONFIG=Release && SHARED=False"
-
-  - <<: *linux_gcc
-    env:
-      - MATRIX_EVAL="CC=gcc-5 && CXX=g++-5 && CONFIG=Release && SHARED=True"
-
-  - <<: *linux_gcc
-    env:
-      - MATRIX_EVAL="CC=gcc-5 && CXX=g++-5 && CONFIG=Debug && SHARED=False && SANITIZE=address"
-
-  - <<: *linux_gcc
-    env:
-      - MATRIX_EVAL="CC=gcc-5 && CXX=g++-5 && CONFIG=Debug && SHARED=False && COVERAGE=True"
-
-  - <<: *linux_clang
-    env:
-     - MATRIX_EVAL="CC=clang-4.0 && CXX=clang++-4.0 && CONFIG=Debug && SHARED=False"
-
-  - <<: *linux_clang
-    env:
-     - MATRIX_EVAL="CC=clang-4.0 && CXX=clang++-4.0 && CONFIG=Debug && SHARED=True"
-
-  - <<: *linux_clang
-    env:
-     - MATRIX_EVAL="CC=clang-4.0 && CXX=clang++-4.0 && CONFIG=Release && SHARED=False"
-
-  - <<: *linux_clang
-    env:
-     - MATRIX_EVAL="CC=clang-4.0 && CXX=clang++-4.0 && CONFIG=Release && SHARED=False"
+#  - <<: *linux_gcc
+#    env:
+#      - MATRIX_EVAL="CC=gcc-5 && CXX=g++-5 && CONFIG=Debug && SHARED=False"
+#
+#  - <<: *linux_gcc
+#    env:
+#      - MATRIX_EVAL="CC=gcc-5 && CXX=g++-5 && CONFIG=Debug && SHARED=True"
+#
+#  - <<: *linux_gcc
+#    env:
+#      - MATRIX_EVAL="CC=gcc-5 && CXX=g++-5 && CONFIG=Release && SHARED=False"
+#
+#  - <<: *linux_gcc
+#    env:
+#      - MATRIX_EVAL="CC=gcc-5 && CXX=g++-5 && CONFIG=Release && SHARED=True"
+#
+#  - <<: *linux_gcc
+#    env:
+#      - MATRIX_EVAL="CC=gcc-5 && CXX=g++-5 && CONFIG=Debug && SHARED=False && SANITIZE=address"
+#
+#  - <<: *linux_gcc
+#    env:
+#      - MATRIX_EVAL="CC=gcc-5 && CXX=g++-5 && CONFIG=Debug && SHARED=False && COVERAGE=True"
+#
+#  - <<: *linux_clang
+#    env:
+#     - MATRIX_EVAL="CC=clang-4.0 && CXX=clang++-4.0 && CONFIG=Debug && SHARED=False"
+#
+#  - <<: *linux_clang
+#    env:
+#     - MATRIX_EVAL="CC=clang-4.0 && CXX=clang++-4.0 && CONFIG=Debug && SHARED=True"
+#
+#  - <<: *linux_clang
+#    env:
+#     - MATRIX_EVAL="CC=clang-4.0 && CXX=clang++-4.0 && CONFIG=Release && SHARED=False"
+#
+#  - <<: *linux_clang
+#    env:
+#     - MATRIX_EVAL="CC=clang-4.0 && CXX=clang++-4.0 && CONFIG=Release && SHARED=False"
 
 cache:
   - apt: true
   - directories:
     - $HOME/lcov
-    - $HOME/gsl-lite
-    - $HOME/gsl-lite
+    - $HOME/3party
+    - $HOME/.conan
 
 before_install:
 # Set up CC/CXX variables.
   - eval "${MATRIX_EVAL}"
-  - export CMAKE=cmake
+  - export EXTERNAL_ROOT=$HOME/3party
   - export COVERAGE=${COVERAGE:-False}
   - export SANITIZE=${SANITIZE:-off}
-  - export CMAKE_PREFIX_PATH=$HOME/local
-  - echo pwd=$PWD
+  - export BUILD_SHARED_LIBS=$SHARED
 
 # install coverage software
   - if [ "$COVERAGE" == "True" ]; then gem install coveralls-lcov; fi
@@ -105,31 +107,17 @@ before_install:
     fi
   - export LCOV=$HOME/lcov/usr/local/bin/lcov
 
-# workaround for gtest not providing its own libraries (sigh)
-  - if [ ! -d "gtest/libgtest.a" ]; then
-      mkdir gtest || true;
-      cd gtest;
-      $CMAKE /usr/src/gtest -DCMAKE_CXX_FLAGS='-fPIC' && make;
-      cd ..;
+# Install any external dependencies
+  - if [ "$USE_CONAN" == "True" ]; then
+      ./.travis/fetch_conan_dependencies.sh;
+    else
+      ./.travis/fetch_system_dependencies.sh;
     fi
-  - export GTEST_ROOT=$PWD/gtest
-
-# install gsl-lite
-  - if [ ! -d "gsl-lite/include/gsl/gsl-lite.hpp" ]; then
-      wget https://github.com/gsl-lite/gsl-lite/archive/v0.34.0.tar.gz;
-      tar -xzf v0.34.0.tar.gz;
-      mkdir gsl-lite || true;
-      cd gsl-lite-0.34.0;
-      $CMAKE -DCMAKE_INSTALL_PREFIX=$HOME/gsl-lite .;
-      make -j2 && make install;
-      cd ..;
-    fi
-  - export GSLLITE_ROOT=$PWD/gsl-lite
 
 before_script:
   - mkdir build || true
   - cd build
-  - $CMAKE -DCMAKE_BUILD_TYPE=$CONFIG -DBUILD_SHARED_LIBS=$SHARED -DTELNETPP_SANITIZE=$SANITIZE -DTELNETPP_COVERAGE=$COVERAGE -Dgsl-lite_DIR=$GSLLITE_ROOT/lib/cmake/gsl-lite ..
+  - cmake -DCMAKE_BUILD_TYPE=$CONFIG -DTELNETPP_SANITIZE=$SANITIZE -DTELNETPP_COVERAGE=$COVERAGE -DCMAKE_PREFIX_PATH=$EXTERNAL_ROOT ..
 
 script:
   - make VERBOSE=1
@@ -144,7 +132,7 @@ after_failure:
 after_success:
   - if [ "$COVERAGE" == "True" ]; then
         $LCOV --gcov-tool=gcov-5 --base-directory . --directory .  --capture --output-file coverage.info;
-        $LCOV --gcov-tool=gcov-5 --remove coverage.info '*/test/*' '/usr/*' '*/gsl-lite/*' --output-file coverage.info;
+        $LCOV --gcov-tool=gcov-5 --remove coverage.info '*/test/*' '/usr/*' '*/3party/*' --output-file coverage.info;
         $LCOV --gcov-tool=gcov-5 --list coverage.info;
         coveralls-lcov --repo-token ${COVERALLS_TOKEN} coverage.info;
     fi
