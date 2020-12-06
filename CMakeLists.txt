@@ -293,6 +293,7 @@ target_sources(telnetpp_tester
         test/command_router_test.cpp
         test/echo_client_test.cpp
         test/echo_server_test.cpp
+        test/element_test.cpp
         test/generator_test.cpp
         test/mccp_client_test.cpp
         test/mccp_server_test.cpp
