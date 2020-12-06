@@ -289,6 +289,7 @@ add_executable(telnetpp_tester)
 target_sources(telnetpp_tester
     PRIVATE
         test/client_option_test.cpp
+        test/command_test.cpp
         test/command_router_test.cpp
         test/echo_client_test.cpp
         test/echo_server_test.cpp

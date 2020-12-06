@@ -1,4 +1,5 @@
 #include "telnetpp/command.hpp"
+#include <boost/io/ios_state.hpp>
 #include <iostream>
 #include <iomanip>
 
@@ -23,8 +24,14 @@ std::ostream &operator<<(std::ostream &out, command const &cmd)
         case telnetpp::el  : out << "EL"; break;
         case telnetpp::ga  : out << "GA"; break;
         default :
-            out << "0x" << std::hex << int(cmd.value());
+        {
+            boost::io::ios_flags_saver ifs(out);
+            out << "0x" 
+                << std::hex << std::setfill('0') << std::setw(2) 
+                << std::uppercase
+                << int(cmd.value());
             break;
+        }
     }
 
     return out << "]";
