@@ -300,6 +300,7 @@ target_sources(telnetpp_tester
         test/msdp_server_test.cpp
         test/naws_client_test.cpp
         test/naws_server_test.cpp
+        test/negotiation_test.cpp
         test/new_environ_client_test.cpp
         test/new_environ_server_test.cpp
         test/negotiation_router_test.cpp
