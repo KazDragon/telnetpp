@@ -289,9 +289,11 @@ add_executable(telnetpp_tester)
 target_sources(telnetpp_tester
     PRIVATE
         test/client_option_test.cpp
+        test/command_test.cpp
         test/command_router_test.cpp
         test/echo_client_test.cpp
         test/echo_server_test.cpp
+        test/element_test.cpp
         test/generator_test.cpp
         test/mccp_client_test.cpp
         test/mccp_server_test.cpp
@@ -299,6 +301,7 @@ target_sources(telnetpp_tester
         test/msdp_server_test.cpp
         test/naws_client_test.cpp
         test/naws_server_test.cpp
+        test/negotiation_test.cpp
         test/new_environ_client_test.cpp
         test/new_environ_server_test.cpp
         test/negotiation_router_test.cpp
@@ -306,6 +309,7 @@ target_sources(telnetpp_tester
         test/q_method_test.cpp
         test/server_option_test.cpp
         test/session_test.cpp
+        test/subnegotiation_test.cpp
         test/subnegotiation_router_test.cpp
         test/suppress_ga_client_test.cpp
         test/suppress_ga_server_test.cpp

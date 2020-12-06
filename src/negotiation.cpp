@@ -1,4 +1,5 @@
 #include "telnetpp/negotiation.hpp"
+#include <boost/io/ios_state.hpp>
 #include <iostream>
 #include <iomanip>
 
@@ -17,12 +18,12 @@ std::ostream &operator<<(std::ostream &out, negotiation const &neg)
         case telnetpp::wont : out << "WONT"; break;
         case telnetpp::do_  : out << "DO"; break;
         case telnetpp::dont : out << "DONT"; break;
-        default :
-            out << "0x" << std::hex << int(neg.request());
-            break;
     }
 
-    return out << ",0x" << std::hex << int(neg.option_code()) << "]";
+    boost::io::ios_flags_saver ifs(out);
+    return out << ", 0x" 
+               << std::hex << std::setfill('0') << std::setw(2) << std::uppercase
+               << int(neg.option_code()) << "]";
 }
 
 }

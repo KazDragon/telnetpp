@@ -308,3 +308,35 @@ TEST_F(a_started_zlib_decompressor, can_decompress_large_data)
     ASSERT_EQ(large_data.size(), received_data_.size());
     ASSERT_EQ(large_data, received_data_);
 }
+
+TEST_F(a_started_zlib_decompressor, throws_corrupted_stream_error_if_invalid_data_is_received)
+{
+    z_stream stream = {};
+    auto response = deflateInit(&stream, Z_DEFAULT_COMPRESSION);
+    assert(response == Z_OK);
+
+    telnetpp::byte output_buffer[1023];
+    auto const test_data = "datadatadatadatadatadata"_tb;
+
+    stream.avail_in  = test_data.size();
+    stream.next_in   = const_cast<telnetpp::byte *>(test_data.data());
+    stream.avail_out = sizeof(output_buffer);
+    stream.next_out  = output_buffer;
+
+    response = deflate(&stream, Z_SYNC_FLUSH);
+    assert(response == Z_OK);
+
+    // Flip some of the bits of the first byte in the output buffer.  When
+    // decompressing this, it should be enough to trigger a corrupted stream.
+    output_buffer[0] ^= (output_buffer[0] & 0b01010101);
+
+    auto const compressed_stream = telnetpp::bytes{
+        output_buffer, stream.next_out
+    };
+
+    ASSERT_THROW(
+        decompress_data(compressed_stream), 
+        telnetpp::options::mccp::corrupted_stream_error);
+
+    deflateEnd(&stream);
+}

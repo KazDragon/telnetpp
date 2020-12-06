@@ -4,6 +4,7 @@
 #include "telnetpp/detail/hash.hpp"
 #include <iosfwd>
 #include <utility>
+#include <cassert>
 
 namespace telnetpp {
 
@@ -20,6 +21,10 @@ public:
       : request_(request),
         option_(option)
     {
+        assert(request == telnetpp::will
+            || request == telnetpp::wont
+            || request == telnetpp::do_
+            || request == telnetpp::dont);
     }
 
     //* =====================================================================

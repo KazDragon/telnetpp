@@ -22,7 +22,7 @@ TEST(negotiation_router_test, message_with_registered_key_goes_to_registered_fun
 {
     telnetpp::detail::negotiation_router router;
 
-    telnetpp::negotiation neg(0x00, 0x00);
+    telnetpp::negotiation neg(telnetpp::will, 0x00);
     telnetpp::negotiation expected(telnetpp::dont, 0x01);
     bool unregistered_route_called = false;
 
@@ -50,7 +50,7 @@ TEST(negotiation_router_test, message_with_unregistered_key_goes_to_unregistered
 {
     telnetpp::detail::negotiation_router router;
 
-    telnetpp::negotiation neg(0x00, 0x00);
+    telnetpp::negotiation neg(telnetpp::will, 0x00);
     telnetpp::negotiation expected(telnetpp::will, 0x02);
     telnetpp::negotiation unexpected(telnetpp::wont, 0x02);
 
