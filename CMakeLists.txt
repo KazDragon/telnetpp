@@ -308,6 +308,7 @@ target_sources(telnetpp_tester
         test/q_method_test.cpp
         test/server_option_test.cpp
         test/session_test.cpp
+        test/subnegotiation_test.cpp
         test/subnegotiation_router_test.cpp
         test/suppress_ga_client_test.cpp
         test/suppress_ga_server_test.cpp

@@ -1,4 +1,6 @@
 #include "telnetpp/subnegotiation.hpp"
+#include <boost/io/ios_state.hpp>
+#include <iomanip>
 #include <iostream>
 #include <utility>
 
@@ -9,13 +11,23 @@ namespace telnetpp {
 // ==========================================================================
 std::ostream &operator<<(std::ostream& out, const subnegotiation& sub)
 {
+    boost::io::ios_all_saver ias(out);
+
     out << "subnegotiation[0x"
-        << std::hex << int(sub.option())
+        << std::hex << std::setw(2) << std::setfill('0') << std::uppercase
+        << int(sub.option())
         << ", [";
+
+    bool first = true;
 
     for (auto &&byte : sub.content())
     {
-        out << "0x" << std::hex << int(byte) << ", ";
+        if (!std::exchange(first, false))
+        {
+            out << ", ";
+        }
+
+        out << "0x" << std::setw(2) << int(byte);
     }
 
     return out << "]]";
