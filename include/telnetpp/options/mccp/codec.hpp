@@ -79,7 +79,7 @@ private:
 /// \brief An exception that is thrown in the case that a stream of data
 /// cannot be decompressed.
 //* =========================================================================
-class corrupted_stream_error
+class TELNETPP_EXPORT corrupted_stream_error
   : virtual std::domain_error,
     virtual boost::exception
 {
