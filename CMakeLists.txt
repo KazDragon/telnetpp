@@ -58,8 +58,8 @@ else()
     # Telnet++ requires at least Boost 1.69.
     find_package(Boost 1.69.0 REQUIRED COMPONENTS container)
 
-    # Telnet++ requires exactly version 0.34 of gsl-lite
-    find_package(gsl-lite 0.34.0 EXACT REQUIRED)
+    # Telnet++ requires exactly 0.34 of gsl-lite.
+    find_package(gsl-lite 0.34.0 REQUIRED)
 
     # If we are building with ZLib, then we require the ZLib library
     if (${TELNETPP_WITH_ZLIB})
