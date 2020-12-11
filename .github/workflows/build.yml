@@ -1,0 +1,104 @@
+name: CMake
+
+on: [push, pull_request]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        include:
+          - build_type: Debug
+          - build_type: Release
+
+    env:
+      EXTERNAL_ROOT: /home/runner/3party
+      BUILD_TYPE: ${{ matrix.build_type }}
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Add Boost repository
+      shell: bash
+      run: sudo apt-add-repository ppa:mhier/libboost-latest
+    
+    - name: Install latest Boost
+      shell: bash
+      run: sudo apt install boost1.74
+      
+    - name: Install dependencies from source
+      run: .ci/fetch_system_dependencies.sh
+      
+    - name: Create Build Environment
+      run: cmake -E make_directory ${{runner.workspace}}/build
+
+    - name: Configure CMake
+      shell: bash
+      working-directory: ${{runner.workspace}}/build
+      run: cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DCMAKE_PREFIX_PATH=$EXTERNAL_ROOT -DTELNETPP_WITH_ZLIB=True
+
+    - name: Build
+      shell: bash
+      working-directory: ${{runner.workspace}}/build
+      run: cmake --build . --config $BUILD_TYPE
+
+    - name: Test
+      working-directory: ${{runner.workspace}}/build
+      shell: bash
+      run: ctest -C $BUILD_TYPE
+
+  build-conan:
+    runs-on: ubuntu-latest
+
+    env:
+      BUILD_TYPE: Release
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Extract branch name
+      shell: bash
+      run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
+      id: extract_branch
+
+    # Build a cache for conan packages.  A new branch will create a copy of
+    # the master cache, but the master cache isn't updated until something is
+    # merged to the master branch.
+    - name: Cache conan packages
+      uses: actions/cache@v2
+      with:
+        path: ~/.conan
+        key: conan-package-cache-${{ steps.extract_branch.outputs.branch }}
+        restore-keys: |
+          conan-package-cache-master
+
+    - name: Install Conan
+      run: |
+        pip3 install --upgrade --user wheel setuptools
+        pip3 install --user conan
+        echo "$HOME/.local/bin" >> $GITHUB_PATH
+
+    - name: Create Build Environment
+      run: cmake -E make_directory ${{runner.workspace}}/build
+
+    - name: Install dependencies from Conan
+      working-directory: ${{runner.workspace}}/build
+      run: |
+        conan config set general.request_timeout=120
+        conan install $GITHUB_WORKSPACE -s compiler.libcxx=libstdc++11 -s cppstd=14 -s build_type=$BUILD_TYPE --build=missing
+
+    - name: Configure CMake
+      shell: bash
+      working-directory: ${{runner.workspace}}/build
+      run: cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=$BUILD_TYPE
+
+    - name: Build
+      working-directory: ${{runner.workspace}}/build
+      shell: bash
+      run: cmake --build . --config $BUILD_TYPE
+
+    - name: Test
+      working-directory: ${{runner.workspace}}/build
+      shell: bash
+      run: ctest -C $BUILD_TYPE
