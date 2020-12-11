@@ -34,6 +34,7 @@ jobs:
       shell: bash
       run: |
         apt-cache search gcov
+        locate gcov
         sudo apt install gcov-5
       
     - name: Install Coverage reporting software
