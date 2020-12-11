@@ -1,7 +1,7 @@
 name: coverage
 
-on: pull_request
-on:
+on: 
+  pull_request:
   push:
     branches:
       - master
