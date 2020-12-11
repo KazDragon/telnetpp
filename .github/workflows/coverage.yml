@@ -32,7 +32,7 @@ jobs:
 
     - name: Install Coverage reporting software
       shell: bash
-      run: gem install --user-install coveralls-lcov
+      run: sudo gem install coveralls-lcov
         
     - name: Extract branch name
       shell: bash
