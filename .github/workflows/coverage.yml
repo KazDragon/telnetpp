@@ -59,7 +59,7 @@ jobs:
           mkdir -p $HOME/.lcov || true;
           DESTDIR=$HOME/.lcov make -C lcov-1.13/ install;
         fi
-        echo "##[set-output name=bin;]$(echo $HOME/.lcov/bin/lcov)"
+        echo "##[set-output name=bin;]$(echo $HOME/.lcov/usr/local/bin/lcov)"
       id: lcov
 
     - name: Install dependencies from source
