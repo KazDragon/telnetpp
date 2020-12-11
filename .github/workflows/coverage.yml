@@ -91,9 +91,8 @@ jobs:
 
     - name: Calculate coverage
       shell: bash
-      working-directory: ${{runner.workspace}}/build
       run: |
-        ${{ steps.lcov.outputs.bin }} --gcov-tool=gcov-7 --base-directory . --directory .  --capture --output-file coverage.info;
+        ${{ steps.lcov.outputs.bin }} --gcov-tool=gcov-7 --base-directory ${{runner.workspace}}/build --directory .  --capture --output-file coverage.info;
         ${{ steps.lcov.outputs.bin }} --gcov-tool=gcov-7 --remove coverage.info '*/test/*' '/usr/*' '*/3party/*' --output-file coverage.info;
         ${{ steps.lcov.outputs.bin }} --gcov-tool=gcov-7 --list coverage.info;
         coveralls-lcov --repo-token ${{ secrets.coveralls_token }} coverage.info;
