@@ -41,13 +41,13 @@ jobs:
 
 
     # Build a cache for LCOV.
-#    - name: Cache lcov
-#      uses: actions/cache@v2
-#      with:
-#        path: ~/.lcov
-#        key: lcov-cache-${{ steps.extract_branch.outputs.branch }}
-#        restore-keys: |
-#          lcov-cache-master
+    - name: Cache lcov
+      uses: actions/cache@v2
+      with:
+        path: ~/.lcov
+        key: lcov-cache-${{ steps.extract_branch.outputs.branch }}
+        restore-keys: |
+          lcov-cache-master
 
     - name: Install LCOV
       shell: bash
