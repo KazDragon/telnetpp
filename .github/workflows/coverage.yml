@@ -32,7 +32,9 @@ jobs:
 
     - name: Install Gcov-5
       shell: bash
-      run: sudo apt install gcov-5
+      run: |
+        apt-cache search gcov
+        sudo apt install gcov-5
       
     - name: Install Coverage reporting software
       shell: bash
