@@ -1,6 +1,10 @@
 name: build
 
-on: [push, pull_request]
+on: 
+  pull_request:
+  push:
+    branches:
+      - master
 
 jobs:
   build:
@@ -19,13 +23,11 @@ jobs:
     steps:
     - uses: actions/checkout@v2
 
-    - name: Add Boost repository
-      shell: bash
-      run: sudo apt-add-repository ppa:mhier/libboost-latest
-    
     - name: Install latest Boost
       shell: bash
-      run: sudo apt install boost1.74
+      run: |
+        sudo apt-add-repository ppa:mhier/libboost-latest
+        sudo apt install boost1.74
       
     - name: Install dependencies from source
       run: .ci/fetch_system_dependencies.sh
