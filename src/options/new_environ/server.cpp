@@ -2,7 +2,7 @@
 #include "telnetpp/options/new_environ/detail/for_each_request.hpp"
 #include "telnetpp/options/new_environ/detail/protocol.hpp"
 #include "telnetpp/options/new_environ/detail/stream.hpp"
-#include <numeric>
+#include <boost/range/algorithm/for_each.hpp>
 #include <utility>
 
 namespace telnetpp { namespace options { namespace new_environ {
@@ -45,28 +45,22 @@ void server::handle_subnegotiation(
     {
         // It can be assumed that this is an empty "SEND" subnegotiation.
         // This is interpreted to have the meaning "Send all the things".
-        std::accumulate(
-            variables_.begin(),
-            variables_.end(),
-            std::ref(response),
-            [&](auto &&storage, auto &&variable) -> telnetpp::byte_storage &
+        boost::for_each(
+            variables_,
+            [&](auto &&variable)
             {
                 this->append_variable(
                     response, variable_type::var, 
                     variable.first, variable.second);
-                return storage;
             });
 
-        std::accumulate(
-            user_variables_.begin(),
-            user_variables_.end(),
-            std::ref(response),
-            [&](auto &&storage, auto &&variable) -> telnetpp::byte_storage &
+        boost::for_each(
+            user_variables_,
+            [&](auto &&variable)
             {
                 this->append_variable(
-                    response, variable_type::uservar, 
+                    response, variable_type::uservar,
                     variable.first, variable.second);
-                return storage;
             });
     }
     else
