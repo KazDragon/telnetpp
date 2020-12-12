@@ -40,7 +40,7 @@ static element_string const element_strings[] = {
     element_string{ telnetpp::element{telnetpp::subnegotiation{0x01, subnegotiation1_content}}, "element[subnegotiation[0x01, [0x10, 0x80, 0xC0]]]" },
 };
 
-INSTANTIATE_TEST_CASE_P(
+INSTANTIATE_TEST_SUITE_P(
     elements_can_be_streamed_to_an_ostream,
     elements_with_strings,
     ValuesIn(element_strings)

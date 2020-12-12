@@ -104,7 +104,7 @@ TEST_F(a_started_zlib_compressor, compresses_received_data)
     assert(response == Z_OK);
 
     telnetpp::byte output_buffer[1024];
-    stream.avail_in  = received_data_.size();
+    stream.avail_in  = static_cast<uInt>(received_data_.size());
     stream.next_in   = const_cast<telnetpp::byte *>(received_data_.data());
     stream.avail_out = sizeof(output_buffer);
     stream.next_out  = output_buffer;
@@ -137,7 +137,7 @@ TEST_F(a_started_zlib_compressor, sends_a_stream_end_when_compression_is_ended)
     assert(response == Z_OK);
 
     telnetpp::byte output_buffer[1024];
-    stream.avail_in  = received_data_.size();
+    stream.avail_in  = static_cast<uInt>(received_data_.size());
     stream.next_in   = const_cast<telnetpp::byte *>(received_data_.data());
     stream.avail_out = sizeof(output_buffer);
     stream.next_out  = output_buffer;
@@ -182,7 +182,7 @@ TEST_F(a_started_zlib_compressor, can_compress_large_amounts_of_data)
     telnetpp::byte output_buffer[1024];
     std::vector<telnetpp::byte> decompressed_data;
 
-    stream.avail_in  = received_data_.size();
+    stream.avail_in  = static_cast<uInt>(received_data_.size());
     stream.next_in   = const_cast<telnetpp::byte *>(received_data_.data());
 
     while(stream.avail_in != 0)

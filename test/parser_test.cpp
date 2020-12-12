@@ -164,7 +164,7 @@ constexpr telnetpp::byte const ec_bytes[]  = { 0xFF, 0xF7 };
 constexpr telnetpp::byte const el_bytes[]  = { 0xFF, 0xF8 };
 constexpr telnetpp::byte const ga_bytes[]  = { 0xFF, 0xF9 };
 
-INSTANTIATE_TEST_CASE_P(
+INSTANTIATE_TEST_SUITE_P(
     commands_are_parsed_to_command_objects,
     for_non_negotiating_commands,
     ValuesIn(
@@ -211,7 +211,7 @@ constexpr telnetpp::byte const iac_sb[]   = { 0xFF, 0xFA };
 constexpr telnetpp::byte const iac_sb_option[] = { 0xFF, 0xFA, 0x00 };
 constexpr telnetpp::byte const iac_sb_option_iac[] = { 0xFF, 0xFA, 0x00, 0xFF };
 
-INSTANTIATE_TEST_CASE_P(
+INSTANTIATE_TEST_SUITE_P(
     negotiations_remain_unparsed,
     for_incomplete_negotiations,
     ValuesIn(
@@ -350,7 +350,7 @@ constexpr telnetpp::byte const wont_negotiation[] = { 0xFF, 0xFC, 0xBC };
 constexpr telnetpp::byte const do_negotiation[]   = { 0xFF, 0xFD, 0xCD };
 constexpr telnetpp::byte const dont_negotiation[] = { 0xFF, 0xFE, 0xDE };
 
-INSTANTIATE_TEST_CASE_P(
+INSTANTIATE_TEST_SUITE_P(
     negotiations_are_parsed_to_negotiation_objects,
     for_complete_negotiations,
     ValuesIn(
