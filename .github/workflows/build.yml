@@ -118,10 +118,13 @@ jobs:
 # This should always be a trivial operation.
     - uses: actions/checkout@v2
     
+    - name: Create Build Environment
+      run: cmake -E make_directory ${{runner.workspace}}/build
+
     - name: Configure CMake
       shell: bash
       working-directory: ${{runner.workspace}}/build
-      run: cmake $GITHUB_WORKSPACE -DTELNETPP_DOC_ONLY
+      run: cmake $GITHUB_WORKSPACE -DTELNETPP_DOC_ONLY=True
 
     - name: Build
       working-directory: ${{runner.workspace}}/build
