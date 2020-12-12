@@ -118,6 +118,10 @@ jobs:
 # This should always be a trivial operation.
     - uses: actions/checkout@v2
     
+    - name: Install Doxygen
+      shell: bash
+      run: sudo apt install doxygen
+
     - name: Create Build Environment
       run: cmake -E make_directory ${{runner.workspace}}/build
 
