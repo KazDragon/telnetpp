@@ -1,6 +1,7 @@
 #pragma once
 
-#include "telnetpp/server_option.hpp"
+#include "telnetpp/options/basic_server.hpp"
+#include "telnetpp/options/naws/detail/protocol.hpp"
 #include <boost/optional.hpp>
 #include <utility>
 
@@ -9,7 +10,8 @@ namespace telnetpp { namespace options { namespace naws {
 //* =========================================================================
 /// \brief An implementation of the server side of the Telnet NAWS option.
 //* =========================================================================
-class TELNETPP_EXPORT server : public telnetpp::server_option 
+class TELNETPP_EXPORT server 
+  : public telnetpp::options::basic_server<detail::option>
 {
 public:
     using window_dimension = std::uint16_t;
@@ -37,14 +39,6 @@ public:
     }
 
 private:
-    //* =====================================================================
-    /// \brief Called when a subnegotiation is received while the option is
-    /// active.  Override for option-specific functionality.
-    //* =====================================================================
-    void handle_subnegotiation(
-        telnetpp::bytes content,
-        continuation const &cont) override;
-
     //* =====================================================================
     /// \brief Report the window size.
     //* =====================================================================
