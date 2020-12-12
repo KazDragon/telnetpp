@@ -104,3 +104,34 @@ jobs:
       working-directory: ${{runner.workspace}}/build
       shell: bash
       run: ctest -C $BUILD_TYPE
+
+  build-docs:
+    runs-on: ubuntu-latest
+#   Only build documentation for valid builds on master.
+    needs: [build, build-conan]
+    if: github.ref == 'refs/heads/master'
+
+    steps:
+    - uses: actions/checkout@v2
+    
+    - name: Install Doxygen
+      shell: bash
+      run: sudo apt install doxygen
+
+    - name: Create Build Environment
+      run: cmake -E make_directory ${{runner.workspace}}/build
+
+    - name: Configure CMake
+      shell: bash
+      working-directory: ${{runner.workspace}}/build
+      run: cmake $GITHUB_WORKSPACE -DTELNETPP_DOC_ONLY=True
+
+    - name: Build
+      working-directory: ${{runner.workspace}}/build
+      shell: bash
+      run: cmake --build . --target telnetpp_doc
+
+    - uses: peaceiris/actions-gh-pages@v3
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: ${{runner.workspace}}/build/html

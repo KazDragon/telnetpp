@@ -16,11 +16,37 @@ option(TELNETPP_WITH_ZLIB "Build using ZLib" False)
 option(TELNETPP_COVERAGE  "Build with code coverage options")
 option(TELNETPP_SANITIZE "Build using sanitizers" "")
 option(TELNETPP_WITH_TESTS "Build with tests" True)
-message("Building Telnet++ with config: ${CMAKE_BUILD_TYPE}")
+option(TELNETPP_DOC_ONLY "Build only documentation" False)
+
+message("Building Telnet++ with build type: ${CMAKE_BUILD_TYPE}")
 message("Building Telnet++ with zlib: ${TELNETPP_WITH_ZLIB}")
 message("Building Telnet++ with code coverage: ${TELNETPP_COVERAGE}")
 message("Building Telnet++ with sanitizers: ${TELNETPP_SANITIZE}")
 message("Building Telnet++ with tests: ${TELNETPP_WITH_TESTS}")
+message("Building Telnet++ with only documentation: ${TELNETPP_DOC_ONLY}")
+
+# For producing automatically-generated documentation, we use Doxygen.
+find_package(Doxygen)
+
+# Add a rule for generating documentation
+if (DOXYGEN_FOUND)
+    configure_file(
+        ${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile.in
+        ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile
+        @ONLY)
+
+    add_custom_target(telnetpp_doc
+        ${DOXYGEN_EXECUTABLE} ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile
+        WORKING_DIRECTORY
+            ${CMAKE_CURRENT_BINARY_DIR}
+        COMMENT
+            "Generate API documentation with Doxygen" VERBATIM
+    )
+endif()
+
+if (TELNETPP_DOC_ONLY)
+    return()
+endif()
 
 if (EXISTS ${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
     message("Using Conan due to conanbuildinfo.cmake")
@@ -97,9 +123,6 @@ endif()
 # Therefore, we need to generate a header suitable for declaring which
 # symbols should be included.
 include(GenerateExportHeader)
-
-# For producing automatically-generated documentation, we use Doxygen.
-find_package(Doxygen)
 
 if (TELNETPP_SANITIZE)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=${TELNETPP_SANITIZE}")
@@ -332,22 +355,6 @@ target_link_libraries(telnetpp_tester
 )
 
 add_test(telnetpp_test telnetpp_tester)
-endif()
-
-# Add a rule for generating documentation
-if (DOXYGEN_FOUND)
-    configure_file(
-        ${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile.in
-        ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile
-        @ONLY)
-
-    add_custom_target(telnetpp_doc
-        ${DOXYGEN_EXECUTABLE} ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile
-        WORKING_DIRECTORY
-            ${CMAKE_CURRENT_BINARY_DIR}
-        COMMENT
-            "Generate API documentation with Doxygen" VERBATIM
-    )
 endif()
 
 # Add customizations for packaging
