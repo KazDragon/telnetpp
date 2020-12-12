@@ -22,23 +22,16 @@ jobs:
     steps:
     - uses: actions/checkout@v2
 
-    - name: Add Boost repository
-      shell: bash
-      run: sudo apt-add-repository ppa:mhier/libboost-latest
-    
     - name: Install latest Boost
       shell: bash
-      run: sudo apt install boost1.74
+      run: |
+        sudo apt-add-repository ppa:mhier/libboost-latest
+        sudo apt install boost1.74
 
-    - name: Install Coverage reporting software
-      shell: bash
-      run: sudo gem install coveralls-lcov
-        
     - name: Extract branch name
       shell: bash
       run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
       id: extract_branch
-
 
     # Build a cache for LCOV.
     - name: Cache lcov
