@@ -93,7 +93,7 @@ jobs:
       run: |
         mkdir ~/.coverage || true
         ${{ steps.lcov.outputs.bin }} --gcov-tool=gcov-7 --base-directory ${{runner.workspace}}/build --directory ${{runner.workspace}}/build  --capture --output-file ~/.coverage/lcov.info;
-        ${{ steps.lcov.outputs.bin }} --gcov-tool=gcov-7 --remove coverage.info '*/test/*' '/usr/*' '*/3party/*' --output-file ~/.coverage/lcov.info;
+        ${{ steps.lcov.outputs.bin }} --gcov-tool=gcov-7 --remove ~/.coverage/lcov.info '*/test/*' '/usr/*' '*/3party/*' --output-file ~/.coverage/lcov.info;
         ${{ steps.lcov.outputs.bin }} --gcov-tool=gcov-7 --list ~/.coverage/lcov.info;
 
     - name: Post coverage
