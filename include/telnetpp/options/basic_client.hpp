@@ -10,13 +10,13 @@ namespace telnetpp { namespace options {
 ///        the option.
 //* =========================================================================
 template <option_type Option>
-class subnegotiationless_client : public telnetpp::client_option
+class basic_client : public telnetpp::client_option
 {
 public:
     //* =====================================================================
     /// \brief Constructor
     //* =====================================================================
-    constexpr subnegotiationless_client() noexcept
+    constexpr basic_client() noexcept
       : client_option(Option)
     {
     }
