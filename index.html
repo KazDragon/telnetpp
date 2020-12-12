@@ -64,10 +64,7 @@ $(function() {
 <div class="title">Telnet++ </div>  </div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><p><a href="https://codedocs.xyz/KazDragon/telnetpp/"></a> <a href="https://en.wikipedia.org/wiki/MIT_License"></a> <a href="https://github.com/KazDragon/telnetpp/releases"></a> <a href="https://ci.appveyor.com/project/KazDragon/telnetpp/branch/master"></a> </p><div class="image">
-<object type="image/svg+xml" data="https://github.com/KazDragon/telnetpp/workflows/build/badge.svg" alt="Linux Build status"></object>
-</div>
-<p> <a href="https://coveralls.io/github/KazDragon/telnetpp?branch=master"></a> <a href="https://www.codacy.com/app/KazDragon/telnetpp?utm_source=github.com&amp;amp;utm_medium=referral&amp;amp;utm_content=KazDragon/telnetpp&amp;amp;utm_campaign=Badge_Grade"></a> <a href="https://bintray.com/kazdragon/conan-public/telnetpp%3Akazdragon/_latestVersion"></a></p>
+<div class="textblock"><p><a href="https://kazdragon.github.io/telnetpp/"></a> <a href="https://en.wikipedia.org/wiki/MIT_License"></a> <a href="https://github.com/KazDragon/telnetpp/releases"></a> <a href="https://ci.appveyor.com/project/KazDragon/telnetpp/branch/master"></a> <a href="https://github.com/KazDragon/telnetpp/actions?query=event%3Apush"></a> <a href="https://coveralls.io/github/KazDragon/telnetpp?branch=master"></a> <a href="https://www.codacy.com/app/KazDragon/telnetpp?utm_source=github.com&amp;amp;utm_medium=referral&amp;amp;utm_content=KazDragon/telnetpp&amp;amp;utm_campaign=Badge_Grade"></a> <a href="https://bintray.com/kazdragon/conan-public/telnetpp%3Akazdragon/_latestVersion"></a></p>
 <p><a href="https://github.com/KazDragon/telnetpp/issues"></a></p>
 <p><a href="https://gitter.im/KazDragon/telnetpp?utm_source=badge&amp;utm_medium=badge&amp;utm_campaign=pr-badge"></a></p>
 <p>Telnet++ is an implementation of the Telnet Session Layer protocol that is used primarily to negotiate a feature set between a client and server, the former of which is usually some kind of text-based terminal, Commonly used terminals include Xterm, PuTTY, and a whole host of Telnet-enabled MUD clients including Tintin++, MushClient, and more.</p>
@@ -119,8 +116,6 @@ sudo cmake --install .
 </ul>
 </li>
 </ol>
-<h1>Documentation</h1>
-<p>Reference documentation is automatically generated and published to <a href="https://kazdragon.github.io/telnetpp/">https://kazdragon.github.io/telnetpp/</a></p>
 <h1>Status</h1>
 <p>Telnet++ is automatically tested with MSVC 2019 and GNU g++ 7.5.</p>
 <h1>The Basics</h1>
@@ -152,7 +147,7 @@ sudo cmake --install .
 <div class="fragment"><div class="line">// A user-specified function used for receiving bytes sent from the</div><div class="line">// remote.</div><div class="line">int my_socket_receive(telnetpp::byte *buffer, int size);</div><div class="line"></div><div class="line">// A user-specified function that transmits data up to the application</div><div class="line">// Note that the second argument is used to tell the application how</div><div class="line">// it may send a respond to the data it receives.</div><div class="line">void my_application_receive(</div><div class="line">    telnetpp::bytes data,</div><div class="line">    std::function&lt;void (telnetpp::bytes)&gt; const &amp;send);</div><div class="line"></div><div class="line">telnetpp::byte my_buffer[1024];</div><div class="line">int amount_received = my_socket_receive(my_buffer, 1024);</div><div class="line"></div><div class="line">session.receive(</div><div class="line">    telnetpp::bytes{my_buffer, amount_received},</div><div class="line">    my_application_receive,</div><div class="line">    my_socket_send);</div></div><!-- fragment --> </div></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Sat Dec 12 2020 19:33:32 for Telnet++ by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Sat Dec 12 2020 20:28:03 for Telnet++ by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.13
 </small></address>
