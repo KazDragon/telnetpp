@@ -1,6 +1,7 @@
 #pragma once
 
-#include "telnetpp/server_option.hpp"
+#include "telnetpp/options/mccp/detail/protocol.hpp"
+#include "telnetpp/options/basic_server.hpp"
 
 namespace telnetpp { namespace options { namespace mccp {
 
@@ -10,7 +11,8 @@ class codec;
 /// \brief A server option responsible for negotiating the server part of the
 /// MCCP protocol.
 //* =========================================================================
-class TELNETPP_EXPORT server : public telnetpp::server_option
+class TELNETPP_EXPORT server 
+  : public telnetpp::options::basic_server<detail::option>
 {
 public:
     //* =====================================================================
@@ -36,14 +38,6 @@ public:
     void finish_compression(continuation const &cont);
     
 private:
-    //* =====================================================================
-    /// \brief Called when a subnegotiation is received while the option is
-    /// active.  Override for option-specific functionality.
-    //* =====================================================================
-    void handle_subnegotiation(
-        telnetpp::bytes data,
-        continuation const &cont) override;
-        
     codec &codec_;
     bool   compression_active_;
 };
