@@ -102,7 +102,7 @@ telnetpp::bytes decompressor::transform_chunk(
 
     byte receive_buffer[receive_buffer_size];
 
-    pimpl_->stream->avail_in  = data.size();
+    pimpl_->stream->avail_in  = static_cast<uInt>(data.size());
     pimpl_->stream->next_in   = const_cast<telnetpp::byte *>(data.data());
     pimpl_->stream->avail_out = receive_buffer_size;
     pimpl_->stream->next_out  = receive_buffer;
