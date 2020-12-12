@@ -1,5 +1,4 @@
 var searchData=
 [
-  ['negotiate',['negotiate',['../classtelnetpp_1_1option.html#a947c7c00f8a717731f1c79778ab60db4',1,'telnetpp::option']]],
-  ['negotiation',['negotiation',['../classtelnetpp_1_1negotiation.html#a11d1d66decdd3518004a62811b0668da',1,'telnetpp::negotiation']]]
+  ['install',['install',['../classtelnetpp_1_1session.html#af2e243439001b6c958f723f1c56c95d9',1,'telnetpp::session::install(telnetpp::command_type cmd, Continuation &amp;&amp;cont)'],['../classtelnetpp_1_1session.html#aaf35152bd66ec72dad49fe9203824616',1,'telnetpp::session::install(client_option &amp;option)'],['../classtelnetpp_1_1session.html#aaa4872d3b0c423b7e7fca86929d96372',1,'telnetpp::session::install(server_option &amp;option)']]]
 ];

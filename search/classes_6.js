@@ -1,8 +1,5 @@
 var searchData=
 [
-  ['server',['server',['../classtelnetpp_1_1options_1_1suppress__ga_1_1server.html',1,'telnetpp::options::suppress_ga::server'],['../classtelnetpp_1_1options_1_1new__environ_1_1server.html',1,'telnetpp::options::new_environ::server'],['../classtelnetpp_1_1options_1_1msdp_1_1server.html',1,'telnetpp::options::msdp::server'],['../classtelnetpp_1_1options_1_1mccp_1_1server.html',1,'telnetpp::options::mccp::server'],['../classtelnetpp_1_1options_1_1echo_1_1server.html',1,'telnetpp::options::echo::server'],['../classtelnetpp_1_1options_1_1naws_1_1server.html',1,'telnetpp::options::naws::server']]],
-  ['session',['session',['../classtelnetpp_1_1session.html',1,'telnetpp']]],
-  ['subnegotiation',['subnegotiation',['../classtelnetpp_1_1subnegotiation.html',1,'telnetpp']]],
-  ['subnegotiationless_5fclient',['subnegotiationless_client',['../classtelnetpp_1_1options_1_1subnegotiationless__client.html',1,'telnetpp::options']]],
-  ['subnegotiationless_5fserver',['subnegotiationless_server',['../classtelnetpp_1_1options_1_1subnegotiationless__server.html',1,'telnetpp::options']]]
+  ['request',['request',['../structtelnetpp_1_1options_1_1new__environ_1_1request.html',1,'telnetpp::options::new_environ']]],
+  ['response',['response',['../structtelnetpp_1_1options_1_1new__environ_1_1response.html',1,'telnetpp::options::new_environ']]]
 ];

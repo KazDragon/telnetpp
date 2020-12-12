@@ -1,5 +1,5 @@
 var searchData=
 [
-  ['hash_5fcombine',['hash_combine',['../classtelnetpp_1_1negotiation.html#a3b10cbca3a7af2de9b770a80f54cd3d5',1,'telnetpp::negotiation']]],
-  ['how_20to_20contribute_20to_20telnet_2b_2b',['How to Contribute to Telnet++',['../md__home_runner_work_telnetpp_telnetpp_CONTRIBUTING.html',1,'']]]
+  ['finish',['finish',['../classtelnetpp_1_1options_1_1mccp_1_1codec.html#aec05fe1cb850be999fe07a837cfc1d92',1,'telnetpp::options::mccp::codec']]],
+  ['finish_5fcompression',['finish_compression',['../classtelnetpp_1_1options_1_1mccp_1_1server.html#a414b0dd1bc77a74f22c4ebd73d1cd99f',1,'telnetpp::options::mccp::server']]]
 ];
