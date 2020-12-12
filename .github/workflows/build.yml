@@ -104,3 +104,25 @@ jobs:
       working-directory: ${{runner.workspace}}/build
       shell: bash
       run: ctest -C $BUILD_TYPE
+
+  build-docs:
+    runs-on: ubuntu-latest
+# TODO: enable these once testing is complete
+#   Only build documentation for valid builds on master.
+#    needs: [build, build-conan]
+#    if: github.ref == 'refs/heads/master'
+
+    steps:
+
+# Checkout the gh-pages branch and immediate rebase it onto master.
+# This should always be a trivial operation.
+    - uses: actions/checkout@v2
+    
+    - uses: mattnotmitt/doxygen-action@v1.1.0
+
+    - uses: peaceiris/actions-gh-pages@v3
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: ./html
+
+
