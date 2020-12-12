@@ -49,7 +49,7 @@ private:
       telnetpp::bytes data,
       continuation const &cont) override;
 
-    class impl;
+    struct impl;
     std::unique_ptr<impl> pimpl_;
 };
 
