@@ -1,6 +1,6 @@
 #pragma once
 
-#include "telnetpp/options/subnegotiationless_client.hpp"
+#include "telnetpp/options/basic_client.hpp"
 #include "telnetpp/options/echo/detail/protocol.hpp"
 
 namespace telnetpp { namespace options { namespace echo {
@@ -11,8 +11,10 @@ namespace telnetpp { namespace options { namespace echo {
 /// \brief An implementation of the client side of Telnet ECHO option
 /// \see https://tools.ietf.org/html/rfc857
 //* =========================================================================
-using client = telnetpp::options::subnegotiationless_client<
+class client : public telnetpp::options::basic_client<
     telnetpp::options::echo::detail::option
->;
+>
+{
+};
 
 }}}

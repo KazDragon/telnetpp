@@ -151,6 +151,8 @@ target_sources(telnetpp
         include/telnetpp/subnegotiation.hpp
         include/telnetpp/telnetpp.hpp
         include/telnetpp/version.hpp
+        include/telnetpp/options/basic_client.hpp
+        include/telnetpp/options/basic_server.hpp
         include/telnetpp/options/echo/client.hpp
         include/telnetpp/options/echo/server.hpp
         include/telnetpp/options/mccp/client.hpp
@@ -164,8 +166,6 @@ target_sources(telnetpp
         include/telnetpp/options/new_environ/client.hpp
         include/telnetpp/options/new_environ/server.hpp
         include/telnetpp/options/terminal_type/client.hpp
-        include/telnetpp/options/subnegotiationless_client.hpp
-        include/telnetpp/options/subnegotiationless_server.hpp
         include/telnetpp/options/suppress_ga/client.hpp
         include/telnetpp/options/suppress_ga/server.hpp
 
