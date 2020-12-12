@@ -1,11 +1,11 @@
 # Telnet++
 
-[![Documentation](https://codedocs.xyz/KazDragon/telnetpp.svg)](https://codedocs.xyz/KazDragon/telnetpp/)
-[![License](https://img.shields.io/github/license/KazDragon/telnetpp.svg)](https://en.wikipedia.org/wiki/MIT_License)
-[![GitHub Releases](https://img.shields.io/github/release/KazDragon/telnetpp.svg)](https://github.com/KazDragon/telnetpp/releases)
-[![MSVC Build status](https://ci.appveyor.com/api/projects/status/8mfv56qt8k2u4ibp/branch/master?svg=true)](https://ci.appveyor.com/project/KazDragon/telnetpp/branch/master)
-![Linux Build status](https://github.com/KazDragon/telnetpp/workflows/build/badge.svg)
-[![Coverage Status](https://coveralls.io/repos/github/KazDragon/telnetpp/badge.svg?branch=master)](https://coveralls.io/github/KazDragon/telnetpp?branch=master)
+[![Documentation](https://img.shields.io/badge/code-documented-brightgreen.svg?style=flat)](https://kazdragon.github.io/telnetpp/) 
+[![License](https://img.shields.io/github/license/KazDragon/telnetpp.svg)](https://en.wikipedia.org/wiki/MIT_License) 
+[![GitHub Releases](https://img.shields.io/github/release/KazDragon/telnetpp.svg)](https://github.com/KazDragon/telnetpp/releases) 
+[![MSVC Build status](https://ci.appveyor.com/api/projects/status/8mfv56qt8k2u4ibp/branch/master?svg=true)](https://ci.appveyor.com/project/KazDragon/telnetpp/branch/master) 
+[![Linux Build status](https://github.com/KazDragon/telnetpp/workflows/build/badge.svg)](https://github.com/KazDragon/telnetpp/actions?query=event%3Apush) 
+[![Coverage Status](https://coveralls.io/repos/github/KazDragon/telnetpp/badge.svg?branch=master)](https://coveralls.io/github/KazDragon/telnetpp?branch=master) 
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/63ec54845f2c41f1899706c61f1c316b)](https://www.codacy.com/app/KazDragon/telnetpp?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=KazDragon/telnetpp&amp;utm_campaign=Badge_Grade)
 [![Download](https://api.bintray.com/packages/kazdragon/conan-public/telnetpp%3Akazdragon/images/download.svg)](https://bintray.com/kazdragon/conan-public/telnetpp%3Akazdragon/_latestVersion)
 
@@ -60,10 +60,6 @@ See [the rot13server example](examples/rot13server) for a minimalistic project t
   * [x] MCCP - the Mud Client Compression Protocol (see http://tintin.sourceforge.net/mccp/)
 5. [x] Structures to hide the complexity of the layer (e.g. routers, parsers, generators).
   * [x] Session class that understands all of the helper structures and how to convert to and from a stream of bytes.
-
-# Documentation
-
-Reference documentation is automatically generated and published to https://kazdragon.github.io/telnetpp/
 
 # Status
 
