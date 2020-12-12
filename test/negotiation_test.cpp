@@ -46,7 +46,7 @@ static negotiation_string const negotiation_strings[] = {
     negotiation_string { telnetpp::negotiation{telnetpp::dont, 0xFF}, "negotiation[DONT, 0xFF]" },
 };
 
-INSTANTIATE_TEST_CASE_P(
+INSTANTIATE_TEST_SUITE_P(
     negotiations_can_be_streamed_to_an_ostream,
     negotiations_with_strings,
     ValuesIn(negotiation_strings)

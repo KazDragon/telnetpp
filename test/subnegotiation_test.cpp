@@ -47,7 +47,7 @@ static subnegotiation_string const subnegotiation_strings[] = {
     subnegotiation_string { 0x00, {0xAC, 0xDE}, "subnegotiation[0x00, [0xAC, 0xDE]]" },
 };
 
-INSTANTIATE_TEST_CASE_P(
+INSTANTIATE_TEST_SUITE_P(
     subnegotiations_can_be_streamed_to_an_ostream,
     subnegotiations_with_strings,
     ValuesIn(subnegotiation_strings)

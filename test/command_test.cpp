@@ -47,7 +47,7 @@ static command_string const command_strings[] = {
     command_string { telnetpp::command{ 0x1B          }, "command[0x1B]"},
 };
 
-INSTANTIATE_TEST_CASE_P(
+INSTANTIATE_TEST_SUITE_P(
     commands_can_be_streamed_to_an_ostream,
     commands_with_strings,
     ValuesIn(command_strings)
