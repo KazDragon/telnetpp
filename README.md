@@ -61,6 +61,10 @@ See [the rot13server example](examples/rot13server) for a minimalistic project t
 5. [x] Structures to hide the complexity of the layer (e.g. routers, parsers, generators).
   * [x] Session class that understands all of the helper structures and how to convert to and from a stream of bytes.
 
+# Documentation
+
+Reference documentation is automatically generated and published to https://kazdragon.github.io/telnetpp/
+
 # Status
 
 Telnet++ is automatically tested with MSVC 2019 and GNU g++ 7.5.
