@@ -10,7 +10,7 @@ namespace telnetpp { namespace options {
 ///        the option.
 //* =========================================================================
 template <option_type Option>
-class basic_client : public telnetpp::client_option
+class TELNETPP_EXPORT basic_client : public telnetpp::client_option
 {
 public:
     //* =====================================================================

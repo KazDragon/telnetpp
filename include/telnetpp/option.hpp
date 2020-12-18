@@ -43,7 +43,7 @@ template <
     telnetpp::command_type LocalNegative,
     telnetpp::command_type RemotePositive,
     telnetpp::command_type RemoteNegative>
-class option
+class TELNETPP_EXPORT option
 {
 public:
     using continuation = std::function<void (telnetpp::element const &)>;

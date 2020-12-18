@@ -1,5 +1,6 @@
 #pragma once
 
+#include "telnetpp/core.hpp"
 #include "telnetpp/options/basic_client.hpp"
 #include "telnetpp/options/suppress_ga/detail/protocol.hpp"
 
@@ -12,10 +13,12 @@ namespace telnetpp { namespace options { namespace suppress_ga {
 /// Ahead option.
 /// \see https://tools.ietf.org/html/rfc858
 //* =========================================================================
-class client : public telnetpp::options::basic_client<
+class TELNETPP_EXPORT client : public telnetpp::options::basic_client<
     telnetpp::options::suppress_ga::detail::option
 >
 {
+public:
+    client() noexcept;
 };
 
 }}}

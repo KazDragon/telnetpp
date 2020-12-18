@@ -1,5 +1,6 @@
 #pragma once
 
+#include "telnetpp/core.hpp"
 #include "telnetpp/options/basic_server.hpp"
 #include "telnetpp/options/echo/detail/protocol.hpp"
 
@@ -11,10 +12,12 @@ namespace telnetpp { namespace options { namespace echo {
 /// \brief An implementation of the server side of Telnet ECHO option
 /// \see https://tools.ietf.org/html/rfc857
 //* =========================================================================
-class server : public telnetpp::options::basic_server<
+class TELNETPP_EXPORT server : public telnetpp::options::basic_server<
     telnetpp::options::echo::detail::option
 >
 {
+public:
+    server() noexcept;
 };
 
 }}}
