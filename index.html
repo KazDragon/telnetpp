@@ -147,7 +147,7 @@ sudo cmake --install .
 <div class="fragment"><div class="line">// A user-specified function used for receiving bytes sent from the</div><div class="line">// remote.</div><div class="line">int my_socket_receive(telnetpp::byte *buffer, int size);</div><div class="line"></div><div class="line">// A user-specified function that transmits data up to the application</div><div class="line">// Note that the second argument is used to tell the application how</div><div class="line">// it may send a respond to the data it receives.</div><div class="line">void my_application_receive(</div><div class="line">    telnetpp::bytes data,</div><div class="line">    std::function&lt;void (telnetpp::bytes)&gt; const &amp;send);</div><div class="line"></div><div class="line">telnetpp::byte my_buffer[1024];</div><div class="line">int amount_received = my_socket_receive(my_buffer, 1024);</div><div class="line"></div><div class="line">session.receive(</div><div class="line">    telnetpp::bytes{my_buffer, amount_received},</div><div class="line">    my_application_receive,</div><div class="line">    my_socket_send);</div></div><!-- fragment --> </div></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Sat Dec 12 2020 20:28:03 for Telnet++ by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Fri Dec 18 2020 21:52:24 for Telnet++ by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.13
 </small></address>
