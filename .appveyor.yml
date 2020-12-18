@@ -14,11 +14,15 @@ configuration:
   - Debug
   - Release
 
+platform:
+  - x64
+
 environment:
   APPVEYOR_SAVE_CACHE_ON_ERROR: true
 
   matrix:
-    - platform: x64
+    - shared: True
+    - shared: False
 
 cache:
   - C:\Tools\vcpkg\installed
