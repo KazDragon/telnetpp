@@ -53,7 +53,7 @@ install:
 build_script:
   - mkdir build
   - cd build
-  - cmake -G "%generator%" -DCMAKE_TOOLCHAIN_FILE=C:/Tools/vcpkg/scripts/buildsystems/vcpkg.cmake -DTELNETPP_WITH_ZLIB=True  ..
+  - cmake -G "%generator%" -DCMAKE_TOOLCHAIN_FILE=C:/Tools/vcpkg/scripts/buildsystems/vcpkg.cmake -DTELNETPP_WITH_ZLIB=True -DBUILD_SHARED_LIBS=%shared% ..
   - cmake --build . --config %configuration%
 
 test_script:
