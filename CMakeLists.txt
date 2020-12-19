@@ -246,6 +246,16 @@ set_target_properties(telnetpp
         SOVERSION ${TELNETPP_VERSION}
 )
 
+target_compile_options(telnetpp
+    PRIVATE
+        # Do not generate warning C4251 (member needs dll linkage) on MSVC
+        $<$<CXX_COMPILER_ID:MSVC>:/wd4251>
+        # Do not generate warning C4275 (type needs dll linkage) on MSVC
+        $<$<CXX_COMPILER_ID:MSVC>:/wd4275>
+        # Any warning on MSVC is an error
+        $<$<CXX_COMPILER_ID:MSVC>:/WX>
+)
+
 target_include_directories(telnetpp
     PUBLIC
         $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
@@ -267,6 +277,8 @@ install(
     EXPORT
         telnetpp-config
     ARCHIVE DESTINATION
+        lib/telnetpp-${TELNETPP_VERSION}
+    RUNTIME DESTINATION
         lib/telnetpp-${TELNETPP_VERSION}
     LIBRARY DESTINATION
         lib/telnetpp-${TELNETPP_VERSION}
@@ -352,6 +364,16 @@ if (TELNETPP_WITH_ZLIB)
             test/mccp_zlib_decompressor_test.cpp
     )
 endif()
+
+target_compile_options(telnetpp_tester
+    PRIVATE
+        # Do not generate warning C4251 (member needs dll linkage) on MSVC
+        $<$<CXX_COMPILER_ID:MSVC>:/wd4251>
+        # Do not generate warning C4275 (type needs dll linkage) on MSVC
+        $<$<CXX_COMPILER_ID:MSVC>:/wd4275>
+        # Any warning on MSVC is an error
+        $<$<CXX_COMPILER_ID:MSVC>:/WX>
+)
 
 target_link_libraries(telnetpp_tester
     PRIVATE
