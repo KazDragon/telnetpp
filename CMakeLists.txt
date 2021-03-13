@@ -328,6 +328,14 @@ install(
         ${CMAKE_INSTALL_INCLUDEDIR}/telnetpp-${TELNETPP_VERSION}
 )
 
+install(
+    FILES
+        "${CMAKE_CURRENT_BINARY_DIR}/telnetpp-config.cmake"
+        "${CMAKE_CURRENT_BINARY_DIR}/telnetpp-config-version.cmake"
+    DESTINATION
+        ${CMAKE_INSTALL_DATADIR}/telnetpp-${TELNETPP_VERSION}
+)
+
 if (TELNETPP_WITH_TESTS)
 enable_testing()
 

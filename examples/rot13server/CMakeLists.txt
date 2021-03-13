@@ -3,8 +3,29 @@ project(ROT13_SERVER)
 cmake_minimum_required(VERSION 3.2 FATAL_ERROR)
 cmake_policy(VERSION 3.2)
 
-include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-conan_basic_setup(TARGETS NO_OUTPUT_DIRS)
+if (EXISTS ${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
+    include (${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
+    conan_basic_setup(TARGETS NO_OUTPUT_DIRS)
+
+    set(ROT13_SERVER_PRIVATE_LIBRARIES
+        CONAN_PKG::serverpp
+        CONAN_PKG::telnetpp
+        CONAN_PKG::boost
+    )
+else()
+    find_package(serverpp REQUIRED)
+    find_package(telnetpp REQUIRED)
+    find_package(Boost COMPONENTS container REQUIRED)
+    find_package(gsl-lite REQUIRED)
+    find_package(ZLIB REQUIRED)
+    find_package(Threads REQUIRED)
+
+    set(ROT13_SERVER_PRIVATE_LIBRARIES
+        KazDragon::serverpp
+        KazDragon::telnetpp
+        Boost::boost
+    )
+endif()
 
 # The required C++ Standard for Server++ is C++14.
 set(CMAKE_CXX_STANDARD 14)
@@ -30,7 +51,5 @@ target_include_directories(rot13_server
 )
 
 target_link_libraries(rot13_server
-    CONAN_PKG::serverpp
-    CONAN_PKG::telnetpp
-    CONAN_PKG::boost
+    ${ROT13_SERVER_PRIVATE_LIBRARIES}
 )
