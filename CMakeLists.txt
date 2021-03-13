@@ -135,6 +135,7 @@ if (TELNETPP_COVERAGE)
 endif()
 
 add_library(telnetpp)
+add_library(KazDragon::telnetpp ALIAS telnetpp)
 
 target_sources(telnetpp
     PRIVATE
