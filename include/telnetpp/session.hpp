@@ -208,17 +208,17 @@ public:
         auto const &token_handler =
             [&](telnetpp::element const &elem)
             {
-                auto generator = [&](telnetpp::element const &elem)
+                auto generator = [&](telnetpp::element const &elm)
                 {
-                    telnetpp::generate(elem, send_continuation);
+                    telnetpp::generate(elm, send_continuation);
                 };
 
                 detail::visit_lambdas(
                     elem,
-                    [&](telnetpp::bytes content)
+                    [&](telnetpp::bytes input_content)
                     {
                         receive_continuation(
-                            content, 
+                            input_content, 
                             [&](telnetpp::bytes data)
                             {
                                 generator(data);

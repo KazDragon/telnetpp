@@ -7,15 +7,15 @@ namespace telnetpp { namespace options { namespace new_environ {
 
 enum class request_parser_state
 {
-    send,
-    type,
-    name,
-    name_esc,
+    state_send,
+    state_type,
+    state_name,
+    state_name_esc,
 };
 
 struct request_parsing_state
 {
-    request_parser_state state = request_parser_state::send;
+    request_parser_state state = request_parser_state::state_send;
     request              req;
 };
 
@@ -25,10 +25,10 @@ struct request_parsing_state
 template <typename Continuation>
 void parse_request_send(
     request_parsing_state &state, 
-    telnetpp::bytes::iterator current, 
-    Continuation &&cont)
+    telnetpp::bytes::iterator /*current*/, 
+    Continuation &&/*cont*/)
 {
-    state.state = request_parser_state::type;
+    state.state = request_parser_state::state_type;
 }
 
 // ==========================================================================
@@ -38,10 +38,10 @@ template <typename Continuation>
 void parse_request_type(
     request_parsing_state &state, 
     telnetpp::bytes::iterator current, 
-    Continuation &&cont)
+    Continuation &&/*cont*/)
 {
     state.req.type = byte_to_type(*current);
-    state.state = request_parser_state::name;
+    state.state = request_parser_state::state_name;
 }
 
 // ==========================================================================
@@ -56,7 +56,7 @@ void parse_request_name(
     switch (*current)
     {
         case detail::esc:
-            state.state = request_parser_state::name_esc;
+            state.state = request_parser_state::state_name_esc;
             break;
 
         case detail::var: // Fall-through
@@ -79,10 +79,10 @@ template <typename Continuation>
 void parse_request_name_esc(
     request_parsing_state &state, 
     telnetpp::bytes::iterator current, 
-    Continuation &&cont)
+    Continuation &&/*cont*/)
 {
     state.req.name.push_back(*current);
-    state.state = request_parser_state::name;
+    state.state = request_parser_state::state_name;
 }
 
 // ==========================================================================
@@ -96,19 +96,19 @@ void parse_request_byte(
 {
     switch (state.state)
     {
-        case request_parser_state::send :
+        case request_parser_state::state_send :
             parse_request_send(state, current, cont);
             break;
 
-        case request_parser_state::type :
+        case request_parser_state::state_type :
             parse_request_type(state, current, cont);
             break;
 
-        case request_parser_state::name :
+        case request_parser_state::state_name :
             parse_request_name(state, current, cont);
             break;
 
-        case request_parser_state::name_esc :
+        case request_parser_state::state_name_esc :
             parse_request_name_esc(state, current, cont);
             break;
 

@@ -17,8 +17,8 @@ variable::variable()
 variable::variable(
     telnetpp::bytes name, 
     string_value value)
-  : name{name.begin(), name.end()},
-    value{std::move(value)}
+  : name_{name.begin(), name.end()},
+    value_{std::move(value)}
 {
 }
 
@@ -28,8 +28,8 @@ variable::variable(
 variable::variable(
     telnetpp::byte_storage name, 
     string_value value)
-  : name{std::move(name)},
-    value{std::move(value)}
+  : name_{std::move(name)},
+    value_{std::move(value)}
 {
 }
 
@@ -39,8 +39,8 @@ variable::variable(
 variable::variable(
     telnetpp::bytes name,
     array_value array_values)
-  : name{name.begin(), name.end()},
-    value{array_values}
+  : name_{name.begin(), name.end()},
+    value_{array_values}
 {
 }
 
@@ -50,8 +50,8 @@ variable::variable(
 variable::variable(
     telnetpp::byte_storage name,
     array_value array_values)
-  : name{std::move(name)},
-    value{std::move(array_values)}
+  : name_{std::move(name)},
+    value_{std::move(array_values)}
 {
 }
 
@@ -61,8 +61,8 @@ variable::variable(
 variable::variable(
     telnetpp::bytes name,
     table_value table_values)
-  : name{name.begin(), name.end()},
-    value{std::move(table_values)}
+  : name_{name.begin(), name.end()},
+    value_{std::move(table_values)}
 {
 }
 
@@ -72,8 +72,8 @@ variable::variable(
 variable::variable(
     telnetpp::byte_storage name,
     table_value table_values)
-  : name{std::move(name)},
-    value{std::move(table_values)}
+  : name_{std::move(name)},
+    value_{std::move(table_values)}
 {
 }
 
@@ -82,11 +82,11 @@ variable::variable(
 // ==========================================================================
 bool operator==(variable const &lhs, variable const &rhs)
 {
-    auto const &lhs_value = lhs.value;
+    auto const &lhs_value = lhs.value_;
 
-    return lhs.name == rhs.name
+    return lhs.name_ == rhs.name_
         && detail::visit_lambdas<bool>(
-               rhs.value,
+               rhs.value_,
                [&lhs_value](auto const &inner_rhs)
                {
                    return boost::get<decltype(inner_rhs)>(lhs_value)
@@ -107,10 +107,10 @@ bool operator!=(variable const &lhs, variable const &rhs)
 // ==========================================================================
 std::ostream &operator<<(std::ostream &out, variable const &var)
 {
-    out << reinterpret_cast<char const *>(var.name.c_str()) << "=";
+    out << reinterpret_cast<char const *>(var.name_.c_str()) << "=";
     
     detail::visit_lambdas(
-        var.value,
+        var.value_,
         [&](string_value const &sv)
         {
             out << "\"" << reinterpret_cast<char const *>(sv.c_str()) << "\"";

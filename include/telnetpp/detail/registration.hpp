@@ -36,7 +36,7 @@ void register_route_from_negotiation_to_option(
 {
     route.register_route(
         negotiation{request, option.option_code()},
-        [&option, request](auto &&neg, auto &&cont)
+        [&option, request](auto &&/*neg*/, auto &&cont)
         {
             return option.negotiate(request, cont);
         });

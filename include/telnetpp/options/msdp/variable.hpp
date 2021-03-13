@@ -67,8 +67,8 @@ struct TELNETPP_EXPORT variable
     //* =====================================================================
     variable(telnetpp::byte_storage name, table_value table_values);
     
-    telnetpp::byte_storage name;
-    value_type value;
+    telnetpp::byte_storage name_;
+    value_type value_;
 };
 
 //* =========================================================================
