@@ -14,8 +14,8 @@ public:
     //* =====================================================================
     /// \brief Constructor
     //* =====================================================================
-    explicit constexpr command(command_type command) noexcept
-      : command_(command)
+    explicit constexpr command(command_type cmnd) noexcept
+      : command_(cmnd)
     {
     }
 

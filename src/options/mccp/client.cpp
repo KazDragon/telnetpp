@@ -29,8 +29,8 @@ client::client(codec &cdc)
 // HANDLE_SUBNEGOTIATION
 // ==========================================================================
 void client::handle_subnegotiation(
-    telnetpp::bytes data,
-    continuation const &cont)
+    telnetpp::bytes /*data*/,
+    continuation const &/*cont*/)
 {
     codec_.start();
 }

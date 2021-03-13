@@ -10,35 +10,35 @@ namespace telnetpp { namespace options { namespace msdp { namespace detail {
 // ENCODE_VARIABLE
 // ==========================================================================
 void encode_variable(
-    telnetpp::options::msdp::variable const &var,
+    telnetpp::options::msdp::variable const &encode_var,
     telnetpp::byte_storage &storage)
 {
     storage.push_back(telnetpp::options::msdp::detail::var);
-    storage += var.name;
+    storage += encode_var.name_;
     storage.push_back(telnetpp::options::msdp::detail::val);
     
     telnetpp::detail::visit_lambdas(
-        var.value,
-        [&](telnetpp::options::msdp::string_value const &val)
+        encode_var.value_,
+        [&](telnetpp::options::msdp::string_value const &vbl)
         {
-            storage += val;
+            storage += vbl;
         },
         [&](telnetpp::options::msdp::array_value const &arr)
         {
             storage.push_back(telnetpp::options::msdp::detail::array_open);
-            for(auto const &val : arr)
+            for(auto const &vbl : arr)
             {
                 storage.push_back(telnetpp::options::msdp::detail::val);
-                storage += val;
+                storage += vbl;
             }
             storage.push_back(telnetpp::options::msdp::detail::array_close);
         },
         [&](telnetpp::options::msdp::table_value const &tbl)
         {
-            for (auto const &val : tbl)
+            for (auto const &vbl : tbl)
             {
                 storage.push_back(telnetpp::options::msdp::detail::table_open);
-                encode_variable(val, storage);
+                encode_variable(vbl, storage);
                 storage.push_back(telnetpp::options::msdp::detail::table_close);
             }
         });

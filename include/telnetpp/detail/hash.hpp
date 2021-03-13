@@ -6,7 +6,7 @@
 
 namespace telnetpp { namespace detail {
     
-constexpr void hash_combine(std::size_t &seed)
+constexpr void hash_combine(std::size_t &/*seed*/)
 {
 }
 

@@ -54,7 +54,7 @@ private:
     //* =====================================================================
     /// \brief A hook for when transformation stream ends.
     //* =====================================================================
-    virtual void do_finish(continuation const &cont) {};
+    virtual void do_finish(continuation const &/*cont*/) {};
 
     //* =====================================================================
     /// \brief Transform the given bytes, sending the transformed data

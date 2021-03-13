@@ -27,8 +27,8 @@ private:
     /// active.  Override for option-specific functionality.
     //* =====================================================================
     void handle_subnegotiation(
-        telnetpp::bytes content,
-        continuation const &cont) override
+        telnetpp::bytes /*content*/,
+        continuation const &/*cont*/) override
     {
     }
 };

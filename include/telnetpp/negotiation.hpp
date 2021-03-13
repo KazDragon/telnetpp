@@ -89,4 +89,4 @@ std::ostream &operator<<(std::ostream &out, negotiation const &cmd);
 // go to a different place than do/don't, for example).  Therefore, the entire
 // negotiation is the key in the lookup and needs to be hashable to go to the
 // unordered map.
-TELNETPP_MAKE_INTRUSIVE_HASH(telnetpp::negotiation);
+TELNETPP_MAKE_INTRUSIVE_HASH(telnetpp::negotiation)

@@ -20,14 +20,14 @@ std::ostream &operator<<(std::ostream& out, const subnegotiation& sub)
 
     bool first = true;
 
-    for (auto &&byte : sub.content())
+    for (auto &&by : sub.content())
     {
         if (!std::exchange(first, false))
         {
             out << ", ";
         }
 
-        out << "0x" << std::setw(2) << int(byte);
+        out << "0x" << std::setw(2) << int(by);
     }
 
     return out << "]]";

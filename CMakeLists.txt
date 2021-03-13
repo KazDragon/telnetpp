@@ -244,6 +244,7 @@ set_target_properties(telnetpp
         CXX_VISIBILITY_PRESET hidden
         VERSION ${TELNETPP_VERSION}
         SOVERSION ${TELNETPP_VERSION}
+        DEBUG_POSTFIX "d"
 )
 
 target_compile_options(telnetpp
@@ -254,6 +255,9 @@ target_compile_options(telnetpp
         $<$<CXX_COMPILER_ID:MSVC>:/wd4275>
         # Any warning on MSVC is an error
         $<$<CXX_COMPILER_ID:MSVC>:/WX>
+
+        # Add warnings on g++ and Clang
+        $<$<OR:$<CXX_COMPILER_ID:GNU>,$<CXX_COMPILER_ID:Clang>>:-Wall -Wextra -Wshadow -Wnon-virtual-dtor -Wpedantic -Wsign-conversion -Werror>
 )
 
 target_include_directories(telnetpp
@@ -271,41 +275,15 @@ configure_file(
     ${PROJECT_SOURCE_DIR}/include/telnetpp/version.hpp
     @ONLY)
 
-install(
-    TARGETS
-        telnetpp
-    EXPORT
-        telnetpp-config
-    ARCHIVE DESTINATION
-        lib/telnetpp-${TELNETPP_VERSION}
-    RUNTIME DESTINATION
-        lib/telnetpp-${TELNETPP_VERSION}
-    LIBRARY DESTINATION
-        lib/telnetpp-${TELNETPP_VERSION}
-)
-
-install(
-    DIRECTORY
-        include/
-    DESTINATION
-        include/telnetpp-${TELNETPP_VERSION}
-)
-
-export(
-    EXPORT
-        telnetpp-config
-    FILE
-        "${CMAKE_CURRENT_BINARY_DIR}/telnetpp-config.cmake"
-)
-
-install(
-    EXPORT
-        telnetpp-config
-    DESTINATION
-        lib/telnetpp-${TELNETPP_VERSION}
-)
-
+include(GNUInstallDirs)
 include(CMakePackageConfigHelpers)
+
+configure_package_config_file(
+    ${PROJECT_SOURCE_DIR}/cmake/telnetpp-config.cmake.in
+    ${CMAKE_CURRENT_BINARY_DIR}/telnetpp-config.cmake
+    INSTALL_DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/telnetpp
+)
+
 write_basic_package_version_file(
     "${CMAKE_CURRENT_BINARY_DIR}/telnetpp-config-version.cmake"
     VERSION
@@ -313,11 +291,49 @@ write_basic_package_version_file(
     COMPATIBILITY AnyNewerVersion
 )
 
+export(
+    TARGETS 
+        telnetpp
+    NAMESPACE 
+        KazDragon::
+    FILE ${PROJECT_BINARY_DIR}/telnetpp-targets.cmake
+)
+
+install(
+    TARGETS
+        telnetpp
+    EXPORT
+        telnetpp-targets
+    ARCHIVE DESTINATION
+        ${CMAKE_INSTALL_LIBDIR}/telnetpp-${TELNETPP_VERSION}
+    RUNTIME DESTINATION
+        ${CMAKE_INSTALL_LIBDIR}/telnetpp-${TELNETPP_VERSION}
+    LIBRARY DESTINATION
+        ${CMAKE_INSTALL_BINDIR}/telnetpp-${TELNETPP_VERSION}
+)
+
+install(
+    EXPORT
+        telnetpp-targets
+    NAMESPACE 
+        KazDragon::
+    DESTINATION
+        ${CMAKE_INSTALL_DATADIR}/telnetpp-${TELNETPP_VERSION}
+)
+
+install(
+    DIRECTORY
+        include/
+    DESTINATION
+        ${CMAKE_INSTALL_INCLUDEDIR}/telnetpp-${TELNETPP_VERSION}
+)
+
 install(
     FILES
+        "${CMAKE_CURRENT_BINARY_DIR}/telnetpp-config.cmake"
         "${CMAKE_CURRENT_BINARY_DIR}/telnetpp-config-version.cmake"
     DESTINATION
-        lib/telnetpp-${TELNETPP_VERSION}
+        ${CMAKE_INSTALL_DATADIR}/telnetpp-${TELNETPP_VERSION}
 )
 
 if (TELNETPP_WITH_TESTS)
