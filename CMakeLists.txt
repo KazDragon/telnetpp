@@ -1,6 +1,6 @@
 if (POLICY CMP0048)
     cmake_policy(SET CMP0048 NEW)
-    project(TELNETPP VERSION 2.1.2)
+    project(TELNETPP VERSION 2.2.0)
 else()
     project(TELNETPP)
 endif()
