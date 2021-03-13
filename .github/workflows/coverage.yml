@@ -26,7 +26,7 @@ jobs:
       shell: bash
       run: |
         sudo apt-add-repository ppa:mhier/libboost-latest
-        sudo apt install boost1.74
+        sudo apt install libboost1.74-dev
 
     - name: Extract branch name
       shell: bash
