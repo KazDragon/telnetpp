@@ -3,7 +3,7 @@ A Simple ROT13 server showcasing Telnet++ and Server++.
 To build: you will need the Conan remotes that are registered with the following commands:
 
 ```
-conan remote add kazdragon-conan https://api.bintray.com/conan/kazdragon/conan-public
+conan remote add kazdragon https://kazdragon.jfrog.io/artifactory/api/conan/conan-public
 ```
 
 In addition, because Conan Center (currently) takes a while to work out where the Boost packages are, the following line is useful in order to make the build more robust:
