@@ -18,7 +18,7 @@ Telnet++ is an implementation of the Telnet Session Layer protocol that is used 
 
 Telnet++ requires a C++14 compiler and the following libraries:
   * Boost (At least version 1.69.0)
-  * GSL-lite (Exactly version 1.34 until 1.38 is available, due to [This issue](https://github.com/gsl-lite/gsl-lite/issues/270)
+  * GSL-lite (At least version 1.38)
   * (Optionally) ZLib
   * (For testing only) Google Test
 

@@ -10,7 +10,7 @@ class ConanTelnetpp(ConanFile):
     generators = "cmake"
     exports = "*.hpp", "*.in", "*.cpp", "CMakeLists.txt", "*.md", "LICENSE"
     description = "A library for handling the Telnet protocol"
-    requires = ("boost/[>=1.69]", "gsl-lite/[=0.34]")
+    requires = ("boost/[>=1.69]", "gsl-lite/[>=0.38]")
     build_requires = ("gtest/[>=1.8.1]")
     options = {"shared": [True, False], "withZlib": [True, False], "coverage": [True, False], "sanitize" : ["off", "address"]}
     default_options = {"shared": False, "withZlib": True, "coverage": False, "sanitize": "off"}
