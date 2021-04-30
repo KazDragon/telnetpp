@@ -6,6 +6,5 @@ var searchData=
   ['compressor_8',['compressor',['../classtelnetpp_1_1options_1_1mccp_1_1zlib_1_1compressor.html',1,'telnetpp::options::mccp::zlib::compressor'],['../classtelnetpp_1_1options_1_1mccp_1_1zlib_1_1compressor.html#aa4721bb05fea285de1d58dc06d175568',1,'telnetpp::options::mccp::zlib::compressor::compressor()']]],
   ['content_9',['content',['../classtelnetpp_1_1subnegotiation.html#aaaf9895d250862589bbff527202cdce2',1,'telnetpp::subnegotiation']]],
   ['corrupted_5fstream_5ferror_10',['corrupted_stream_error',['../classtelnetpp_1_1options_1_1mccp_1_1corrupted__stream__error.html',1,'telnetpp::options::mccp::corrupted_stream_error'],['../classtelnetpp_1_1options_1_1mccp_1_1corrupted__stream__error.html#a54b31a876bc1a4d523b622176f6985a6',1,'telnetpp::options::mccp::corrupted_stream_error::corrupted_stream_error()']]],
-  ['changelog_11',['Changelog',['../md__home_runner_work_telnetpp_telnetpp_CHANGELOG.html',1,'']]],
-  ['contributor_20code_20of_20conduct_12',['Contributor Code of Conduct',['../md__home_runner_work_telnetpp_telnetpp_CODE_OF_CONDUCT.html',1,'']]]
+  ['contributor_20code_20of_20conduct_11',['Contributor Code of Conduct',['../md__home_runner_work_telnetpp_telnetpp_CODE_OF_CONDUCT.html',1,'']]]
 ];

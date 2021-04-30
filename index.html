@@ -71,26 +71,26 @@ $(function() {
 <p><a href="https://github.com/KazDragon/telnetpp/issues"><object type="image/svg+xml" data="https://img.shields.io/github/issues/KazDragon/telnetpp.svg" style="pointer-events: none;">Github Issues</object></a></p>
 <p><a href="https://gitter.im/KazDragon/telnetpp?utm_source=badge&amp;utm_medium=badge&amp;utm_campaign=pr-badge"><object type="image/svg+xml" data="https://badges.gitter.im/KazDragon/telnetpp.svg" style="pointer-events: none;">Gitter</object></a></p>
 <p>Telnet++ is an implementation of the Telnet Session Layer protocol that is used primarily to negotiate a feature set between a client and server, the former of which is usually some kind of text-based terminal, Commonly used terminals include Xterm, PuTTY, and a whole host of Telnet-enabled MUD clients including Tintin++, MushClient, and more.</p>
-<h1><a class="anchor" id="autotoc_md12"></a>
+<h1><a class="anchor" id="autotoc_md9"></a>
 Requirements</h1>
 <p>Telnet++ requires a C++14 compiler and the following libraries:</p><ul>
 <li>Boost (At least version 1.69.0)</li>
-<li>GSL-lite (Exactly version 1.34 until 1.38 is available, due to <a href="https://github.com/gsl-lite/gsl-lite/issues/270">This issue</a></li>
+<li>GSL-lite (At least version 1.38)</li>
 <li>(Optionally) ZLib</li>
 <li>(For testing only) Google Test</li>
 </ul>
-<h1><a class="anchor" id="autotoc_md13"></a>
+<h1><a class="anchor" id="autotoc_md10"></a>
 Installation - CMake</h1>
 <p>Telnet++ can be installed from source using CMake. This requires Boost, GSL-Lite and any other dependencies to have been installed beforehand, using their own instructions, or for the call to <code>cmake --configure</code> to be adjusted appropriately (e.g. <code>-DBOOST_ROOT=...</code> or <code>-Dgsl-lite_DIR=...</code>). If you do not wish to install into a system directory, and thus avoid the use of sudo, you can also pass <code>-DCMAKE_INSTALL_PREFIX=...</code> into the <code>cmake --configure</code> call. </p><pre class="fragment">git clone https://github.com/KazDragon/telnetpp.git &amp;&amp; cd telnetpp
 mkdir build &amp;&amp; cd build
 cmake --configure -DCMAKE_BUILD_TYPE=Release ..
 cmake --build .
 sudo cmake --install .
-</pre><h1><a class="anchor" id="autotoc_md14"></a>
+</pre><h1><a class="anchor" id="autotoc_md11"></a>
 Installation - Conan</h1>
 <p>You can also use <a href="https://conan.io/">The Conan Package Manager</a> to install Telnet++ and its dependencies.</p>
 <p>See <a href="examples/rot13server">the rot13server example</a> for a minimalistic project that describes this setup.</p>
-<h1><a class="anchor" id="autotoc_md15"></a>
+<h1><a class="anchor" id="autotoc_md12"></a>
 Features / Roadmap / Progress</h1>
 <ol type="1">
 <li>[x] Basic constants and structures for use with Telnet<ul>
@@ -123,32 +123,32 @@ Features / Roadmap / Progress</h1>
 </ul>
 </li>
 </ol>
-<h1><a class="anchor" id="autotoc_md16"></a>
+<h1><a class="anchor" id="autotoc_md13"></a>
 Status</h1>
 <p>Telnet++ is automatically tested with MSVC 2019 and GNU g++ 7.5.</p>
-<h1><a class="anchor" id="autotoc_md17"></a>
+<h1><a class="anchor" id="autotoc_md14"></a>
 The Basics</h1>
 <p>The protocol has three basic elements, all of which are accessed by using the 0xFF character called "Interpret As Command", or IAC.</p>
-<h2><a class="anchor" id="autotoc_md18"></a>
+<h2><a class="anchor" id="autotoc_md15"></a>
 Commands</h2>
 <p>Without needing to negotiate any capabilities, Telnet offers some out-of-the-box commands. These include Are You There, which is usually sent by the client to provoke a response from an otherwise-busy server; Erase Line, which could be used in interative applications to cancel a set of input, and several other commands used for negotiations between options.</p>
 <p>Commands are represented by the <a href="include/telnetpp/command.hpp">telnetpp::command</a> class.</p>
-<h2><a class="anchor" id="autotoc_md19"></a>
+<h2><a class="anchor" id="autotoc_md16"></a>
 Negotiations</h2>
 <p>The Telnet protocol describes a model whereby the client and server maintain separate lists of features, called "options", which can be enabled or disabled by the remote side. Individual options may each be described as "server" or "client" options, and server and client options may be mixed on each side of the connection. It is even possible in some cases that both sides of the connection can be both client and server for the same option. These options are negotiated by using the commands DO, DONT, WILL and WONT.</p>
 <p>The various Telnet option specifications are not consistent in what is considered a server and what is considered a client, but for the purposes of this library, the server is considered as the side of the connection that does the thing, and the client is the side of the connection that wants the thing. That is, the server reacts to DO and DONT and sends WILL and WONT, and the client reacts to WILL and WONT and sends DO and DONT.</p>
 <p>Negotiations are represented by the <a href="include/telnetpp/negotiation.hpp">telnetpp::negotiation</a> class.</p>
-<h2><a class="anchor" id="autotoc_md20"></a>
+<h2><a class="anchor" id="autotoc_md17"></a>
 Subnegotiations</h2>
 <p>After an option has been negotiated, a new channel opens up to be able to communicate in an option-specific way to the remote terminal. These are called subnegotiations, and each protocol defines its own sub-protocol. For example, the NAWS (Negotiate About Window Size) sends five bytes when reporting window size, the first of which represents an "IS" token, and the following four bytes represent two two-byte pairs that are the window extends.</p>
 <p>Subnegotiations are represented by the <a href="include/telnetpp/subnegotiation.hpp">telnetpp::subnegotiation</a> class.</p>
-<h1><a class="anchor" id="autotoc_md21"></a>
+<h1><a class="anchor" id="autotoc_md18"></a>
 Dataflow: Elements, Tokens and Streams</h1>
 <p>A <a href="include/telnetpp/element.hpp">telnetpp::element</a> is a Boost.Variant that may contain a command, a negotiation, a subnegotiation, or just a plain sequence of bytes representing non-Telnet-specific input/output.</p>
-<h1><a class="anchor" id="autotoc_md22"></a>
+<h1><a class="anchor" id="autotoc_md19"></a>
 Stream-Unaware</h1>
 <p>The Telnet++ library does not impose any requirement on any kind of data stream API. In order to accomplish this, it makes heavy use of continuation functions. See the <a href="include/telnetpp/session.hpp">telnetpp::session</a> class for an in-depth explanation of how this works.</p>
-<h1><a class="anchor" id="autotoc_md23"></a>
+<h1><a class="anchor" id="autotoc_md20"></a>
 Options</h1>
 <p>As alluded to earlier, each distinct feature is represented by either a <a href="include/telnetpp/client_option.hpp">telnetpp::client_option</a> or a <a href="include/telnetpp/server_option.hpp">telnetpp::server_option</a>. These both enjoy the same <a href="include/telnetpp/option.hpp">API</a>; they only differ in the underlying protocol. The user needs to know little about which actual negotiations and commands are sent. There are two key functions and one signal for the option classes:</p>
 <ul>
@@ -156,7 +156,7 @@ Options</h1>
 <li>deactive() - this is used to request deactivation on the remote side.</li>
 <li>on_state_changed - this is a signal that is called when the option is either being activated, active, being deactivated, or has become inactive.</li>
 </ul>
-<h1><a class="anchor" id="autotoc_md24"></a>
+<h1><a class="anchor" id="autotoc_md21"></a>
 Session</h1>
 <p>All of the above can be quite complicated to manage, so Telnet++ provides the <a href="include/telnetpp/session.hpp">telnetpp::session</a> class. This is the key abstraction of the Telnet++ library, and is used to manage an entire Telnet feature set for a connection. This is accomplished by "install"ing handlers for commands and options:</p>
 <div class="fragment"><div class="line">// A user-specified function for sending bytes to the remote.</div>
@@ -219,7 +219,7 @@ Session</h1>
 </div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Sun Apr 25 2021 08:23:16 for Telnet++ by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Fri Apr 30 2021 14:05:22 for Telnet++ by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.17
 </small></address>
