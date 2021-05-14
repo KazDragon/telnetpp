@@ -123,8 +123,8 @@ $(function() {
 <div class="line"><a name="l00085"></a><span class="lineno">   85</span>&#160;        <span class="keywordflow">switch</span> (state_)</div>
 <div class="line"><a name="l00086"></a><span class="lineno">   86</span>&#160;        {</div>
 <div class="line"><a name="l00087"></a><span class="lineno">   87</span>&#160;            <span class="keywordflow">case</span> internal_state::inactive:</div>
-<div class="line"><a name="l00088"></a><span class="lineno">   88</span>&#160;                send(<a class="code" href="classtelnetpp_1_1negotiation.html">telnetpp::negotiation</a>{local_positive, code_});</div>
-<div class="line"><a name="l00089"></a><span class="lineno">   89</span>&#160;                state_ = internal_state::activating;</div>
+<div class="line"><a name="l00088"></a><span class="lineno">   88</span>&#160;                state_ = internal_state::activating;</div>
+<div class="line"><a name="l00089"></a><span class="lineno">   89</span>&#160;                send(<a class="code" href="classtelnetpp_1_1negotiation.html">telnetpp::negotiation</a>{local_positive, code_});</div>
 <div class="line"><a name="l00090"></a><span class="lineno">   90</span>&#160;                <span class="keywordflow">break</span>;</div>
 <div class="line"><a name="l00091"></a><span class="lineno">   91</span>&#160; </div>
 <div class="line"><a name="l00092"></a><span class="lineno">   92</span>&#160;            <span class="keywordflow">case</span> internal_state::activating:</div>
@@ -151,8 +151,8 @@ $(function() {
 <div class="line"><a name="l00116"></a><span class="lineno">  116</span>&#160;        <span class="keywordflow">switch</span> (state_)</div>
 <div class="line"><a name="l00117"></a><span class="lineno">  117</span>&#160;        {</div>
 <div class="line"><a name="l00118"></a><span class="lineno">  118</span>&#160;            <span class="keywordflow">case</span> internal_state::active:</div>
-<div class="line"><a name="l00119"></a><span class="lineno">  119</span>&#160;                send(<a class="code" href="classtelnetpp_1_1negotiation.html">telnetpp::negotiation</a>{local_negative, code_});</div>
-<div class="line"><a name="l00120"></a><span class="lineno">  120</span>&#160;                state_ = internal_state::deactivating;</div>
+<div class="line"><a name="l00119"></a><span class="lineno">  119</span>&#160;                state_ = internal_state::deactivating;</div>
+<div class="line"><a name="l00120"></a><span class="lineno">  120</span>&#160;                send(<a class="code" href="classtelnetpp_1_1negotiation.html">telnetpp::negotiation</a>{local_negative, code_});</div>
 <div class="line"><a name="l00121"></a><span class="lineno">  121</span>&#160;                <span class="keywordflow">break</span>;</div>
 <div class="line"><a name="l00122"></a><span class="lineno">  122</span>&#160; </div>
 <div class="line"><a name="l00123"></a><span class="lineno">  123</span>&#160;            <span class="keywordflow">case</span> internal_state::activating:</div>
@@ -183,8 +183,8 @@ $(function() {
 <div class="line"><a name="l00151"></a><span class="lineno">  151</span>&#160;            <span class="keywordflow">case</span> internal_state::inactive:</div>
 <div class="line"><a name="l00152"></a><span class="lineno">  152</span>&#160;                <span class="keywordflow">if</span> (neg == remote_positive)</div>
 <div class="line"><a name="l00153"></a><span class="lineno">  153</span>&#160;                {</div>
-<div class="line"><a name="l00154"></a><span class="lineno">  154</span>&#160;                    send(<a class="code" href="classtelnetpp_1_1negotiation.html">telnetpp::negotiation</a>{local_positive, code_});</div>
-<div class="line"><a name="l00155"></a><span class="lineno">  155</span>&#160;                    state_ = internal_state::active;</div>
+<div class="line"><a name="l00154"></a><span class="lineno">  154</span>&#160;                    state_ = internal_state::active;</div>
+<div class="line"><a name="l00155"></a><span class="lineno">  155</span>&#160;                    send(<a class="code" href="classtelnetpp_1_1negotiation.html">telnetpp::negotiation</a>{local_positive, code_});</div>
 <div class="line"><a name="l00156"></a><span class="lineno">  156</span>&#160;                    on_state_changed(send);</div>
 <div class="line"><a name="l00157"></a><span class="lineno">  157</span>&#160;                }</div>
 <div class="line"><a name="l00158"></a><span class="lineno">  158</span>&#160;                <span class="keywordflow">else</span></div>
@@ -294,7 +294,7 @@ $(function() {
 <div class="ttc" id="aclasstelnetpp_1_1element_html"><div class="ttname"><a href="classtelnetpp_1_1element.html">element</a></div><div class="ttdoc">A common type that can contain any Telnet operation, such as a command, negotiation,...</div></div>
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Fri Apr 30 2021 14:05:22 for Telnet++ by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Fri May 14 2021 09:52:53 for Telnet++ by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.17
 </small></address>
