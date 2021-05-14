@@ -85,8 +85,8 @@ public:
         switch (state_)
         {
             case internal_state::inactive:
-                send(telnetpp::negotiation{local_positive, code_});
                 state_ = internal_state::activating;
+                send(telnetpp::negotiation{local_positive, code_});
                 break;
 
             case internal_state::activating:
@@ -116,8 +116,8 @@ public:
         switch (state_)
         {
             case internal_state::active:
-                send(telnetpp::negotiation{local_negative, code_});
                 state_ = internal_state::deactivating;
+                send(telnetpp::negotiation{local_negative, code_});
                 break;
 
             case internal_state::activating:
@@ -151,8 +151,8 @@ public:
             case internal_state::inactive:
                 if (neg == remote_positive)
                 {
-                    send(telnetpp::negotiation{local_positive, code_});
                     state_ = internal_state::active;
+                    send(telnetpp::negotiation{local_positive, code_});
                     on_state_changed(send);
                 }
                 else
