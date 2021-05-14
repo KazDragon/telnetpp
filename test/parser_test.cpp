@@ -9,36 +9,42 @@ using testing::ValuesIn;
 
 namespace {
 
-class parser_test : public testing::Test
+class parser_test_base
 {
 protected:
     void parse(telnetpp::bytes data)
     {
-        remainder_ = telnetpp::parse(
-            data,
+        parser_(
+            data, 
             [this](telnetpp::element const &elem)
             {
                 result_.push_back(elem);
-            }
-        );
+            });
     }
 
-    template <typename F>
-    void parse_with_check(telnetpp::bytes data, F&& check)
+    template <typename Check>
+    void parse_with_check(telnetpp::bytes data, Check &&check)
     {
-        remainder_ = telnetpp::parse(
+        parser_(
             data,
-            [this, &check](telnetpp::element const &elem)
+            [&](telnetpp::element const &elem)
             {
                 check(elem);
                 result_.push_back(elem);
-            }
-        );
+            });
     }
 
+    telnetpp::parser parser_;
     std::vector<telnetpp::element> result_;
-    telnetpp::bytes remainder_;
 };
+
+class parser_test 
+  : public parser_test_base, 
+    public testing::Test
+{
+};
+
+}
 
 TEST_F(parser_test, empty_range_parses_to_nothing)
 {
@@ -46,38 +52,43 @@ TEST_F(parser_test, empty_range_parses_to_nothing)
 
     parse({});
 
-    ASSERT_EQ(size_t{0}, result_.size());
-    ASSERT_EQ(size_t{0}, remainder_.size());
+    ASSERT_TRUE(result_.empty());
 }
 
 TEST_F(parser_test, normal_character_parses_to_span_of_character)
 {
-    static constexpr telnetpp::byte const data[] = {'x'};
-    
-    parse(data);
+    static constexpr telnetpp::byte const data[] = { 'x' };
 
-    ASSERT_EQ(size_t{1}, result_.size());
-    ASSERT_EQ(size_t{0}, remainder_.size());
+    parse_with_check(
+        data,
+        [](telnetpp::element const &elem)
+        {
+            static constexpr telnetpp::byte const expected_values[] = { 'x' };
+            static constexpr telnetpp::bytes const expected{ expected_values };
 
-    auto const actual = boost::get<telnetpp::bytes>(result_[0]);
-    ASSERT_EQ(size_t{1}, actual.size());
-    ASSERT_EQ('x', actual[0]);
+            auto const actual = boost::get<telnetpp::bytes>(elem);
+            ASSERT_EQ(size_t{ 1 }, actual.size());
+        });
+
+    ASSERT_EQ(size_t{ 1 }, result_.size());
 }
 
 TEST_F(parser_test, two_normal_characters_parse_to_string)
 {
     static constexpr telnetpp::byte const data[] = { 'x', 'y' };
-    static constexpr telnetpp::byte const expected_values[] = { 'x', 'y' };
-    static constexpr telnetpp::bytes const expected{expected_values};
 
-    parse(data);
+    parse_with_check(
+        data,
+        [](telnetpp::element const &elem)
+        {
+            static constexpr telnetpp::byte const expected_values[] = { 'x', 'y' };
+            static constexpr telnetpp::bytes const expected{ expected_values };
 
-    ASSERT_EQ(size_t{1}, result_.size());
-    ASSERT_EQ(size_t{0}, remainder_.size());
+            auto const actual = boost::get<telnetpp::bytes>(elem);
+            ASSERT_EQ(expected, actual);
+        });
 
-    auto const actual = boost::get<telnetpp::bytes>(result_[0]);
-
-    ASSERT_EQ(expected, actual);
+    ASSERT_EQ(size_t{ 1 }, result_.size());
 }
 
 TEST_F(parser_test, lone_iac_parses_to_nothing)
@@ -86,40 +97,44 @@ TEST_F(parser_test, lone_iac_parses_to_nothing)
 
     parse(data);
 
-    ASSERT_EQ(size_t{0}, result_.size());
-    ASSERT_EQ(size_t{1}, remainder_.size());
+    ASSERT_EQ(size_t{ 0 }, result_.size());
 }
 
 TEST_F(parser_test, byte_then_iac_emits_byte_only)
 {
     static constexpr telnetpp::byte const data[] = { 'x', 0xFF };
-    static constexpr telnetpp::byte const expected_values[] = { 'x' };
-    static constexpr telnetpp::bytes const expected{expected_values};
 
-    parse(data);
+    parse_with_check(
+        data,
+        [](telnetpp::element const &elem)
+        {
+            static constexpr telnetpp::byte const expected_values[] = { 'x' };
+            static constexpr telnetpp::bytes const expected{ expected_values };
 
-    ASSERT_EQ(size_t{1}, result_.size());
-    ASSERT_EQ(size_t{1}, remainder_.size());
+            auto const actual = boost::get<telnetpp::bytes>(elem);
+            ASSERT_EQ(expected, actual);
+        });
 
-    auto const actual = boost::get<telnetpp::bytes>(result_[0]);
 
-    ASSERT_EQ(expected, actual);
+    ASSERT_EQ(size_t{ 1 }, result_.size());
 }
 
 TEST_F(parser_test, double_iac_parses_to_iac)
 {
     static constexpr telnetpp::byte const data[] = { 0xFF, 0xFF };
-    static constexpr telnetpp::byte const expected_values[] = { 0xFF };
-    static constexpr telnetpp::bytes const expected{expected_values};
 
-    parse(data);
+    parse_with_check(
+        data,
+        [](telnetpp::element const &elem)
+        {
+            static constexpr telnetpp::byte const expected_values[] = { 0xFF };
+            static constexpr telnetpp::bytes const expected{ expected_values };
 
-    ASSERT_EQ(size_t{1}, result_.size());
-    ASSERT_EQ(size_t{0}, remainder_.size());
+            auto const actual = boost::get<telnetpp::bytes>(elem);
+            ASSERT_EQ(expected, actual);
+        });
 
-    auto const actual = boost::get<telnetpp::bytes>(result_[0]);
-
-    ASSERT_EQ(expected, actual);
+    ASSERT_EQ(size_t{ 1 }, result_.size());
 }
 
 using command_test_data = std::tuple<
@@ -128,7 +143,8 @@ using command_test_data = std::tuple<
 >;
 
 class for_non_negotiating_commands 
-  : public testing::TestWithParam<command_test_data>
+  : public parser_test_base,
+    public testing::TestWithParam<command_test_data>
 {
 };
 
@@ -138,19 +154,11 @@ TEST_P(for_non_negotiating_commands, as_the_only_element)
     auto const &data             = std::get<0>(param);
     auto const &expected_command = std::get<1>(param);
 
-    std::vector<telnetpp::element> result;
-    auto const remainder = telnetpp::parse(
-        data,
-        [&result](telnetpp::element const &elem)
-        {
-            result.push_back(elem);
-        });
+    parse(data);
 
-    ASSERT_EQ(size_t{1}, result.size());
-    ASSERT_EQ(size_t{0}, remainder.size());
+    ASSERT_EQ(size_t{1}, result_.size());
 
-    auto const actual = boost::get<telnetpp::command>(result[0]);
-
+    auto const actual = boost::get<telnetpp::command>(result_[0]);
     ASSERT_EQ(expected_command, actual);
 }
 
@@ -182,7 +190,8 @@ INSTANTIATE_TEST_SUITE_P(
 );
 
 class for_incomplete_negotiations
- : public testing::TestWithParam<telnetpp::bytes>
+ : public parser_test_base,
+   public testing::TestWithParam<telnetpp::bytes>
 {
 };
 
@@ -190,16 +199,9 @@ TEST_P(for_incomplete_negotiations, as_the_only_element)
 {
     auto const &data = GetParam();
 
-    std::vector<telnetpp::element> result;
-    auto const remainder = telnetpp::parse(
-        data,
-        [&result](telnetpp::element const &elem)
-        {
-            result.push_back(elem);
-        });
+    parse(data);
 
-    ASSERT_EQ(size_t{0}, result.size());
-    ASSERT_EQ(data.size(), remainder.size());
+    ASSERT_EQ(size_t{0}, result_.size());
 }
 
 constexpr telnetpp::byte const iac_will[] = { 0xFF, 0xFB };
@@ -238,10 +240,8 @@ TEST_F(parser_test, sb_option_iac_se_parses_to_empty_subnegotiation)
     parse(data);
 
     ASSERT_EQ(size_t{1}, result_.size());
-    ASSERT_EQ(size_t{0}, remainder_.size());
 
     auto const actual = boost::get<telnetpp::subnegotiation>(result_[0]);
-
     ASSERT_EQ(expected, actual);
 }
 
@@ -263,10 +263,8 @@ TEST_F(parser_test, subnegotiation_with_content_parses_to_subnegotation)
     parse(data);
 
     ASSERT_EQ(size_t{1}, result_.size());
-    ASSERT_EQ(size_t{0}, remainder_.size());
 
     auto const actual = boost::get<telnetpp::subnegotiation>(result_[0]);
-
     ASSERT_EQ(expected, actual);
 }
 
@@ -279,7 +277,6 @@ TEST_F(parser_test, an_incomplete_subnegotiation_parses_to_nothing)
     parse(data);
     
     ASSERT_TRUE(result_.empty());
-    ASSERT_EQ(sizeof(data), remainder_.size());
 }
 
 TEST_F(parser_test, subnegotiation_with_iac_iac_parses_to_iac)
@@ -310,7 +307,6 @@ TEST_F(parser_test, subnegotiation_with_iac_iac_parses_to_iac)
         });
 
     ASSERT_EQ(size_t{1}, result_.size());
-    ASSERT_EQ(size_t{0}, remainder_.size());
 }
 
 using negotiation_test_data = std::tuple<
@@ -319,7 +315,8 @@ using negotiation_test_data = std::tuple<
 >;
 
 class for_complete_negotiations
-  : public testing::TestWithParam<negotiation_test_data>
+  : public parser_test_base,
+    public testing::TestWithParam<negotiation_test_data>
 {
 };
 
@@ -329,19 +326,11 @@ TEST_P(for_complete_negotiations, as_the_only_element)
     auto const &data                 = std::get<0>(param);
     auto const &expected_negotiation = std::get<1>(param);
 
-    std::vector<telnetpp::element> result;
-    auto const remainder = telnetpp::parse(
-        data,
-        [&result](telnetpp::element const &elem)
-        {
-            result.push_back(elem);
-        });
+    parse(data);
 
-    ASSERT_EQ(size_t{1}, result.size());
-    ASSERT_EQ(size_t{0}, remainder.size());
+    ASSERT_EQ(size_t{1}, result_.size());
 
-    auto const actual = boost::get<telnetpp::negotiation>(result[0]);
-
+    auto const actual = boost::get<telnetpp::negotiation>(result_[0]);
     ASSERT_EQ(expected_negotiation, actual);
 }
 
@@ -392,39 +381,36 @@ TEST_F(parser_test, many_elements_parses_to_many_elements)
         'i'                        // text: i
     };
 
-    static constexpr telnetpp::byte const expected_values0[] = { 'a', 'b', 'c' };
-    static constexpr telnetpp::bytes const expected0{expected_values0};
-    static constexpr telnetpp::command const expected1{telnetpp::nop};
-    static constexpr telnetpp::command const expected2{telnetpp::ayt};
-    static constexpr telnetpp::byte const expected_values3[] = { 'd' };
-    static constexpr telnetpp::bytes const expected3{expected_values3};
-    static constexpr telnetpp::negotiation const expected4{telnetpp::will, 0x00};
-    static constexpr telnetpp::negotiation const expected5{telnetpp::dont, 0x01};
-    static constexpr telnetpp::byte const expected_content6[] = { 'e', 'f' };
-    static constexpr telnetpp::subnegotiation const expected6{ 0x20, expected_content6 };
-    static constexpr telnetpp::subnegotiation const expected7{ 0xFF, {}};
-    static constexpr telnetpp::byte const expected_values8[] = { 'g', 'h' };
-    static constexpr telnetpp::bytes const expected8{expected_values8};
-    static constexpr telnetpp::negotiation const expected9 = {telnetpp::wont, 0xFF};
-    static constexpr telnetpp::byte const expected_value10[] = { 'i' };
-    static constexpr telnetpp::bytes const expected10{expected_value10};
+    parse_with_check(
+        data,
+        [iteration = 0](telnetpp::element const &elem) mutable
+        {
+            static constexpr telnetpp::byte const expected_values0[] = { 'a', 'b', 'c' };
+            static constexpr telnetpp::bytes const expected0{ expected_values0 };
+            static constexpr telnetpp::command const expected1{ telnetpp::nop };
+            static constexpr telnetpp::command const expected2{ telnetpp::ayt };
+            static constexpr telnetpp::byte const expected_values3[] = { 'd' };
+            static constexpr telnetpp::bytes const expected3{ expected_values3 };
+            static constexpr telnetpp::negotiation const expected4{ telnetpp::will, 0x00 };
+            static constexpr telnetpp::negotiation const expected5{ telnetpp::dont, 0x01 };
+            static constexpr telnetpp::byte const expected_content6[] = { 'e', 'f' };
+            static constexpr telnetpp::subnegotiation const expected6{ 0x20, expected_content6 };
+            static constexpr telnetpp::subnegotiation const expected7{ 0xFF, {} };
+            static constexpr telnetpp::byte const expected_values8[] = { 'g', 'h' };
+            static constexpr telnetpp::bytes const expected8{ expected_values8 };
+            static constexpr telnetpp::negotiation const expected9 = { telnetpp::wont, 0xFF };
+            static constexpr telnetpp::byte const expected_value10[] = { 'i' };
+            static constexpr telnetpp::bytes const expected10{ expected_value10 };
 
-    parse(data);
+            static telnetpp::element const expected_elements[] = {
+                expected0, expected1, expected2, expected3, expected4,
+                expected5, expected6, expected7, expected8, expected9,
+                expected10
+            };
+
+            ASSERT_EQ(expected_elements[iteration], elem);
+            ++iteration;
+        });
 
     ASSERT_EQ(size_t{11}, result_.size());
-    ASSERT_EQ(size_t{0}, remainder_.size());
-
-    ASSERT_EQ(expected0, boost::get<decltype(expected0)>(result_[0]));
-    ASSERT_EQ(expected1, boost::get<decltype(expected1)>(result_[1]));
-    ASSERT_EQ(expected2, boost::get<decltype(expected2)>(result_[2]));
-    ASSERT_EQ(expected3, boost::get<decltype(expected3)>(result_[3]));
-    ASSERT_EQ(expected4, boost::get<decltype(expected4)>(result_[4]));
-    ASSERT_EQ(expected5, boost::get<decltype(expected5)>(result_[5]));
-    ASSERT_EQ(expected6, boost::get<decltype(expected6)>(result_[6]));
-    ASSERT_EQ(expected7, boost::get<decltype(expected7)>(result_[7]));
-    ASSERT_EQ(expected8, boost::get<decltype(expected8)>(result_[8]));
-    ASSERT_EQ(expected9, boost::get<decltype(expected9)>(result_[9]));
-    ASSERT_EQ(expected10, boost::get<decltype(expected10)>(result_[10]));
-}
-
 }
