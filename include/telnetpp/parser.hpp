@@ -30,27 +30,27 @@ public:
 
                 switch (state_)
                 {
-                    case parsing_state::idle:
+                    case parsing_state::state_idle:
                         parse_idle(by, c);
                         break;
 
-                    case parsing_state::iac:
+                    case parsing_state::state_iac:
                         parse_iac(by, c);
                         break;
 
-                    case parsing_state::negotiation:
+                    case parsing_state::state_negotiation:
                         parse_negotiation(by, c);
                         break;
 
-                    case parsing_state::subnegotiation:
+                    case parsing_state::state_subnegotiation:
                         parse_subnegotiation(by, c);
                         break;
 
-                    case parsing_state::subnegotiation_content:
+                    case parsing_state::state_subnegotiation_content:
                         parse_subnegotiation_content(by, c);
                         break;
 
-                    case parsing_state::subnegotiation_content_iac:
+                    case parsing_state::state_subnegotiation_content_iac:
                         parse_subnegotiation_content_iac(by, c);
                         break;
 
@@ -66,15 +66,15 @@ public:
 private:
     enum class parsing_state
     {
-        idle,
-        iac,
-        negotiation,
-        subnegotiation,
-        subnegotiation_content,
-        subnegotiation_content_iac
+        state_idle,
+        state_iac,
+        state_negotiation,
+        state_subnegotiation,
+        state_subnegotiation_content,
+        state_subnegotiation_content_iac
     };
 
-    parsing_state state_ { parsing_state::idle };
+    parsing_state state_ { parsing_state::state_idle };
     bool currently_parsing_ { false };
     std::vector<telnetpp::byte> unparsed_data_;
 
@@ -89,7 +89,7 @@ private:
         switch (by)
         {
             case telnetpp::iac:
-                state_ = parsing_state::iac;
+                state_ = parsing_state::state_iac;
                 break;
 
             default:
@@ -105,7 +105,7 @@ private:
         {
             case telnetpp::iac:
                 plain_data_.push_back(by);
-                state_ = parsing_state::idle;
+                state_ = parsing_state::state_idle;
                 break;
 
             case telnetpp::will: // fall-through
@@ -114,18 +114,18 @@ private:
             case telnetpp::dont:
                 emit_plain_data(c);
                 negotiation_type_ = by;
-                state_ = parsing_state::negotiation;
+                state_ = parsing_state::state_negotiation;
                 break;
                 
             case telnetpp::sb:
                 emit_plain_data(c);
-                state_ = parsing_state::subnegotiation;
+                state_ = parsing_state::state_subnegotiation;
                 break;
 
             default:
                 emit_plain_data(c);
                 c(telnetpp::command{by});
-                state_ = parsing_state::idle;
+                state_ = parsing_state::state_idle;
                 break;
         }
     }
@@ -134,7 +134,7 @@ private:
     void parse_negotiation(telnetpp::byte by, Continuation &&c)
     {
         c(telnetpp::negotiation{negotiation_type_, by});
-        state_ = parsing_state::idle;
+        state_ = parsing_state::state_idle;
     }
 
     template <typename Continuation>
@@ -142,7 +142,7 @@ private:
     {
         subnegotiation_option_ = by;
         subnegotiation_content_.clear();
-        state_ = parsing_state::subnegotiation_content;
+        state_ = parsing_state::state_subnegotiation_content;
     }
 
     template <typename Continuation>
@@ -151,7 +151,7 @@ private:
         switch (by)
         {
             case telnetpp::iac:
-                state_ = parsing_state::subnegotiation_content_iac;
+                state_ = parsing_state::state_subnegotiation_content_iac;
                 break;
 
             default:
@@ -169,12 +169,12 @@ private:
                 c(telnetpp::subnegotiation{
                     subnegotiation_option_,
                     subnegotiation_content_});
-                state_ = parsing_state::idle;
+                state_ = parsing_state::state_idle;
                 break;
 
             default:
                 subnegotiation_content_.push_back(by);
-                state_ = parsing_state::subnegotiation_content;
+                state_ = parsing_state::state_subnegotiation_content;
                 break;
         }
     }
