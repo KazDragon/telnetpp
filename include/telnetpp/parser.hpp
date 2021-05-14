@@ -1,6 +1,9 @@
 #pragma once
 
 #include "telnetpp/core.hpp"
+#include "telnetpp/command.hpp"
+#include "telnetpp/negotiation.hpp"
+#include "telnetpp/subnegotiation.hpp"
 #include <boost/range/algorithm_ext/insert.hpp>
 #include <vector>
 
