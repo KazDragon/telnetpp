@@ -238,25 +238,7 @@ public:
                     });
             };
 
-        if (unparsed_buffer_.empty())
-        {
-            auto remainder = telnetpp::parse(content, token_handler);
-            unparsed_buffer_.insert(
-                unparsed_buffer_.end(), remainder.begin(), remainder.end());
-        }
-        else
-        {
-            unparsed_buffer_.insert(
-                unparsed_buffer_.end(),
-                content.begin(),
-                content.end());
-
-            auto remainder = telnetpp::parse(
-                unparsed_buffer_,
-                token_handler);
-    
-            unparsed_buffer_.erase(0, unparsed_buffer_.size() - remainder.size());
-        }
+        parser_(content, token_handler);
     }
 
     //* =====================================================================
@@ -279,7 +261,7 @@ public:
     void install(server_option &option);
 
 private:
-    std::basic_string<telnetpp::byte>       unparsed_buffer_;
+    telnetpp::parser                        parser_;
     telnetpp::detail::command_router        command_router_;
     telnetpp::detail::negotiation_router    negotiation_router_;
     telnetpp::detail::subnegotiation_router subnegotiation_router_;

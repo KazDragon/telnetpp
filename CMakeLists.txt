@@ -175,7 +175,6 @@ target_sources(telnetpp
         include/telnetpp/detail/generate_helper.hpp
         include/telnetpp/detail/lambda_visitor.hpp
         include/telnetpp/detail/negotiation_router.hpp
-        include/telnetpp/detail/parse_helper.hpp
         include/telnetpp/detail/registration.hpp
         include/telnetpp/detail/return_default.hpp
         include/telnetpp/detail/router.hpp
@@ -351,6 +350,7 @@ target_sources(telnetpp_tester
         test/echo_server_test.cpp
         test/element_test.cpp
         test/generator_test.cpp
+        test/in_memory_session_test.cpp
         test/mccp_client_test.cpp
         test/mccp_server_test.cpp
         test/msdp_client_test.cpp
