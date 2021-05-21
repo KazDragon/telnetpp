@@ -108,7 +108,7 @@ As alluded to earlier, each distinct feature is represented by either a [telnetp
 
 All of the above can be quite complicated to manage, so Telnet++ provides the [telnetpp::session](include/telnetpp/session.hpp) class.  This is the key abstraction of the Telnet++ library, and is used to manage an entire Telnet feature set for a connection.  This is accomplished by "install"ing handlers for commands and options:
 
-```
+```cpp
 // A user-specified function for sending bytes to the remote.
 void my_socket_send(telnetpp::bytes data);
 
@@ -150,7 +150,7 @@ session.install(
 
 Receiving data is slightly more complex in that any reception of data may require data to be sent, and so functions that receive data also have a continuation for what to do with the response.
 
-```
+```cpp
 // A user-specified function used for receiving bytes sent from the
 // remote.
 int my_socket_receive(telnetpp::byte *buffer, int size);
