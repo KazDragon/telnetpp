@@ -1,16 +1,5 @@
-if (POLICY CMP0048)
-    cmake_policy(SET CMP0048 NEW)
-    project(TELNETPP VERSION 2.2.0)
-else()
-    project(TELNETPP)
-endif()
-
 cmake_minimum_required(VERSION 3.2 FATAL_ERROR)
-cmake_policy(VERSION 3.2)
-
-if (POLICY CMP0063)
-    cmake_policy(SET CMP0063 OLD) # Do not allow hidden visibility for static libs
-endif()
+cmake_policy(VERSION 3.13)
 
 option(TELNETPP_WITH_ZLIB "Build using ZLib" False)
 option(TELNETPP_COVERAGE  "Build with code coverage options")
@@ -24,6 +13,14 @@ message("Building Telnet++ with code coverage: ${TELNETPP_COVERAGE}")
 message("Building Telnet++ with sanitizers: ${TELNETPP_SANITIZE}")
 message("Building Telnet++ with tests: ${TELNETPP_WITH_TESTS}")
 message("Building Telnet++ with only documentation: ${TELNETPP_DOC_ONLY}")
+
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/cmake/Modules")
+
+include(function-git_version)
+git_version(TELNETPP)
+message(STATUS "Telnet++ Version: ${TELNETPP_VERSION}")
+project(TELNETPP VERSION ${TELNETPP_VERSION})
 
 # For producing automatically-generated documentation, we use Doxygen.
 find_package(Doxygen)
@@ -54,11 +51,6 @@ if (EXISTS ${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
     include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
     conan_basic_setup(TARGETS NO_OUTPUT_DIRS)
 endif()
-
-set (CMAKE_EXPORT_COMPILE_COMMANDS ON)
-
-# The required C++ Standard for Telnet++ is C++14.
-set(CMAKE_CXX_STANDARD 14)
 
 if (TELNETPP_USE_CONAN)
     set(TELNETPP_PUBLIC_LIBRARIES
@@ -136,6 +128,9 @@ endif()
 
 add_library(telnetpp)
 add_library(KazDragon::telnetpp ALIAS telnetpp)
+
+# The required C++ Standard for Telnet++ is C++14.
+target_compile_features(telnetpp PUBLIC cxx_std_14)
 
 target_sources(telnetpp
     PRIVATE
