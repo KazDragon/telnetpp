@@ -18,14 +18,14 @@ platform:
   - x64
 
 environment:
-  APPVEYOR_SAVE_CACHE_ON_ERROR: true
+#  APPVEYOR_SAVE_CACHE_ON_ERROR: true
 
   matrix:
     - shared: True
     - shared: False
 
 cache:
-  - C:\Tools\vcpkg\installed
+#  - C:\Tools\vcpkg\installed
 
 init:
   - echo Appveyor Image = %APPVEYOR_BUILD_WORKER_IMAGE%
