@@ -8,7 +8,7 @@ class ConanTelnetpp(ConanFile):
     license = "MIT"
     settings = "os", "arch", "compiler", "build_type"
     generators = "cmake"
-    exports = "*.hpp", "*.in", "*.cpp", "CMakeLists.txt", "*.md", "LICENSE"
+    exports = "*.hpp", "*.in", "*.cpp", "CMakeLists.txt", "*.md", "LICENSE", "*.cmake"
     description = "A library for handling the Telnet protocol"
     requires = ("boost/[>=1.69]", "gsl-lite/[>=0.38]")
     build_requires = ("gtest/[>=1.8.1]")
@@ -28,6 +28,7 @@ class ConanTelnetpp(ConanFile):
         cmake.definitions["TELNETPP_WITH_ZLIB"] = self.options.withZlib
         cmake.definitions["TELNETPP_COVERAGE"] = self.options.coverage
         cmake.definitions["TELNETPP_SANITIZE"] = self.options.sanitize
+        cmake.definitions["TELNETPP_VERSION"] = self.version
         cmake.configure()
         return cmake
 
