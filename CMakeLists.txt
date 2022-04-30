@@ -17,8 +17,11 @@ message("Building Telnet++ with only documentation: ${TELNETPP_DOC_ONLY}")
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/cmake/Modules")
 
-include(function-git_version)
-git_version(TELNETPP)
+if (NOT TELNETPP_VERSION)
+    include(function-git_version)
+    git_version(TELNETPP)
+endif()
+
 message(STATUS "Telnet++ Version: ${TELNETPP_VERSION}")
 project(TELNETPP VERSION ${TELNETPP_VERSION})
 
