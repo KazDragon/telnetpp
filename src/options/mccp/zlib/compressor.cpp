@@ -30,7 +30,7 @@ struct compressor::impl
     // ======================================================================
     void construct_stream()
     {
-        assert(stream == boost::none);
+        assert(stream == std::nullopt);
 
         stream = z_stream{};
 
@@ -44,7 +44,7 @@ struct compressor::impl
     // ======================================================================
     void destroy_stream()
     {
-        assert(stream != boost::none);
+        assert(stream != std::nullopt);
 
         auto result = deflateEnd(&*stream);
         boost::ignore_unused(result);

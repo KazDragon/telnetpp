@@ -30,7 +30,7 @@ struct decompressor::impl
     // ======================================================================
     void construct_stream()
     {
-        assert(stream == boost::none);
+        assert(stream == std::nullopt);
 
         stream = z_stream{};
 
@@ -44,7 +44,7 @@ struct decompressor::impl
     // ======================================================================
     void destroy_stream()
     {
-        assert(stream != boost::none);
+        assert(stream != std::nullopt);
 
         auto result = inflateEnd(&*stream);
         boost::ignore_unused(result);
