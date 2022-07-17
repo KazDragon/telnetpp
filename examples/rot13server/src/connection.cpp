@@ -1,6 +1,5 @@
 #include "connection.hpp"
 #include <serverpp/tcp_socket.hpp>
-#include <boost/make_unique.hpp>
 #include <telnetpp/telnetpp.hpp>
 #include <telnetpp/options/echo/server.hpp>
 #include <telnetpp/options/naws/client.hpp>
@@ -216,7 +215,7 @@ struct connection::impl
 // CONSTRUCTOR
 // ==========================================================================
 connection::connection(serverpp::tcp_socket &&new_socket)
-    : pimpl_(boost::make_unique<impl>(std::move(new_socket)))
+    : pimpl_(std::make_unique<impl>(std::move(new_socket)))
 {
 }
 

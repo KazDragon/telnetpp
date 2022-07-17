@@ -1,6 +1,6 @@
 #include <telnetpp/options/mccp/server.hpp>
 #include <telnetpp/options/mccp/codec.hpp>
-#include <telnetpp/detail/lambda_visitor.hpp>
+#include <telnetpp/detail/overloaded.hpp>
 #include <gtest/gtest.h>
 
 using namespace telnetpp::literals;
@@ -186,7 +186,7 @@ TEST_F(an_active_mccp_server, sends_nothing_when_finishing_compression)
     server_.finish_compression(
         [&](auto const &elements)
         {
-            auto const &data = boost::get<telnetpp::bytes>(elements);
+            auto const &data = std::get<telnetpp::bytes>(elements);
             sent_data_.insert(
                 sent_data_.end(),
                 data.begin(),
@@ -288,7 +288,7 @@ TEST_F(an_active_mccp_server_with_compression_started, sends_compression_end_com
     server_.finish_compression(
         [this](telnetpp::element const &element)
         {
-            send_data(boost::get<telnetpp::bytes>(element));
+            send_data(std::get<telnetpp::bytes>(element));
         });
 
     auto const end_data = "end"_tb;
@@ -316,8 +316,7 @@ TEST_F(an_active_mccp_server_with_compression_started, sends_compression_end_com
         telnetpp::dont,
         [this](telnetpp::element const &element)
         {
-            telnetpp::detail::visit_lambdas(
-                element,
+            std::visit(telnetpp::detail::overloaded{
                 [this](telnetpp::bytes data)
                 {
                     send_data(data);
@@ -335,7 +334,8 @@ TEST_F(an_active_mccp_server_with_compression_started, sends_compression_end_com
                 [](auto &&)
                 {
                     FAIL();
-                });
+                }},
+                element);
         });
         
     std::vector<telnetpp::byte> const expected_data = [&]()

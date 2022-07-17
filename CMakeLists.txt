@@ -132,9 +132,6 @@ endif()
 add_library(telnetpp)
 add_library(KazDragon::telnetpp ALIAS telnetpp)
 
-# The required C++ Standard for Telnet++ is C++14.
-target_compile_features(telnetpp PUBLIC cxx_std_14)
-
 target_sources(telnetpp
     PRIVATE
         include/telnetpp/client_option.hpp
@@ -171,8 +168,8 @@ target_sources(telnetpp
         include/telnetpp/detail/command_router.hpp
         include/telnetpp/detail/export.hpp
         include/telnetpp/detail/generate_helper.hpp
-        include/telnetpp/detail/lambda_visitor.hpp
         include/telnetpp/detail/negotiation_router.hpp
+        include/telnetpp/detail/overloaded.hpp
         include/telnetpp/detail/registration.hpp
         include/telnetpp/detail/return_default.hpp
         include/telnetpp/detail/router.hpp
@@ -256,6 +253,12 @@ target_compile_options(telnetpp
 
         # Add warnings on g++ and Clang
         $<$<OR:$<CXX_COMPILER_ID:GNU>,$<CXX_COMPILER_ID:Clang>>:-Wall -Wextra -Wshadow -Wnon-virtual-dtor -Wpedantic -Wsign-conversion -Werror>
+)
+
+# The required C++ Standard for Telnet++ is C++17.
+target_compile_features(telnetpp 
+    PUBLIC 
+        cxx_std_17
 )
 
 target_include_directories(telnetpp

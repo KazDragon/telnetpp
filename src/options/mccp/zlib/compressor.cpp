@@ -1,8 +1,8 @@
 #include "telnetpp/options/mccp/zlib/compressor.hpp"
 #include <boost/core/ignore_unused.hpp>
-#include <boost/optional.hpp>
 #include <zlib.h>
 #include <cassert>
+#include <optional>
 
 namespace telnetpp { namespace options { namespace mccp { namespace zlib {
 
@@ -23,18 +23,18 @@ static std::size_t constexpr output_buffer_size = 1024;
 // ==========================================================================
 struct compressor::impl
 {
-    boost::optional<z_stream> stream;
+    std::optional<z_stream> stream;
 
     // ======================================================================
     // CONSTRUCT_STREAM
     // ======================================================================
     void construct_stream()
     {
-        assert(stream == boost::none);
+        assert(stream == std::nullopt);
 
         stream = z_stream{};
 
-        auto result = deflateInit(stream.get_ptr(), Z_DEFAULT_COMPRESSION);
+        auto result = deflateInit(&*stream, Z_DEFAULT_COMPRESSION);
         boost::ignore_unused(result);
         assert(result == Z_OK);
     }
@@ -44,13 +44,13 @@ struct compressor::impl
     // ======================================================================
     void destroy_stream()
     {
-        assert(stream != boost::none);
+        assert(stream != std::nullopt);
 
-        auto result = deflateEnd(stream.get_ptr());
+        auto result = deflateEnd(&*stream);
         boost::ignore_unused(result);
         assert(result == Z_OK || result == Z_STREAM_ERROR || Z_DATA_ERROR);
 
-        stream = boost::none;
+        stream = std::nullopt;
     }
 };
 
@@ -101,7 +101,7 @@ void compressor::do_finish(continuation const &cont)
         pimpl_->stream->avail_out = output_buffer_size;
         pimpl_->stream->next_out  = output_buffer;
         
-        response = deflate(pimpl_->stream.get_ptr(), Z_FINISH);
+        response = deflate(&*pimpl_->stream, Z_FINISH);
         
         auto const output_data = telnetpp::bytes{
             output_buffer, pimpl_->stream->next_out
@@ -134,7 +134,7 @@ telnetpp::bytes compressor::transform_chunk(
     pimpl_->stream->avail_out = output_buffer_size;
     pimpl_->stream->next_out  = output_buffer;
 
-    auto response = deflate(pimpl_->stream.get_ptr(), Z_SYNC_FLUSH);
+    auto response = deflate(&*pimpl_->stream, Z_SYNC_FLUSH);
     boost::ignore_unused(response);
     assert(response == Z_OK);
 

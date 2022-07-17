@@ -1,7 +1,7 @@
 #pragma once
 
 #include "telnetpp/core.hpp"
-#include <boost/optional.hpp>
+#include <optional>
 
 namespace telnetpp { namespace options { namespace new_environ {
 
@@ -30,9 +30,9 @@ using requests = gsl::span<request const>;
 //* =========================================================================
 struct response
 {
-    variable_type                           type;
-    telnetpp::byte_storage                  name;
-    boost::optional<telnetpp::byte_storage> value;
+    variable_type                         type;
+    telnetpp::byte_storage                name;
+    std::optional<telnetpp::byte_storage> value;
 };
 
 using responses = gsl::span<response const>;

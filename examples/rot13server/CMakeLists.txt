@@ -27,8 +27,8 @@ else()
     )
 endif()
 
-# The required C++ Standard for Server++ is C++14.
-set(CMAKE_CXX_STANDARD 14)
+# The required C++ Standard for Server++ is C++17.
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 set (ROT13_SERVER_PUBLIC_SOURCE_FILES

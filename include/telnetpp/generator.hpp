@@ -2,7 +2,7 @@
 
 #include "telnetpp/element.hpp"
 #include "telnetpp/detail/generate_helper.hpp"
-#include "telnetpp/detail/lambda_visitor.hpp"
+#include "telnetpp/detail/overloaded.hpp"
 #include <algorithm>
 #include <utility>
 
@@ -18,8 +18,7 @@ namespace telnetpp {
 template <class Continuation>
 constexpr void generate(telnetpp::element const &elem, Continuation &&cont)
 {
-    detail::visit_lambdas(
-        elem,
+    std::visit(detail::overloaded{
         [&cont](telnetpp::bytes data)
         {
             detail::generate_escaped(data, cont);
@@ -35,8 +34,8 @@ constexpr void generate(telnetpp::element const &elem, Continuation &&cont)
         [&cont](telnetpp::subnegotiation const &sub)
         {
             detail::generate_subnegotiation(sub, cont);
-        }
-    );
+        }},
+        elem);
 }
 
 }

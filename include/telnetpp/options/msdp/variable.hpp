@@ -2,8 +2,8 @@
 
 #include "telnetpp/core.hpp"
 #include <boost/container/small_vector.hpp>
-#include <boost/variant.hpp>
 #include <iosfwd>
+#include <variant>
 #include <vector>
 
 namespace telnetpp { namespace options { namespace msdp {
@@ -19,10 +19,10 @@ using table_value  = std::vector<variable>;
 /// \brief A variant that can either be a string, an array of string, or
 /// an array of telnetpp::options::msdp::variable.
 //* =========================================================================
-using value_type = boost::variant<
+using value_type = std::variant<
     string_value,
     array_value,
-    boost::recursive_wrapper<table_value>
+    table_value
 >;
 
 //* =========================================================================

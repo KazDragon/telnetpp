@@ -66,7 +66,7 @@ TEST_F(parser_test, normal_character_parses_to_span_of_character)
             static constexpr telnetpp::byte const expected_values[] = { 'x' };
             static constexpr telnetpp::bytes const expected{ expected_values };
 
-            auto const actual = boost::get<telnetpp::bytes>(elem);
+            auto const actual = std::get<telnetpp::bytes>(elem);
             ASSERT_EQ(size_t{ 1 }, actual.size());
         });
 
@@ -84,7 +84,7 @@ TEST_F(parser_test, two_normal_characters_parse_to_string)
             static constexpr telnetpp::byte const expected_values[] = { 'x', 'y' };
             static constexpr telnetpp::bytes const expected{ expected_values };
 
-            auto const actual = boost::get<telnetpp::bytes>(elem);
+            auto const actual = std::get<telnetpp::bytes>(elem);
             ASSERT_EQ(expected, actual);
         });
 
@@ -111,7 +111,7 @@ TEST_F(parser_test, byte_then_iac_emits_byte_only)
             static constexpr telnetpp::byte const expected_values[] = { 'x' };
             static constexpr telnetpp::bytes const expected{ expected_values };
 
-            auto const actual = boost::get<telnetpp::bytes>(elem);
+            auto const actual = std::get<telnetpp::bytes>(elem);
             ASSERT_EQ(expected, actual);
         });
 
@@ -130,7 +130,7 @@ TEST_F(parser_test, double_iac_parses_to_iac)
             static constexpr telnetpp::byte const expected_values[] = { 0xFF };
             static constexpr telnetpp::bytes const expected{ expected_values };
 
-            auto const actual = boost::get<telnetpp::bytes>(elem);
+            auto const actual = std::get<telnetpp::bytes>(elem);
             ASSERT_EQ(expected, actual);
         });
 
@@ -158,7 +158,7 @@ TEST_P(for_non_negotiating_commands, as_the_only_element)
 
     ASSERT_EQ(size_t{1}, result_.size());
 
-    auto const actual = boost::get<telnetpp::command>(result_[0]);
+    auto const actual = std::get<telnetpp::command>(result_[0]);
     ASSERT_EQ(expected_command, actual);
 }
 
@@ -241,7 +241,7 @@ TEST_F(parser_test, sb_option_iac_se_parses_to_empty_subnegotiation)
 
     ASSERT_EQ(size_t{1}, result_.size());
 
-    auto const actual = boost::get<telnetpp::subnegotiation>(result_[0]);
+    auto const actual = std::get<telnetpp::subnegotiation>(result_[0]);
     ASSERT_EQ(expected, actual);
 }
 
@@ -264,7 +264,7 @@ TEST_F(parser_test, subnegotiation_with_content_parses_to_subnegotation)
 
     ASSERT_EQ(size_t{1}, result_.size());
 
-    auto const actual = boost::get<telnetpp::subnegotiation>(result_[0]);
+    auto const actual = std::get<telnetpp::subnegotiation>(result_[0]);
     ASSERT_EQ(expected, actual);
 }
 
@@ -302,7 +302,7 @@ TEST_F(parser_test, subnegotiation_with_iac_iac_parses_to_iac)
                 expected_content
             };
 
-            auto const actual = boost::get<telnetpp::subnegotiation>(elem);
+            auto const actual = std::get<telnetpp::subnegotiation>(elem);
             ASSERT_EQ(expected, actual);
         });
 
@@ -330,7 +330,7 @@ TEST_P(for_complete_negotiations, as_the_only_element)
 
     ASSERT_EQ(size_t{1}, result_.size());
 
-    auto const actual = boost::get<telnetpp::negotiation>(result_[0]);
+    auto const actual = std::get<telnetpp::negotiation>(result_[0]);
     ASSERT_EQ(expected_negotiation, actual);
 }
 

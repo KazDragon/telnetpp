@@ -1,6 +1,5 @@
 #include <telnetpp/options/mccp/zlib/compressor.hpp>
 #include <gtest/gtest.h>
-#include <boost/make_unique.hpp>
 #include <boost/range/algorithm/generate.hpp>
 #include <random>
 #include <zlib.h>

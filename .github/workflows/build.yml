@@ -92,7 +92,7 @@ jobs:
       working-directory: ${{runner.workspace}}/telnetpp/build
       run: |
         conan config set general.request_timeout=120
-        conan install $GITHUB_WORKSPACE -s compiler.libcxx=libstdc++11 -s cppstd=14 -s build_type=$BUILD_TYPE --build=missing
+        conan install $GITHUB_WORKSPACE -s compiler.libcxx=libstdc++11 -s cppstd=17 -s build_type=$BUILD_TYPE --build=missing
 
     - name: Configure CMake
       shell: bash

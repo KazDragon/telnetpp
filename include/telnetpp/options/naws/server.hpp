@@ -2,7 +2,7 @@
 
 #include "telnetpp/options/basic_server.hpp"
 #include "telnetpp/options/naws/detail/protocol.hpp"
-#include <boost/optional.hpp>
+#include <optional>
 #include <utility>
 
 namespace telnetpp { namespace options { namespace naws {
@@ -45,7 +45,7 @@ private:
     template <typename Continuation>
     void report_window_size(Continuation &&send)
     {
-        if (window_size_.is_initialized())
+        if (window_size_.has_value())
         {
             telnetpp::byte const content[] = {
                 byte(window_size_->first >> 8),
@@ -58,7 +58,7 @@ private:
         }
     }
 
-    boost::optional<std::pair<
+    std::optional<std::pair<
         window_dimension, window_dimension
     >> window_size_;
 };

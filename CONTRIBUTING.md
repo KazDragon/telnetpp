@@ -6,7 +6,7 @@ Contributions are welcome!
 
 ## Scope
 
-Telnet++ is a C++-14 library aimed at providing an easy-to-use, easy-to-integrate implementation of the core Telnet functionality, and an extensible Option framework, including various reference implementations.  The scope of the library includes implementation of anything in the core Telnet RFCs, or any domain-specific Telnet extensions, such as those proposed within the Mudding community.
+Telnet++ is a C++-17 library aimed at providing an easy-to-use, easy-to-integrate implementation of the core Telnet functionality, and an extensible Option framework, including various reference implementations.  The scope of the library includes implementation of anything in the core Telnet RFCs, or any domain-specific Telnet extensions, such as those proposed within the Mudding community.
 
 ## Contributing
 
@@ -16,4 +16,4 @@ Contributions can be in several forms:
 
 ## Guidelines
 
-This is a C++-14 codebase, with a Standard Library/Boost look-and-feel.  Please let your tests drive your development, and keep it to around 80 characters per line to make it easier to read.  The rest is negotiable during integration.
+This is a C++-17 codebase, with a Standard Library/Boost look-and-feel.  Please let your tests drive your development, and keep it to around 80 characters per line to make it easier to read.  The rest is negotiable during integration.

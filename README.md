@@ -16,7 +16,7 @@ Telnet++ is an implementation of the Telnet Session Layer protocol that is used 
 
 # Requirements
 
-Telnet++ requires a C++14 compiler and the following libraries:
+Telnet++ requires a C++17 compiler and the following libraries:
   * Boost (At least version 1.69.0)
   * GSL-lite (At least version 1.38)
   * (Optionally) ZLib
@@ -90,7 +90,7 @@ Subnegotiations are represented by the [telnetpp::subnegotiation](include/telnet
 
 # Dataflow: Elements, Tokens and Streams
 
-A [telnetpp::element](include/telnetpp/element.hpp) is a Boost.Variant that may contain a command, a negotiation, a subnegotiation, or just a plain sequence of bytes representing non-Telnet-specific input/output.
+A [telnetpp::element](include/telnetpp/element.hpp) is a variant that may contain a command, a negotiation, a subnegotiation, or just a plain sequence of bytes representing non-Telnet-specific input/output.
 
 # Stream-Unaware
 
