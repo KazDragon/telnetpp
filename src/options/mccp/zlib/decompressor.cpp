@@ -1,8 +1,8 @@
 #include "telnetpp/options/mccp/zlib/decompressor.hpp"
 #include <boost/core/ignore_unused.hpp>
-#include <boost/optional.hpp>
 #include <zlib.h>
 #include <cassert>
+#include <optional>
 
 namespace telnetpp { namespace options { namespace mccp { namespace zlib {
 
@@ -23,7 +23,7 @@ static constexpr std::size_t receive_buffer_size = 1024;
 // ==========================================================================
 struct decompressor::impl
 {
-    boost::optional<z_stream> stream;
+    std::optional<z_stream> stream;
 
     // ======================================================================
     // CONSTRUCT_STREAM
@@ -34,7 +34,7 @@ struct decompressor::impl
 
         stream = z_stream{};
 
-        auto result = inflateInit(stream.get_ptr());
+        auto result = inflateInit(&*stream);
         boost::ignore_unused(result);
         assert(result == Z_OK);
     }
@@ -46,11 +46,11 @@ struct decompressor::impl
     {
         assert(stream != boost::none);
 
-        auto result = inflateEnd(stream.get_ptr());
+        auto result = inflateEnd(&*stream);
         boost::ignore_unused(result);
         assert(result == Z_OK || result == Z_STREAM_ERROR);
 
-        stream = boost::none;
+        stream = std::nullopt;
     }
 };
 
@@ -110,7 +110,7 @@ telnetpp::bytes decompressor::transform_chunk(
     pimpl_->stream->avail_out = receive_buffer_size;
     pimpl_->stream->next_out  = receive_buffer;
 
-    auto response = inflate(pimpl_->stream.get_ptr(), Z_SYNC_FLUSH);
+    auto response = inflate(&*pimpl_->stream, Z_SYNC_FLUSH);
 
     if (response == Z_DATA_ERROR)
     {

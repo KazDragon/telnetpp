@@ -334,7 +334,7 @@ TEST_F(in_an_active_new_environ_client, receiving_var_and_no_value_reports_undef
     ASSERT_EQ(size_t{1}, received_responses.size());
     ASSERT_EQ(telnetpp::options::new_environ::variable_type::var, received_responses[0].type);
     ASSERT_EQ("USER"_tb, received_responses[0].name);
-    ASSERT_FALSE(received_responses[0].value.is_initialized());
+    ASSERT_FALSE(received_responses[0].value.has_value());
 }
 
 TEST_F(in_an_active_new_environ_client, receiving_uservar_and_no_value_reports_undefined_uservar)
@@ -356,7 +356,7 @@ TEST_F(in_an_active_new_environ_client, receiving_uservar_and_no_value_reports_u
     ASSERT_EQ(size_t{1}, received_responses.size());
     ASSERT_EQ(telnetpp::options::new_environ::variable_type::uservar, received_responses[0].type);
     ASSERT_EQ("TEST"_tb, received_responses[0].name);
-    ASSERT_FALSE(received_responses[0].value.is_initialized());
+    ASSERT_FALSE(received_responses[0].value.has_value());
 }
 
 TEST_F(in_an_active_new_environ_client, receiving_var_and_empty_value_reports_empty_var)
@@ -379,7 +379,7 @@ TEST_F(in_an_active_new_environ_client, receiving_var_and_empty_value_reports_em
     ASSERT_EQ(size_t{1}, received_responses.size());
     ASSERT_EQ(telnetpp::options::new_environ::variable_type::var, received_responses[0].type);
     ASSERT_EQ("USER"_tb, received_responses[0].name);
-    ASSERT_TRUE(received_responses[0].value.is_initialized());
+    ASSERT_TRUE(received_responses[0].value.has_value());
     ASSERT_EQ(""_tb, *received_responses[0].value);
 }
 
@@ -403,7 +403,7 @@ TEST_F(in_an_active_new_environ_client, receiving_uservar_and_empty_value_report
     ASSERT_EQ(size_t{1}, received_responses.size());
     ASSERT_EQ(telnetpp::options::new_environ::variable_type::uservar, received_responses[0].type);
     ASSERT_EQ("TEST"_tb, received_responses[0].name);
-    ASSERT_TRUE(received_responses[0].value.is_initialized());
+    ASSERT_TRUE(received_responses[0].value.has_value());
     ASSERT_EQ(""_tb, *received_responses[0].value);
 }
 
@@ -427,7 +427,7 @@ TEST_F(in_an_active_new_environ_client, receiving_var_and_value_reports_var_and_
     ASSERT_EQ(size_t{1}, received_responses.size());
     ASSERT_EQ(telnetpp::options::new_environ::variable_type::var, received_responses[0].type);
     ASSERT_EQ("USER"_tb, received_responses[0].name);
-    ASSERT_TRUE(received_responses[0].value.is_initialized());
+    ASSERT_TRUE(received_responses[0].value.has_value());
     ASSERT_EQ("BOB"_tb, *received_responses[0].value);
 }
 
@@ -451,7 +451,7 @@ TEST_F(in_an_active_new_environ_client, receiving_uservar_and_value_reports_var_
     ASSERT_EQ(size_t{1}, received_responses.size());
     ASSERT_EQ(telnetpp::options::new_environ::variable_type::uservar, received_responses[0].type);
     ASSERT_EQ("TEST"_tb, received_responses[0].name);
-    ASSERT_TRUE(received_responses[0].value.is_initialized());
+    ASSERT_TRUE(received_responses[0].value.has_value());
     ASSERT_EQ("VALUE"_tb, *received_responses[0].value);
 }
 
@@ -479,16 +479,16 @@ TEST_F(in_an_active_new_environ_client, receiving_multiple_variables_reports_mul
 
     ASSERT_EQ(telnetpp::options::new_environ::variable_type::var, received_responses[0].type);
     ASSERT_EQ("USER"_tb, received_responses[0].name);
-    ASSERT_TRUE(received_responses[0].value.is_initialized());
+    ASSERT_TRUE(received_responses[0].value.has_value());
     ASSERT_EQ("BOB"_tb, *received_responses[0].value);
 
     ASSERT_EQ(telnetpp::options::new_environ::variable_type::uservar, received_responses[1].type);
     ASSERT_EQ("TEST0"_tb, received_responses[1].name);
-    ASSERT_FALSE(received_responses[1].value.is_initialized());
+    ASSERT_FALSE(received_responses[1].value.has_value());
 
     ASSERT_EQ(telnetpp::options::new_environ::variable_type::uservar, received_responses[2].type);
     ASSERT_EQ("TEST1"_tb, received_responses[2].name);
-    ASSERT_TRUE(received_responses[2].value.is_initialized());
+    ASSERT_TRUE(received_responses[2].value.has_value());
     ASSERT_EQ("VALUE"_tb, *received_responses[2].value);
 }
 
@@ -516,16 +516,16 @@ TEST_F(in_an_active_new_environ_client, receiving_info_for_multiple_variables_re
 
     ASSERT_EQ(telnetpp::options::new_environ::variable_type::var, received_responses[0].type);
     ASSERT_EQ("USER"_tb, received_responses[0].name);
-    ASSERT_TRUE(received_responses[0].value.is_initialized());
+    ASSERT_TRUE(received_responses[0].value.has_value());
     ASSERT_EQ("BOB"_tb, *received_responses[0].value);
 
     ASSERT_EQ(telnetpp::options::new_environ::variable_type::uservar, received_responses[1].type);
     ASSERT_EQ("TEST0"_tb, received_responses[1].name);
-    ASSERT_FALSE(received_responses[1].value.is_initialized());
+    ASSERT_FALSE(received_responses[1].value.has_value());
 
     ASSERT_EQ(telnetpp::options::new_environ::variable_type::uservar, received_responses[2].type);
     ASSERT_EQ("TEST1"_tb, received_responses[2].name);
-    ASSERT_TRUE(received_responses[2].value.is_initialized());
+    ASSERT_TRUE(received_responses[2].value.has_value());
     ASSERT_EQ("VALUE"_tb, *received_responses[2].value);
 }
 
@@ -550,7 +550,7 @@ TEST_F(in_an_active_new_environ_client, receiving_uservar_with_escaped_var_in_na
 
     ASSERT_EQ(telnetpp::options::new_environ::variable_type::uservar, received_responses[0].type);
     ASSERT_EQ("TE\x00ST"_tb, received_responses[0].name);
-    ASSERT_TRUE(received_responses[0].value.is_initialized());
+    ASSERT_TRUE(received_responses[0].value.has_value());
     ASSERT_EQ("VALUE"_tb, *received_responses[0].value);
 }
 
@@ -575,7 +575,7 @@ TEST_F(in_an_active_new_environ_client, receiving_uservar_with_escaped_uservar_i
 
     ASSERT_EQ(telnetpp::options::new_environ::variable_type::uservar, received_responses[0].type);
     ASSERT_EQ("TE\x03ST"_tb, received_responses[0].name);
-    ASSERT_TRUE(received_responses[0].value.is_initialized());
+    ASSERT_TRUE(received_responses[0].value.has_value());
     ASSERT_EQ("VALUE"_tb, *received_responses[0].value);
 }
 
@@ -600,7 +600,7 @@ TEST_F(in_an_active_new_environ_client, receiving_uservar_with_escaped_value_in_
 
     ASSERT_EQ(telnetpp::options::new_environ::variable_type::uservar, received_responses[0].type);
     ASSERT_EQ("TE\x01ST"_tb, received_responses[0].name);
-    ASSERT_TRUE(received_responses[0].value.is_initialized());
+    ASSERT_TRUE(received_responses[0].value.has_value());
     ASSERT_EQ("VALUE"_tb, *received_responses[0].value);
 }
 
@@ -625,7 +625,7 @@ TEST_F(in_an_active_new_environ_client, receiving_uservar_with_escaped_escape_in
 
     ASSERT_EQ(telnetpp::options::new_environ::variable_type::uservar, received_responses[0].type);
     ASSERT_EQ("TE\x02ST"_tb, received_responses[0].name);
-    ASSERT_TRUE(received_responses[0].value.is_initialized());
+    ASSERT_TRUE(received_responses[0].value.has_value());
     ASSERT_EQ("VALUE"_tb, *received_responses[0].value);
 }
 
@@ -650,7 +650,7 @@ TEST_F(in_an_active_new_environ_client, receiving_uservar_with_escaped_var_in_va
 
     ASSERT_EQ(telnetpp::options::new_environ::variable_type::uservar, received_responses[0].type);
     ASSERT_EQ("TEST"_tb, received_responses[0].name);
-    ASSERT_TRUE(received_responses[0].value.is_initialized());
+    ASSERT_TRUE(received_responses[0].value.has_value());
     ASSERT_EQ("VAL\x00UE"_tb, *received_responses[0].value);
 }
 
@@ -675,6 +675,6 @@ TEST_F(in_an_active_new_environ_client, receiving_uservar_with_escaped_uservar_i
 
     ASSERT_EQ(telnetpp::options::new_environ::variable_type::uservar, received_responses[0].type);
     ASSERT_EQ("TEST"_tb, received_responses[0].name);
-    ASSERT_TRUE(received_responses[0].value.is_initialized());
+    ASSERT_TRUE(received_responses[0].value.has_value());
     ASSERT_EQ("VAL\x03UE"_tb, *received_responses[0].value);
 }

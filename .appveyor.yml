@@ -42,7 +42,6 @@ install:
   - vcpkg install boost-core:%platform%-windows
   - vcpkg install boost-exception:%platform%-windows
   - vcpkg install boost-io:%platform%-windows
-  - vcpkg install boost-optional:%platform%-windows
   - vcpkg install boost-range:%platform%-windows
   - vcpkg install boost-signals2:%platform%-windows
   - vcpkg install gsl-lite:%platform%-windows
