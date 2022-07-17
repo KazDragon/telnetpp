@@ -1,5 +1,4 @@
 #include "telnetpp/element.hpp"
-#include "telnetpp/detail/lambda_visitor.hpp"
 #include <iostream>
 
 namespace telnetpp {
@@ -9,13 +8,12 @@ namespace telnetpp {
 // ==========================================================================
 std::ostream &operator<<(std::ostream &out, telnetpp::element const &elem)
 {
-    detail::visit_lambdas(
-        elem,
+    std::visit(
         [&out](auto &&data)
         {
             out << "element[" << data << "]";
-        }
-    );
+        },
+        elem);
 
     return out;
 }

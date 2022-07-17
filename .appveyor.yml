@@ -45,7 +45,6 @@ install:
   - vcpkg install boost-optional:%platform%-windows
   - vcpkg install boost-range:%platform%-windows
   - vcpkg install boost-signals2:%platform%-windows
-  - vcpkg install boost-variant:%platform%-windows
   - vcpkg install gsl-lite:%platform%-windows
   - vcpkg install zlib:%platform%-windows
   - vcpkg install gtest:%platform%-windows

@@ -2,11 +2,11 @@
 
 #include "telnetpp/generator.hpp"
 #include "telnetpp/parser.hpp"
-#include "telnetpp/detail/lambda_visitor.hpp"
 #include "telnetpp/client_option.hpp"
 #include "telnetpp/server_option.hpp"
 #include "telnetpp/detail/command_router.hpp"
 #include "telnetpp/detail/negotiation_router.hpp"
+#include "telnetpp/detail/overloaded.hpp"
 #include "telnetpp/detail/subnegotiation_router.hpp"
 #include <string>
 
@@ -213,8 +213,7 @@ public:
                     telnetpp::generate(elm, send_continuation);
                 };
 
-                detail::visit_lambdas(
-                    elem,
+                std::visit(detail::overloaded{
                     [&](telnetpp::bytes input_content)
                     {
                         receive_continuation(
@@ -235,7 +234,8 @@ public:
                     [&](telnetpp::subnegotiation const &sub)
                     {
                         subnegotiation_router_(sub, generator);
-                    });
+                    }},
+                    elem);
             };
 
         parser_(content, token_handler);

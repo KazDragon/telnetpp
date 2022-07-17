@@ -90,7 +90,7 @@ Subnegotiations are represented by the [telnetpp::subnegotiation](include/telnet
 
 # Dataflow: Elements, Tokens and Streams
 
-A [telnetpp::element](include/telnetpp/element.hpp) is a Boost.Variant that may contain a command, a negotiation, a subnegotiation, or just a plain sequence of bytes representing non-Telnet-specific input/output.
+A [telnetpp::element](include/telnetpp/element.hpp) is a variant that may contain a command, a negotiation, a subnegotiation, or just a plain sequence of bytes representing non-Telnet-specific input/output.
 
 # Stream-Unaware
 

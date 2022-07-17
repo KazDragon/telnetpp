@@ -168,8 +168,8 @@ target_sources(telnetpp
         include/telnetpp/detail/command_router.hpp
         include/telnetpp/detail/export.hpp
         include/telnetpp/detail/generate_helper.hpp
-        include/telnetpp/detail/lambda_visitor.hpp
         include/telnetpp/detail/negotiation_router.hpp
+        include/telnetpp/detail/overloaded.hpp
         include/telnetpp/detail/registration.hpp
         include/telnetpp/detail/return_default.hpp
         include/telnetpp/detail/router.hpp

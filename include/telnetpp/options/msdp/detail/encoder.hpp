@@ -2,7 +2,6 @@
 
 #include "telnetpp/options/msdp/variable.hpp"
 #include "telnetpp/options/msdp/detail/protocol.hpp"
-#include "telnetpp/detail/lambda_visitor.hpp"
 
 namespace telnetpp { namespace options { namespace msdp { namespace detail {
 

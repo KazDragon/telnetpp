@@ -1,6 +1,6 @@
 #include "telnetpp/options/msdp/detail/encoder.hpp"
 #include "telnetpp/options/msdp/detail/protocol.hpp"
-#include "telnetpp/detail/lambda_visitor.hpp"
+#include "telnetpp/detail/overloaded.hpp"
 
 using variable = telnetpp::options::msdp::variable;
 
@@ -17,8 +17,7 @@ void encode_variable(
     storage += encode_var.name_;
     storage.push_back(telnetpp::options::msdp::detail::val);
     
-    telnetpp::detail::visit_lambdas(
-        encode_var.value_,
+    std::visit(telnetpp::detail::overloaded{
         [&](telnetpp::options::msdp::string_value const &vbl)
         {
             storage += vbl;
@@ -41,7 +40,8 @@ void encode_variable(
                 encode_variable(vbl, storage);
                 storage.push_back(telnetpp::options::msdp::detail::table_close);
             }
-        });
+        }},
+        encode_var.value_);
 }
 
 }}}}

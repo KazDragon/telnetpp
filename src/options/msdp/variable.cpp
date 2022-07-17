@@ -1,5 +1,5 @@
 #include "telnetpp/options/msdp/variable.hpp"
-#include "telnetpp/detail/lambda_visitor.hpp"
+#include "telnetpp/detail/overloaded.hpp"
 #include <ostream>
 
 namespace telnetpp { namespace options { namespace msdp {
@@ -85,13 +85,23 @@ bool operator==(variable const &lhs, variable const &rhs)
     auto const &lhs_value = lhs.value_;
 
     return lhs.name_ == rhs.name_
-        && detail::visit_lambdas<bool>(
-               rhs.value_,
-               [&lhs_value](auto const &inner_rhs)
+        && std::visit(detail::overloaded{
+               [&lhs_value](string_value const &inner_rhs)
                {
-                   return boost::get<decltype(inner_rhs)>(lhs_value)
+                   return std::get<string_value>(lhs_value)
                        == inner_rhs;
-               });
+               },
+               [&lhs_value](array_value const &inner_rhs)
+               {
+                   return std::get<array_value>(lhs_value)
+                       == inner_rhs;
+               },
+               [&lhs_value](table_value const &inner_rhs)
+               {
+                   return std::get<table_value>(lhs_value)
+                       == inner_rhs;
+               }},
+               rhs.value_);
 }
 
 // ==========================================================================
@@ -109,8 +119,7 @@ std::ostream &operator<<(std::ostream &out, variable const &var)
 {
     out << reinterpret_cast<char const *>(var.name_.c_str()) << "=";
     
-    detail::visit_lambdas(
-        var.value_,
+    std::visit(detail::overloaded{
         [&](string_value const &sv)
         {
             out << "\"" << reinterpret_cast<char const *>(sv.c_str()) << "\"";
@@ -136,7 +145,8 @@ std::ostream &operator<<(std::ostream &out, variable const &var)
             }
 
             out << "}";
-        });
+        }},
+        var.value_);
         
     return out;
 }

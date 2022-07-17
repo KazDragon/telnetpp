@@ -4,8 +4,8 @@
 #include "telnetpp/command.hpp"
 #include "telnetpp/negotiation.hpp"
 #include "telnetpp/subnegotiation.hpp"
-#include <boost/variant.hpp>
 #include <iosfwd>
+#include <variant>
 
 namespace telnetpp {
 
@@ -15,7 +15,7 @@ namespace telnetpp {
 /// a command, negotiation, or subnegotiation, or a string that represents
 /// upper-layer non-Telnet data.
 //* =========================================================================
-using element = boost::variant<
+using element = std::variant<
     bytes,
     negotiation,
     subnegotiation,
