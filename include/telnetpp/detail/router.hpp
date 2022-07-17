@@ -115,10 +115,9 @@ public:
     template <typename MessageType, typename... Args>
     result_type operator()(MessageType &&message, Args &&... args) const
     {
-        auto iter = registered_functions_.find(
-            KeyFromMessagePolicy::key_from_message(message));
-
-        if (iter != registered_functions_.end())
+        if (auto iter = registered_functions_.find(
+                KeyFromMessagePolicy::key_from_message(message));
+            iter != registered_functions_.end())
         {
             return iter->second(
                 std::forward<MessageType>(message), 
