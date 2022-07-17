@@ -15,7 +15,7 @@ conan config set general.request_timeout=120
 Conan packages are then installed as following:
 
 ```
-conan install -s compiler.libcxx=libstdc++11 -s cppstd=14 --build=missing .
+conan install -s compiler.libcxx=libstdc++11 -s cppstd=17 --build=missing .
 ```
 
 You can then build with:
