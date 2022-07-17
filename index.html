@@ -22,7 +22,7 @@
  <tr style="height: 56px;">
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname">Telnet++
-   &#160;<span id="projectnumber">2.3.0.1</span>
+   &#160;<span id="projectnumber">2.4.0</span>
    </div>
    <div id="projectbrief">A C++ library for interacting with Telnet streams</div>
   </td>
@@ -73,7 +73,7 @@ $(function() {
 <p>Telnet++ is an implementation of the Telnet Session Layer protocol that is used primarily to negotiate a feature set between a client and server, the former of which is usually some kind of text-based terminal, Commonly used terminals include Xterm, PuTTY, and a whole host of Telnet-enabled MUD clients including Tintin++, MushClient, and more.</p>
 <h1><a class="anchor" id="autotoc_md9"></a>
 Requirements</h1>
-<p>Telnet++ requires a C++14 compiler and the following libraries:</p><ul>
+<p>Telnet++ requires a C++17 compiler and the following libraries:</p><ul>
 <li>Boost (At least version 1.69.0)</li>
 <li>GSL-lite (At least version 1.38)</li>
 <li>(Optionally) ZLib</li>
@@ -144,7 +144,7 @@ Subnegotiations</h2>
 <p>Subnegotiations are represented by the <a href="include/telnetpp/subnegotiation.hpp">telnetpp::subnegotiation</a> class.</p>
 <h1><a class="anchor" id="autotoc_md18"></a>
 Dataflow: Elements, Tokens and Streams</h1>
-<p>A <a href="include/telnetpp/element.hpp">telnetpp::element</a> is a Boost.Variant that may contain a command, a negotiation, a subnegotiation, or just a plain sequence of bytes representing non-Telnet-specific input/output.</p>
+<p>A <a href="include/telnetpp/element.hpp">telnetpp::element</a> is a variant that may contain a command, a negotiation, a subnegotiation, or just a plain sequence of bytes representing non-Telnet-specific input/output.</p>
 <h1><a class="anchor" id="autotoc_md19"></a>
 Stream-Unaware</h1>
 <p>The Telnet++ library does not impose any requirement on any kind of data stream API. In order to accomplish this, it makes heavy use of continuation functions. See the <a href="include/telnetpp/session.hpp">telnetpp::session</a> class for an in-depth explanation of how this works.</p>
@@ -227,7 +227,7 @@ Session</h1>
 <div class="ttc" id="aclasstelnetpp_1_1element_html"><div class="ttname"><a href="classtelnetpp_1_1element.html">element</a></div><div class="ttdoc">A common type that can contain any Telnet operation, such as a command, negotiation,...</div></div>
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Sat Apr 30 2022 13:52:31 for Telnet++ by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Sun Jul 17 2022 15:47:19 for Telnet++ by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.17
 </small></address>
