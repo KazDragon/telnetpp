@@ -1,6 +1,9 @@
 #include "telnetpp/options/msdp/variable.hpp"
 #include "telnetpp/detail/overloaded.hpp"
+#include <boost/algorithm/string/join.hpp>
+#include <boost/range/adaptor/transformed.hpp>
 #include <ostream>
+#include <sstream>
 #include <tuple>
 
 namespace telnetpp { namespace options { namespace msdp {
@@ -99,33 +102,35 @@ bool operator!=(variable const &lhs, variable const &rhs)
 // ==========================================================================
 std::ostream &operator<<(std::ostream &out, variable const &var)
 {
-    out << reinterpret_cast<char const *>(var.name_.c_str()) << "=";
+    using boost::adaptors::transformed;
+
+    static auto const to_string = [](auto const &str) {
+        return std::string(reinterpret_cast<char const *>(str.c_str()));
+    };
+
+    out << to_string(var.name_) << "=";
     
     std::visit(detail::overloaded{
         [&](string_value const &sv)
         {
-            out << "\"" << reinterpret_cast<char const *>(sv.c_str()) << "\"";
+            out << "\"" << to_string(sv) << "\"";
         },
         [&](array_value const &av)
         {
             out << "[";
-            
-            for (auto const &item : av)
-            {
-                out << reinterpret_cast<char const *>(item.c_str()) << ",";
-            }
-            
+            out << boost::algorithm::join(av | transformed(to_string), ",");
             out << "]";
         },
         [&](table_value const &tv)
         {
-            out << "{";
-            
-            for (auto const &inner_var :tv)
-            {
-                out << inner_var << ",";
-            }
+            static auto const variable_to_string = [](auto const &tab_var) {
+                std::stringstream stream;
+                stream << tab_var;
+                return stream.str();
+            };
 
+            out << "{";
+            out << boost::algorithm::join(tv | transformed(variable_to_string), ",");
             out << "}";
         }},
         var.value_);

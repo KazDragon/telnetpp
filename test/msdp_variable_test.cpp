@@ -113,7 +113,7 @@ TEST(a_variable, can_be_streamed_to_output)
 
     out << var;
 
-    char const *expected = R"(table={val0="val00",val1=[val010,val011,],val2={val20="val200",},})";
+    char const *expected = R"(table={val0="val00",val1=[val010,val011],val2={val20="val200"}})";
 
     ASSERT_EQ(expected, stream.str());
    
