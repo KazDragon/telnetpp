@@ -355,6 +355,7 @@ target_sources(telnetpp_tester
         test/mccp_server_test.cpp
         test/msdp_client_test.cpp
         test/msdp_server_test.cpp
+        test/msdp_variable_test.cpp
         test/naws_client_test.cpp
         test/naws_server_test.cpp
         test/negotiation_test.cpp
