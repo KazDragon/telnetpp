@@ -1,6 +1,7 @@
 #include "telnetpp/options/msdp/variable.hpp"
 #include "telnetpp/detail/overloaded.hpp"
 #include <ostream>
+#include <tuple>
 
 namespace telnetpp { namespace options { namespace msdp {
 
@@ -82,26 +83,7 @@ variable::variable(
 // ==========================================================================
 bool operator==(variable const &lhs, variable const &rhs)
 {
-    auto const &lhs_value = lhs.value_;
-
-    return lhs.name_ == rhs.name_
-        && std::visit(detail::overloaded{
-               [&lhs_value](string_value const &inner_rhs)
-               {
-                   return std::get<string_value>(lhs_value)
-                       == inner_rhs;
-               },
-               [&lhs_value](array_value const &inner_rhs)
-               {
-                   return std::get<array_value>(lhs_value)
-                       == inner_rhs;
-               },
-               [&lhs_value](table_value const &inner_rhs)
-               {
-                   return std::get<table_value>(lhs_value)
-                       == inner_rhs;
-               }},
-               rhs.value_);
+    return std::tie(lhs.name_, lhs.value_) == std::tie(rhs.name_, rhs.value_);
 }
 
 // ==========================================================================
