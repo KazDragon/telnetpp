@@ -37,6 +37,7 @@ install:
   - git pull
   - .\bootstrap-vcpkg.bat
   - cd %appveyor_build_folder%
+  - vcpkg install boost-algorithm:%platform%-windows
   - vcpkg install boost-smart-ptr:%platform%-windows
   - vcpkg install boost-container:%platform%-windows
   - vcpkg install boost-core:%platform%-windows
