@@ -3,6 +3,9 @@
 #include <sstream>
 
 using namespace telnetpp::literals;
+using string_value = telnetpp::options::msdp::string_value;
+using array_value = telnetpp::options::msdp::array_value;
+using table_value = telnetpp::options::msdp::table_value;
 
 TEST(a_default_variable, is_an_unnamed_empty_string)
 {
@@ -41,7 +44,7 @@ TEST(a_new_variable_with_bytes_for_name_and_array_values, has_those_values_as_na
     static auto const val0 = "val0"_tb;
     static auto const val1 = "val1"_tb;
 
-    telnetpp::options::msdp::variable var{name, {val0, val1}};
+    telnetpp::options::msdp::variable var{name, array_value{val0, val1}};
     ASSERT_EQ(name, var.name_);
     auto const value = std::get<telnetpp::options::msdp::array_value>(var.value_);
     ASSERT_EQ(2u, value.size());
@@ -55,7 +58,7 @@ TEST(a_new_variable_with_storage_for_name_and_array_values, has_those_values_as_
     static auto const val0 = "val0"_tb;
     static auto const val1 = "val1"_tb;
 
-    telnetpp::options::msdp::variable var{name, {val0, val1}};
+    telnetpp::options::msdp::variable var{name, array_value{val0, val1}};
     ASSERT_EQ(name, var.name_);
     auto const value = std::get<telnetpp::options::msdp::array_value>(var.value_);
     ASSERT_EQ(2u, value.size());
@@ -66,11 +69,11 @@ TEST(a_new_variable_with_storage_for_name_and_array_values, has_those_values_as_
 TEST(a_new_variable_with_bytes_for_name_and_table_values, has_those_values_as_name_and_value)
 {
     static auto const name = "table_name"_tb;
-    telnetpp::options::msdp::variable var{
+    telnetpp::options::msdp::variable const var{
         name,
-        {
+        table_value{
             { "val0"_tb, "val00"_tb },
-            { "val1"_tb, { "val010"_tb, "val011"_tb }},
+            { "val1"_tb, array_value{ "val010"_tb, "val011"_tb }},
             { "val2"_tb, {
                 telnetpp::options::msdp::variable{ "val20"_tb, "val200"_tb }
             }}
@@ -99,9 +102,9 @@ TEST(a_variable, can_be_streamed_to_output)
 {
     telnetpp::options::msdp::variable const var{
         "table"_tb,
-        {
+        table_value{
             { "val0"_tb, "val00"_tb },
-            { "val1"_tb, { "val010"_tb, "val011"_tb }},
+            { "val1"_tb, array_value{ "val010"_tb, "val011"_tb }},
             { "val2"_tb, {
                 telnetpp::options::msdp::variable{ "val20"_tb, "val200"_tb }
             }}
@@ -115,6 +118,5 @@ TEST(a_variable, can_be_streamed_to_output)
 
     char const *expected = R"(table={val0="val00",val1=[val010,val011],val2={val20="val200"}})";
 
-    ASSERT_EQ(expected, stream.str());
-   
+    ASSERT_EQ(expected, stream.str()); 
 }
