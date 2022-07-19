@@ -192,11 +192,16 @@ jobs:
         ${{ steps.lcov.outputs.bin }} --gcov-tool=gcov-9 --remove coverage.info '*/test/*' '/usr/*' '*/3party/*' --output-file coverage.info;
         ${{ steps.lcov.outputs.bin }} --gcov-tool=gcov-9 --list coverage.info;
 
-    - name: Post coverage
+    - name: Post coverage to coveralls
       uses: coverallsapp/github-action@master
       with:
         path-to-lcov: coverage.info
         github-token: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Post coverage to Codacy
+      shell: bash
+      run: |
+        bash <(curl -Ls https://coverage.codacy.com/get.sh)
 
   conan-create:
     runs-on: ubuntu-latest
