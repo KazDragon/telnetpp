@@ -6,8 +6,7 @@
 [![MSVC Build status](https://ci.appveyor.com/api/projects/status/8mfv56qt8k2u4ibp/branch/master?svg=true)](https://ci.appveyor.com/project/KazDragon/telnetpp/branch/master) 
 [![Linux Build status](https://github.com/KazDragon/telnetpp/workflows/build/badge.svg)](https://github.com/KazDragon/telnetpp/actions?query=event%3Apush) 
 [![Coverage Status](https://coveralls.io/repos/github/KazDragon/telnetpp/badge.svg?branch=master)](https://coveralls.io/github/KazDragon/telnetpp?branch=master) 
-[![Codacy Badge](https://api.codacy.com/project/badge/Grade/63ec54845f2c41f1899706c61f1c316b)](https://www.codacy.com/app/KazDragon/telnetpp?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=KazDragon/telnetpp&amp;utm_campaign=Badge_Grade)
-
+[![Codacy Badge](https://app.codacy.com/project/badge/Grade/63ec54845f2c41f1899706c61f1c316b)](https://www.codacy.com/gh/KazDragon/telnetpp/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=KazDragon/telnetpp&amp;utm_campaign=Badge_Grade)
 [![Github Issues](https://img.shields.io/github/issues/KazDragon/telnetpp.svg)](https://github.com/KazDragon/telnetpp/issues)
 
 [![Gitter](https://badges.gitter.im/KazDragon/telnetpp.svg)](https://gitter.im/KazDragon/telnetpp?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
