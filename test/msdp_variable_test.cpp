@@ -120,3 +120,74 @@ TEST(a_variable, can_be_streamed_to_output)
 
     ASSERT_EQ(expected, stream.str()); 
 }
+
+TEST(empty_variables, compare_equal)
+{
+    telnetpp::options::msdp::variable lhs;
+    telnetpp::options::msdp::variable rhs;
+
+    ASSERT_EQ(lhs, rhs);
+    ASSERT_FALSE(lhs != rhs);
+}
+
+TEST(string_variables_with_the_same_name_and_value, compare_equal)
+{
+    telnetpp::options::msdp::variable lhs{"value"_tb, "test"_tb};
+    telnetpp::options::msdp::variable rhs{"value"_tb, "test"_tb};
+
+    ASSERT_EQ(lhs, rhs);
+    ASSERT_FALSE(lhs != rhs);
+}
+
+TEST(string_variables_with_different_names_but_the_same_value, do_not_compare_equal)
+{
+    telnetpp::options::msdp::variable lhs{"value0"_tb, "test"_tb};
+    telnetpp::options::msdp::variable rhs{"value1"_tb, "test"_tb};
+
+    ASSERT_NE(lhs, rhs);
+    ASSERT_TRUE(lhs != rhs);
+}
+
+TEST(string_variables_with_the_same_name_but_different_values, do_not_compare_equal)
+{
+    telnetpp::options::msdp::variable lhs{"value"_tb, "test0"_tb};
+    telnetpp::options::msdp::variable rhs{"value"_tb, "test1"_tb};
+
+    ASSERT_NE(lhs, rhs);
+    ASSERT_TRUE(lhs != rhs);
+}
+
+TEST(string_variables_with_different_names_and_values, do_not_compare_equal)
+{
+    telnetpp::options::msdp::variable lhs{"value0"_tb, "test0"_tb};
+    telnetpp::options::msdp::variable rhs{"value1"_tb, "test1"_tb};
+
+    ASSERT_NE(lhs, rhs);
+    ASSERT_TRUE(lhs != rhs);
+}
+
+TEST(string_variables_and_array_variables, do_not_compare_equal)
+{
+    telnetpp::options::msdp::variable lhs{"value"_tb, "test"_tb};
+    telnetpp::options::msdp::variable rhs{"value"_tb, array_value{"test"_tb}};
+
+    ASSERT_NE(lhs, rhs);
+    ASSERT_TRUE(lhs != rhs);
+
+    ASSERT_NE(rhs, lhs);
+    ASSERT_TRUE(rhs != lhs);
+}
+
+TEST(string_variables_and_table_variables, do_not_compare_equal)
+{
+    telnetpp::options::msdp::variable lhs{"value"_tb, "test"_tb};
+    telnetpp::options::msdp::variable rhs{"value"_tb, {
+        telnetpp::options::msdp::variable{"value"_tb, "test"_tb}
+    }};
+
+    ASSERT_NE(lhs, rhs);
+    ASSERT_TRUE(lhs != rhs);
+
+    ASSERT_NE(rhs, lhs);
+    ASSERT_TRUE(rhs != lhs);
+}
