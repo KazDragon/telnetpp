@@ -8,14 +8,12 @@ namespace telnetpp {
 // ==========================================================================
 std::ostream &operator<<(std::ostream &out, telnetpp::element const &elem)
 {
-    std::visit(
-        [&out](auto &&data)
+    return std::visit(
+        [&out](auto &&data) -> std::ostream &
         {
-            out << "element[" << data << "]";
+            return out << "element[" << data << "]";
         },
         elem);
-
-    return out;
 }
 
 }
