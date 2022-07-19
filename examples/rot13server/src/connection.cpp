@@ -16,7 +16,7 @@ struct connection::impl
     // ======================================================================
     // CONSTRUCTOR
     // ======================================================================
-    impl(serverpp::tcp_socket &&socket)
+    explicit impl(serverpp::tcp_socket &&socket)
       : socket_(std::move(socket))
     {
         // Set up handlers for Telnet options functionality:
