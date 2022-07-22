@@ -2,7 +2,8 @@
 
 namespace telnetpp { namespace options { namespace suppress_ga {
 
-server::server() noexcept
+server::server(telnetpp::session &sess) noexcept
+  : basic_server(sess)
 {
 }
 

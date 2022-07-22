@@ -29,11 +29,20 @@ namespace telnetpp {
 /// state.
 /// \see https://tools.ietf.org/html/std8
 //* =========================================================================
-using client_option = telnetpp::option<
-    telnetpp::do_,
-    telnetpp::dont,
-    telnetpp::will,
-    telnetpp::wont
->;
+class TELNETPP_EXPORT client_option 
+  : public telnetpp::option<
+        telnetpp::do_,
+        telnetpp::dont,
+        telnetpp::will,
+        telnetpp::wont
+    >
+{
+public:
+    explicit client_option(
+        telnetpp::session &sess, telnetpp::option_type code) noexcept
+      : option{sess, code}
+    {
+    }
+};
 
 }

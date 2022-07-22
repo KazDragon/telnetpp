@@ -25,17 +25,69 @@ static byte type_to_byte(variable_type const &type)
 // ==========================================================================
 // CONSTRUCTOR
 // ==========================================================================
-server::server()
-  : telnetpp::server_option(telnetpp::options::new_environ::detail::option)
+server::server(telnetpp::session &sess) noexcept
+  : telnetpp::server_option(sess, telnetpp::options::new_environ::detail::option)
 {
+}
+
+// ==========================================================================
+// SET_VARIABLE
+// ==========================================================================
+void server::set_variable(telnetpp::bytes name, telnetpp::bytes value)
+{
+    variables_[telnetpp::byte_storage{name.begin(), name.end()}] = 
+        telnetpp::byte_storage{value.begin(), value.end()};
+
+    if (active())
+    {
+        broadcast_variable_update(variable_type::var, name, value);
+    }
+}
+
+// ==========================================================================
+// DELETE_VARIABLE
+// ==========================================================================
+void server::delete_variable(telnetpp::bytes name)
+{
+    variables_.erase(telnetpp::byte_storage{name.begin(), name.end()});
+
+    if (active())
+    {
+        broadcast_variable_deletion(variable_type::var, name);
+    }
+}
+
+// ==========================================================================
+// SET_USER_VARIABLE
+// ==========================================================================
+void server::set_user_variable(telnetpp::bytes name, telnetpp::bytes value)
+{
+    user_variables_[telnetpp::byte_storage{name.begin(), name.end()}] = 
+        telnetpp::byte_storage{value.begin(), value.end()};
+
+    if (active())
+    {
+        broadcast_variable_update(variable_type::uservar, name, value);
+    }
+}
+
+// ==========================================================================
+// DELETE_USER_VARIABLE
+// ==========================================================================
+void server::delete_user_variable(telnetpp::bytes name)
+{
+    user_variables_.erase(telnetpp::byte_storage{name.begin(), name.end()});
+
+    if (active())
+    {
+        broadcast_variable_deletion(variable_type::uservar, name);
+    }
 }
 
 // ==========================================================================
 // HANDLE_SUBNEGOTIATION
 // ==========================================================================
-void server::handle_subnegotiation(
-    telnetpp::bytes data,
-    continuation const &cont)
+void server::handle_subnegotiation(telnetpp::bytes data)
 {
     telnetpp::byte_storage response{
         telnetpp::options::new_environ::detail::is
@@ -94,10 +146,40 @@ void server::handle_subnegotiation(
             });
     }
     
-    cont(telnetpp::subnegotiation{
-        option_code(),
-        response
-    });
+    write_subnegotiation(response);
+}
+
+// ==========================================================================
+// BROADCAST_VARIABLE_UPDATE
+// ==========================================================================
+void server::broadcast_variable_update(
+    variable_type   type,
+    telnetpp::bytes name,
+    telnetpp::bytes value)
+{
+    telnetpp::byte_storage storage;
+    storage.reserve(3 + name.size() + value.size());
+
+    storage.push_back(detail::info);
+    append_variable(storage, type, name, value);
+
+    write_subnegotiation(storage);
+}
+
+// ==========================================================================
+// BROADCAST_VARIABLE_DELETION
+// ==========================================================================
+void server::broadcast_variable_deletion(
+    variable_type   type,
+    telnetpp::bytes name)
+{
+    telnetpp::byte_storage storage;
+    storage.reserve(2 + name.size());
+
+    storage.push_back(detail::info);
+    append_variable(storage, type, name);
+
+    write_subnegotiation(storage);
 }
 
 // ==========================================================================
@@ -127,4 +209,3 @@ void server::append_variable(
 }
 
 }}}
-

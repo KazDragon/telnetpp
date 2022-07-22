@@ -36,9 +36,9 @@ void register_route_from_negotiation_to_option(
 {
     route.register_route(
         negotiation{request, option.option_code()},
-        [&option, request](auto &&/*neg*/, auto &&cont)
+        [&option, request](telnetpp::negotiation const &)
         {
-            return option.negotiate(request, cont);
+            return option.negotiate(request);
         });
 }
 
@@ -51,9 +51,9 @@ void register_route_from_subnegotiation_to_option(
     SubnegotiableOption   &option)
 {
     route.register_route(option.option_code(),
-        [&option](auto &&sub, auto &&cont)
+        [&option](telnetpp::subnegotiation const &sub)
         {
-            return option.subnegotiate(sub.content(), cont);
+            return option.subnegotiate(sub.content());
         });
 }
 

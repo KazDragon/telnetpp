@@ -1,104 +1,60 @@
 #include "telnetpp/options/naws/server.hpp"
+#include "telnet_option_fixture.hpp"
 #include <gtest/gtest.h>
 
-TEST(naws_server_test, option_is_naws)
-{
-    telnetpp::options::naws::server server;
-    ASSERT_EQ(31, server.option_code());
+namespace {
+using a_naws_server = a_telnet_option<telnetpp::options::naws::server>;
 }
 
-TEST(naws_server_test, activation_with_no_screen_size_sends_nothing)
+TEST_F(a_naws_server, is_a_naws_server)
 {
-    telnetpp::options::naws::server server;
-
-    std::vector<telnetpp::element> const expected_result = {
-    };
-
-    std::vector<telnetpp::element> received_result;
-    server.activate([&](auto &&){});
-    server.negotiate(
-        telnetpp::do_,
-        [&](telnetpp::element const &elem)
-        {
-            received_result.push_back(elem);
-        });
-    assert(server.active());
-
-    ASSERT_EQ(expected_result, received_result);
+    ASSERT_EQ(31, option_.option_code());
 }
 
-TEST(naws_server_test, setting_screen_size_when_not_activated_sends_nothing)
+TEST_F(a_naws_server, on_activation_with_no_screen_size_does_not_send_screen_size)
 {
-    telnetpp::options::naws::server server;
+    option_.activate();
+    channel_.written_.clear();
 
-    std::vector<telnetpp::element> const expected_result = {
-    };
+    option_.negotiate(telnetpp::do_);
+    assert(option_.active());
 
-    std::vector<telnetpp::element> received_result;
-
-    server.set_window_size(
-        80, 24, 
-        [&](telnetpp::element const &elem)
-        {
-            received_result.push_back(elem);
-        });
-
-    ASSERT_EQ(expected_result, received_result);
+    telnetpp::byte_storage const expected_result = {};
+    ASSERT_EQ(expected_result, channel_.written_);
 }
 
-TEST(naws_server_test, activation_with_screen_size_sends_screen_size)
+TEST_F(a_naws_server, on_activation_with_screen_size_sends_screen_size)
 {
-    telnetpp::options::naws::server server;
-    server.set_window_size(80, 24, [&](auto &&){});
+    option_.set_window_size(80, 24);
 
-    telnetpp::byte const expected_content[] = {
-        0, 80, 0, 24
+    option_.activate();
+    channel_.written_.clear();
+
+    option_.negotiate(telnetpp::do_);
+    assert(option_.active());
+
+    telnetpp::byte_storage const expected_content = {
+        telnetpp::iac, telnetpp::sb, option_.option_code(),
+        0, 80, 0, 24,
+        telnetpp::iac, telnetpp::se
     };
-
-    std::vector<telnetpp::element> const expected_result = {
-        telnetpp::subnegotiation{server.option_code(), expected_content}
-    };
-
-    std::vector<telnetpp::element> received_result;
-    server.activate([&](auto &&){});
-    server.negotiate(
-        telnetpp::do_,
-        [&](telnetpp::element const &elem)
-        {
-            received_result.push_back(elem);
-
-            // Have to check here due to the span's short life.
-            ASSERT_EQ(expected_result, received_result);
-        });
-    assert(server.active());
-
-    ASSERT_EQ(size_t{1}, received_result.size());
+    ASSERT_EQ(expected_content, channel_.written_);
 }
 
-TEST(naws_server_test, setting_screen_size_when_activated_sends_screen_size)
+TEST_F(a_naws_server, setting_screen_size_when_activated_sends_screen_size)
 {
-    telnetpp::options::naws::server server;
-    server.activate([&](auto &&){});
-    server.negotiate(telnetpp::do_, [&](auto &&){});
+    option_.activate();
+    channel_.written_.clear();
 
-    telnetpp::byte const expected_content[] = {
-        0, 80, 0, 24
+    option_.negotiate(telnetpp::do_);
+    assert(option_.active());
+
+    option_.set_window_size(80, 24);
+
+    telnetpp::byte_storage const expected_content = {
+        telnetpp::iac, telnetpp::sb, option_.option_code(),
+        0, 80, 0, 24,
+        telnetpp::iac, telnetpp::se
     };
-
-    std::vector<telnetpp::element> const expected_result = {
-        telnetpp::subnegotiation{server.option_code(), expected_content}
-    };
-
-    std::vector<telnetpp::element> received_result;
-    server.set_window_size(
-        80, 24,
-        [&](telnetpp::element const &elem)
-        {
-            received_result.push_back(elem);
-
-            // Have to check here due to the span's short life.
-            ASSERT_EQ(expected_result, received_result);
-        });
-
-    ASSERT_EQ(size_t{1}, received_result.size());
+    ASSERT_EQ(expected_content, channel_.written_);
 }

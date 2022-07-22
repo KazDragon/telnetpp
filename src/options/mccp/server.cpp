@@ -6,19 +6,20 @@ namespace telnetpp { namespace options { namespace mccp {
 // ==========================================================================
 // CONSTRUCTOR
 // ==========================================================================
-server::server(codec &cdc)
-  : codec_(cdc),
+server::server(telnetpp::session &sess, codec &cdc)
+  : basic_server(sess),
+    codec_(cdc),
     compression_active_(false)
 {
     on_state_changed.connect(
-        [this](auto &&cont)
+        [this]()
         {
             if (compression_active_)
             {
                 codec_.finish(
-                    [&](auto const &data, bool)
+                    [&](telnetpp::bytes data, bool)
                     {
-                        cont(data);
+                        write_text(data);
                     });
                     
                 compression_active_ = false;
@@ -29,12 +30,11 @@ server::server(codec &cdc)
 // ==========================================================================
 // BEGIN_COMPRESSION
 // ==========================================================================
-void server::start_compression(continuation const &cont)
+void server::start_compression()
 {
     if (active())
     {
-        element compression_start = subnegotiation{detail::option, {}};
-        cont({compression_start});
+        write_subnegotiation({});
         codec_.start();
         compression_active_ = true;
     }
@@ -43,14 +43,14 @@ void server::start_compression(continuation const &cont)
 // ==========================================================================
 // END_COMPRESSION
 // ==========================================================================
-void server::finish_compression(continuation const &cont)
+void server::finish_compression()
 {
     if (active() && compression_active_)
     {
         codec_.finish(
-            [&](auto const &data, bool)
+            [&](telnetpp::bytes data, bool)
             {
-                cont(data);
+                write_text(data);
             });
             
         compression_active_ = false;

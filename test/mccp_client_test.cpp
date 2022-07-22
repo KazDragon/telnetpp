@@ -1,5 +1,6 @@
 #include <telnetpp/options/mccp/client.hpp>
 #include <telnetpp/options/mccp/codec.hpp>
+#include "telnet_option_fixture.hpp"
 #include <gtest/gtest.h>
 
 using namespace telnetpp::literals;
@@ -42,11 +43,11 @@ private:
     }
 };
 
-class an_mccp_client : public testing::Test
+class an_mccp_client : public a_telnet_option_base
 {
 protected:
     fake_decompressor decompressor_;
-    telnetpp::options::mccp::client client_{decompressor_}; 
+    telnetpp::options::mccp::client client_{session_, decompressor_}; 
 };
 
 class an_active_mccp_client : public an_mccp_client
@@ -54,8 +55,9 @@ class an_active_mccp_client : public an_mccp_client
 protected:
     an_active_mccp_client()
     {
-        client_.negotiate(telnetpp::will, [](auto &&){});
+        client_.negotiate(telnetpp::will);
         assert(client_.active());
+        channel_.written_.clear();
     }
     
     void receive_data(telnetpp::bytes data)
@@ -96,7 +98,7 @@ TEST_F(an_active_mccp_client, when_not_engaged_receives_data_in_plain_text)
 
 TEST_F(an_active_mccp_client, receives_compressed_data_after_remote_engages_compression)
 {
-    client_.subnegotiate({}, [](auto &&){});
+    client_.subnegotiate({});
 
     auto const test_data = "test_data"_tb;
     compress_decompress(
@@ -112,7 +114,7 @@ TEST_F(an_active_mccp_client, receives_compressed_data_after_remote_engages_comp
 
 TEST_F(an_active_mccp_client, with_engaged_compression_reports_compression_end_and_no_longer_decompresses)
 {
-    client_.subnegotiate({}, [](auto &&){});
+    client_.subnegotiate({});
 
     auto const test_data = "test_data"_tb;
 
@@ -137,8 +139,8 @@ TEST_F(an_active_mccp_client, with_engaged_compression_reports_compression_end_a
 
 TEST_F(an_active_mccp_client, deactivated_locally_receives_decompressed_data_until_negotiation_is_complete)
 {
-    client_.subnegotiate({}, [](auto &&){});
-    client_.deactivate([](auto &&){});
+    client_.subnegotiate({});
+    client_.deactivate();
 
     auto const test_data = "test_data"_tb;
     compress_decompress(
@@ -152,7 +154,7 @@ TEST_F(an_active_mccp_client, deactivated_locally_receives_decompressed_data_unt
     ASSERT_EQ(expected_data, received_data_);
     
     received_data_.clear();
-    client_.negotiate(telnetpp::wont, [&](auto &&){});
+    client_.negotiate(telnetpp::wont);
     
     receive_data(test_data);
     
@@ -161,8 +163,8 @@ TEST_F(an_active_mccp_client, deactivated_locally_receives_decompressed_data_unt
 
 TEST_F(an_active_mccp_client, deactivated_remotely_stops_decompressing_immediately)
 {
-    client_.subnegotiate({}, [](auto &&){});
-    client_.negotiate(telnetpp::wont, [](auto &&){});
+    client_.subnegotiate({});
+    client_.negotiate(telnetpp::wont);
         
     auto const test_data = "test_data"_tb;
     

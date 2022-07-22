@@ -1,22 +1,36 @@
 #include "telnetpp/options/naws/client.hpp"
+#include "telnet_option_fixture.hpp"
 #include <gtest/gtest.h>
 
-TEST(naws_client_test, option_is_naws)
-{
-    telnetpp::options::naws::client client;
-    ASSERT_EQ(31, client.option_code());
+namespace {
+using a_naws_client = a_telnet_option<telnetpp::options::naws::client>;
 }
 
-TEST(naws_client_test, valid_subnegotiation_signals_window_size_change)
+TEST_F(a_naws_client, is_a_naws_client)
 {
-    telnetpp::options::naws::client client;
-    client.negotiate(telnetpp::will, [](auto &&){});
-    assert(client.active());
+    ASSERT_EQ(31, option_.option_code());
+}
 
+namespace {
+
+class an_active_naws_client : public a_naws_client
+{
+protected:
+    an_active_naws_client()
+    {
+        option_.negotiate(telnetpp::will);
+        assert(option_.active());
+    }
+};
+
+}
+
+TEST_F(an_active_naws_client, remote_window_size_change_signals_local_window_size_change)
+{
     telnetpp::options::naws::client::window_dimension width = 0, height = 0;
 
-    client.on_window_size_changed.connect(
-        [&width, &height](auto new_width, auto new_height, auto &&cont)
+    option_.on_window_size_changed.connect(
+        [&width, &height](auto new_width, auto new_height)
         {
             width = new_width;
             height = new_height;
@@ -26,7 +40,7 @@ TEST(naws_client_test, valid_subnegotiation_signals_window_size_change)
         0x01, 0x02, 0x03, 0x04
     };
 
-    client.subnegotiate(content, [](auto &&){});
+    option_.subnegotiate(content);
 
     telnetpp::options::naws::client::window_dimension const expected_width =
         0x01 << 8 | 0x02;
@@ -37,15 +51,11 @@ TEST(naws_client_test, valid_subnegotiation_signals_window_size_change)
     ASSERT_EQ(expected_height, height);
 }
 
-TEST(naws_client_test, short_subnegotiation_is_ignored)
+TEST_F(an_active_naws_client, short_subnegotiation_is_ignored)
 {
-    telnetpp::options::naws::client client;
-    client.negotiate(telnetpp::will, [](auto &&){});
-    assert(client.active());
-
     bool called = false;
-    client.on_window_size_changed.connect(
-        [&called](auto &&, auto&&, auto &&)
+    option_.on_window_size_changed.connect(
+        [&called](auto &&, auto&&)
         {
             called = true;
         });
@@ -54,7 +64,7 @@ TEST(naws_client_test, short_subnegotiation_is_ignored)
         0x01, 0x02, 0x03
     };
 
-    client.subnegotiate(content, [](auto &&){});
+    option_.subnegotiate(content);
 
    ASSERT_EQ(false, called);
 }

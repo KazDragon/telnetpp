@@ -16,8 +16,8 @@ public:
     //* =====================================================================
     /// \brief Constructor
     //* =====================================================================
-    constexpr basic_client() noexcept
-      : client_option(Option)
+    basic_client(telnetpp::session &sess) noexcept
+      : client_option(sess, Option)
     {
     }
 
@@ -26,9 +26,7 @@ private:
     /// \brief Called when a subnegotiation is received while the option is
     /// active.  Override for option-specific functionality.
     //* =====================================================================
-    void handle_subnegotiation(
-        telnetpp::bytes /*content*/,
-        continuation const &/*cont*/) override
+    void handle_subnegotiation(telnetpp::bytes /*content*/) override
     {
     }
 };

@@ -15,33 +15,21 @@ public:
     //* =====================================================================
     /// CONSTRUCTOR
     //* =====================================================================
-    client();
+    explicit client(telnetpp::session &sess);
 
     //* =====================================================================
     /// \brief Requests that the remote end send its terminal type.
     //* =====================================================================
-    template <typename Continuation>
-    void request_terminal_type(Continuation &&send)
-    {
-        static constexpr telnetpp::byte const request_content[] = {
-            detail::send
-        };
+    void request_terminal_type();
 
-        send(telnetpp::subnegotiation{option_code(), request_content});
-    }
-
-    boost::signals2::signal<
-        void (telnetpp::bytes, continuation const &)
-    > on_terminal_type;
+    boost::signals2::signal<void (telnetpp::bytes)> on_terminal_type;
 
 private:
     //* =====================================================================
     /// \brief Called when a subnegotiation is received while the option is
     /// active.  Override for option-specific functionality.
     //* =====================================================================
-    void handle_subnegotiation(
-        telnetpp::bytes data,
-        continuation const &cont) override;
+    void handle_subnegotiation(telnetpp::bytes data) override;
 };
 
 }}}

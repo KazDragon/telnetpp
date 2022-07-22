@@ -7,19 +7,19 @@ namespace telnetpp { namespace options { namespace mccp {
 // ==========================================================================
 // CONSTRUCTOR
 // ==========================================================================
-client::client(codec &cdc)
-  : client_option(detail::option),
+client::client(telnetpp::session &sess, codec &cdc)
+  : client_option(sess, detail::option),
     codec_(cdc)
 {
     on_state_changed.connect(
-        [&](continuation const &cont)
+        [this]()
         {
             if (!active())
             {
                 codec_.finish(
-                    [&](auto const &data, bool)
+                    [&](telnetpp::bytes data, bool)
                     {
-                        cont(data);
+                        write_text(data);
                     });
             }
         });
@@ -28,9 +28,7 @@ client::client(codec &cdc)
 // ==========================================================================
 // HANDLE_SUBNEGOTIATION
 // ==========================================================================
-void client::handle_subnegotiation(
-    telnetpp::bytes /*data*/,
-    continuation const &/*cont*/)
+void client::handle_subnegotiation(telnetpp::bytes /*data*/)
 {
     codec_.start();
 }

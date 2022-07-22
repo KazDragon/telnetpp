@@ -1,7 +1,17 @@
 #pragma once
 
+#include "telnetpp/options/new_environ/detail/protocol.hpp"
+#include "telnetpp/options/new_environ/detail/stream.hpp"
+
 namespace telnetpp { namespace options { namespace new_environ {
     namespace detail {
+
+constexpr telnetpp::byte type_to_byte(variable_type type)
+{
+    return type == variable_type::var
+        ? telnetpp::options::new_environ::detail::var
+        : telnetpp::options::new_environ::detail::uservar;
+}
 
 enum class parser_state
 {

@@ -2,7 +2,8 @@
 
 namespace telnetpp { namespace options { namespace echo {
 
-server::server() noexcept
+server::server(telnetpp::session &sess) noexcept
+  : basic_server(sess)
 {
 }
 

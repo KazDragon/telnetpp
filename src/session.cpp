@@ -1,18 +1,33 @@
 #include "telnetpp/session.hpp"
+#include "telnetpp/generator.hpp"
+#include "telnetpp/parser.hpp"
 #include "telnetpp/detail/registration.hpp"
+#include "telnetpp/detail/overloaded.hpp"
+#include "telnetpp/detail/command_router.hpp"
+#include "telnetpp/detail/negotiation_router.hpp"
+#include "telnetpp/detail/subnegotiation_router.hpp"
 
 namespace telnetpp {
+
+struct session::impl
+{
+    telnetpp::parser                        parser_;
+    telnetpp::detail::command_router        command_router_;
+    telnetpp::detail::negotiation_router    negotiation_router_;
+    telnetpp::detail::subnegotiation_router subnegotiation_router_;
+};
 
 // ==========================================================================
 // CONSTRUCTOR
 // ==========================================================================
 session::session()
+  : pimpl_{std::make_unique<impl>()}
 {
     // By default, the session will respond to WILL/WONT(option) with
     // DONT(option), and to DO/DONT(option) with WONT(option).  This behaviour
     // is overridden with any installed options.
-    negotiation_router_.set_unregistered_route(
-        [](telnetpp::negotiation const &negotiation, auto &&cont)
+    pimpl_->negotiation_router_.set_unregistered_route(
+        [this](telnetpp::negotiation const &negotiation)
         {
             auto const &request = negotiation.request();
 
@@ -21,8 +36,72 @@ session::session()
               ? telnetpp::dont
               : telnetpp::wont;
 
-            cont(telnetpp::negotiation{result, negotiation.option_code()});
+            write(telnetpp::negotiation{result, negotiation.option_code()});
         });
+}
+
+// ==========================================================================
+// DESTRUCTOR
+// ==========================================================================
+session::~session() = default;
+
+// ==========================================================================
+// ASYNC_READ
+// ==========================================================================
+void session::async_read(
+    std::function<void (telnetpp::bytes)> const &callback)
+{
+    channel_->async_read(
+        [this, callback](telnetpp::bytes content) {
+
+        auto const &token_handler =
+            [this, callback](telnetpp::element const &elem)
+            {
+                std::visit(detail::overloaded{
+                    [&](telnetpp::bytes input_content)
+                    {
+                        callback(input_content);
+                    },
+                    [&](telnetpp::command const &cmd)
+                    {
+                        pimpl_->command_router_(cmd);
+                    },
+                    [&](telnetpp::negotiation const &neg)
+                    {
+                        pimpl_->negotiation_router_(neg);
+                    },
+                    [&](telnetpp::subnegotiation const &sub)
+                    {
+                        pimpl_->subnegotiation_router_(sub);
+                    }},
+                    elem);
+            };
+
+        pimpl_->parser_(content, token_handler);
+        callback({});
+    });
+}
+
+// ==========================================================================
+// WRITE
+// ==========================================================================
+void session::write(telnetpp::element const &elem)
+{
+    telnetpp::generate(
+        elem, 
+        [this](telnetpp::bytes data) {
+            channel_->write(data);
+        });
+}
+
+// ==========================================================================
+// INSTALL
+// ==========================================================================
+void session::install(
+    telnetpp::command_type cmd,
+    std::function<void (telnetpp::command)> const &handler)
+{
+    pimpl_->command_router_.register_route(cmd, handler);
 }
 
 // ==========================================================================
@@ -31,7 +110,7 @@ session::session()
 void session::install(client_option &option)
 {
     detail::register_client_option(
-        option, negotiation_router_, subnegotiation_router_);
+        option, pimpl_->negotiation_router_, pimpl_->subnegotiation_router_);
 }
 
 // ==========================================================================
@@ -40,7 +119,7 @@ void session::install(client_option &option)
 void session::install(server_option &option)
 {
     detail::register_server_option(
-        option, negotiation_router_, subnegotiation_router_);
+        option, pimpl_->negotiation_router_, pimpl_->subnegotiation_router_);
 }
 
 }

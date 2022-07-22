@@ -1,75 +1,62 @@
 #include "telnetpp/options/terminal_type/client.hpp"
+#include "telnet_option_fixture.hpp"
 #include <gtest/gtest.h>
 
-TEST(terminal_type_client_test, option_is_terminal_type)
-{
-    telnetpp::options::terminal_type::client client;
-    ASSERT_EQ(24, client.option_code());
+using namespace telnetpp::literals;
+
+namespace {
+using a_terminal_type_client = a_telnet_option<telnetpp::options::terminal_type::client>;
 }
 
-TEST(terminal_type_client_test, requesting_terminal_type_sends_terminal_type_request)
+TEST_F(a_terminal_type_client, is_a_terminal_type_client)
 {
-    telnetpp::options::terminal_type::client client;
-    client.activate([](auto &&){});
-    client.negotiate(telnetpp::will, [](auto &&){});
-    assert(client.active());
-
-    static constexpr telnetpp::byte const expected_content[] = {
-        0x01
-    };
-
-    std::vector<telnetpp::element> const expected_elements = {
-        telnetpp::subnegotiation{client.option_code(), expected_content}
-    };
-
-    std::vector<telnetpp::element> received_elements;
-    client.request_terminal_type(
-        [&received_elements](telnetpp::element const &elem)
-        {
-            received_elements.push_back(elem);
-        });
-
-    ASSERT_EQ(expected_elements, received_elements);
+    ASSERT_EQ(24, option_.option_code());
 }
 
-TEST(terminal_type_client_test, receiving_terminal_type_reports_terminal_type)
+namespace {
+
+class an_active_terminal_type_client : public a_terminal_type_client
 {
-    telnetpp::options::terminal_type::client client;
-    client.activate([](auto &&){});
-    client.negotiate(telnetpp::will, [](auto &&){});
-    assert(client.active());
+protected:
+    an_active_terminal_type_client()
+    {
+        option_.negotiate(telnetpp::will);
+        assert(option_.active());
+        channel_.written_.clear();
 
-    std::string terminal_type;
-    client.on_terminal_type.connect(
-        [&terminal_type](telnetpp::bytes content, auto &&cont)
-        {
-            terminal_type.reserve(content.size());
-            std::transform(
-                content.begin(), 
-                content.end(), 
-                std::back_inserter(terminal_type),
-                [](auto ch)
-                {
-                    return static_cast<char>(ch);
-                });
-        });
+        option_.on_terminal_type.connect(
+            [this](telnetpp::bytes type)
+            {
+                received_types_.emplace_back(type.begin(), type.end());
+            });
+    }
 
-    static std::string const expected_terminal_type = "abc";
+    std::vector<telnetpp::byte_storage> received_types_;
+};
+
+}
+
+TEST_F(an_active_terminal_type_client, requesting_terminal_type_sends_terminal_type_request)
+{
+    option_.request_terminal_type();
+
+    telnetpp::byte_storage const expected_content = {
+        telnetpp::iac, telnetpp::sb, option_.option_code(),
+        0x01, // SEND
+        telnetpp::iac, telnetpp::se
+    };
+
+    ASSERT_EQ(expected_content, channel_.written_);
+}
+
+TEST_F(an_active_terminal_type_client, receiving_terminal_type_reports_terminal_type)
+{
     static constexpr telnetpp::byte const content[] = {
         0x00, 'a', 'b', 'c'
     };
 
-    std::vector<telnetpp::element> const expected_elements = {
-    };
-
-    std::vector<telnetpp::element> received_elements;
-    client.subnegotiate(
-        content,
-        [&received_elements](telnetpp::element const &elem)
-        {
-            received_elements.push_back(elem);
-        });
-
-    ASSERT_EQ(expected_elements, received_elements);
-    ASSERT_EQ(expected_terminal_type, terminal_type);
+    option_.subnegotiate(content);
+    
+    ASSERT_EQ(size_t{1u}, received_types_.size());
+    ASSERT_EQ("abc"_tb, received_types_[0]);
 }

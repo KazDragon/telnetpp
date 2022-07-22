@@ -1,16 +1,14 @@
 #pragma once
 
-#include "telnetpp/generator.hpp"
-#include "telnetpp/parser.hpp"
-#include "telnetpp/client_option.hpp"
-#include "telnetpp/server_option.hpp"
-#include "telnetpp/detail/command_router.hpp"
-#include "telnetpp/detail/negotiation_router.hpp"
-#include "telnetpp/detail/overloaded.hpp"
-#include "telnetpp/detail/subnegotiation_router.hpp"
-#include <string>
+#include <telnetpp/core.hpp>
+#include <telnetpp/element.hpp>
+#include <functional>
+#include <memory>
 
 namespace telnetpp {
+
+class client_option;
+class server_option;
 
 //* =========================================================================
 /// \brief An abstraction for a Telnet session.
@@ -165,106 +163,155 @@ namespace telnetpp {
 ///     });
 /// \endcode
 //* =========================================================================
-class TELNETPP_EXPORT session
+class TELNETPP_EXPORT session final
 {
 public:
+    //* =====================================================================
+    /// \brief Constructor
+    //* =====================================================================
+    template <typename Channel>
+    explicit session(Channel &channel)
+      : session{}
+    {
+        channel_ = std::unique_ptr<channel_concept>(
+            std::make_unique<channel_model<Channel>>(channel));
+    }
+
+    //* =====================================================================
+    /// \brief Destructor
+    //* =====================================================================
+    ~session();
+
+    //* =====================================================================
+    /// \brief Returns whether the session is still alive
+    //* =====================================================================
+    bool is_alive() const;
+
+    //* =====================================================================
+    /// \brief Requests data from the underlying channel, acting on any
+    /// Telnet primitives that are received.
+    ///
+    /// Note: the callback may be called several times for any async_read.
+    /// For an example, it may contain two pieces of regular text surrounding
+    /// a block of negotiation, which may change the way those two pieces of
+    /// text are interpreted.  For this reason, after an async_read is 
+    /// complete, the callback will always be called with an empty parameter
+    /// to indicate that a new read request can be made.
+    //* =====================================================================
+    void async_read(std::function<void (telnetpp::bytes)> const &callback);
+
+    //* =====================================================================
+    /// \brief Sends a Telnet data element.  Translates the element into a
+    /// sequence of bytes, that is then sent to the continuation.
+    /// \param content The data to send
+    //* =====================================================================
+    void write(telnetpp::element const &elem);
+
+    //* =====================================================================
+    /// \brief Installs a handler for the given command.
+    //* =====================================================================
+    void install(
+        telnetpp::command_type cmd, 
+        std::function<void (telnetpp::command)> const &handler);
+
+    //* =====================================================================
+    /// \brief Installs a client option.
+    //* =====================================================================
+    void install(telnetpp::client_option &option);
+
+    //* =====================================================================
+    /// \brief Installs a server option.
+    //* =====================================================================
+    void install(telnetpp::server_option &option);
+
+private:
     //* =====================================================================
     /// \brief Constructor
     //* =====================================================================
     session();
 
     //* =====================================================================
-    /// \brief Sends a Telnet data element.  Translates the element into a
-    /// sequence of bytes, that is then sent to the continuation.
-    /// \param content The data to send
-    /// \param send_continuation A continuation that is used to send the 
-    /// resultant stream of bytes onward.  Matches the signature
-    /// `void (telnetpp::bytes)`.
+    /// \brief An interface for the channel model.
     //* =====================================================================
-    template <typename SendContinuation>
-    void send(
-        telnetpp::element const &elem,
-        SendContinuation &&send_continuation)
+    struct channel_concept
     {
-        telnetpp::generate(elem, send_continuation);
-    }
+        //* =================================================================
+        /// \brief Destructor
+        //* =================================================================
+        virtual ~channel_concept() = default;
 
-    //* =====================================================================
-    /// \brief Receive a stream of bytes.
-    /// \param content The content of the data.
-    /// \param receive_continuation A continuation for any data received that
-    /// is not encapsulated as Telnet protocol units (i.e. plain text).  
-    /// Matches the signature `void (telnetpp::bytes, SendContinuation &&)`.
-    /// \param send_continuation A continuation that is used to send any 
-    /// response that occur as a consequence of receiving the data. Matches
-    /// the signature `void (telnetpp::bytes)`.
-    //* =====================================================================
-    template <typename ReceiveContinuation, typename SendContinuation>
-    void receive(
-        telnetpp::bytes content,
-        ReceiveContinuation &&receive_continuation,
-        SendContinuation &&send_continuation)
+        //* =================================================================
+        /// \brief Asynchronously read from the channel and call the function
+        /// back when it's available.
+        //* =================================================================
+        virtual void async_read(std::function<void (bytes)> const &) = 0;
+
+        //* =================================================================
+        /// \brief Write the given data to the channel.
+        //* =================================================================
+        virtual void write(bytes data) = 0;
+
+        //* =================================================================
+        /// \brief Returns whether the channel is alive.
+        //* =================================================================
+        virtual bool is_alive() const = 0;
+
+        //* =================================================================
+        /// \brief Closes the channel.
+        //* =================================================================
+        virtual void close() = 0;
+    };
+
+    template <typename Channel>
+    struct channel_model final : channel_concept
     {
-        auto const &token_handler =
-            [&](telnetpp::element const &elem)
-            {
-                auto generator = [&](telnetpp::element const &elm)
-                {
-                    telnetpp::generate(elm, send_continuation);
-                };
+        //* =================================================================
+        /// \brief Constructor
+        //* =================================================================
+        channel_model(Channel &channel)
+          : channel_{channel}
+        {
+        }
 
-                std::visit(detail::overloaded{
-                    [&](telnetpp::bytes input_content)
-                    {
-                        receive_continuation(
-                            input_content, 
-                            [&](telnetpp::bytes data)
-                            {
-                                generator(data);
-                            });
-                    },
-                    [&](telnetpp::command const &cmd)
-                    {
-                        command_router_(cmd, generator);
-                    },
-                    [&](telnetpp::negotiation const &neg)
-                    {
-                        negotiation_router_(neg, generator);
-                    },
-                    [&](telnetpp::subnegotiation const &sub)
-                    {
-                        subnegotiation_router_(sub, generator);
-                    }},
-                    elem);
-            };
+        //* =================================================================
+        /// \brief Asynchronously read from the channel and call the function
+        /// back when it's available.
+        //* =================================================================
+        void async_read(std::function<void (bytes)> const &callback)
+        {
+            channel_.async_read(callback);
+        }
 
-        parser_(content, token_handler);
-    }
+        //* =================================================================
+        /// \brief Write the given data to the channel.
+        //* =================================================================
+        void write(bytes data)
+        {
+            channel_.write(data);
+        }
 
-    //* =====================================================================
-    /// \brief Installs a handler for the given command.
-    //* =====================================================================
-    template <typename Continuation>
-    void install(telnetpp::command_type cmd, Continuation &&cont)
-    {
-        command_router_.register_route(cmd, cont);
-    }
+        //* =================================================================
+        /// \brief Returns whether the channel is alive.
+        //* =================================================================
+        bool is_alive() const
+        {
+            return channel_.is_alive();
+        }
 
-    //* =====================================================================
-    /// \brief Installs a client option.
-    //* =====================================================================
-    void install(client_option &option);
+        //* =================================================================
+        /// \brief Closes the channel.
+        //* =================================================================
+        void close()
+        {
+            channel_.close();
+        }
 
-    //* =====================================================================
-    /// \brief Installs a server option.
-    //* =====================================================================
-    void install(server_option &option);
+        Channel &channel_;
+    };
 
-private:
-    telnetpp::parser                        parser_;
-    telnetpp::detail::command_router        command_router_;
-    telnetpp::detail::negotiation_router    negotiation_router_;
-    telnetpp::detail::subnegotiation_router subnegotiation_router_;
+    struct impl;
+    std::unique_ptr<channel_concept> channel_;
+    std::unique_ptr<impl> pimpl_;
 };
 
 }

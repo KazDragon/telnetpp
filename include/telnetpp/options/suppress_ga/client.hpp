@@ -18,7 +18,7 @@ class TELNETPP_EXPORT client : public telnetpp::options::basic_client<
 >
 {
 public:
-    client() noexcept;
+    explicit client(telnetpp::session &sess);
 };
 
 }}}

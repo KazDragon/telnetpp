@@ -1,5 +1,6 @@
-#include <telnetpp/client_option.hpp>
-#include <telnetpp/server_option.hpp>
+#include "fakes/fake_channel.hpp"
+#include "fakes/fake_client_option.hpp"
+#include "fakes/fake_server_option.hpp"
 #include <gtest/gtest.h>
 
 // The Q Method (RFC 1153) is a specification of how to use TELNET negotiations
@@ -19,79 +20,71 @@ class an_option_being_deactivated : public testing::Test
 public:
     an_option_being_deactivated()
     {
-        option_.activate([](auto &&){});
-        option_.negotiate(Option::remote_positive, [](auto &&){});
-        option_.deactivate([](auto &&){});
+        option_.activate();
+        option_.negotiate(Option::remote_positive);
+        option_.deactivate();
+        channel_.written_.clear();
+
+        option_.on_state_changed.connect([this] { state_changed_ = true; });
     }
 
 protected:
     class option : public Option
     {
     public:
-        option()
-          : Option(0)
-        {
-        }
-
-        void handle_subnegotiation(
-            telnetpp::bytes content,
-            typename Option::continuation const &cont) override
+        option(telnetpp::session &sess)
+          : Option(sess, 0)
         {
         }
     };
 
-    option option_;
+    fake_channel channel_;
+    telnetpp::session session_{channel_};
+    option option_{session_};
+
+    bool state_changed_ = false;
 };
 
 using a_client_option_being_deactivated =
-    an_option_being_deactivated<telnetpp::client_option>;
+    an_option_being_deactivated<fake_client_option>;
 using a_server_option_being_deactivated =
-    an_option_being_deactivated<telnetpp::server_option>;
+    an_option_being_deactivated<fake_server_option>;
 
 TEST_F(a_client_option_being_deactivated, ignores_activate_requests)
 {
-    bool called = false;
-    auto cont = [&called](auto &&cont){ 
-        called = true; 
-    };
+    option_.activate();
 
-    option_.activate(cont);
-    ASSERT_FALSE(called);
+    telnetpp::byte_storage const expected_written = {};
+    ASSERT_FALSE(state_changed_);
+    ASSERT_EQ(expected_written, channel_.written_);
 }
 
 TEST_F(a_client_option_being_deactivated, ignores_deactivate_requests)
 {
-    bool called = false;
-    auto cont = [&called](auto &&cont){ 
-        called = true; 
-    };
+    option_.deactivate();
 
-    option_.deactivate(cont);
-    ASSERT_FALSE(called);
+    telnetpp::byte_storage const expected_written = {};
+    ASSERT_FALSE(state_changed_);
+    ASSERT_EQ(expected_written, channel_.written_);
 }
 
 TEST_F(a_server_option_being_deactivated, ignores_activate_requests)
 {
-    bool called = false;
-    auto cont = [&called](auto &&cont){ 
-        called = true; 
-    };
+    option_.activate();
 
-    option_.activate(cont);
-    ASSERT_FALSE(called);
+    telnetpp::byte_storage const expected_written = {};
+    ASSERT_FALSE(state_changed_);
+    ASSERT_EQ(expected_written, channel_.written_);
 }
 
 TEST_F(a_server_option_being_deactivated, ignores_deactivate_requests)
 {
-    bool called = false;
-    auto cont = [&called](auto &&cont){ 
-        called = true; 
-    };
+    option_.deactivate();
 
-    option_.deactivate(cont);
-    ASSERT_FALSE(called);
+    telnetpp::byte_storage const expected_written = {};
+    ASSERT_FALSE(state_changed_);
+    ASSERT_EQ(expected_written, channel_.written_);
 }
-
 
 template <class Option>
 class an_option_being_activated : public testing::Test
@@ -99,75 +92,68 @@ class an_option_being_activated : public testing::Test
 public:
     an_option_being_activated()
     {
-        option_.activate([](auto &&){});
+        option_.activate();
+        channel_.written_.clear();
+
+        option_.on_state_changed.connect([this] { state_changed_ = true; });
     }
 
 protected:
     class option : public Option
     {
     public:
-        option()
-          : Option(0)
-        {
-        }
-
-        void handle_subnegotiation(
-            telnetpp::bytes content,
-            typename Option::continuation const &cont) override
+        option(telnetpp::session &sess)
+          : Option(sess, 0)
         {
         }
     };
 
-    option option_;
+    fake_channel channel_;
+    telnetpp::session session_{channel_};
+    option option_{session_};
+
+    bool state_changed_ = false;
 };
 
 using a_client_option_being_activated =
-    an_option_being_activated<telnetpp::client_option>;
+    an_option_being_activated<fake_client_option>;
 using a_server_option_being_activated =
-    an_option_being_activated<telnetpp::server_option>;
+    an_option_being_activated<fake_server_option>;
 
 TEST_F(a_client_option_being_activated, ignores_activate_requests)
 {
-    bool called = false;
-    auto cont = [&called](auto &&cont){ 
-        called = true; 
-    };
+    option_.activate();
 
-    option_.activate(cont);
-    ASSERT_FALSE(called);
+    telnetpp::byte_storage const expected_written = {};
+    ASSERT_FALSE(state_changed_);
+    ASSERT_EQ(expected_written, channel_.written_);
 }
 
 TEST_F(a_client_option_being_activated, ignores_deactivate_requests)
 {
-    bool called = false;
-    auto cont = [&called](auto &&cont){ 
-        called = true; 
-    };
+    option_.deactivate();
 
-    option_.deactivate(cont);
-    ASSERT_FALSE(called);
+    telnetpp::byte_storage const expected_written = {};
+    ASSERT_FALSE(state_changed_);
+    ASSERT_EQ(expected_written, channel_.written_);
 }
 
 TEST_F(a_server_option_being_activated, ignores_activate_requests)
 {
-    bool called = false;
-    auto cont = [&called](auto &&cont){ 
-        called = true; 
-    };
+    option_.activate();
 
-    option_.activate(cont);
-    ASSERT_FALSE(called);
+    telnetpp::byte_storage const expected_written = {};
+    ASSERT_FALSE(state_changed_);
+    ASSERT_EQ(expected_written, channel_.written_);
 }
 
 TEST_F(a_server_option_being_activated, ignores_deactivate_requests)
 {
-    bool called = false;
-    auto cont = [&called](auto &&cont){ 
-        called = true; 
-    };
+    option_.deactivate();
 
-    option_.deactivate(cont);
-    ASSERT_FALSE(called);
+    telnetpp::byte_storage const expected_written = {};
+    ASSERT_FALSE(state_changed_);
+    ASSERT_EQ(expected_written, channel_.written_);
 }
 
 // Rule 2: Prohibit new requests before completing old negotiation.
@@ -181,6 +167,5 @@ TEST_F(a_server_option_being_activated, ignores_deactivate_requests)
 // use cases, there is only usually one initial request, and then nothing
 // else changes.
 
-// Rule 3: Separate WANTNO and WANTYET
+// Rule 3: Separate WANTNO and WANTYES
 // This is the activating/deactivating states.
-
