@@ -1,7 +1,6 @@
 var searchData=
 [
-  ['_7ecodec_140',['~codec',['../classtelnetpp_1_1options_1_1mccp_1_1codec.html#a16362d1df9ace5ccdc1a6d0e50b3d488',1,'telnetpp::options::mccp::codec']]],
-  ['_7ecompressor_141',['~compressor',['../classtelnetpp_1_1options_1_1mccp_1_1zlib_1_1compressor.html#a244163bf94c97c3299390382d059593c',1,'telnetpp::options::mccp::zlib::compressor']]],
-  ['_7edecompressor_142',['~decompressor',['../classtelnetpp_1_1options_1_1mccp_1_1zlib_1_1decompressor.html#afde183d5bb6bfae1c44239ca12b26b73',1,'telnetpp::options::mccp::zlib::decompressor']]],
-  ['_7eoption_143',['~option',['../classtelnetpp_1_1option.html#a4897a80d0b9a2dbfa80a90ef157735c9',1,'telnetpp::option']]]
+  ['write_158',['write',['../classtelnetpp_1_1session.html#a142c0ca472d06debadd5f553b58ba4ea',1,'telnetpp::session']]],
+  ['write_5fsubnegotiation_159',['write_subnegotiation',['../classtelnetpp_1_1option.html#ac2961b3f2e953b9e4616e51d6d9d87a9',1,'telnetpp::option']]],
+  ['write_5ftext_160',['write_text',['../classtelnetpp_1_1option.html#a6761c9fb1b67b669764e90250ceb95fb',1,'telnetpp::option']]]
 ];

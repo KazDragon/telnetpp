@@ -22,7 +22,7 @@
  <tr style="height: 56px;">
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname">Telnet++
-   &#160;<span id="projectnumber">2.4.0.6</span>
+   &#160;<span id="projectnumber">2.4.0.7</span>
    </div>
    <div id="projectbrief">A C++ library for interacting with Telnet streams</div>
   </td>
@@ -146,7 +146,7 @@ Dataflow: Elements, Tokens and Streams</h1>
 <p>A <a href="include/telnetpp/element.hpp">telnetpp::element</a> is a variant that may contain a command, a negotiation, a subnegotiation, or just a plain sequence of bytes representing non-Telnet-specific input/output.</p>
 <h1><a class="anchor" id="autotoc_md19"></a>
 Stream-Unaware</h1>
-<p>The Telnet++ library does not impose any requirement on any kind of data stream API. In order to accomplish this, it makes heavy use of continuation functions. See the <a href="include/telnetpp/session.hpp">telnetpp::session</a> class for an in-depth explanation of how this works.</p>
+<p>The Telnet++ library does not impose any requirement on any kind of data stream API. In order to accomplish this, it makes heavy use of a channel concept. See the <a href="include/telnetpp/session.hpp">telnetpp::session</a> class for an in-depth explanation of how this works.</p>
 <h1><a class="anchor" id="autotoc_md20"></a>
 Options</h1>
 <p>As alluded to earlier, each distinct feature is represented by either a <a href="include/telnetpp/client_option.hpp">telnetpp::client_option</a> or a <a href="include/telnetpp/server_option.hpp">telnetpp::server_option</a>. These both enjoy the same <a href="include/telnetpp/option.hpp">API</a>; they only differ in the underlying protocol. The user needs to know little about which actual negotiations and commands are sent. There are two key functions and one signal for the option classes:</p>
@@ -158,34 +158,36 @@ Options</h1>
 <h1><a class="anchor" id="autotoc_md21"></a>
 Session</h1>
 <p>All of the above can be quite complicated to manage, so Telnet++ provides the <a href="include/telnetpp/session.hpp">telnetpp::session</a> class. This is the key abstraction of the Telnet++ library, and is used to manage an entire Telnet feature set for a connection. This is accomplished by "install"ing handlers for commands and options:</p>
-<div class="fragment"><div class="line"><span class="comment">// A user-specified function for sending bytes to the remote.</span></div>
-<div class="line"><span class="keywordtype">void</span> my_socket_send(telnetpp::bytes data);</div>
+<div class="fragment"><div class="line"><span class="comment">// A user-supplied class that models the channel concept</span></div>
+<div class="line"><span class="keyword">class </span><a class="code" href="structchannel.html">channel</a> {</div>
+<div class="line">  <span class="keywordtype">void</span> write(telnetpp::bytes);</div>
+<div class="line">  <span class="keywordtype">void</span> async_read(std::function&lt;<span class="keywordtype">void</span> (telnetpp::bytes)&gt;);</div>
+<div class="line">  <span class="keywordtype">bool</span> is_alive() <span class="keyword">const</span>;</div>
+<div class="line">  <span class="keywordtype">void</span> close();</div>
+<div class="line">}</div>
 <div class="line"> </div>
-<div class="line"><span class="comment">// Create a session object, which manages the inputs and outputs from my connection.  It requires</span></div>
-<div class="line"><span class="comment">// a function that is to be called whenever non-Telnet input is received.</span></div>
-<div class="line"><a class="code" href="classtelnetpp_1_1session.html">telnetpp::session</a> session;</div>
+<div class="line"><a class="code" href="structchannel.html">channel</a> my_channel;</div>
+<div class="line"> </div>
+<div class="line"><span class="comment">// Create a session object, which manages the inputs and outputs from my channel.</span></div>
+<div class="line"><a class="code" href="classtelnetpp_1_1session.html">telnetpp::session</a> session{my_channel};</div>
 <div class="line"> </div>
 <div class="line"><span class="comment">// An echo server (provided with Telnet++) is used to control whether a server responds to input from</span></div>
 <div class="line"><span class="comment">// a client by transmitting the same text back to the client.  By default, this does not happen, and</span></div>
 <div class="line"><span class="comment">// clients print out locally whatever is typed in.  By activating this option, the client no longer</span></div>
 <div class="line"><span class="comment">// locally echos input, and the server is totally in control of what appears on the screen.</span></div>
-<div class="line"><a class="code" href="classtelnetpp_1_1options_1_1echo_1_1server.html">telnetpp::options::echo::server</a> echo_server;</div>
+<div class="line"><a class="code" href="classtelnetpp_1_1options_1_1echo_1_1server.html">telnetpp::options::echo::server</a> echo_server{session};</div>
 <div class="line"> </div>
 <div class="line"><span class="comment">// The session now knows we want this feature to be handled and does all the heavy lifting for us.</span></div>
-<div class="line">session.<a class="code" href="classtelnetpp_1_1session.html#af2e243439001b6c958f723f1c56c95d9">install</a>(echo_server);</div>
+<div class="line">session.install(echo_server);</div>
 <div class="line"> </div>
 <div class="line"><span class="comment">// By default, options sit there in a deactivated state unless explicitly activated either locally</span></div>
-<div class="line"><span class="comment">// in code or in protocol from the remote.  Here, we activate it ourselves, forwarding protocol</span></div>
-<div class="line"><span class="comment">// via the session, and eventually out through our user-specified function.</span></div>
-<div class="line">echo_server.<a class="code" href="classtelnetpp_1_1option.html#a84ed0636e581b6e37466550a455a1644">activate</a>(</div>
-<div class="line">    [&amp;](<a class="code" href="classtelnetpp_1_1element.html">telnetpp::element</a> <span class="keyword">const</span> &amp;elem)</div>
-<div class="line">    {</div>
-<div class="line">        session.<a class="code" href="classtelnetpp_1_1session.html#a3b36c3f5b606193f0141231ba993efcb">send</a>(elem, my_socket_send);</div>
-<div class="line">    });</div>
+<div class="line"><span class="comment">// in code or in protocol from the remote.  Here, we activate it ourselves.  This uses the session</span></div>
+<div class="line"><span class="comment">// to ensure that the protocol bytes are forwarded to the channel.</span></div>
+<div class="line">echo_server.<a class="code" href="classtelnetpp_1_1option.html#a76f1bcfdaedaecacb92e6cf8d4f0e345">activate</a>();</div>
 <div class="line"> </div>
 <div class="line"><span class="comment">// Sessions just pass on commands to functions installed on a per-command basis.  Here we pass a</span></div>
 <div class="line"><span class="comment">// lambda to handle the Are You There command.</span></div>
-<div class="line">session.<a class="code" href="classtelnetpp_1_1session.html#af2e243439001b6c958f723f1c56c95d9">install</a>(</div>
+<div class="line">session.install(</div>
 <div class="line">    <a class="code" href="classtelnetpp_1_1command.html">telnetpp::command</a>{telnetpp::ayt},</div>
 <div class="line">    [&amp;]</div>
 <div class="line">    {</div>
@@ -193,40 +195,30 @@ Session</h1>
 <div class="line">        <span class="keyword">using</span> telnetpp::literals;</div>
 <div class="line">        <span class="keyword">auto</span> <span class="keyword">const</span> message = <span class="stringliteral">&quot;Yes, I&#39;m here&quot;</span>_tb;</div>
 <div class="line">        </div>
-<div class="line">        session.<a class="code" href="classtelnetpp_1_1session.html#a3b36c3f5b606193f0141231ba993efcb">send</a>(message, my_socket_send);</div>
+<div class="line">        session.write(message, my_socket_send);</div>
 <div class="line">    });</div>
-</div><!-- fragment --><p>Receiving data is slightly more complex in that any reception of data may require data to be sent, and so functions that receive data also have a continuation for what to do with the response.</p>
-<div class="fragment"><div class="line"><span class="comment">// A user-specified function used for receiving bytes sent from the</span></div>
-<div class="line"><span class="comment">// remote.</span></div>
-<div class="line"><span class="keywordtype">int</span> my_socket_receive(telnetpp::byte *buffer, <span class="keywordtype">int</span> size);</div>
+</div><!-- fragment --><p>Receiving data is slightly more complex since it is asynchronous and so requires a callback that is called when data is received.</p>
+<div class="fragment"><div class="line"><span class="comment">// A user-specified function that transmits data up to the application.</span></div>
+<div class="line"><span class="comment">// Note: the session indicates that an async_read is complete by sending</span></div>
+<div class="line"><span class="comment">// an empty packet of data.  This can be used to prompt a new async_read,</span></div>
+<div class="line"><span class="comment">// for example.</span></div>
+<div class="line"><span class="keywordtype">void</span> my_application_receive(telnetpp::bytes data);</div>
 <div class="line"> </div>
-<div class="line"><span class="comment">// A user-specified function that transmits data up to the application</span></div>
-<div class="line"><span class="comment">// Note that the second argument is used to tell the application how</span></div>
-<div class="line"><span class="comment">// it may send a respond to the data it receives.</span></div>
-<div class="line"><span class="keywordtype">void</span> my_application_receive(</div>
-<div class="line">    telnetpp::bytes data,</div>
-<div class="line">    std::function&lt;<span class="keywordtype">void</span> (telnetpp::bytes)&gt; <span class="keyword">const</span> &amp;send);</div>
-<div class="line"> </div>
-<div class="line">telnetpp::byte my_buffer[1024];</div>
-<div class="line"><span class="keywordtype">int</span> amount_received = my_socket_receive(my_buffer, 1024);</div>
-<div class="line"> </div>
-<div class="line">session.<a class="code" href="classtelnetpp_1_1session.html#a8a9184db65bf9dc9becea32137d7cab6">receive</a>(</div>
-<div class="line">    telnetpp::bytes{my_buffer, amount_received},</div>
-<div class="line">    my_application_receive,</div>
-<div class="line">    my_socket_send);</div>
+<div class="line">session.async_read(</div>
+<div class="line">    [&amp;](telnetpp::bytes data)</div>
+<div class="line">    {</div>
+<div class="line">        my_application_receive(data);</div>
+<div class="line">    });</div>
 </div><!-- fragment --> </div></div><!-- PageDoc -->
 </div><!-- contents -->
 <div class="ttc" id="aclasstelnetpp_1_1command_html"><div class="ttname"><a href="classtelnetpp_1_1command.html">telnetpp::command</a></div><div class="ttdoc">A class that encapsulates the value of a Telnet command.</div><div class="ttdef"><b>Definition:</b> command.hpp:11</div></div>
-<div class="ttc" id="aclasstelnetpp_1_1session_html"><div class="ttname"><a href="classtelnetpp_1_1session.html">telnetpp::session</a></div><div class="ttdoc">An abstraction for a Telnet session.</div><div class="ttdef"><b>Definition:</b> session.hpp:168</div></div>
-<div class="ttc" id="aclasstelnetpp_1_1option_html_a84ed0636e581b6e37466550a455a1644"><div class="ttname"><a href="classtelnetpp_1_1option.html#a84ed0636e581b6e37466550a455a1644">telnetpp::option::activate</a></div><div class="ttdeci">constexpr void activate(Continuation &amp;&amp;send)</div><div class="ttdoc">Begins the activation process for the option.</div><div class="ttdef"><b>Definition:</b> option.hpp:83</div></div>
-<div class="ttc" id="aclasstelnetpp_1_1session_html_af2e243439001b6c958f723f1c56c95d9"><div class="ttname"><a href="classtelnetpp_1_1session.html#af2e243439001b6c958f723f1c56c95d9">telnetpp::session::install</a></div><div class="ttdeci">void install(telnetpp::command_type cmd, Continuation &amp;&amp;cont)</div><div class="ttdoc">Installs a handler for the given command.</div><div class="ttdef"><b>Definition:</b> session.hpp:248</div></div>
-<div class="ttc" id="aclasstelnetpp_1_1session_html_a8a9184db65bf9dc9becea32137d7cab6"><div class="ttname"><a href="classtelnetpp_1_1session.html#a8a9184db65bf9dc9becea32137d7cab6">telnetpp::session::receive</a></div><div class="ttdeci">void receive(telnetpp::bytes content, ReceiveContinuation &amp;&amp;receive_continuation, SendContinuation &amp;&amp;send_continuation)</div><div class="ttdoc">Receive a stream of bytes.</div><div class="ttdef"><b>Definition:</b> session.hpp:203</div></div>
+<div class="ttc" id="aclasstelnetpp_1_1session_html"><div class="ttname"><a href="classtelnetpp_1_1session.html">telnetpp::session</a></div><div class="ttdoc">An abstraction for a Telnet session.</div><div class="ttdef"><b>Definition:</b> session.hpp:139</div></div>
+<div class="ttc" id="aclasstelnetpp_1_1option_html_a76f1bcfdaedaecacb92e6cf8d4f0e345"><div class="ttname"><a href="classtelnetpp_1_1option.html#a76f1bcfdaedaecacb92e6cf8d4f0e345">telnetpp::option::activate</a></div><div class="ttdeci">constexpr void activate()</div><div class="ttdoc">Begins the activation process for the option.</div><div class="ttdef"><b>Definition:</b> option.hpp:77</div></div>
 <div class="ttc" id="aclasstelnetpp_1_1options_1_1echo_1_1server_html"><div class="ttname"><a href="classtelnetpp_1_1options_1_1echo_1_1server.html">telnetpp::options::echo::server</a></div><div class="ttdoc">An implementation of the server side of Telnet ECHO option.</div><div class="ttdef"><b>Definition:</b> server.hpp:15</div></div>
-<div class="ttc" id="aclasstelnetpp_1_1session_html_a3b36c3f5b606193f0141231ba993efcb"><div class="ttname"><a href="classtelnetpp_1_1session.html#a3b36c3f5b606193f0141231ba993efcb">telnetpp::session::send</a></div><div class="ttdeci">void send(telnetpp::element const &amp;elem, SendContinuation &amp;&amp;send_continuation)</div><div class="ttdoc">Sends a Telnet data element. Translates the element into a sequence of bytes, that is then sent to th...</div><div class="ttdef"><b>Definition:</b> session.hpp:185</div></div>
-<div class="ttc" id="aclasstelnetpp_1_1element_html"><div class="ttname"><a href="classtelnetpp_1_1element.html">element</a></div><div class="ttdoc">A common type that can contain any Telnet operation, such as a command, negotiation,...</div></div>
+<div class="ttc" id="astructchannel_html"><div class="ttname"><a href="structchannel.html">channel</a></div><div class="ttdef"><b>Definition:</b> example.cpp:4</div></div>
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Tue Jul 19 2022 13:26:03 for Telnet++ by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Sun Jul 24 2022 20:36:20 for Telnet++ by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.17
 </small></address>

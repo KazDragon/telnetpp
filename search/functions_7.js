@@ -1,5 +1,5 @@
 var searchData=
 [
-  ['negotiate_115',['negotiate',['../classtelnetpp_1_1option.html#a947c7c00f8a717731f1c79778ab60db4',1,'telnetpp::option']]],
-  ['negotiation_116',['negotiation',['../classtelnetpp_1_1negotiation.html#a11d1d66decdd3518004a62811b0668da',1,'telnetpp::negotiation']]]
+  ['negotiate_134',['negotiate',['../classtelnetpp_1_1option.html#a3baef1b671fc33cef8df88ece2394de6',1,'telnetpp::option']]],
+  ['negotiation_135',['negotiation',['../classtelnetpp_1_1negotiation.html#a11d1d66decdd3518004a62811b0668da',1,'telnetpp::negotiation']]]
 ];

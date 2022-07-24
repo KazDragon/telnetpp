@@ -22,7 +22,7 @@
  <tr style="height: 56px;">
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname">Telnet++
-   &#160;<span id="projectnumber">2.4.0.6</span>
+   &#160;<span id="projectnumber">2.4.0.7</span>
    </div>
    <div id="projectbrief">A C++ library for interacting with Telnet streams</div>
   </td>
@@ -79,19 +79,30 @@ $(function() {
 <div class="line"><a name="l00006"></a><span class="lineno">    6</span>&#160; </div>
 <div class="line"><a name="l00007"></a><span class="lineno">    7</span>&#160;<span class="comment">//* =========================================================================</span></div>
 <div class="line"><a name="l00031"></a><span class="lineno">   31</span>&#160;<span class="comment"></span><span class="comment">//* =========================================================================</span></div>
-<div class="line"><a name="l00032"></a><span class="lineno">   32</span>&#160;<span class="keyword">using</span> server_option = <a class="code" href="classtelnetpp_1_1option.html">telnetpp::option</a>&lt;</div>
-<div class="line"><a name="l00033"></a><span class="lineno">   33</span>&#160;    telnetpp::will,</div>
-<div class="line"><a name="l00034"></a><span class="lineno">   34</span>&#160;    telnetpp::wont,</div>
-<div class="line"><a name="l00035"></a><span class="lineno">   35</span>&#160;    telnetpp::do_,</div>
-<div class="line"><a name="l00036"></a><span class="lineno">   36</span>&#160;    telnetpp::dont</div>
-<div class="line"><a name="l00037"></a><span class="lineno">   37</span>&#160;&gt;;</div>
-<div class="line"><a name="l00038"></a><span class="lineno">   38</span>&#160; </div>
-<div class="line"><a name="l00039"></a><span class="lineno">   39</span>&#160;}</div>
+<div class="line"><a name="l00032"></a><span class="lineno"><a class="line" href="classtelnetpp_1_1server__option.html">   32</a></span>&#160;<span class="keyword">class </span>TELNETPP_EXPORT <a class="code" href="classtelnetpp_1_1server__option.html">server_option</a></div>
+<div class="line"><a name="l00033"></a><span class="lineno">   33</span>&#160;  : <span class="keyword">public</span> <a class="code" href="classtelnetpp_1_1option.html">telnetpp::option</a>&lt;</div>
+<div class="line"><a name="l00034"></a><span class="lineno">   34</span>&#160;        telnetpp::will,</div>
+<div class="line"><a name="l00035"></a><span class="lineno">   35</span>&#160;        telnetpp::wont,</div>
+<div class="line"><a name="l00036"></a><span class="lineno">   36</span>&#160;        telnetpp::do_,</div>
+<div class="line"><a name="l00037"></a><span class="lineno">   37</span>&#160;        telnetpp::dont</div>
+<div class="line"><a name="l00038"></a><span class="lineno">   38</span>&#160;    &gt;</div>
+<div class="line"><a name="l00039"></a><span class="lineno">   39</span>&#160;{</div>
+<div class="line"><a name="l00040"></a><span class="lineno">   40</span>&#160;<span class="keyword">public</span>:</div>
+<div class="line"><a name="l00041"></a><span class="lineno">   41</span>&#160;    <span class="keyword">explicit</span> <a class="code" href="classtelnetpp_1_1server__option.html">server_option</a>(</div>
+<div class="line"><a name="l00042"></a><span class="lineno">   42</span>&#160;        <a class="code" href="classtelnetpp_1_1session.html">telnetpp::session</a> &amp;sess, telnetpp::option_type code) noexcept</div>
+<div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160;      : <a class="code" href="classtelnetpp_1_1option.html">option</a>{sess, code}</div>
+<div class="line"><a name="l00044"></a><span class="lineno">   44</span>&#160;    {</div>
+<div class="line"><a name="l00045"></a><span class="lineno">   45</span>&#160;    }</div>
+<div class="line"><a name="l00046"></a><span class="lineno">   46</span>&#160;};</div>
+<div class="line"><a name="l00047"></a><span class="lineno">   47</span>&#160; </div>
+<div class="line"><a name="l00048"></a><span class="lineno">   48</span>&#160;}</div>
 </div><!-- fragment --></div><!-- contents -->
-<div class="ttc" id="aclasstelnetpp_1_1option_html"><div class="ttname"><a href="classtelnetpp_1_1option.html">telnetpp::option</a></div><div class="ttdoc">An class that encapsulates one side of a Telnet option.</div><div class="ttdef"><b>Definition:</b> option.hpp:46</div></div>
+<div class="ttc" id="aclasstelnetpp_1_1session_html"><div class="ttname"><a href="classtelnetpp_1_1session.html">telnetpp::session</a></div><div class="ttdoc">An abstraction for a Telnet session.</div><div class="ttdef"><b>Definition:</b> session.hpp:139</div></div>
+<div class="ttc" id="aclasstelnetpp_1_1option_html"><div class="ttname"><a href="classtelnetpp_1_1option.html">telnetpp::option</a></div><div class="ttdoc">An class that encapsulates one side of a Telnet option.</div><div class="ttdef"><b>Definition:</b> option.hpp:45</div></div>
+<div class="ttc" id="aclasstelnetpp_1_1server__option_html"><div class="ttname"><a href="classtelnetpp_1_1server__option.html">telnetpp::server_option</a></div><div class="ttdoc">A class that represents a Telnet option's server side. That is, the side that receives DO and DONT ne...</div><div class="ttdef"><b>Definition:</b> server_option.hpp:32</div></div>
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Tue Jul 19 2022 13:26:03 for Telnet++ by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Sun Jul 24 2022 20:36:20 for Telnet++ by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.17
 </small></address>

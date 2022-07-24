@@ -22,7 +22,7 @@
  <tr style="height: 56px;">
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname">Telnet++
-   &#160;<span id="projectnumber">2.4.0.6</span>
+   &#160;<span id="projectnumber">2.4.0.7</span>
    </div>
    <div id="projectbrief">A C++ library for interacting with Telnet streams</div>
   </td>
@@ -74,16 +74,19 @@ $(function() {
 
 <p>This is the complete list of members for <a class="el" href="classtelnetpp_1_1session.html">telnetpp::session</a>, including all inherited members.</p>
 <table class="directory">
-  <tr class="even"><td class="entry"><a class="el" href="classtelnetpp_1_1session.html#af2e243439001b6c958f723f1c56c95d9">install</a>(telnetpp::command_type cmd, Continuation &amp;&amp;cont)</td><td class="entry"><a class="el" href="classtelnetpp_1_1session.html">telnetpp::session</a></td><td class="entry"><span class="mlabel">inline</span></td></tr>
-  <tr><td class="entry"><a class="el" href="classtelnetpp_1_1session.html#aaf35152bd66ec72dad49fe9203824616">install</a>(client_option &amp;option)</td><td class="entry"><a class="el" href="classtelnetpp_1_1session.html">telnetpp::session</a></td><td class="entry"></td></tr>
-  <tr class="even"><td class="entry"><a class="el" href="classtelnetpp_1_1session.html#aaa4872d3b0c423b7e7fca86929d96372">install</a>(server_option &amp;option)</td><td class="entry"><a class="el" href="classtelnetpp_1_1session.html">telnetpp::session</a></td><td class="entry"></td></tr>
-  <tr><td class="entry"><a class="el" href="classtelnetpp_1_1session.html#a8a9184db65bf9dc9becea32137d7cab6">receive</a>(telnetpp::bytes content, ReceiveContinuation &amp;&amp;receive_continuation, SendContinuation &amp;&amp;send_continuation)</td><td class="entry"><a class="el" href="classtelnetpp_1_1session.html">telnetpp::session</a></td><td class="entry"><span class="mlabel">inline</span></td></tr>
-  <tr class="even"><td class="entry"><a class="el" href="classtelnetpp_1_1session.html#a3b36c3f5b606193f0141231ba993efcb">send</a>(telnetpp::element const &amp;elem, SendContinuation &amp;&amp;send_continuation)</td><td class="entry"><a class="el" href="classtelnetpp_1_1session.html">telnetpp::session</a></td><td class="entry"><span class="mlabel">inline</span></td></tr>
-  <tr><td class="entry"><a class="el" href="classtelnetpp_1_1session.html#a6972cae8f26e95d6e5d1cb1cd0d45971">session</a>()</td><td class="entry"><a class="el" href="classtelnetpp_1_1session.html">telnetpp::session</a></td><td class="entry"></td></tr>
+  <tr class="even"><td class="entry"><a class="el" href="classtelnetpp_1_1session.html#a2f5b379db52bd9647dfc3112d3404cae">async_read</a>(std::function&lt; void(telnetpp::bytes)&gt; const &amp;callback)</td><td class="entry"><a class="el" href="classtelnetpp_1_1session.html">telnetpp::session</a></td><td class="entry"></td></tr>
+  <tr><td class="entry"><a class="el" href="classtelnetpp_1_1session.html#a61f5579c712c3802fc54e4c81f2eccda">close</a>()</td><td class="entry"><a class="el" href="classtelnetpp_1_1session.html">telnetpp::session</a></td><td class="entry"></td></tr>
+  <tr class="even"><td class="entry"><a class="el" href="classtelnetpp_1_1session.html#a8ec3e554d8928b13863a03d3ac797d9d">install</a>(telnetpp::command_type cmd, std::function&lt; void(telnetpp::command)&gt; const &amp;handler)</td><td class="entry"><a class="el" href="classtelnetpp_1_1session.html">telnetpp::session</a></td><td class="entry"></td></tr>
+  <tr><td class="entry"><a class="el" href="classtelnetpp_1_1session.html#af7b35fbb138b54db5e2d7149787b26eb">install</a>(telnetpp::client_option &amp;option)</td><td class="entry"><a class="el" href="classtelnetpp_1_1session.html">telnetpp::session</a></td><td class="entry"></td></tr>
+  <tr class="even"><td class="entry"><a class="el" href="classtelnetpp_1_1session.html#a4be8b18145828395f63d1f5f78848e1a">install</a>(telnetpp::server_option &amp;option)</td><td class="entry"><a class="el" href="classtelnetpp_1_1session.html">telnetpp::session</a></td><td class="entry"></td></tr>
+  <tr><td class="entry"><a class="el" href="classtelnetpp_1_1session.html#afeae015193152c241cd3f5144544443f">is_alive</a>() const</td><td class="entry"><a class="el" href="classtelnetpp_1_1session.html">telnetpp::session</a></td><td class="entry"></td></tr>
+  <tr class="even"><td class="entry"><a class="el" href="classtelnetpp_1_1session.html#aabe493f86cbe3315c7c4447d67fea6b3">session</a>(Channel &amp;channel)</td><td class="entry"><a class="el" href="classtelnetpp_1_1session.html">telnetpp::session</a></td><td class="entry"><span class="mlabel">inline</span><span class="mlabel">explicit</span></td></tr>
+  <tr><td class="entry"><a class="el" href="classtelnetpp_1_1session.html#a142c0ca472d06debadd5f553b58ba4ea">write</a>(telnetpp::element const &amp;elem)</td><td class="entry"><a class="el" href="classtelnetpp_1_1session.html">telnetpp::session</a></td><td class="entry"></td></tr>
+  <tr class="even"><td class="entry"><a class="el" href="classtelnetpp_1_1session.html#ab295ec67d51602dc7b9af40611339a34">~session</a>()</td><td class="entry"><a class="el" href="classtelnetpp_1_1session.html">telnetpp::session</a></td><td class="entry"></td></tr>
 </table></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Tue Jul 19 2022 13:26:03 for Telnet++ by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Sun Jul 24 2022 20:36:20 for Telnet++ by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.17
 </small></address>

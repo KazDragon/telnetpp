@@ -22,7 +22,7 @@
  <tr style="height: 56px;">
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname">Telnet++
-   &#160;<span id="projectnumber">2.4.0.6</span>
+   &#160;<span id="projectnumber">2.4.0.7</span>
    </div>
    <div id="projectbrief">A C++ library for interacting with Telnet streams</div>
   </td>
@@ -84,14 +84,14 @@ $(function() {
 <div class="line"><a name="l00011"></a><span class="lineno">   11</span>&#160;<span class="comment">//* =========================================================================</span></div>
 <div class="line"><a name="l00013"></a><span class="lineno">   13</span>&#160;<span class="comment"></span><span class="comment">//* =========================================================================</span></div>
 <div class="line"><a name="l00014"></a><span class="lineno">   14</span>&#160;<span class="keywordtype">void</span> register_client_option(</div>
-<div class="line"><a name="l00015"></a><span class="lineno">   15</span>&#160;    <a class="code" href="classtelnetpp_1_1option.html">telnetpp::client_option</a> &amp;option,</div>
+<div class="line"><a name="l00015"></a><span class="lineno">   15</span>&#160;    <a class="code" href="classtelnetpp_1_1client__option.html">telnetpp::client_option</a> &amp;option,</div>
 <div class="line"><a name="l00016"></a><span class="lineno">   16</span>&#160;    negotiation_router &amp;neg_router,</div>
 <div class="line"><a name="l00017"></a><span class="lineno">   17</span>&#160;    subnegotiation_router &amp;sub_router);</div>
 <div class="line"><a name="l00018"></a><span class="lineno">   18</span>&#160; </div>
 <div class="line"><a name="l00019"></a><span class="lineno">   19</span>&#160;<span class="comment">//* =========================================================================</span></div>
 <div class="line"><a name="l00021"></a><span class="lineno">   21</span>&#160;<span class="comment"></span><span class="comment">//* =========================================================================</span></div>
 <div class="line"><a name="l00022"></a><span class="lineno">   22</span>&#160;<span class="keywordtype">void</span> register_server_option(</div>
-<div class="line"><a name="l00023"></a><span class="lineno">   23</span>&#160;    <a class="code" href="classtelnetpp_1_1option.html">telnetpp::server_option</a> &amp;option,</div>
+<div class="line"><a name="l00023"></a><span class="lineno">   23</span>&#160;    <a class="code" href="classtelnetpp_1_1server__option.html">telnetpp::server_option</a> &amp;option,</div>
 <div class="line"><a name="l00024"></a><span class="lineno">   24</span>&#160;    negotiation_router &amp;neg_router,</div>
 <div class="line"><a name="l00025"></a><span class="lineno">   25</span>&#160;    subnegotiation_router &amp;sub_router);</div>
 <div class="line"><a name="l00026"></a><span class="lineno">   26</span>&#160; </div>
@@ -103,9 +103,9 @@ $(function() {
 <div class="line"><a name="l00036"></a><span class="lineno">   36</span>&#160;{</div>
 <div class="line"><a name="l00037"></a><span class="lineno">   37</span>&#160;    route.register_route(</div>
 <div class="line"><a name="l00038"></a><span class="lineno">   38</span>&#160;        negotiation{request, option.option_code()},</div>
-<div class="line"><a name="l00039"></a><span class="lineno">   39</span>&#160;        [&amp;option, request](<span class="keyword">auto</span> &amp;&amp;<span class="comment">/*neg*/</span>, <span class="keyword">auto</span> &amp;&amp;cont)</div>
+<div class="line"><a name="l00039"></a><span class="lineno">   39</span>&#160;        [&amp;option, request](<a class="code" href="classtelnetpp_1_1negotiation.html">telnetpp::negotiation</a> <span class="keyword">const</span> &amp;)</div>
 <div class="line"><a name="l00040"></a><span class="lineno">   40</span>&#160;        {</div>
-<div class="line"><a name="l00041"></a><span class="lineno">   41</span>&#160;            <span class="keywordflow">return</span> option.negotiate(request, cont);</div>
+<div class="line"><a name="l00041"></a><span class="lineno">   41</span>&#160;            <span class="keywordflow">return</span> option.negotiate(request);</div>
 <div class="line"><a name="l00042"></a><span class="lineno">   42</span>&#160;        });</div>
 <div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160;}</div>
 <div class="line"><a name="l00044"></a><span class="lineno">   44</span>&#160; </div>
@@ -117,18 +117,21 @@ $(function() {
 <div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160;    SubnegotiableOption   &amp;option)</div>
 <div class="line"><a name="l00052"></a><span class="lineno">   52</span>&#160;{</div>
 <div class="line"><a name="l00053"></a><span class="lineno">   53</span>&#160;    route.register_route(option.option_code(),</div>
-<div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160;        [&amp;option](<span class="keyword">auto</span> &amp;&amp;sub, <span class="keyword">auto</span> &amp;&amp;cont)</div>
+<div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160;        [&amp;option](<a class="code" href="classtelnetpp_1_1subnegotiation.html">telnetpp::subnegotiation</a> <span class="keyword">const</span> &amp;sub)</div>
 <div class="line"><a name="l00055"></a><span class="lineno">   55</span>&#160;        {</div>
-<div class="line"><a name="l00056"></a><span class="lineno">   56</span>&#160;            return option.subnegotiate(sub.content(), cont);</div>
+<div class="line"><a name="l00056"></a><span class="lineno">   56</span>&#160;            return option.subnegotiate(sub.content());</div>
 <div class="line"><a name="l00057"></a><span class="lineno">   57</span>&#160;        });</div>
 <div class="line"><a name="l00058"></a><span class="lineno">   58</span>&#160;}</div>
 <div class="line"><a name="l00059"></a><span class="lineno">   59</span>&#160; </div>
 <div class="line"><a name="l00060"></a><span class="lineno">   60</span>&#160;}}</div>
 </div><!-- fragment --></div><!-- contents -->
-<div class="ttc" id="aclasstelnetpp_1_1option_html"><div class="ttname"><a href="classtelnetpp_1_1option.html">telnetpp::option</a></div><div class="ttdoc">An class that encapsulates one side of a Telnet option.</div><div class="ttdef"><b>Definition:</b> option.hpp:46</div></div>
+<div class="ttc" id="aclasstelnetpp_1_1client__option_html"><div class="ttname"><a href="classtelnetpp_1_1client__option.html">telnetpp::client_option</a></div><div class="ttdoc">A class that represents a Telnet option's client side. That is, the side that receives WILL and WONT ...</div><div class="ttdef"><b>Definition:</b> client_option.hpp:32</div></div>
+<div class="ttc" id="aclasstelnetpp_1_1server__option_html"><div class="ttname"><a href="classtelnetpp_1_1server__option.html">telnetpp::server_option</a></div><div class="ttdoc">A class that represents a Telnet option's server side. That is, the side that receives DO and DONT ne...</div><div class="ttdef"><b>Definition:</b> server_option.hpp:32</div></div>
+<div class="ttc" id="aclasstelnetpp_1_1negotiation_html"><div class="ttname"><a href="classtelnetpp_1_1negotiation.html">telnetpp::negotiation</a></div><div class="ttdoc">A class that encapsulates a Telnet negotiation.</div><div class="ttdef"><b>Definition:</b> negotiation.hpp:14</div></div>
+<div class="ttc" id="aclasstelnetpp_1_1subnegotiation_html"><div class="ttname"><a href="classtelnetpp_1_1subnegotiation.html">telnetpp::subnegotiation</a></div><div class="ttdoc">A class that encapsulates a Telnet subnegotiation.</div><div class="ttdef"><b>Definition:</b> subnegotiation.hpp:12</div></div>
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Tue Jul 19 2022 13:26:03 for Telnet++ by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Sun Jul 24 2022 20:36:20 for Telnet++ by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.17
 </small></address>
