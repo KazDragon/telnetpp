@@ -1,6 +1,7 @@
 #pragma once
 
 #include "telnetpp/options/new_environ/protocol.hpp"
+#include "telnetpp/options/new_environ/detail/stream.hpp"
 
 namespace telnetpp { namespace options { namespace new_environ {
     namespace detail {

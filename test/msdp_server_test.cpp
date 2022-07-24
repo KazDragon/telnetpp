@@ -1,4 +1,5 @@
 #include "telnetpp/options/msdp/server.hpp"
+#include "telnet_option_fixture.hpp"
 #include <gtest/gtest.h>
 #include <vector>
 
@@ -6,85 +7,78 @@ using namespace telnetpp::literals;
 
 namespace {
 
-class in_an_activated_msdp_server : public testing::Test
+namespace {
+using an_msdp_server = a_telnet_option<telnetpp::options::msdp::server>;
+}
+
+}
+
+TEST_F(an_msdp_server, is_an_msdp_server)
+{
+    ASSERT_EQ(69, option_.option_code());
+}
+
+namespace {
+class an_activated_msdp_server : public an_msdp_server
 {
 protected:
-    in_an_activated_msdp_server()
+    an_activated_msdp_server()
     {
-        server_.on_receive.connect(
-            [this](telnetpp::options::msdp::variable const &var,
-                   telnetpp::options::msdp::server::continuation const &cont)
+        option_.on_receive.connect(
+            [this](telnetpp::options::msdp::variable const &var)
             {
                 received_variables_.push_back(var);
             });
             
-        server_.negotiate(telnetpp::do_, [](auto &&){});
-        assert(server_.active());
+        option_.negotiate(telnetpp::do_);
+        assert(option_.active());
+        channel_.written_.clear();
     }
-    
-    telnetpp::options::msdp::server server_;
+
     std::vector<telnetpp::options::msdp::variable> received_variables_;
 };
 
 }
 
-TEST(msdp_server_test, option_is_msdp)
-{
-    telnetpp::options::msdp::server server;
-    ASSERT_EQ(69, server.option_code());
-}
-
-TEST_F(in_an_activated_msdp_server, send_with_variable_sends_simple_variable)
+TEST_F(an_activated_msdp_server, send_with_variable_sends_simple_variable)
 {
     telnetpp::options::msdp::variable const var{"var"_tb, "val"_tb};
 
-    server_.send(
-        var,
-        [this](telnetpp::elements data)
-        {
-            ASSERT_EQ(size_t{1}, data.size());
+    option_.send(var);
 
-            auto const expected_content = "\x01" "var" "\x02" "val"_tb;
-            auto const expected_subnegotiation = telnetpp::subnegotiation{
-                server_.option_code(),
-                expected_content
-            };
+    telnetpp::byte_storage const expected = {
+        telnetpp::iac, telnetpp::sb, option_.option_code(),
+        0x01, 'v', 'a', 'r', 0x02, 'v', 'a', 'l',
+        telnetpp::iac, telnetpp::se
+    };
 
-            ASSERT_EQ(telnetpp::element{expected_subnegotiation}, data[0]);
-        });
+    ASSERT_EQ(expected, channel_.written_);
 }
 
-TEST_F(in_an_activated_msdp_server, send_with_array_sends_array_variable)
+TEST_F(an_activated_msdp_server, send_with_array_sends_array_variable)
 {
-    server_.send(
+    option_.send(
         telnetpp::options::msdp::variable{
             "var"_tb,
             telnetpp::options::msdp::array_value{ "val0"_tb, "val1"_tb }
-        },
-        [this](telnetpp::elements data)
-        {
-            ASSERT_EQ(size_t{1}, data.size());
-
-            auto const expected_content = 
-                "\x01" "var" 
-                "\x02"
-                    "\x05" 
-                        "\x02" "val0"
-                        "\x02" "val1"
-                    "\x06"_tb;
-        
-            auto const expected_subnegotiation = telnetpp::subnegotiation{
-                server_.option_code(),
-                expected_content
-            };
-
-            ASSERT_EQ(telnetpp::element{expected_subnegotiation}, data[0]);
         });
+
+    telnetpp::byte_storage const expected = {
+        telnetpp::iac, telnetpp::sb, option_.option_code(),
+        0x01, 'v', 'a', 'r', 
+            0x02, 0x05,
+                0x02, 'v', 'a', 'l', '0',
+                0x02, 'v', 'a', 'l', '1',
+            0x06,
+        telnetpp::iac, telnetpp::se
+    };
+
+    ASSERT_EQ(expected, channel_.written_);
 }
 
-TEST_F(in_an_activated_msdp_server, send_with_table_sends_table_variable)
+TEST_F(an_activated_msdp_server, send_with_table_sends_table_variable)
 {
-    server_.send(
+    option_.send(
         telnetpp::options::msdp::variable{
             "var"_tb,
             telnetpp::options::msdp::table_value{
@@ -95,46 +89,38 @@ TEST_F(in_an_activated_msdp_server, send_with_table_sends_table_variable)
                     }
                 }
             }
-        },
-        [this](telnetpp::elements data)
-        {
-            ASSERT_EQ(size_t{1}, data.size());
-
-            auto const expected_content = 
-                "\x01" "var" 
-                "\x02"
-                    "\x03" 
-                        "\x01" "tbl"
-                        "\x02"
-                            "\x05" 
-                                "\x02" "val0"
-                                "\x02" "val1"
-                            "\x06"
-                    "\x04"_tb;
-        
-            auto const expected_subnegotiation = telnetpp::subnegotiation{
-                server_.option_code(),
-                expected_content
-            };
-
-            ASSERT_EQ(telnetpp::element{expected_subnegotiation}, data[0]);
         });
+
+    telnetpp::byte_storage const expected = {
+        telnetpp::iac, telnetpp::sb, option_.option_code(),
+        0x01, 'v', 'a', 'r', 
+            0x02, 0x03,
+                0x01, 't', 'b', 'l',
+                    0x02, 0x05,
+                        0x02, 'v', 'a', 'l', '0',
+                        0x02, 'v', 'a', 'l', '1',
+                    0x06,
+            0x04,
+        telnetpp::iac, telnetpp::se
+    };
+
+    ASSERT_EQ(expected, channel_.written_);
 }
 
-TEST_F(in_an_activated_msdp_server, receiving_no_variables_does_nothing)
+TEST_F(an_activated_msdp_server, receiving_no_variables_does_nothing)
 {
-    server_.subnegotiate({}, [](auto &&){});
+    option_.subnegotiate({});
 
     ASSERT_EQ(size_t{0}, received_variables_.size());
 }
 
-TEST_F(in_an_activated_msdp_server, receiving_a_variable_reports_an_array_of_one_variable)
+TEST_F(an_activated_msdp_server, receiving_a_variable_reports_an_array_of_one_variable)
 {
     auto const subnegotiation_content =
         "\x01" "var"
         "\x02" "val"_tb;
         
-    server_.subnegotiate(subnegotiation_content, [](auto &&){});
+    option_.subnegotiate(subnegotiation_content);
 
     auto const expected = telnetpp::options::msdp::variable{"var"_tb, "val"_tb};
 
@@ -142,7 +128,7 @@ TEST_F(in_an_activated_msdp_server, receiving_a_variable_reports_an_array_of_one
     ASSERT_EQ(expected, received_variables_[0]);
 }
 
-TEST_F(in_an_activated_msdp_server, receiving_two_variables_reports_two_variable)
+TEST_F(an_activated_msdp_server, receiving_two_variables_reports_two_variable)
 {
     auto const subnegotiation_content =
         "\x01" "var0"
@@ -150,7 +136,7 @@ TEST_F(in_an_activated_msdp_server, receiving_two_variables_reports_two_variable
         "\x01" "var1"
         "\x02" "val1"_tb;
         
-    server_.subnegotiate(subnegotiation_content, [](auto &&){});
+    option_.subnegotiate(subnegotiation_content);
 
     auto const expected0 = telnetpp::options::msdp::variable{"var0"_tb, "val0"_tb};
     auto const expected1 = telnetpp::options::msdp::variable{"var1"_tb, "val1"_tb};
@@ -160,14 +146,14 @@ TEST_F(in_an_activated_msdp_server, receiving_two_variables_reports_two_variable
     ASSERT_EQ(expected1, received_variables_[1]);
 }
 
-TEST_F(in_an_activated_msdp_server, receiving_empty_array_variable_reports_empty_array)
+TEST_F(an_activated_msdp_server, receiving_empty_array_variable_reports_empty_array)
 {
     auto const subnegotiation_content =
         "\x01" "arr"
         "\x02" "\x05"
                "\x06"_tb;
         
-    server_.subnegotiate(subnegotiation_content, [](auto &&){});
+    option_.subnegotiate(subnegotiation_content);
 
     auto const expected = telnetpp::options::msdp::variable{
         "arr"_tb, 
@@ -178,7 +164,7 @@ TEST_F(in_an_activated_msdp_server, receiving_empty_array_variable_reports_empty
     ASSERT_EQ(expected, received_variables_[0]);
 }
 
-TEST_F(in_an_activated_msdp_server, receiving_array_variable_with_one_element_reports_array)
+TEST_F(an_activated_msdp_server, receiving_array_variable_with_one_element_reports_array)
 {
     auto const subnegotiation_content =
         "\x01" "arr"
@@ -186,7 +172,7 @@ TEST_F(in_an_activated_msdp_server, receiving_array_variable_with_one_element_re
                       "\x02" "val"
                "\x06"_tb;
         
-    server_.subnegotiate(subnegotiation_content, [](auto &&){});
+    option_.subnegotiate(subnegotiation_content);
 
     auto const expected = telnetpp::options::msdp::variable{
         "arr"_tb, 
@@ -197,7 +183,7 @@ TEST_F(in_an_activated_msdp_server, receiving_array_variable_with_one_element_re
     ASSERT_EQ(expected, received_variables_[0]);
 }
 
-TEST_F(in_an_activated_msdp_server, receiving_array_variable_with_two_elements_reports_array)
+TEST_F(an_activated_msdp_server, receiving_array_variable_with_two_elements_reports_array)
 {
     auto const subnegotiation_content =
         "\x01" "arr"
@@ -206,7 +192,7 @@ TEST_F(in_an_activated_msdp_server, receiving_array_variable_with_two_elements_r
                       "\x02" "val1"
                "\x06"_tb;
 
-    server_.subnegotiate(subnegotiation_content, [](auto &&){});
+    option_.subnegotiate(subnegotiation_content);
 
     auto const expected = telnetpp::options::msdp::variable{
         "arr"_tb, 
@@ -217,7 +203,7 @@ TEST_F(in_an_activated_msdp_server, receiving_array_variable_with_two_elements_r
     ASSERT_EQ(expected, received_variables_[0]);
 }
 
-TEST_F(in_an_activated_msdp_server, receiving_array_variable_then_string_reports_array_and_string)
+TEST_F(an_activated_msdp_server, receiving_array_variable_then_string_reports_array_and_string)
 {
     auto const subnegotiation_content =
         "\x01" "arr"
@@ -228,7 +214,7 @@ TEST_F(in_an_activated_msdp_server, receiving_array_variable_then_string_reports
         "\x01" "var"
         "\x02" "val"_tb;
 
-    server_.subnegotiate(subnegotiation_content, [](auto &&){});
+    option_.subnegotiate(subnegotiation_content);
 
     auto const expected0 = telnetpp::options::msdp::variable{
         "arr"_tb,
@@ -242,14 +228,14 @@ TEST_F(in_an_activated_msdp_server, receiving_array_variable_then_string_reports
     ASSERT_EQ(expected1, received_variables_[1]);
 }
 
-TEST_F(in_an_activated_msdp_server, receiving_empty_table_reports_empty_table)
+TEST_F(an_activated_msdp_server, receiving_empty_table_reports_empty_table)
 {
     auto const subnegotiation_content =
         "\x01" "tbl"
         "\x02" "\x03"
                "\x04"_tb;
 
-    server_.subnegotiate(subnegotiation_content, [](auto &&){});
+    option_.subnegotiate(subnegotiation_content);
 
     auto const expected = telnetpp::options::msdp::variable{
         "tbl"_tb,
@@ -260,7 +246,7 @@ TEST_F(in_an_activated_msdp_server, receiving_empty_table_reports_empty_table)
     ASSERT_EQ(expected, received_variables_[0]);
 }
 
-TEST_F(in_an_activated_msdp_server, receiving_table_with_one_string_value_returns_table_with_value)
+TEST_F(an_activated_msdp_server, receiving_table_with_one_string_value_returns_table_with_value)
 {
     auto const subnegotiation_content =
         "\x01" "tbl"
@@ -269,7 +255,7 @@ TEST_F(in_an_activated_msdp_server, receiving_table_with_one_string_value_return
                       "\x02" "val"
                "\x04"_tb;
 
-    server_.subnegotiate(subnegotiation_content, [](auto &&){});
+    option_.subnegotiate(subnegotiation_content);
 
     auto const expected = telnetpp::options::msdp::variable{
         "tbl"_tb,
@@ -282,7 +268,7 @@ TEST_F(in_an_activated_msdp_server, receiving_table_with_one_string_value_return
     ASSERT_EQ(expected, received_variables_[0]);
 }
 
-TEST_F(in_an_activated_msdp_server, receiving_table_with_one_array_value_returns_table_with_value)
+TEST_F(an_activated_msdp_server, receiving_table_with_one_array_value_returns_table_with_value)
 {
     auto const subnegotiation_content =
         "\x01" "tbl"
@@ -295,7 +281,7 @@ TEST_F(in_an_activated_msdp_server, receiving_table_with_one_array_value_returns
                              "\x06"
                "\x04"_tb;
 
-    server_.subnegotiate(subnegotiation_content, [](auto &&){});
+    option_.subnegotiate(subnegotiation_content);
 
     auto const expected = telnetpp::options::msdp::variable{
         "tbl"_tb,
@@ -313,7 +299,7 @@ TEST_F(in_an_activated_msdp_server, receiving_table_with_one_array_value_returns
     ASSERT_EQ(expected, received_variables_[0]);
 }
 
-TEST_F(in_an_activated_msdp_server, receiving_table_with_one_table_value_returns_table_with_value)
+TEST_F(an_activated_msdp_server, receiving_table_with_one_table_value_returns_table_with_value)
 {
     auto const subnegotiation_content =
         "\x01" "tbl"
@@ -325,7 +311,7 @@ TEST_F(in_an_activated_msdp_server, receiving_table_with_one_table_value_returns
                              "\x04"
                "\x04"_tb;
 
-    server_.subnegotiate(subnegotiation_content, [](auto &&){});
+    option_.subnegotiate(subnegotiation_content);
 
     auto const expected = telnetpp::options::msdp::variable{
         "tbl"_tb,
@@ -343,7 +329,7 @@ TEST_F(in_an_activated_msdp_server, receiving_table_with_one_table_value_returns
     ASSERT_EQ(expected, received_variables_[0]);
 }
 
-TEST_F(in_an_activated_msdp_server, receiving_table_with_many_values_returns_table_with_values)
+TEST_F(an_activated_msdp_server, receiving_table_with_many_values_returns_table_with_values)
 {
     auto const subnegotiation_content =
         "\x01" "tbl"
@@ -365,7 +351,7 @@ TEST_F(in_an_activated_msdp_server, receiving_table_with_many_values_returns_tab
                              "\x06"
                 "\x04"_tb;
                 
-    server_.subnegotiate(subnegotiation_content, [](auto &&){});
+    option_.subnegotiate(subnegotiation_content);
     
     auto const expected = telnetpp::options::msdp::variable{
         "tbl"_tb,

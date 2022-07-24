@@ -18,7 +18,7 @@ public:
     //* =====================================================================
     /// \brief Constructor
     //* =====================================================================
-    explicit server(codec &cdc);
+    explicit server(telnetpp::session &sess, codec &cdc);
 
     //* =====================================================================
     /// \brief Requests that compression begins.
@@ -26,7 +26,7 @@ public:
     /// compression.  Otherwise, the sequence will be sent as soon as the 
     /// option is activated.
     //* =====================================================================
-    void start_compression(continuation const &cont);
+    void start_compression();
 
     //* =====================================================================
     /// \brief Requests that compression ends.
@@ -35,7 +35,7 @@ public:
     /// request to begin_compression that would auto-start compression on
     /// activation.
     //* =====================================================================
-    void finish_compression(continuation const &cont);
+    void finish_compression();
     
 private:
     codec &codec_;

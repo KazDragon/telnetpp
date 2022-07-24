@@ -16,16 +16,14 @@ public:
     //* =====================================================================
     /// \brief Constructor
     //* =====================================================================
-    explicit client(codec &cdc);
+    explicit client(telnetpp::session& sess, codec &cdc);
 
 private:
     //* =====================================================================
     /// \brief Called when a subnegotiation is received while the option is
     /// active.  Override for option-specific functionality.
     //* =====================================================================
-    void handle_subnegotiation(
-        telnetpp::bytes data,
-        continuation const &cont) override;
+    void handle_subnegotiation(telnetpp::bytes data) override;
         
     codec &codec_;
 };

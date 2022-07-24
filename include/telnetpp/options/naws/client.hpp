@@ -15,10 +15,10 @@ public:
     //* =====================================================================
     /// Constructor
     //* =====================================================================
-    client();
+    explicit client(telnetpp::session& sess) noexcept;
 
     boost::signals2::signal<
-        void (window_dimension, window_dimension, continuation const &)
+        void (window_dimension, window_dimension)
     > on_window_size_changed;
 
 private:
@@ -26,9 +26,7 @@ private:
     /// \brief Called when a subnegotiation is received while the option is
     /// active.  Override for option-specific functionality.
     //* =====================================================================
-    void handle_subnegotiation(
-        telnetpp::bytes content,
-        continuation const &cont) override;
+    void handle_subnegotiation(telnetpp::bytes content) override;
 };
 
 }}}

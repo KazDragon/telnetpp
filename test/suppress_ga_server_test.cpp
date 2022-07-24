@@ -1,31 +1,12 @@
 #include "telnetpp/options/suppress_ga/server.hpp"
+#include "telnet_option_fixture.hpp"
 #include <gtest/gtest.h>
 
-TEST(suppress_ga_server_test, option_is_suppress_ga)
-{
-    telnetpp::options::suppress_ga::server server;
-    ASSERT_EQ(3, server.option_code());
+namespace {
+using a_suppress_ga_server = a_telnet_option<telnetpp::options::suppress_ga::server>;
 }
 
-TEST(suppress_ga_server_test, subnegotiation_returns_nothing)
+TEST_F(a_suppress_ga_server, is_a_suppress_ga_server)
 {
-    telnetpp::options::suppress_ga::server server;
-    server.activate([](auto &&){});
-    server.negotiate(telnetpp::do_, [](auto &&){});
-    assert(server.active());
-
-    static constexpr telnetpp::byte const content[] = { 0x00 };
-
-    std::vector<telnetpp::element> const expected_elements = {
-    };
-
-    std::vector<telnetpp::element> received_elements;
-    server.subnegotiate(
-        content, 
-        [&received_elements](telnetpp::element const &elem)
-        {
-            received_elements.push_back(elem);
-        });
-
-    ASSERT_EQ(expected_elements, received_elements);
+    ASSERT_EQ(3, option_.option_code());
 }

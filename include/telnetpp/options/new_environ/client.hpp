@@ -2,10 +2,6 @@
 
 #include "telnetpp/client_option.hpp"
 #include "telnetpp/options/new_environ/protocol.hpp"
-#include "telnetpp/options/new_environ/detail/protocol.hpp"
-#include "telnetpp/options/new_environ/detail/stream.hpp"
-#include <numeric>
-#include <string>
 
 namespace telnetpp { namespace options { namespace new_environ {
 
@@ -20,28 +16,13 @@ public:
     //* =====================================================================
     /// CONSTRUCTOR
     //* =====================================================================
-    client();
+    explicit client(telnetpp::session &sess) noexcept;
 
     //* =====================================================================
     /// \brief Requests that a particular set of environment variables be
     /// transmitted by the client.
     //* =====================================================================
-    template <typename Continuation>
-    void request_variables(requests const &reqs, Continuation &&cont)
-    {
-        auto request_content = std::accumulate(
-            reqs.begin(),
-            reqs.end(),
-            byte_storage{detail::send},
-            [](byte_storage &content, request const &req) -> byte_storage &
-            {
-                content.push_back(type_to_byte(req.type));
-                detail::append_escaped(content, req.name);
-                return content;
-            });
-
-        cont(telnetpp::subnegotiation{option_code(), request_content});
-    }
+    void request_variables(requests const &reqs);
 
     //* =====================================================================
     /// \brief Signal called whenever an environment variable is updated.
@@ -49,29 +30,14 @@ public:
     /// \param cont a continuation to pass any Telnet response that may
     ///        occur as a result of receiving this response.
     //* =====================================================================
-    boost::signals2::signal<
-        void (response const &rsp, continuation const &cont)
-    > on_variable_changed;
+    boost::signals2::signal<void (response const &rsp)> on_variable_changed;
 
 private:
     //* =====================================================================
     /// \brief Called when a subnegotiation is received while the option is
     /// active.  Override for option-specific functionality.
     //* =====================================================================
-    void handle_subnegotiation(
-        telnetpp::bytes data,
-        continuation const &cont) override;
-
-    //* =====================================================================
-    /// \brief Converts a variable type to its byte representation.
-    //* =====================================================================
-    static constexpr telnetpp::byte type_to_byte(variable_type type)
-    {
-         return type == variable_type::var
-              ? telnetpp::options::new_environ::detail::var
-              : telnetpp::options::new_environ::detail::uservar;
-    }
-
+    void handle_subnegotiation(telnetpp::bytes data) override;
 };
 
 }}}

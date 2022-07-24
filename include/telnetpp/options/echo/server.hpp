@@ -17,7 +17,7 @@ class TELNETPP_EXPORT server : public telnetpp::options::basic_server<
 >
 {
 public:
-    server() noexcept;
+    explicit server(telnetpp::session &sess) noexcept;
 };
 
 }}}

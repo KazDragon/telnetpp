@@ -1,239 +1,147 @@
 #include "telnetpp/session.hpp"
-#include "telnetpp/options/echo/client.hpp"
-#include "telnetpp/options/echo/server.hpp"
+#include "telnetpp/client_option.hpp"
+#include "telnetpp/server_option.hpp"
+#include "fakes/fake_channel.hpp"
+#include "fakes/fake_client_option.hpp"
+#include "fakes/fake_server_option.hpp"
 #include <gtest/gtest.h>
 
 using namespace telnetpp::literals;
 
 namespace {
-
-class fake_client_option : public telnetpp::client_option
+class a_session : public testing::Test
 {
-public:
-    explicit fake_client_option(telnetpp::option_type option)
-      : telnetpp::client_option(option)
+protected:
+    void async_read()
     {
+        session_.async_read(
+            [this](telnetpp::bytes content) {
+                received_content_.append(content.begin(), content.end());
+
+                // The session should always send empty content as the last 
+                // callback to indicate completion.
+                complete_ = content.empty();
+            });
     }
 
-    boost::signals2::signal<
-        void (telnetpp::bytes data)
-    > on_subnegotiation;
+    fake_channel channel_;
+    telnetpp::session session_{channel_};
 
-private:
-    void handle_subnegotiation(
-        telnetpp::bytes data,
-        std::function<void (telnetpp::element const &)> const &cont) override
-    {
-        on_subnegotiation(data);
-    }
-};
-
-class fake_server_option : public telnetpp::server_option
-{
-public:
-    explicit fake_server_option(telnetpp::option_type option)
-      : telnetpp::server_option(option)
-    {
-    }
-
-    boost::signals2::signal<
-        void (telnetpp::bytes data)
-    > on_subnegotiation;
-
-private:
-    void handle_subnegotiation(
-        telnetpp::bytes data,
-        std::function<void (telnetpp::element const &)> const &cont) override
-    {
-        on_subnegotiation(data);
-    }
+    telnetpp::byte_storage received_content_;
+    bool complete_{false};
 };
 
 }
 
-TEST(session_test, reception_of_text_routes_to_user_supplied_function)
+TEST_F(a_session, routed_text_to_user_supplied_function)
 {
-    telnetpp::session session;
-    
-    static constexpr telnetpp::byte const content[] = {
+    static telnetpp::byte_storage const content = {
         'T', 'E', 'S', 'T', ' ', 'S', 'T', 'R', 'I', 'N', 'G'
     };
 
-    static std::string const expected_content = "TEST STRING";
-    std::string received_content;
-    
-    static std::vector<telnetpp::byte> expected_result = {
-    };
+    async_read();
+    channel_.receive(content);
 
-    std::vector<telnetpp::byte> received_result;
-    session.receive(
-        content,
-        [&received_content](telnetpp::bytes content, auto const &cont)
-        {
-            std::transform(
-                content.begin(),
-                content.end(),
-                std::back_inserter(received_content),
-                [](auto ch) { return static_cast<char>(ch); });
-        },
-        [&received_result](telnetpp::bytes data)
-        {
-            received_result.insert(
-                received_result.end(),
-                data.begin(),
-                data.end());
-        });
-
-    ASSERT_EQ(expected_result, received_result);
-    ASSERT_EQ(expected_content, received_content);
+    ASSERT_EQ(content, received_content_);
+    ASSERT_TRUE(complete_);
 }
 
-TEST(session_test, reception_of_command_routes_to_installed_command_function)
+TEST_F(a_session, routes_commands_to_installed_command_function)
 {
-    telnetpp::session session;
-
-    session.install(
+    session_.install(
         telnetpp::ayt,
-        [](telnetpp::command const &cmd, auto &&send)
+        [this](telnetpp::command const &cmd)
         {
             ASSERT_EQ(telnetpp::ayt, cmd.value());
 
             static constexpr telnetpp::byte content[] = { 'Y', 'e', 's' };
-            send(content);
+            session_.write(content);
         });
 
-    session.install(
+    session_.install(
         telnetpp::dm,
-        [](telnetpp::command const &cmd, auto &&send)
+        [this](telnetpp::command const &cmd)
         {
             ASSERT_EQ(telnetpp::dm, cmd.value());
 
             static constexpr telnetpp::byte content[] = { 'N', 'o' };
-            send(content);
+            session_.write(content);
         });
-
-    static constexpr telnetpp::command const command{telnetpp::ayt};
 
     static constexpr telnetpp::byte const content[] = {
         telnetpp::iac, telnetpp::ayt
     };
 
-    static std::vector<telnetpp::byte> expected_result = {
+    async_read();
+    channel_.receive(content);
+
+    static telnetpp::byte_storage const expected_result = {
         'Y', 'e', 's'
     };
 
-    std::vector<telnetpp::byte> received_result;
-    session.receive(
-        content,
-        [](auto &&...){},
-        [&received_result](telnetpp::bytes data)
-        {
-            received_result.insert(
-                received_result.end(),
-                data.begin(),
-                data.end());
-        });
-
-    ASSERT_EQ(expected_result, received_result);
+    ASSERT_EQ(expected_result, channel_.written_);
+    ASSERT_TRUE(received_content_.empty());
+    ASSERT_TRUE(complete_);
 }
 
-TEST(session_test, reception_of_negotiation_routes_to_installed_client_option)
+TEST_F(a_session, routes_negotiations_to_installed_client_option)
 {
-    telnetpp::session session;
-    telnetpp::options::echo::client client;
-
-    session.install(client);
+    constexpr telnetpp::option_type option = 42;
+    fake_client_option client{session_, option};
+    session_.install(client);
 
     telnetpp::byte const content[] = {
         telnetpp::iac, telnetpp::will, client.option_code()
     };
 
-    std::vector<telnetpp::byte> const expected_result = {
+    async_read();
+    channel_.receive(content);
+
+    telnetpp::byte_storage const expected_result = {
         telnetpp::iac, telnetpp::do_, client.option_code()
     };
 
-    std::string received_content;
-    std::vector<telnetpp::byte> received_result;
-    session.receive(
-        content,
-        [&received_content](telnetpp::bytes content, auto const &cont)
-        {
-            std::transform(
-                content.begin(),
-                content.end(),
-                std::back_inserter(received_content),
-                [](auto ch) { return static_cast<char>(ch); });
-        },
-        [&received_result](telnetpp::bytes data)
-        {
-            received_result.insert(
-                received_result.end(),
-                data.begin(),
-                data.end());
-        });
-
-    ASSERT_EQ(std::string{}, received_content);
-    ASSERT_EQ(expected_result, received_result);
+    ASSERT_EQ(expected_result, channel_.written_);
+    ASSERT_TRUE(complete_);
 }
 
-TEST(session_test, reception_of_negotiation_routes_to_installed_server_option)
+TEST_F(a_session, routes_negotiations_to_installed_server_option)
 {
-    telnetpp::session session;
-    telnetpp::options::echo::server server;
+    constexpr telnetpp::option_type option = 67;
+    fake_server_option server{session_, option};
 
-    session.install(server);
+    session_.install(server);
 
     telnetpp::byte const content[] = {
         telnetpp::iac, telnetpp::do_, server.option_code()
     };
 
-    std::vector<telnetpp::byte> const expected_result = {
+    async_read();
+    channel_.receive(content);
+
+    telnetpp::byte_storage const expected_result = {
         telnetpp::iac, telnetpp::will, server.option_code()
     };
 
-    std::string received_content;
-    std::vector<telnetpp::byte> received_result;
-    session.receive(
-        content,
-        [&received_content](telnetpp::bytes content, auto const &cont)
-        {
-            std::transform(
-                content.begin(),
-                content.end(),
-                std::back_inserter(received_content),
-                [](auto ch) { return static_cast<char>(ch); });
-        },
-        [&received_result](telnetpp::bytes data)
-        {
-            received_result.insert(
-                received_result.end(),
-                data.begin(),
-                data.end());
-        });
-
-    ASSERT_EQ(std::string{}, received_content);
-    ASSERT_EQ(expected_result, received_result);
+    ASSERT_EQ(expected_result, channel_.written_);
+    ASSERT_TRUE(complete_);
 }
 
-TEST(session_test, reception_of_subnegotiation_routes_to_installed_client_option)
+TEST_F(a_session, routes_subnegotiations_to_installed_client_option)
 {
-    telnetpp::session session;
-    fake_client_option client{0xA5};
-    client.negotiate(telnetpp::will, [](auto &&...){});
+    constexpr telnetpp::option_type option = 0xA5;
+    fake_client_option client{session_, option};
+
+    client.negotiate(telnetpp::will);
     assert(client.active());
 
-    session.install(client);
+    session_.install(client);
 
-    std::vector<telnetpp::byte> const expected_subnegotiation = {
-        'T', 'E', 'S', 'T'
-    };
-    
-    std::vector<telnetpp::byte> received_subnegotiation;
+    telnetpp::byte_storage received_subnegotiation;
     client.on_subnegotiation.connect(
         [&](telnetpp::bytes data)
         {
-            received_subnegotiation.insert(
-                received_subnegotiation.end(),
+            received_subnegotiation.append(
                 data.begin(),
                 data.end());
         });
@@ -244,49 +152,28 @@ TEST(session_test, reception_of_subnegotiation_routes_to_installed_client_option
         telnetpp::iac, telnetpp::se
     };
 
-    std::vector<telnetpp::byte> const expected_result = {
-    };
+    async_read();
+    channel_.receive(content);
 
-    
-    std::string received_content;
-    std::vector<telnetpp::byte> received_result;
-    session.receive(
-        content,
-        [&received_content](telnetpp::bytes content, auto const &cont)
-        {
-            std::transform(
-                content.begin(),
-                content.end(),
-                std::back_inserter(received_content),
-                [](auto ch) { return static_cast<char>(ch); });
-        },
-        [&received_result](telnetpp::bytes data)
-        {
-            received_result.insert(
-                received_result.end(),
-                data.begin(),
-                data.end());
-        });
-
-    ASSERT_EQ(std::string{}, received_content);
-    ASSERT_EQ(expected_result, received_result);
-    ASSERT_EQ(expected_subnegotiation, received_subnegotiation);
-}
-
-TEST(session_test, reception_of_fragmented_subnegotiation_routes_to_installed_client_option)
-{
-    telnetpp::session session;
-    fake_client_option client{0xA5};
-    client.negotiate(telnetpp::will, [](auto &&...){});
-    assert(client.active());
-
-    session.install(client);
-
-    std::vector<telnetpp::byte> const expected_subnegotiation = {
+    telnetpp::byte_storage const expected_subnegotiation = {
         'T', 'E', 'S', 'T'
     };
     
-    std::vector<telnetpp::byte> received_subnegotiation;
+    ASSERT_EQ(expected_subnegotiation, received_subnegotiation);
+    ASSERT_TRUE(complete_);
+}
+
+TEST_F(a_session, routes_fragmented_subnegotiations_to_installed_client_option)
+{
+    constexpr telnetpp::option_type option = 0xA5;
+    fake_client_option client{session_, option};
+
+    client.negotiate(telnetpp::will);
+    assert(client.active());
+
+    session_.install(client);
+
+    telnetpp::byte_storage received_subnegotiation;
     client.on_subnegotiation.connect(
         [&](telnetpp::bytes data)
         {
@@ -306,248 +193,148 @@ TEST(session_test, reception_of_fragmented_subnegotiation_routes_to_installed_cl
         telnetpp::iac, telnetpp::se
     };
 
-    std::vector<telnetpp::byte> const expected_result = {
+    async_read();
+    channel_.receive(content0);
+
+    ASSERT_TRUE(received_subnegotiation.empty());
+    ASSERT_TRUE(std::exchange(complete_, false));
+
+    async_read();
+    channel_.receive(content1);
+    
+    telnetpp::byte_storage const expected_subnegotiation = {
+        'T', 'E', 'S', 'T'
     };
 
-    
-    std::string received_content;
-    auto const &receive_content = 
-        [&received_content](telnetpp::bytes content, auto const &cont)
-        {
-            std::transform(
-                content.begin(),
-                content.end(),
-                std::back_inserter(received_content),
-                [](auto ch) { return static_cast<char>(ch); });
-        };
-        
-    std::vector<telnetpp::byte> received_result;
-    auto const &receive_result =
-        [&received_result](telnetpp::bytes data)
-        {
-            received_result.insert(
-                received_result.end(),
-                data.begin(),
-                data.end());
-        };
-        
-    session.receive(content0, receive_content, receive_result);
-    session.receive(content1, receive_content, receive_result);
-
-    ASSERT_EQ(std::string{}, received_content);
-    ASSERT_EQ(expected_result, received_result);
     ASSERT_EQ(expected_subnegotiation, received_subnegotiation);
+    ASSERT_TRUE(received_content_.empty());
+    ASSERT_TRUE(complete_);
 }
 
-TEST(session_test, unrouted_will_sends_dont)
+TEST_F(a_session, sends_dont_for_unrouted_will)
 {
-    telnetpp::session session;
-
-    telnetpp::byte const content[] = {
+    static telnetpp::byte_storage const content = {
         telnetpp::iac, telnetpp::will, 0xAB
     };
 
-    std::vector<telnetpp::byte> const expected_result = {
+    async_read();
+    channel_.receive(content);
+
+    static telnetpp::byte_storage const expected_result = {
         telnetpp::iac, telnetpp::dont, 0xAB
     };
 
-    std::string received_content;
-    std::vector<telnetpp::byte> received_result;
-    session.receive(
-        content,
-        [&received_content](telnetpp::bytes content, auto const &cont)
-        {
-            std::transform(
-                content.begin(),
-                content.end(),
-                std::back_inserter(received_content),
-                [](auto ch) { return static_cast<char>(ch); });
-        },
-        [&received_result](telnetpp::bytes data)
-        {
-            received_result.insert(
-                received_result.end(),
-                data.begin(),
-                data.end());
-        });
-
-    ASSERT_EQ(std::string{}, received_content);
-    ASSERT_EQ(expected_result, received_result);
+    ASSERT_EQ(expected_result, channel_.written_);
+    ASSERT_TRUE(received_content_.empty());
+    ASSERT_TRUE(complete_);
 }
 
-TEST(session_test, unrouted_wont_results_in_dont)
+TEST_F(a_session, sends_dont_for_unrouted_wont)
 {
-    telnetpp::session session;
-
-    telnetpp::byte const content[] = {
+    static telnetpp::byte_storage const content = {
         telnetpp::iac, telnetpp::wont, 0xAB
     };
 
-    std::vector<telnetpp::byte> const expected_result = {
+    async_read();
+    channel_.receive(content);
+
+    static telnetpp::byte_storage const expected_result = {
         telnetpp::iac, telnetpp::dont, 0xAB
     };
 
-    std::string received_content;
-    std::vector<telnetpp::byte> received_result;
-    session.receive(
-        content,
-        [&received_content](telnetpp::bytes content, auto const &cont)
-        {
-            std::transform(
-                content.begin(),
-                content.end(),
-                std::back_inserter(received_content),
-                [](auto ch) { return static_cast<char>(ch); });
-        },
-        [&received_result](telnetpp::bytes data)
-        {
-            received_result.insert(
-                received_result.end(),
-                data.begin(),
-                data.end());
-        });
-
-    ASSERT_EQ(std::string{}, received_content);
-    ASSERT_EQ(expected_result, received_result);
+    ASSERT_EQ(expected_result, channel_.written_);
+    ASSERT_TRUE(received_content_.empty());
+    ASSERT_TRUE(complete_);
 }
 
-TEST(session_test, unrouted_do_results_in_wont)
+TEST_F(a_session, sends_wont_for_unrouted_do)
 {
-    telnetpp::session session;
-
-    telnetpp::byte const content[] = {
+    static telnetpp::byte_storage const content = {
         telnetpp::iac, telnetpp::do_, 0xAB
     };
 
-    std::vector<telnetpp::byte> const expected_result = {
+    async_read();
+    channel_.receive(content);
+
+    static telnetpp::byte_storage const expected_result = {
         telnetpp::iac, telnetpp::wont, 0xAB
     };
 
-    std::string received_content;
-    std::vector<telnetpp::byte> received_result;
-    session.receive(
-        content,
-        [&received_content](telnetpp::bytes content, auto const &cont)
-        {
-            std::transform(
-                content.begin(),
-                content.end(),
-                std::back_inserter(received_content),
-                [](auto ch) { return static_cast<char>(ch); });
-        },
-        [&received_result](telnetpp::bytes data)
-        {
-            received_result.insert(
-                received_result.end(),
-                data.begin(),
-                data.end());
-        });
-
-    ASSERT_EQ(std::string{}, received_content);
-    ASSERT_EQ(expected_result, received_result);
+    ASSERT_EQ(expected_result, channel_.written_);
+    ASSERT_TRUE(received_content_.empty());
+    ASSERT_TRUE(complete_);
 }
 
-TEST(session_test, unrouted_dont_results_in_wont)
+TEST_F(a_session, sends_wont_for_unrouted_dont)
 {
-    telnetpp::session session;
-
-    telnetpp::byte const content[] = {
+    static telnetpp::byte_storage const content = {
         telnetpp::iac, telnetpp::dont, 0xAB
     };
 
-    telnetpp::byte_storage const expected_result = {
+    async_read();
+    channel_.receive(content);
+
+    static telnetpp::byte_storage const expected_result = {
         telnetpp::iac, telnetpp::wont, 0xAB
     };
 
-    telnetpp::byte_storage received_content;
-    telnetpp::byte_storage received_result;
-    session.receive(
-        content,
-        [&received_content](telnetpp::bytes content, auto const &cont)
-        {
-            received_content.insert(
-                received_content.end(),
-                content.begin(),
-                content.end());
-        },
-        [&received_result](telnetpp::bytes data)
-        {
-            received_result.insert(
-                received_result.end(),
-                data.begin(),
-                data.end());
-        });
-
-    ASSERT_EQ(telnetpp::byte_storage{}, received_content);
-    ASSERT_EQ(expected_result, received_result);
+    ASSERT_EQ(expected_result, channel_.written_);
+    ASSERT_TRUE(received_content_.empty());
+    ASSERT_TRUE(complete_);
 }
 
-TEST(session_test, commands_can_be_sent_separately)
+TEST_F(a_session, can_send_commands)
 {
-    telnetpp::session session;
+    session_.write(telnetpp::command(telnetpp::ayt));
 
-    std::vector<telnetpp::byte> const expected_result = {
+    telnetpp::byte_storage const expected_result = {
         telnetpp::iac, telnetpp::ayt
     };
 
-    std::vector<telnetpp::byte> received_result;
-    session.send(
-        telnetpp::command(telnetpp::ayt),
-        [&received_result](telnetpp::bytes data)
-        {
-            received_result.insert(
-                received_result.end(),
-                data.begin(),
-                data.end());
-        });
-
-    ASSERT_EQ(expected_result, received_result);
+    ASSERT_EQ(expected_result, channel_.written_);
 }
 
-TEST(session_test, non_telnet_data_can_be_sent_separately)
+TEST_F(a_session, can_send_plain_text)
 {
-    telnetpp::session session;
-
-    std::vector<telnetpp::byte> const expected_result = {
-        'T', 'E', 'S', 'T', 0xFF, 0xFF
-    };
-
-    static constexpr telnetpp::byte const content[] = {
+    static telnetpp::byte_storage const content = {
         'T', 'E', 'S', 'T', 0xFF
     };
 
-    std::vector<telnetpp::byte> received_result;
-    session.send(
-        content,
-        [&received_result](telnetpp::bytes data)
-        {
-            received_result.insert(
-                received_result.end(),
-                data.begin(),
-                data.end());
-        });
+    session_.write(content);
 
-    ASSERT_EQ(expected_result, received_result);
+    static telnetpp::byte_storage const expected_result = {
+        'T', 'E', 'S', 'T', 0xFF, 0xFF
+    };
+
+    ASSERT_EQ(expected_result, channel_.written_);
 }
 
-TEST(session_test, telnet_data_can_be_received_piecemeal)
+TEST_F(a_session, can_receive_data_piecemeal)
 {
-    telnetpp::session session;
-    fake_client_option client(0xD0);
-    fake_server_option server(0xD7);
+    static telnetpp::option_type const client_option = 0xD0;
+    static telnetpp::option_type const server_option = 0xD7;
 
-    telnetpp::byte_storage received_subnegotiation_content;
-    server.on_subnegotiation.connect(
-        [&](telnetpp::bytes content)
-        {
-            received_subnegotiation_content.insert(
-                received_subnegotiation_content.end(),
+    fake_client_option client{session_, client_option};
+    fake_server_option server{session_, server_option};
+
+    telnetpp::byte_storage client_subnegotiation_content;
+    client.on_subnegotiation.connect(
+        [&](telnetpp::bytes content) {
+            client_subnegotiation_content.append(
                 content.begin(),
                 content.end());
         });
-    
-    session.install(client);
-    session.install(server);
+
+    telnetpp::byte_storage server_subnegotiation_content;
+    server.on_subnegotiation.connect(
+        [&](telnetpp::bytes content) {
+            server_subnegotiation_content.append(
+                content.begin(),
+                content.end());
+        });
+
+    session_.install(client);
+    session_.install(server);
 
     static auto const content = 
         "HELLO"
@@ -556,40 +343,42 @@ TEST(session_test, telnet_data_can_be_received_piecemeal)
         "\xFF\xFD\xD7"
         "\xFF\xFA\xD7" "TEST" "\xFF\xF0"_tb;
 
-    telnetpp::byte_storage received_content;
-    telnetpp::byte_storage received_result;
-
-    for (auto ch : content)
+    for (auto const ch : content)
     {
-        telnetpp::bytes const byte_content { &ch, 1 };
-        session.receive(
-            byte_content,
-            [&received_content](telnetpp::bytes content, auto const &cont)
-            {
-                received_content.insert(
-                    received_content.end(),
-                    content.begin(),
-                    content.end());
-            },
-            [&received_result](telnetpp::bytes data)
-            {
-                received_result.insert(
-                    received_result.end(),
-                    data.begin(),
-                    data.end());
-            });
+        async_read();
+
+        telnetpp::bytes const byte_content{ &ch, 1 };
+        channel_.receive(byte_content);
+
+        ASSERT_TRUE(std::exchange(complete_, false));
     }
 
     static auto const expected_content = "HELLOWORLD" "\xFF"_tb;
     static auto const expected_result =
         "\xFF\xFD\xD0"
         "\xFF\xFB\xD7"_tb;
-    static auto const expected_subnegotiation_content = "TEST"_tb;
+    static auto const expected_server_subnegotiation_content = "TEST"_tb;
+    static auto const expected_client_subnegotiation_content = ""_tb;
 
-    ASSERT_EQ(expected_content, received_content);
-    ASSERT_EQ(expected_result, received_result);
-    ASSERT_EQ(expected_subnegotiation_content, received_subnegotiation_content);
+    ASSERT_EQ(expected_content, received_content_);
+    ASSERT_EQ(expected_result, channel_.written_);
+    ASSERT_EQ(expected_client_subnegotiation_content, client_subnegotiation_content);
+    ASSERT_EQ(expected_server_subnegotiation_content, server_subnegotiation_content);
 
     ASSERT_TRUE(client.active());
     ASSERT_TRUE(server.active());
+}
+
+TEST_F(a_session, is_alive_if_the_channel_is_alive)
+{
+    ASSERT_TRUE(session_.is_alive());
+    channel_.close();
+    ASSERT_FALSE(session_.is_alive());
+}
+
+TEST_F(a_session, closes_the_channel_when_closed)
+{
+    ASSERT_TRUE(session_.is_alive());
+    session_.close();
+    ASSERT_FALSE(session_.is_alive());
 }

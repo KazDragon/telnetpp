@@ -18,9 +18,7 @@ class command_router
   : public router<
         command_type,
         command,
-        void (
-            command const &,
-            std::function<void (telnetpp::element const &)>),
+        void (command),
         detail::command_router_key_from_message_policy
     >
 {

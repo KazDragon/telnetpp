@@ -1,6 +1,7 @@
 #include <telnetpp/options/mccp/server.hpp>
 #include <telnetpp/options/mccp/codec.hpp>
 #include <telnetpp/detail/overloaded.hpp>
+#include "telnet_option_fixture.hpp"
 #include <gtest/gtest.h>
 
 using namespace telnetpp::literals;
@@ -51,7 +52,7 @@ private:
     }
 };
 
-class an_mccp_server : public testing::Test
+class an_mccp_server : public a_telnet_option_base
 {
 protected:
     void send_data(telnetpp::bytes data)
@@ -60,19 +61,14 @@ protected:
             data,
             [this](telnetpp::bytes compressed_data, bool compression_end)
             {
-                sent_data_.insert(
-                    sent_data_.end(),
-                    compressed_data.begin(),
-                    compressed_data.end());
-                    
+                session_.write(compressed_data);
                 compression_ended_ = compression_end;
             });
     }
 
     fake_compressor compressor_;
-    telnetpp::options::mccp::server server_{compressor_};
+    telnetpp::options::mccp::server server_{session_, compressor_};
     
-    std::vector<telnetpp::byte> sent_data_;
     bool compression_ended_ = false;
 };
 
@@ -83,68 +79,18 @@ TEST_F(an_mccp_server, reports_mccp_option_code)
     ASSERT_EQ(86, server_.option_code());
 }
 
-TEST_F(an_mccp_server, sends_nothing_when_beginning_compression)
-{
-    auto received_data = std::vector<telnetpp::element>{};
-    server_.start_compression(
-        [&](auto const &elem)
-        {
-            received_data.push_back(elem);
-        });
-
-    auto const expected_data = std::vector<telnetpp::element>{};
-    ASSERT_EQ(expected_data, received_data);
-}
-
-TEST_F(an_mccp_server, sends_nothing_when_finishing_compression)
-{
-    auto received_data = std::vector<telnetpp::element>{};
-    server_.finish_compression(
-        [&](auto const &elem)
-        {
-            received_data.push_back(elem);
-        });
-
-    auto const expected_data = std::vector<telnetpp::element>{};
-    ASSERT_EQ(expected_data, received_data);
-}
-
-TEST_F(an_mccp_server, sends_nothing_when_being_activated_locally)
-{
-    // In particular, we mean when the confirmation of our locally initiated
-    // negotiation returns.
-    auto received_data = std::vector<telnetpp::element>{};
-    server_.activate([](auto &&){});
-    server_.negotiate(
-        telnetpp::do_, 
-        [&](auto const &elem)
-        {
-            received_data.push_back(elem);
-        });
-    assert(server_.active());
-        
-    auto const expected_data = std::vector<telnetpp::element>{};
-    ASSERT_EQ(expected_data, received_data);
-}
-
 TEST_F(an_mccp_server, sends_nothing_when_being_activated_remotely)
 {
     // In particular, we mean apart from our confirmation of the
     // negotiation.
-    auto received_data = std::vector<telnetpp::element>{};
-    server_.negotiate(
-        telnetpp::do_, 
-        [&](auto const &elem)
-        {
-            received_data.push_back(elem);
-        });
+    server_.negotiate(telnetpp::do_);
     assert(server_.active());
     
-    auto const expected_data = std::vector<telnetpp::element>{
-        telnetpp::element{telnetpp::negotiation{telnetpp::will, 86}}
+    telnetpp::byte_storage const expected_data = {
+        telnetpp::iac, telnetpp::will, server_.option_code()
     };
     
-    ASSERT_EQ(expected_data, received_data);
+    ASSERT_EQ(expected_data, channel_.written_);
 }
 
 namespace {
@@ -154,10 +100,9 @@ class an_active_mccp_server : public an_mccp_server
 protected:
     an_active_mccp_server()
     {
-        server_.negotiate(
-            telnetpp::do_, 
-            [&](auto const &elem){});
+        server_.negotiate(telnetpp::do_);
         assert(server_.active());
+        channel_.written_.clear();
     }
 };
 
@@ -165,48 +110,37 @@ protected:
 
 TEST_F(an_active_mccp_server, sends_empty_subnegotiation_when_beginning_compression)
 {
-    auto const expected = std::vector<telnetpp::element> {
-        telnetpp::subnegotiation{server_.option_code(), {}}
+    server_.start_compression();
+        
+    telnetpp::byte_storage const expected = {
+        telnetpp::iac, telnetpp::sb, server_.option_code(),
+        telnetpp::iac, telnetpp::se
     };
     
-    auto received = std::vector<telnetpp::element>{};
-    server_.start_compression(
-        [&](auto const &element)
-        {
-            received.push_back(element);
-        });
-        
-    ASSERT_EQ(expected, received);
+    ASSERT_EQ(expected, channel_.written_);
 }
+
 
 TEST_F(an_active_mccp_server, sends_nothing_when_finishing_compression)
 {
-    auto const expected_data = std::vector<telnetpp::byte>{};
-    
-    server_.finish_compression(
-        [&](auto const &elements)
-        {
-            auto const &data = std::get<telnetpp::bytes>(elements);
-            sent_data_.insert(
-                sent_data_.end(),
-                data.begin(),
-                data.end());
-        });
+    server_.finish_compression();
         
-    ASSERT_EQ(expected_data, sent_data_);
+    telnetpp::byte_storage const expected = {};
+    ASSERT_EQ(expected, channel_.written_);
 }
 
 TEST_F(an_active_mccp_server, sends_data_uncompressed)
 {
-    auto const test_data = "test_data"_tb;
+    telnetpp::byte_storage const test_data = "test_data"_tb;
     send_data(test_data);
 
-    auto const expected_data = std::vector<telnetpp::byte>{
+    telnetpp::byte_storage const expected_data = {
         test_data.begin(), test_data.end()
     };
 
-    ASSERT_EQ(expected_data, sent_data_);
+    ASSERT_EQ(expected_data, channel_.written_);
 }
+
 
 namespace {
 
@@ -216,7 +150,8 @@ class an_mccp_server_activated_with_compression_started
 protected:
     an_mccp_server_activated_with_compression_started()
     {
-        server_.start_compression([&](auto const &elem){});
+        server_.start_compression();
+        channel_.written_.clear();
     }
 };
 
@@ -224,16 +159,16 @@ protected:
 
 TEST_F(an_mccp_server_activated_with_compression_started, sends_compressed_data)
 {
-    auto const test_data = "test_data"_tb;
+    telnetpp::byte_storage const test_data = "test_data"_tb;
     send_data(test_data);
     
-    std::vector<telnetpp::byte> const expected_data = [&]()
+    telnetpp::byte_storage const expected_data = [&]()
     {
-        std::vector<telnetpp::byte> data;
+        telnetpp::byte_storage data;
         
         compress_decompress(
             test_data,
-            [&](auto const &bytes)
+            [&](telnetpp::bytes bytes)
             {
                 data.insert(data.end(), bytes.begin(), bytes.end());
             });
@@ -241,128 +176,30 @@ TEST_F(an_mccp_server_activated_with_compression_started, sends_compressed_data)
         return data;
     }();
     
-    ASSERT_EQ(expected_data, sent_data_);
+    ASSERT_EQ(expected_data, channel_.written_);
 }
 
 
-namespace {
-
-class an_active_mccp_server_with_compression_started 
-  : public an_active_mccp_server
+TEST_F(an_mccp_server_activated_with_compression_started, sends_compression_end_compressed_when_compression_is_ended)
 {
-protected:
-    an_active_mccp_server_with_compression_started()
-    {
-        server_.start_compression([](auto &&){});
-    }
-};
+    server_.finish_compression();
 
-}
-
-TEST_F(an_active_mccp_server_with_compression_started, sends_data_compressed)
-{
-    auto const test_data = "test_data"_tb;
-    send_data(test_data);
-
-    auto const expected_data = [&]()
-    {
-        std::vector<telnetpp::byte> compressed_data;
-        compress_decompress(
-            test_data,
-            [&](auto const &bytes)
-            {
-                compressed_data.insert(
-                    compressed_data.end(),
-                    bytes.begin(),
-                    bytes.end());
-            });
-
-        return compressed_data;
-    }();
-
-    ASSERT_EQ(expected_data, sent_data_);
-}
-
-TEST_F(an_active_mccp_server_with_compression_started, sends_compression_end_compressed_when_compression_is_ended)
-{
-    server_.finish_compression(
-        [this](telnetpp::element const &element)
-        {
-            send_data(std::get<telnetpp::bytes>(element));
-        });
-
-    auto const end_data = "end"_tb;
-    std::vector<telnetpp::byte> const expected_data = [&]()
-    {
-        std::vector<telnetpp::byte> data;
-        
-        compress_decompress(
-            end_data,
-            [&](auto const &bytes)
-            {
-                data.insert(data.end(), bytes.begin(), bytes.end());
-            });
-            
-        return data;
-    }();
+    telnetpp::byte_storage const expected_data = "end"_tb;
     
-    ASSERT_EQ(expected_data, sent_data_);
+    ASSERT_EQ(expected_data, channel_.written_);
     ASSERT_TRUE(compressor_.finished_);
 }
 
-TEST_F(an_active_mccp_server_with_compression_started, sends_compression_end_compressed_and_negotiation_uncompressed)
+TEST_F(an_mccp_server_activated_with_compression_started, sends_compression_end_compressed_and_negotiation_uncompressed)
 {
-    server_.negotiate(
-        telnetpp::dont,
-        [this](telnetpp::element const &element)
-        {
-            std::visit(telnetpp::detail::overloaded{
-                [this](telnetpp::bytes data)
-                {
-                    send_data(data);
-                },
-                [this](telnetpp::negotiation neg)
-                {
-                    telnetpp::byte const output[] = {
-                        telnetpp::iac,
-                        neg.request(),
-                        neg.option_code()
-                    };
-                    
-                    send_data(output);
-                },
-                [](auto &&)
-                {
-                    FAIL();
-                }},
-                element);
-        });
-        
-    std::vector<telnetpp::byte> const expected_data = [&]()
-    {
-        std::vector<telnetpp::byte> data;
-        
-        auto const end_data = "end"_tb;
-        compress_decompress(
-            end_data,
-            [&](auto const &bytes)
-            {
-                data.insert(data.end(), bytes.begin(), bytes.end());
-            });
-            
-        telnetpp::byte const neg_data[] = {
-            telnetpp::iac,
-            telnetpp::wont,
-            server_.option_code()
-        };
-        
-        using std::begin;
-        using std::end;
-        
-        data.insert(data.end(), begin(neg_data), end(neg_data));
-        return data;
-    }();
+    server_.negotiate(telnetpp::dont);
     
-    ASSERT_EQ(expected_data, sent_data_);
+    telnetpp::byte_storage const expected_data = {
+        'e', 'n', 'd',
+        telnetpp::iac, telnetpp::wont, server_.option_code()
+    };
+
+    ASSERT_EQ(expected_data, channel_.written_);
     ASSERT_TRUE(compressor_.finished_);
 }
+

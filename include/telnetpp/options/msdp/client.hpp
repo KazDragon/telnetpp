@@ -15,45 +15,26 @@ public:
     //* =====================================================================
     /// \brief Constructor
     //* =====================================================================
-    client();
+    explicit client(telnetpp::session& sess) noexcept;
 
     //* =====================================================================
     /// \brief Send a variables to the remote server.
     //* =====================================================================
-    template <typename Continuation>
-    void send(variable const &var, Continuation &&cont)
-    {
-        detail::encode(
-            var,
-            [&](telnetpp::bytes data)
-            {
-                auto const elem = telnetpp::element{telnetpp::subnegotiation{
-                    option_code(),
-                    data
-                }};
-                
-                telnetpp::elements elems = { &elem, 1 };
-                cont(elems);
-            });
-    }
+    void send(variable const &var);
 
     //* =====================================================================
     /// \fn on_receive
     /// \brief Register for a signal whenever a list of variables is received
     /// from the remote server.
     //* =====================================================================
-    boost::signals2::signal<
-        void (variable const &, continuation const &)
-    > on_receive;
+    boost::signals2::signal<void (variable const &)> on_receive;
 
 private:
     //* =====================================================================
     /// \brief Called when a subnegotiation is received while the option is
     /// active.  Override for option-specific functionality.
     //* =====================================================================
-    void handle_subnegotiation(
-        telnetpp::bytes data,
-        continuation const &cont) override;
+    void handle_subnegotiation(telnetpp::bytes data) override;
 };
 
 }}}

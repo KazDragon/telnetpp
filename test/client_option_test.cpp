@@ -1,501 +1,312 @@
 #include "telnetpp/client_option.hpp"
+#include "fakes/fake_channel.hpp"
+#include "fakes/fake_client_option.hpp"
 #include <gtest/gtest.h>
 
 using namespace telnetpp::literals;
 
+TEST(client_option_test, code_returns_option_code)
+{
+    fake_channel channel;
+    telnetpp::session session{channel};
+
+    fake_client_option client{session, 21};
+    ASSERT_EQ(telnetpp::option_type{21}, client.option_code());
+}
+
 namespace {
 
-class fake_client_option : public telnetpp::client_option
+class a_client_option : public testing::Test
 {
-public:
-    explicit fake_client_option(telnetpp::option_type option)
-      : telnetpp::client_option(option)
+protected:
+    a_client_option()
     {
+        client_.on_state_changed.connect(
+            [this]() { 
+                state_changed_ = true; 
+            });
+
+        client_.on_subnegotiation.connect(
+            [this](telnetpp::bytes data) {
+                subnegotiation_content_.append(
+                    data.begin(),
+                    data.end());
+            });
     }
 
-    boost::signals2::signal<
-        void (telnetpp::bytes data)
-    > on_subnegotiation;
+    static constexpr telnetpp::option_type option_ = 0xA5;
 
-private:
-    void handle_subnegotiation(
-        telnetpp::bytes data,
-        std::function<void (telnetpp::element const &)> const &cont) override
+    fake_channel channel_;
+    telnetpp::session session_{channel_};
+    fake_client_option client_{session_, option_};
+    telnetpp::byte_storage subnegotiation_content_;
+
+    bool state_changed_{false};
+};
+
+}
+
+TEST_F(a_client_option, is_deactivated_by_default)
+{
+    ASSERT_FALSE(client_.active());
+}
+
+namespace {
+
+class a_deactivated_client_option : public a_client_option
+{
+};
+
+}
+
+TEST_F(a_deactivated_client_option, on_will_responds_with_do_and_is_active)
+{
+    client_.negotiate(telnetpp::will);
+
+    telnetpp::byte_storage const expected_written = {
+        telnetpp::iac, telnetpp::do_, option_
+    };
+
+    ASSERT_EQ(expected_written, channel_.written_);
+    ASSERT_TRUE(state_changed_);
+    ASSERT_TRUE(client_.active());
+}
+
+TEST_F(a_deactivated_client_option, on_wont_responds_with_dont_and_is_not_active)
+{
+    client_.negotiate(telnetpp::wont);
+
+    telnetpp::byte_storage const expected_written = {
+        telnetpp::iac, telnetpp::dont, option_
+    };
+
+    ASSERT_EQ(expected_written, channel_.written_);
+    ASSERT_FALSE(state_changed_);
+    ASSERT_FALSE(client_.active());
+}
+
+TEST_F(a_deactivated_client_option, on_activation_sends_do)
+{
+    client_.activate();
+
+    telnetpp::byte_storage const expected_written = {
+        telnetpp::iac, telnetpp::do_, option_
+    };
+
+    ASSERT_EQ(expected_written, channel_.written_);
+    ASSERT_FALSE(state_changed_);
+    ASSERT_FALSE(client_.active());
+}
+
+TEST_F(a_deactivated_client_option, on_deactivate_sends_nothing)
+{
+    client_.deactivate();
+
+    telnetpp::byte_storage const expected_written = {};
+
+    ASSERT_EQ(expected_written, channel_.written_);
+    ASSERT_TRUE(state_changed_);
+    ASSERT_FALSE(client_.active());
+}
+
+TEST_F(a_deactivated_client_option, ignores_subnegotiations)
+{
+    client_.subnegotiate(telnetpp::byte_storage{ 0x01, 0x02 });
+    
+    telnetpp::byte_storage const expected_subnegotiation_content = {};
+    ASSERT_EQ(expected_subnegotiation_content, subnegotiation_content_);
+}
+
+namespace {
+
+class an_activating_client_option : public a_client_option
+{
+protected:
+    an_activating_client_option()
     {
-        on_subnegotiation(data);
+        client_.activate();
+        channel_.written_.clear();
     }
 };
 
 }
 
-TEST(client_option_test, code_returns_option_code)
+TEST_F(an_activating_client_option, on_will_is_active)
 {
-    fake_client_option client{21};
-    ASSERT_EQ(telnetpp::option_type{21}, client.option_code());
+    client_.negotiate(telnetpp::will);
+
+    telnetpp::byte_storage const expected_written = {};
+    ASSERT_EQ(expected_written, channel_.written_);
+    ASSERT_TRUE(state_changed_);
+    ASSERT_TRUE(client_.active());
 }
 
-TEST(client_option_test, deactivated_negotiate_will_sends_do_with_signal)
+TEST_F(an_activating_client_option, on_wont_is_inactive)
 {
-    fake_client_option client(0xA5);
+    client_.negotiate(telnetpp::wont);
 
-    bool state_changed = false;
-    client.on_state_changed.connect(
-        [&state_changed](auto &&)
-        { 
-            state_changed = true; 
-        });
+    telnetpp::byte_storage const expected_written = {};
+    ASSERT_EQ(expected_written, channel_.written_);
+    ASSERT_TRUE(state_changed_);
+    ASSERT_FALSE(client_.active());
+}
 
-    std::vector<telnetpp::element> const expected_elements = {
-        telnetpp::element{telnetpp::negotiation{telnetpp::do_, 0xA5}}
+TEST_F(an_activating_client_option, on_activate_sends_nothing)
+{
+    client_.activate();
+
+    telnetpp::byte_storage const expected_written = {};
+    ASSERT_EQ(expected_written, channel_.written_);
+    ASSERT_FALSE(state_changed_);
+    ASSERT_FALSE(client_.active());
+}
+
+TEST_F(an_activating_client_option, ignores_subnegotiations)
+{
+    client_.subnegotiate(telnetpp::byte_storage{ 0x01, 0x02 });
+    
+    telnetpp::byte_storage const expected_subnegotiation_content = {};
+    ASSERT_EQ(expected_subnegotiation_content, subnegotiation_content_);
+}
+
+namespace {
+
+class an_active_client_option : public a_client_option
+{
+protected:
+    an_active_client_option()
+    {
+        client_.negotiate(telnetpp::will);
+        assert(client_.active());
+
+        channel_.written_.clear();
+        state_changed_ = false;
+    }
+};
+
+}
+
+TEST_F(an_active_client_option, on_will_sends_do)
+{
+    client_.negotiate(telnetpp::will);
+    
+    telnetpp::byte_storage const expected_written = {
+        telnetpp::iac, telnetpp::do_, option_
     };
 
-    std::vector<telnetpp::element> received_elements;
-    client.negotiate(
-        telnetpp::will, 
-        [&received_elements](telnetpp::element const &elem)
-        {
-            received_elements.push_back(elem);
-        });
-
-    ASSERT_TRUE(state_changed);
-    ASSERT_TRUE(client.active());
-    ASSERT_EQ(expected_elements, received_elements);
+    ASSERT_EQ(expected_written, channel_.written_);
+    ASSERT_FALSE(state_changed_);
+    ASSERT_TRUE(client_.active());
 }
 
-TEST(client_option_test, deactivated_negotiate_wont_sends_dont_no_signal)
+TEST_F(an_active_client_option, on_wont_sends_dont_is_inactive)
 {
-    fake_client_option client(0xA5);
-
-    bool state_changed = false;
-    client.on_state_changed.connect(
-        [&state_changed](auto &&)
-        { 
-            state_changed = true; 
-        });
-
-    std::vector<telnetpp::element> const expected_elements = {
-        telnetpp::negotiation{telnetpp::dont, 0xA5}
+    client_.negotiate(telnetpp::wont);
+    
+    telnetpp::byte_storage const expected_written = {
+        telnetpp::iac, telnetpp::dont, option_
     };
 
-    std::vector<telnetpp::element> received_elements;
-    client.negotiate(
-        telnetpp::wont, 
-        [&received_elements](telnetpp::element const &elem)
-        {
-            received_elements.push_back(elem);
-        });
-
-    ASSERT_FALSE(state_changed);
-    ASSERT_FALSE(client.active());
-    ASSERT_EQ(expected_elements, received_elements);
+    ASSERT_EQ(expected_written, channel_.written_);
+    ASSERT_TRUE(state_changed_);
+    ASSERT_FALSE(client_.active());
 }
 
-TEST(client_option_test, deactivated_activate_sends_do_no_signal)
+TEST_F(an_active_client_option, on_activate_sends_nothing)
 {
-    fake_client_option client(0xA5);
+    client_.activate();
+    
+    telnetpp::byte_storage const expected_written = {};
 
-    bool state_changed = false;
-    client.on_state_changed.connect(
-        [&state_changed](auto &&)
-        { 
-            state_changed = true; 
-        });
+    ASSERT_EQ(expected_written, channel_.written_);
+    ASSERT_TRUE(state_changed_);
+    ASSERT_TRUE(client_.active());
+}
 
-    std::vector<telnetpp::element> const expected_elements = {
-        telnetpp::negotiation{telnetpp::do_, 0xA5}
+TEST_F(an_active_client_option, on_deactivate_sends_dont_is_inactive)
+{
+    client_.deactivate();
+    
+    telnetpp::byte_storage const expected_written = {
+        telnetpp::iac, telnetpp::dont, option_
     };
 
-    std::vector<telnetpp::element> received_elements;
-    client.activate(
-        [&received_elements](telnetpp::element const &elem)
-        {
-            received_elements.push_back(elem);
-        });
-
-    ASSERT_FALSE(state_changed);
-    ASSERT_FALSE(client.active());
-    ASSERT_EQ(expected_elements, received_elements);
+    ASSERT_EQ(expected_written, channel_.written_);
+    ASSERT_FALSE(state_changed_);
+    ASSERT_FALSE(client_.active());
 }
 
-TEST(client_option_test, deactivated_deactivate_sends_nothing_with_signal)
+TEST_F(an_active_client_option, handles_subnegotiations)
 {
-    fake_client_option client(0xA5);
-
-    bool state_changed = false;
-    client.on_state_changed.connect(
-        [&state_changed](auto &&)
-        { 
-            state_changed = true; 
-        });
-
-    std::vector<telnetpp::element> const expected_elements = {
+    client_.subnegotiate(telnetpp::byte_storage{ 0x01, 0x02 });
+    
+    telnetpp::byte_storage const expected_subnegotiation_content = {
+        0x01, 0x02
     };
-
-    std::vector<telnetpp::element> received_elements;
-    client.deactivate(
-        [&received_elements](telnetpp::element const &elem)
-        {
-            received_elements.push_back(elem);
-        });
-
-    ASSERT_TRUE(state_changed);
-    ASSERT_FALSE(client.active());
-    ASSERT_EQ(expected_elements, received_elements);
+    ASSERT_EQ(expected_subnegotiation_content, subnegotiation_content_);
 }
 
-TEST(client_option_test, activating_negotiate_will_sends_nothing_is_active_with_signal)
+namespace {
+
+class a_deactivating_client_option : public a_client_option
 {
-    fake_client_option client(0xA5);
-    client.activate([](auto &&){});
+protected:
+    a_deactivating_client_option()
+    {
+        client_.negotiate(telnetpp::will);
+        assert(client_.active());
+        client_.deactivate();
+        assert(!client_.active());
 
-    bool state_changed = false;
-    client.on_state_changed.connect(
-        [&state_changed](auto &&)
-        { 
-            state_changed = true; 
-        });
+        channel_.written_.clear();
+        state_changed_ = false;
+    }
+};
 
-    std::vector<telnetpp::element> const expected_elements = {
-    };
-
-    std::vector<telnetpp::element> received_elements;
-    client.negotiate(
-        telnetpp::will,
-        [&received_elements](telnetpp::element const &elem)
-        {
-            received_elements.push_back(elem);
-        });
-
-    ASSERT_TRUE(state_changed);
-    ASSERT_TRUE(client.active());
-    ASSERT_EQ(expected_elements, received_elements);
 }
 
-TEST(client_option_test, activating_negotiate_wont_sends_nothing_is_inactive_with_signal)
-{
-    fake_client_option client(0xA5);
-    client.activate([](auto &&){});
-
-    bool state_changed = false;
-    client.on_state_changed.connect(
-        [&state_changed](auto &&)
-        { 
-            state_changed = true; 
-        });
-
-    std::vector<telnetpp::element> const expected_elements = {
-    };
-
-    std::vector<telnetpp::element> received_elements;
-    client.negotiate(
-        telnetpp::wont,
-        [&received_elements](telnetpp::element const &elem)
-        {
-            received_elements.push_back(elem);
-        });
-
-    ASSERT_TRUE(state_changed);
-    ASSERT_FALSE(client.active());
-    ASSERT_EQ(expected_elements, received_elements);
-}
-
-TEST(client_option_test, activating_activate_sends_nothing_no_signal)
-{
-    fake_client_option client(0xA5);
-    client.activate([](auto &&){});
-
-    bool state_changed = false;
-    client.on_state_changed.connect(
-        [&state_changed](auto &&)
-        { 
-            state_changed = true; 
-        });
-
-    std::vector<telnetpp::element> const expected_elements = {
-    };
-
-    std::vector<telnetpp::element> received_elements;
-    client.activate(
-        [&received_elements](telnetpp::element const &elem)
-        {
-            received_elements.push_back(elem);
-        });
-
-    ASSERT_FALSE(state_changed);
-    ASSERT_FALSE(client.active());
-    ASSERT_EQ(expected_elements, received_elements);
-}
-
-TEST(client_option_test, activated_negotiate_will_sends_do_is_active_no_signal)
-{
-    fake_client_option client(0xA5);
-    client.activate([](auto &&){});
-    client.negotiate(telnetpp::will, [](auto &&){});
-
-    bool state_changed = false;
-    client.on_state_changed.connect(
-        [&state_changed](auto &&)
-        { 
-            state_changed = true; 
-        });
-
-    std::vector<telnetpp::element> const expected_elements = {
-        telnetpp::negotiation{telnetpp::do_, 0xA5}
-    };
-
-    std::vector<telnetpp::element> received_elements;
-    client.negotiate(
-        telnetpp::will,
-        [&received_elements](telnetpp::element const &elem)
-        {
-            received_elements.push_back(elem);
-        });
-
-    ASSERT_FALSE(state_changed);
-    ASSERT_TRUE(client.active());
-    ASSERT_EQ(expected_elements, received_elements);
-}
-
-TEST(client_option_test, activated_negotiate_wont_sends_dont_is_inactive_with_signal)
-{
-    fake_client_option client(0xA5);
-    client.activate([](auto &&){});
-    client.negotiate(telnetpp::will, [](auto &&){});
-
-    bool state_changed = false;
-    client.on_state_changed.connect(
-        [&state_changed](auto &&)
-        { 
-            state_changed = true; 
-        });
-
-    std::vector<telnetpp::element> const expected_elements = {
-        telnetpp::negotiation{telnetpp::dont, 0xA5}
-    };
-
-    std::vector<telnetpp::element> received_elements;
-    client.negotiate(
-        telnetpp::wont,
-        [&received_elements](telnetpp::element const &elem)
-        {
-            received_elements.push_back(elem);
-        });
-
-    ASSERT_TRUE(state_changed);
-    ASSERT_FALSE(client.active());
-    ASSERT_EQ(expected_elements, received_elements);
-}
-
-TEST(client_option_test, activated_activate_sends_nothing_is_active_with_signal)
-{
-    fake_client_option client(0xA5);
-    client.activate([](auto &&){});
-    client.negotiate(telnetpp::will, [](auto &&){});
-
-    bool state_changed = false;
-    client.on_state_changed.connect(
-        [&state_changed](auto &&)
-        { 
-            state_changed = true; 
-        });
-
-    std::vector<telnetpp::element> const expected_elements = {
-    };
-
-    std::vector<telnetpp::element> received_elements;
-    client.activate(
-        [&received_elements](telnetpp::element const &elem)
-        {
-            received_elements.push_back(elem);
-        });
-
-    ASSERT_TRUE(state_changed);
-    ASSERT_TRUE(client.active());
-    ASSERT_EQ(expected_elements, received_elements);
-}
-
-TEST(client_option_test, activated_deactivate_sends_dont_is_inactive_no_signal)
-{
-    fake_client_option client(0xA5);
-    client.activate([](auto &&){});
-    client.negotiate(telnetpp::will, [](auto &&){});
-
-    bool state_changed = false;
-    client.on_state_changed.connect(
-        [&state_changed](auto &&)
-        { 
-            state_changed = true; 
-        });
-
-    std::vector<telnetpp::element> const expected_elements = {
-        telnetpp::negotiation{telnetpp::dont, 0xA5}
-    };
-
-    std::vector<telnetpp::element> received_elements;
-    client.deactivate(
-        [&received_elements](telnetpp::element const &elem)
-        {
-            received_elements.push_back(elem);
-        });
-
-    ASSERT_FALSE(state_changed);
-    ASSERT_FALSE(client.active());
-    ASSERT_EQ(expected_elements, received_elements);
-}
-
-TEST(client_option_test, deactivating_negotiate_will_sends_nothing_is_active_with_signal)
+TEST_F(a_deactivating_client_option, on_will_sends_nothing_is_active)
 {
     // Note: this transition is explicitly disallowed in the protocol 
     // specification.  However, it is included here to specify what our
     // behaviour is in the case that the remote is not acting according to 
     // spec.  The implementation currently chooses to be lenient and allow the
     // remote to cancel an option's deactivation.
-    fake_client_option client(0xA5);
-    client.activate([](auto &&){});
-    client.negotiate(telnetpp::will, [](auto &&){});
-    client.deactivate([](auto &&){});
+    client_.negotiate(telnetpp::will);
+    
+    telnetpp::byte_storage const expected_written = {};
 
-    bool state_changed = false;
-    client.on_state_changed.connect(
-        [&state_changed](auto &&)
-        { 
-            state_changed = true; 
-        });
-
-    std::vector<telnetpp::element> const expected_elements = {
-    };
-
-    std::vector<telnetpp::element> received_elements;
-    client.negotiate(
-        telnetpp::will,
-        [&received_elements](telnetpp::element const &elem)
-        {
-            received_elements.push_back(elem);
-        });
-
-    ASSERT_TRUE(state_changed);
-    ASSERT_TRUE(client.active());
-    ASSERT_EQ(expected_elements, received_elements);
+    ASSERT_EQ(expected_written, channel_.written_);
+    ASSERT_TRUE(state_changed_);
+    ASSERT_TRUE(client_.active());
 }
 
-TEST(client_option_test, deactivating_negotiate_wont_sends_nothing_is_inactive_with_signal)
+TEST_F(a_deactivating_client_option, on_wont_is_inactive)
 {
-    fake_client_option client(0xA5);
-    client.activate([](auto &&){});
-    client.negotiate(telnetpp::will, [](auto &&){});
-    client.deactivate([](auto &&){});
+    client_.negotiate(telnetpp::wont);
 
-    bool state_changed = false;
-    client.on_state_changed.connect(
-        [&state_changed](auto &&)
-        { 
-            state_changed = true; 
-        });
+    telnetpp::byte_storage const expected_written = {};
 
-    std::vector<telnetpp::element> const expected_elements = {
-    };
-
-    std::vector<telnetpp::element> received_elements;
-    client.negotiate(
-        telnetpp::wont,
-        [&received_elements](telnetpp::element const &elem)
-        {
-            received_elements.push_back(elem);
-        });
-
-    ASSERT_TRUE(state_changed);
-    ASSERT_FALSE(client.active());
-    ASSERT_EQ(expected_elements, received_elements);
+    ASSERT_EQ(expected_written, channel_.written_);
+    ASSERT_TRUE(state_changed_);
+    ASSERT_FALSE(client_.active());
 }
 
-TEST(client_option_test, deactivating_deactivate_sends_nothing_is_inactive_no_signal)
+TEST_F(a_deactivating_client_option, on_deactivate_sends_nothing)
 {
-    fake_client_option client(0xA5);
-    client.activate([](auto &&){});
-    client.negotiate(telnetpp::will, [](auto &&){});
-    client.deactivate([](auto &&){});
+    client_.deactivate();
 
-    bool state_changed = false;
-    client.on_state_changed.connect(
-        [&state_changed](auto &&)
-        { 
-            state_changed = true; 
-        });
+    telnetpp::byte_storage const expected_written = {};
 
-    std::vector<telnetpp::element> const expected_elements = {
-    };
-
-    std::vector<telnetpp::element> received_elements;
-    client.deactivate(
-        [&received_elements](telnetpp::element const &elem)
-        {
-            received_elements.push_back(elem);
-        });
-
-    ASSERT_FALSE(state_changed);
-    ASSERT_FALSE(client.active());
-    ASSERT_EQ(expected_elements, received_elements);
+    ASSERT_EQ(expected_written, channel_.written_);
+    ASSERT_FALSE(state_changed_);
+    ASSERT_FALSE(client_.active());
 }
 
-TEST(client_option_test, inactive_subnegotiation_is_ignored)
+TEST_F(a_deactivating_client_option, ignores_subnegotiations)
 {
-    fake_client_option client(0xA5);
-
-    bool subnegotiation_called = false;
-    client.on_subnegotiation.connect(
-        [&subnegotiation_called](auto &&)
-        { 
-            subnegotiation_called = true; 
-        });
-
-    static auto const content = "\x01\x02\x03"_tb;
-
-    std::vector<telnetpp::element> const expected_elements = {
-    };
-
-    std::vector<telnetpp::element> received_elements;
-    client.subnegotiate(
-        content,
-        [&received_elements](telnetpp::element const &elem)
-        {
-            received_elements.push_back(elem);
-        });
-
-    ASSERT_FALSE(subnegotiation_called);
-    ASSERT_EQ(expected_elements, received_elements);
-}
-
-TEST(client_option_test, active_subnegotiation_is_handled)
-{
-    fake_client_option client(0xA5);
-    client.activate([](auto &&){});
-    client.negotiate(telnetpp::will, [](auto &&){});
-
-    bool subnegotiation_called = false;
-    telnetpp::byte_storage received_content;
-    client.on_subnegotiation.connect(
-        [&subnegotiation_called, &received_content](auto &&content)
-        { 
-            subnegotiation_called = true; 
-            received_content.append(content.begin(), content.end());
-        });
-
-    static auto const content = "\x01\x02\x03"_tb;
-
-    std::vector<telnetpp::element> const expected_elements = {
-    };
-
-    static auto const expected_content = "\x01\x02\x03"_tb;
-
-    std::vector<telnetpp::element> received_elements;
-    client.subnegotiate(
-        content,
-        [&received_elements](telnetpp::element const &elem)
-        {
-            received_elements.push_back(elem);
-        });
-
-    ASSERT_TRUE(subnegotiation_called);
-    ASSERT_EQ(expected_elements, received_elements);
-    ASSERT_EQ(expected_content, received_content);
+    client_.subnegotiate(telnetpp::byte_storage{ 0x01, 0x02 });
+    
+    telnetpp::byte_storage const expected_subnegotiation_content = {};
+    ASSERT_EQ(expected_subnegotiation_content, subnegotiation_content_);
 }

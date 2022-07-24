@@ -251,7 +251,7 @@ target_compile_options(telnetpp
         $<$<CXX_COMPILER_ID:MSVC>:/WX>
 
         # Add warnings on g++ and Clang
-        $<$<OR:$<CXX_COMPILER_ID:GNU>,$<CXX_COMPILER_ID:Clang>>:-Wall -Wextra -Wshadow -Wnon-virtual-dtor -Wpedantic -Wsign-conversion -Werror>
+        $<$<OR:$<CXX_COMPILER_ID:GNU>,$<CXX_COMPILER_ID:Clang>>:-Wall -Wextra -Wshadow -Wnon-virtual-dtor -Wpedantic -Wsign-conversion -Werror -Wno-unused-parameter>
 )
 
 # The required C++ Standard for Telnet++ is C++17.
@@ -343,6 +343,12 @@ add_executable(telnetpp_tester)
 
 target_sources(telnetpp_tester
     PRIVATE
+        test/fakes/fake_channel.hpp
+        test/fakes/fake_client_option.hpp
+        test/fakes/fake_compressor.hpp
+        test/fakes/fake_decompressor.hpp
+        test/telnet_option_fixture.hpp
+
         test/client_option_test.cpp
         test/command_test.cpp
         test/command_router_test.cpp
@@ -350,7 +356,6 @@ target_sources(telnetpp_tester
         test/echo_server_test.cpp
         test/element_test.cpp
         test/generator_test.cpp
-        test/in_memory_session_test.cpp
         test/mccp_client_test.cpp
         test/mccp_server_test.cpp
         test/msdp_client_test.cpp

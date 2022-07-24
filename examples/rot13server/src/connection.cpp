@@ -24,7 +24,7 @@ struct connection::impl
         // When the window size of the client changes, announce it to a 
         // listener
         telnet_naws_client_.on_window_size_changed.connect(
-            [this](auto &&width, auto &&height, auto &&continuation)
+            [this](auto &&width, auto &&height)
             {
                 this->on_window_size_changed(width, height);
             });
@@ -32,18 +32,18 @@ struct connection::impl
         // When the Terminal Type option becomes active, request the client's
         // terminal type.
         telnet_terminal_type_client_.on_state_changed.connect(
-            [this](auto &&continuation)
+            [this]()
             {
                 if (telnet_terminal_type_client_.active())
                 {
-                    telnet_terminal_type_client_.request_terminal_type(continuation);
+                    telnet_terminal_type_client_.request_terminal_type();
                 }
             });
 
         // When we receive the client's terminal type, announce it to a
         // listener
         telnet_terminal_type_client_.on_terminal_type.connect(
-            [this](auto &&type, auto &&continuation)
+            [this](auto &&type)
             {
                 std::string user_type(type.begin(), type.end());
                 this->on_terminal_type_detected(user_type);
@@ -55,24 +55,17 @@ struct connection::impl
         telnet_session_.install(telnet_naws_client_);
         telnet_session_.install(telnet_terminal_type_client_);
         
-        // Send activations for the options we want to be activated immediately.
-        auto const &write_continuation = 
-            [this](telnetpp::element const &elem)
-            {
-                this->write(elem);
-            };
-
         // Activating ECHO stops the terminal from locally echoing what is
         // typed, and SUPPRESS-GA on top of that enables "character at a time"
         // mode, as opposed to line mode.
-        telnet_echo_server_.activate(write_continuation);
-        telnet_suppress_ga_server_.activate(write_continuation);
+        telnet_echo_server_.activate();
+        telnet_suppress_ga_server_.activate();
 
         // For fun, activate NAWS so that we get information about when the
         // terminal size changes, and also TERMINAL-TYPE so that we can see
         // what the client has used to connect.
-        telnet_naws_client_.activate(write_continuation);
-        telnet_terminal_type_client_.activate(write_continuation);
+        telnet_naws_client_.activate();
+        telnet_terminal_type_client_.activate();
     }
 
     // ======================================================================
@@ -107,12 +100,7 @@ struct connection::impl
     {
         // Send general data via the Telnet Session so that Telnet control
         // characters can be escaped properly.
-        telnet_session_.send(
-            data, 
-            [this](telnetpp::bytes data)
-            {
-                this->raw_write(data);
-            });
+        telnet_session_.write(data);
     }
 
     // ======================================================================
@@ -122,45 +110,21 @@ struct connection::impl
         std::function<void (serverpp::bytes)> const &data_continuation,
         std::function<void ()> const &read_complete_continuation)
     {
-        // Requests that we read some data from the socket, passing a
-        // continuation that is called when data is received.
-
-        // Upon reception, this is filtered through the Telnet Session.
-        // This takes two continuations:
-        //    o The first is for application layer non-Telnet data.
-        //      This continuation passes both the data and also another
-        //      continuation that can be used for the application to
-        //      respond to the data, although this is unused in this
-        //      example.
-        //
-        //    o The second is the Telnet "response" continuation.
-        //      Since the Telnet session object doesn't know or care
-        //      where the data is coming from or going to, this is
-        //      the function that it uses to respond to incoming
-        //      messages (e.g. if it receives an option negotiation,
-        //      this is the function it calls to send the response).
-        //
-        // Finally, the completion continuation is called every time.
-        // This is because it could be the case that all the data is
-        // consumed as Telnet messages, and more data needs to be
-        // requested.  Or the socket could have disconnected with no
-        // data received.  Either way, the caller of async_read must
-        // know to take action at this point in time.
-        socket_.async_read(
-            [=](serverpp::bytes data)
+        // Requests that we read some data from the telnet session, 
+        // Because Telnet contains both in- and out-of band data, one
+        // read may invoke the data continuation several times.  The end
+        // of the current read is indicated by sending us empty data.
+        telnet_session_.async_read(
+            [=](telnetpp::bytes data)
             {
-                telnet_session_.receive(
-                    data, 
-                    [=](telnetpp::bytes data, auto &&send)
-                    {
-                        data_continuation(data);
-                    },
-                    [=](telnetpp::bytes data)
-                    {
-                        this->raw_write(data);
-                    });
-
-                read_complete_continuation();
+                if (data.empty())
+                {
+                    read_complete_continuation();
+                }
+                else
+                {
+                    data_continuation(data);
+                }
             });
     }
 
@@ -199,11 +163,11 @@ struct connection::impl
 
     serverpp::tcp_socket socket_;
 
-    telnetpp::session                                    telnet_session_;
-    telnetpp::options::echo::server                      telnet_echo_server_;
-    telnetpp::options::suppress_ga::server               telnet_suppress_ga_server_;
-    telnetpp::options::naws::client                      telnet_naws_client_;
-    telnetpp::options::terminal_type::client             telnet_terminal_type_client_;
+    telnetpp::session                                    telnet_session_{socket_};
+    telnetpp::options::echo::server                      telnet_echo_server_{telnet_session_};
+    telnetpp::options::suppress_ga::server               telnet_suppress_ga_server_{telnet_session_};
+    telnetpp::options::naws::client                      telnet_naws_client_{telnet_session_};
+    telnetpp::options::terminal_type::client             telnet_terminal_type_client_{telnet_session_};
     
     std::function<void (std::uint16_t, std::uint16_t)>   on_window_size_changed_;
 

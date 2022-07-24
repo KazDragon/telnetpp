@@ -7,23 +7,34 @@ namespace telnetpp { namespace options { namespace msdp {
 // ==========================================================================
 // CONSTRUCTOR
 // ==========================================================================
-client::client()
-  : telnetpp::client_option(telnetpp::options::msdp::detail::option)
+client::client(telnetpp::session &sess) noexcept
+  : telnetpp::client_option(sess, telnetpp::options::msdp::detail::option)
 {
+}
+
+// ==========================================================================
+// SEND
+// ==========================================================================
+void client::send(variable const &var)
+{
+    detail::encode(
+        var,
+        [this](telnetpp::bytes data)
+        {
+            write_subnegotiation(data);
+        });
 }
 
 // ==========================================================================
 // HANDLE_SUBNEGOTIATION
 // ==========================================================================
-void client::handle_subnegotiation(
-    telnetpp::bytes data,
-    continuation const &cont)
+void client::handle_subnegotiation(telnetpp::bytes data)
 {
     detail::decode(
         data, 
         [&](auto const &var)
         {
-            on_receive(var, cont);
+            on_receive(var);
         });
 }
 
