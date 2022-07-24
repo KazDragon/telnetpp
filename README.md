@@ -93,7 +93,7 @@ A [telnetpp::element](include/telnetpp/element.hpp) is a variant that may contai
 
 # Stream-Unaware
 
-The Telnet++ library does not impose any requirement on any kind of data stream API.  In order to accomplish this, it makes heavy use of continuation functions.  See the [telnetpp::session](include/telnetpp/session.hpp) class for an in-depth explanation of how this works.
+The Telnet++ library does not impose any requirement on any kind of data stream API.  In order to accomplish this, it makes heavy use of a channel concept.  See the [telnetpp::session](include/telnetpp/session.hpp) class for an in-depth explanation of how this works.
 
 # Options
 
@@ -108,30 +108,32 @@ As alluded to earlier, each distinct feature is represented by either a [telnetp
 All of the above can be quite complicated to manage, so Telnet++ provides the [telnetpp::session](include/telnetpp/session.hpp) class.  This is the key abstraction of the Telnet++ library, and is used to manage an entire Telnet feature set for a connection.  This is accomplished by "install"ing handlers for commands and options:
 
 ```cpp
-// A user-specified function for sending bytes to the remote.
-void my_socket_send(telnetpp::bytes data);
+// A user-supplied class that models the channel concept
+class channel {
+  void write(telnetpp::bytes);
+  void async_read(std::function<void (telnetpp::bytes)>);
+  bool is_alive() const;
+  void close();
+}
 
-// Create a session object, which manages the inputs and outputs from my connection.  It requires
-// a function that is to be called whenever non-Telnet input is received.
-telnetpp::session session;
+channel my_channel;
+
+// Create a session object, which manages the inputs and outputs from my channel.
+telnetpp::session session{my_channel};
 
 // An echo server (provided with Telnet++) is used to control whether a server responds to input from
 // a client by transmitting the same text back to the client.  By default, this does not happen, and
 // clients print out locally whatever is typed in.  By activating this option, the client no longer
 // locally echos input, and the server is totally in control of what appears on the screen.
-telnetpp::options::echo::server echo_server;
+telnetpp::options::echo::server echo_server{session};
 
 // The session now knows we want this feature to be handled and does all the heavy lifting for us.
 session.install(echo_server);
 
 // By default, options sit there in a deactivated state unless explicitly activated either locally
-// in code or in protocol from the remote.  Here, we activate it ourselves, forwarding protocol
-// via the session, and eventually out through our user-specified function.
-echo_server.activate(
-    [&](telnetpp::element const &elem)
-    {
-        session.send(elem, my_socket_send);
-    });
+// in code or in protocol from the remote.  Here, we activate it ourselves.  This uses the session
+// to ensure that the protocol bytes are forwarded to the channel.
+echo_server.activate();
 
 // Sessions just pass on commands to functions installed on a per-command basis.  Here we pass a
 // lambda to handle the Are You There command.
@@ -143,29 +145,23 @@ session.install(
         using telnetpp::literals;
         auto const message = "Yes, I'm here"_tb;
         
-        session.send(message, my_socket_send);
+        session.write(message, my_socket_send);
     });
 ```
 
-Receiving data is slightly more complex in that any reception of data may require data to be sent, and so functions that receive data also have a continuation for what to do with the response.
+Receiving data is slightly more complex since it is asynchronous and so requires a callback that is called when data is received.
 
 ```cpp
-// A user-specified function used for receiving bytes sent from the
-// remote.
-int my_socket_receive(telnetpp::byte *buffer, int size);
 
-// A user-specified function that transmits data up to the application
-// Note that the second argument is used to tell the application how
-// it may send a respond to the data it receives.
-void my_application_receive(
-    telnetpp::bytes data,
-    std::function<void (telnetpp::bytes)> const &send);
+// A user-specified function that transmits data up to the application.
+// Note: the session indicates that an async_read is complete by sending
+// an empty packet of data.  This can be used to prompt a new async_read,
+// for example.
+void my_application_receive(telnetpp::bytes data);
 
-telnetpp::byte my_buffer[1024];
-int amount_received = my_socket_receive(my_buffer, 1024);
-
-session.receive(
-    telnetpp::bytes{my_buffer, amount_received},
-    my_application_receive,
-    my_socket_send);
+session.async_read(
+    [&](telnetpp::bytes data)
+    {
+        my_application_receive(data);
+    });
 ```
