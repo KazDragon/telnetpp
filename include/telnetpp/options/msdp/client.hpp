@@ -15,7 +15,7 @@ public:
     //* =====================================================================
     /// \brief Constructor
     //* =====================================================================
-    client(telnetpp::session& sess) noexcept;
+    explicit client(telnetpp::session& sess) noexcept;
 
     //* =====================================================================
     /// \brief Send a variables to the remote server.

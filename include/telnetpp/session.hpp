@@ -246,7 +246,7 @@ private:
         //* =================================================================
         /// \brief Constructor
         //* =================================================================
-        channel_model(Channel &channel)
+        explicit channel_model(Channel &channel)
           : channel_{channel}
         {
         }

@@ -16,7 +16,7 @@ public:
     //* =====================================================================
     /// \brief Constructor
     //* =====================================================================
-    constexpr basic_server(telnetpp::session &sess) noexcept
+    constexpr explicit basic_server(telnetpp::session &sess) noexcept
       : server_option(sess, Option)
     {
     }
