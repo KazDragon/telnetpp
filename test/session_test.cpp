@@ -368,3 +368,17 @@ TEST_F(a_session, can_receive_data_piecemeal)
     ASSERT_TRUE(client.active());
     ASSERT_TRUE(server.active());
 }
+
+TEST_F(a_session, is_alive_if_the_channel_is_alive)
+{
+    ASSERT_TRUE(session_.is_alive());
+    channel_.close();
+    ASSERT_FALSE(session_.is_alive());
+}
+
+TEST_F(a_session, closes_the_channel_when_closed)
+{
+    ASSERT_TRUE(session_.is_alive());
+    session_.close();
+    ASSERT_FALSE(session_.is_alive());
+}
