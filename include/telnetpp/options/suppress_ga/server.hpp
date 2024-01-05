@@ -18,10 +18,7 @@ class TELNETPP_EXPORT server
         telnetpp::options::suppress_ga::detail::option>
 {
  public:
-  constexpr explicit server(telnetpp::session &sess) noexcept
-    : basic_server(sess)
-  {
-  }
+  explicit server(telnetpp::session &sess) noexcept;
 };
 
 }  // namespace telnetpp::options::suppress_ga

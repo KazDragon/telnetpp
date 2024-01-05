@@ -141,6 +141,8 @@ target_sources(telnetpp
         src/command.cpp
         src/element.cpp
         src/negotiation.cpp
+        src/options/echo/client.cpp
+        src/options/echo/server.cpp
         src/options/mccp/client.cpp
         src/options/mccp/codec.cpp
         src/options/mccp/server.cpp
@@ -151,6 +153,8 @@ target_sources(telnetpp
         src/options/naws/server.cpp
         src/options/new_environ/client.cpp
         src/options/new_environ/server.cpp
+        src/options/suppress_ga/client.cpp
+        src/options/suppress_ga/server.cpp
         src/options/terminal_type/client.cpp
         src/session.cpp
         src/subnegotiation.cpp
