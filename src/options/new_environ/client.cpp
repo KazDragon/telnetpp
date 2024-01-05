@@ -4,7 +4,7 @@
 #include "telnetpp/options/new_environ/detail/stream.hpp"
 #include <numeric>
 
-namespace telnetpp { namespace options { namespace new_environ {
+namespace telnetpp::options::new_environ {
 
 // ==========================================================================
 // CONSTRUCTOR
@@ -19,18 +19,18 @@ client::client(telnetpp::session &sess) noexcept
 // ==========================================================================
 void client::request_variables(requests const &reqs)
 {
-    auto request_content = std::accumulate(
-        reqs.begin(),
-        reqs.end(),
-        byte_storage{detail::send},
-        [](byte_storage &content, request const &req) -> byte_storage &
-        {
-            content.push_back(detail::type_to_byte(req.type));
-            detail::append_escaped(content, req.name);
-            return content;
-        });
+  auto request_content = std::accumulate(
+      reqs.begin(),
+      reqs.end(),
+      byte_storage{detail::send},
+      [](byte_storage &content, request const &req) -> byte_storage &
+      {
+        content.push_back(detail::type_to_byte(req.type));
+        detail::append_escaped(content, req.name);
+        return content;
+      });
 
-    write_subnegotiation(request_content);
+  write_subnegotiation(request_content);
 }
 
 // ==========================================================================
@@ -38,12 +38,8 @@ void client::request_variables(requests const &reqs)
 // ==========================================================================
 void client::handle_subnegotiation(telnetpp::bytes data)
 {
-    detail::for_each_response(
-        data,
-        [&](response const &rsp)
-        {
-            on_variable_changed(rsp);
-        });
+  detail::for_each_response(
+      data, [&](response const &rsp) { on_variable_changed(rsp); });
 }
 
-}}}
+}  // namespace telnetpp::options::new_environ

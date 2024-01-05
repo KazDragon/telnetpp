@@ -4,7 +4,7 @@
 #include "telnetpp/options/basic_client.hpp"
 #include "telnetpp/options/suppress_ga/detail/protocol.hpp"
 
-namespace telnetpp { namespace options { namespace suppress_ga {
+namespace telnetpp::options::suppress_ga {
 
 //* =========================================================================
 /// \class telnetpp::options::suppress_ga::client
@@ -13,12 +13,15 @@ namespace telnetpp { namespace options { namespace suppress_ga {
 /// Ahead option.
 /// \see https://tools.ietf.org/html/rfc858
 //* =========================================================================
-class TELNETPP_EXPORT client : public telnetpp::options::basic_client<
-    telnetpp::options::suppress_ga::detail::option
->
+class TELNETPP_EXPORT client
+  : public telnetpp::options::basic_client<
+        telnetpp::options::suppress_ga::detail::option>
 {
-public:
-    explicit client(telnetpp::session &sess);
+ public:
+  constexpr explicit client(telnetpp::session &sess) noexcept
+    : basic_client(sess)
+  {
+  }
 };
 
-}}}
+}  // namespace telnetpp::options::suppress_ga

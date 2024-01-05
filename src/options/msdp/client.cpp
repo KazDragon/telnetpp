@@ -1,8 +1,9 @@
 #include "telnetpp/options/msdp/client.hpp"
 #include "telnetpp/options/msdp/detail/decoder.hpp"
+#include "telnetpp/options/msdp/detail/encoder.hpp"
 #include "telnetpp/options/msdp/detail/protocol.hpp"
 
-namespace telnetpp { namespace options { namespace msdp {
+namespace telnetpp::options::msdp {
 
 // ==========================================================================
 // CONSTRUCTOR
@@ -17,12 +18,8 @@ client::client(telnetpp::session &sess) noexcept
 // ==========================================================================
 void client::send(variable const &var)
 {
-    detail::encode(
-        var,
-        [this](telnetpp::bytes data)
-        {
-            write_subnegotiation(data);
-        });
+  detail::encode(
+      var, [this](telnetpp::bytes data) { write_subnegotiation(data); });
 }
 
 // ==========================================================================
@@ -30,12 +27,7 @@ void client::send(variable const &var)
 // ==========================================================================
 void client::handle_subnegotiation(telnetpp::bytes data)
 {
-    detail::decode(
-        data, 
-        [&](auto const &var)
-        {
-            on_receive(var);
-        });
+  detail::decode(data, [&](auto const &var) { on_receive(var); });
 }
 
-}}}
+}  // namespace telnetpp::options::msdp

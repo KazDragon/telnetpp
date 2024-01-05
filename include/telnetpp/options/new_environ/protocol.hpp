@@ -3,15 +3,15 @@
 #include "telnetpp/core.hpp"
 #include <optional>
 
-namespace telnetpp { namespace options { namespace new_environ {
+namespace telnetpp::options::new_environ {
 
 //* =========================================================================
 /// \brief An enumeration of the type of variables that NEW_ENVIRON handles.
 //* =========================================================================
 enum class variable_type
 {
-    var,
-    uservar
+  var,
+  uservar
 };
 
 //* =========================================================================
@@ -19,8 +19,8 @@ enum class variable_type
 //* =========================================================================
 struct request
 {
-    variable_type          type;
-    telnetpp::byte_storage name;
+  variable_type type;
+  telnetpp::byte_storage name;
 };
 
 using requests = gsl::span<request const>;
@@ -30,11 +30,11 @@ using requests = gsl::span<request const>;
 //* =========================================================================
 struct response
 {
-    variable_type                         type;
-    telnetpp::byte_storage                name;
-    std::optional<telnetpp::byte_storage> value;
+  variable_type type;
+  telnetpp::byte_storage name;
+  std::optional<telnetpp::byte_storage> value;
 };
 
 using responses = gsl::span<response const>;
 
-}}}
+}  // namespace telnetpp::options::new_environ

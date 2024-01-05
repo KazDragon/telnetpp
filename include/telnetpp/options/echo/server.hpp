@@ -4,7 +4,7 @@
 #include "telnetpp/options/basic_server.hpp"
 #include "telnetpp/options/echo/detail/protocol.hpp"
 
-namespace telnetpp { namespace options { namespace echo {
+namespace telnetpp::options::echo {
 
 //* =========================================================================
 /// \class telnetpp::options::echo::server
@@ -13,11 +13,13 @@ namespace telnetpp { namespace options { namespace echo {
 /// \see https://tools.ietf.org/html/rfc857
 //* =========================================================================
 class TELNETPP_EXPORT server : public telnetpp::options::basic_server<
-    telnetpp::options::echo::detail::option
->
+                                   telnetpp::options::echo::detail::option>
 {
-public:
-    explicit server(telnetpp::session &sess) noexcept;
+ public:
+  constexpr explicit server(telnetpp::session &sess) noexcept
+    : basic_server(sess)
+  {
+  }
 };
 
-}}}
+}  // namespace telnetpp::options::echo

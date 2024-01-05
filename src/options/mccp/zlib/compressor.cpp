@@ -4,7 +4,7 @@
 #include <cassert>
 #include <optional>
 
-namespace telnetpp { namespace options { namespace mccp { namespace zlib {
+namespace telnetpp::options::mccp::zlib {
 
 namespace {
 
@@ -14,51 +14,50 @@ namespace {
 // how-to guide.  Instead, we can just use small blocks on the stack and
 // iterate in the very rare case that a single message yields a block of 1KB
 // or more.
-static std::size_t constexpr output_buffer_size = 1024;
+constexpr std::size_t output_buffer_size = 1024;
 
-}
+}  // namespace
 
 // ==========================================================================
 // ZLIB_COMPRESSION::IMPL
 // ==========================================================================
 struct compressor::impl
 {
-    std::optional<z_stream> stream;
+  std::optional<z_stream> stream;
 
-    // ======================================================================
-    // CONSTRUCT_STREAM
-    // ======================================================================
-    void construct_stream()
-    {
-        assert(stream == std::nullopt);
+  // ======================================================================
+  // CONSTRUCT_STREAM
+  // ======================================================================
+  void construct_stream()
+  {
+    assert(stream == std::nullopt);
 
-        stream = z_stream{};
+    stream = z_stream{};
 
-        auto result = deflateInit(&*stream, Z_DEFAULT_COMPRESSION);
-        boost::ignore_unused(result);
-        assert(result == Z_OK);
-    }
+    auto result = deflateInit(&*stream, Z_DEFAULT_COMPRESSION);
+    boost::ignore_unused(result);
+    assert(result == Z_OK);
+  }
 
-    // ======================================================================
-    // DESTROY_STREAM
-    // ======================================================================
-    void destroy_stream()
-    {
-        assert(stream != std::nullopt);
+  // ======================================================================
+  // DESTROY_STREAM
+  // ======================================================================
+  void destroy_stream()
+  {
+    assert(stream != std::nullopt);
 
-        auto result = deflateEnd(&*stream);
-        boost::ignore_unused(result);
-        assert(result == Z_OK || result == Z_STREAM_ERROR || Z_DATA_ERROR);
+    auto result = deflateEnd(&*stream);
+    boost::ignore_unused(result);
+    assert(result == Z_OK || result == Z_STREAM_ERROR || Z_DATA_ERROR);
 
-        stream = std::nullopt;
-    }
+    stream = std::nullopt;
+  }
 };
 
 // ==========================================================================
 // CONSTRUCTOR
 // ==========================================================================
-compressor::compressor()
-  : pimpl_(new impl)
+compressor::compressor() : pimpl_(new impl)
 {
 }
 
@@ -67,10 +66,10 @@ compressor::compressor()
 // ==========================================================================
 compressor::~compressor()
 {
-    if (pimpl_->stream)
-    {
-        pimpl_->destroy_stream();
-    }
+  if (pimpl_->stream)
+  {
+    pimpl_->destroy_stream();
+  }
 }
 
 // ==========================================================================
@@ -85,66 +84,64 @@ void compressor::do_start()
 // ==========================================================================
 void compressor::do_finish(continuation const &cont)
 {
-    if (!pimpl_->stream)
-    {
-        pimpl_->construct_stream();
-    }
+  if (!pimpl_->stream)
+  {
+    pimpl_->construct_stream();
+  }
 
-    byte output_buffer[output_buffer_size];
-    pimpl_->stream->avail_in  = 0;
-    pimpl_->stream->next_in   = nullptr;
+  assert(pimpl_->stream.has_value());
+  byte output_buffer[output_buffer_size];
+  pimpl_->stream->avail_in = 0;
+  pimpl_->stream->next_in = nullptr;
 
-    auto response = Z_OK;
+  auto response = Z_OK;
 
-    do 
-    {
-        pimpl_->stream->avail_out = output_buffer_size;
-        pimpl_->stream->next_out  = output_buffer;
-        
-        response = deflate(&*pimpl_->stream, Z_FINISH);
-        
-        auto const output_data = telnetpp::bytes{
-            output_buffer, pimpl_->stream->next_out
-        };
+  do
+  {
+    pimpl_->stream->avail_out = output_buffer_size;
+    pimpl_->stream->next_out = output_buffer;
 
-        cont(output_data, true);
-    }
-    while (response == Z_OK);
+    response = deflate(&*pimpl_->stream, Z_FINISH);
 
-    assert(response == Z_STREAM_END);
+    auto const output_data =
+        telnetpp::bytes{output_buffer, pimpl_->stream->next_out};
 
-    pimpl_->destroy_stream();
+    cont(output_data, true);
+  } while (response == Z_OK);
+
+  assert(response == Z_STREAM_END);
+
+  pimpl_->destroy_stream();
 }
 
 // ==========================================================================
 // TRANSFORM_CHUNK
 // ==========================================================================
 telnetpp::bytes compressor::transform_chunk(
-    telnetpp::bytes data,
-    continuation const &cont)
+    telnetpp::bytes data, continuation const &cont)
 {
-    if (!pimpl_->stream)
-    {
-        pimpl_->construct_stream();
-    }
+  if (!pimpl_->stream)
+  {
+    pimpl_->construct_stream();
+  }
 
-    byte output_buffer[output_buffer_size];
-    pimpl_->stream->avail_in  = static_cast<uInt>(data.size());
-    pimpl_->stream->next_in   = const_cast<telnetpp::byte *>(data.data());
-    pimpl_->stream->avail_out = output_buffer_size;
-    pimpl_->stream->next_out  = output_buffer;
+  assert(pimpl_->stream.has_value());
+  byte output_buffer[output_buffer_size];
+  pimpl_->stream->avail_in = static_cast<uInt>(data.size());
+  pimpl_->stream->next_in = const_cast<telnetpp::byte *>(data.data());
+  pimpl_->stream->avail_out = output_buffer_size;
+  pimpl_->stream->next_out = output_buffer;
 
-    auto response = deflate(&*pimpl_->stream, Z_SYNC_FLUSH);
-    boost::ignore_unused(response);
-    assert(response == Z_OK);
+  auto response = deflate(&*pimpl_->stream, Z_SYNC_FLUSH);
+  boost::ignore_unused(response);
+  assert(response == Z_OK);
 
-    auto const output_data = telnetpp::bytes{
-        output_buffer, pimpl_->stream->next_out
-    };
+  auto const output_data =
+      telnetpp::bytes{output_buffer, pimpl_->stream->next_out};
 
-    cont(output_data, false);
+  cont(output_data, false);
 
-    return data.subspan(data.size() - pimpl_->stream->avail_in);
+  return data.subspan(data.size() - pimpl_->stream->avail_in);
 }
 
-}}}}
+}  // namespace telnetpp::options::mccp::zlib

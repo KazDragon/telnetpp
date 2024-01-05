@@ -1,14 +1,14 @@
 #include "telnetpp/options/mccp/codec.hpp"
 
-namespace telnetpp { namespace options { namespace mccp {
+namespace telnetpp::options::mccp {
 
 // ==========================================================================
 // START
 // ==========================================================================
 void codec::start()
 {
-    engaged_ = true;
-    do_start();
+  engaged_ = true;
+  do_start();
 }
 
 // ==========================================================================
@@ -16,8 +16,8 @@ void codec::start()
 // ==========================================================================
 void codec::finish(continuation const &cont)
 {
-    do_finish(cont);
-    engaged_ = false; 
+  do_finish(cont);
+  engaged_ = false;
 }
 
 // ==========================================================================
@@ -25,26 +25,26 @@ void codec::finish(continuation const &cont)
 // ==========================================================================
 void codec::operator()(telnetpp::bytes data, continuation const &cont)
 {
-    while (!data.empty())
+  while (!data.empty())
+  {
+    if (engaged_)
     {
-        if (engaged_)
-        {
-            data = transform_chunk(
-                data,
-                [&](telnetpp::bytes decompressed_data, bool decompression_ended)
-                {
-                    engaged_ = !decompression_ended;
-                    cont(decompressed_data, decompression_ended);
-                });
-        }
-        else
-        {
-            // Every byte might activate decompression, so they must be
-            // transmitted individually.
-            cont(data.subspan(0, 1), false);
-            data = data.subspan(1);
-        }
+      data = transform_chunk(
+          data,
+          [&](telnetpp::bytes decompressed_data, bool decompression_ended)
+          {
+            engaged_ = !decompression_ended;
+            cont(decompressed_data, decompression_ended);
+          });
     }
+    else
+    {
+      // Every byte might activate decompression, so they must be
+      // transmitted individually.
+      cont(data.subspan(0, 1), false);
+      data = data.subspan(1);
+    }
+  }
 }
 
 // ==========================================================================
@@ -55,4 +55,4 @@ corrupted_stream_error::corrupted_stream_error(char const *what_arg)
 {
 }
 
-}}}
+}  // namespace telnetpp::options::mccp

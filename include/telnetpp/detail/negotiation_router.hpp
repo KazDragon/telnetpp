@@ -4,14 +4,14 @@
 #include "telnetpp/element.hpp"
 #include "telnetpp/negotiation.hpp"
 
-namespace telnetpp { namespace detail {
+namespace telnetpp::detail {
 
 struct negotiation_router_key_from_message_policy
 {
-    static negotiation key_from_message(negotiation const &neg)
-    {
-        return neg;
-    }
+  static negotiation key_from_message(negotiation const &neg)
+  {
+    return neg;
+  }
 };
 
 //* =========================================================================
@@ -25,10 +25,9 @@ class negotiation_router
   : public router<
         negotiation,
         negotiation,
-        void (telnetpp::negotiation),
-        detail::negotiation_router_key_from_message_policy
-    >
+        void(telnetpp::negotiation),
+        detail::negotiation_router_key_from_message_policy>
 {
 };
 
-}}
+}  // namespace telnetpp::detail

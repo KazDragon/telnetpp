@@ -2,27 +2,22 @@
 #include "telnetpp/options/mccp/codec.hpp"
 #include "telnetpp/options/mccp/detail/protocol.hpp"
 
-namespace telnetpp { namespace options { namespace mccp {
+namespace telnetpp::options::mccp {
 
 // ==========================================================================
 // CONSTRUCTOR
 // ==========================================================================
 client::client(telnetpp::session &sess, codec &cdc)
-  : client_option(sess, detail::option),
-    codec_(cdc)
+  : client_option(sess, detail::option), codec_(cdc)
 {
-    on_state_changed.connect(
-        [this]()
+  on_state_changed.connect(
+      [this]()
+      {
+        if (!active())
         {
-            if (!active())
-            {
-                codec_.finish(
-                    [&](telnetpp::bytes data, bool)
-                    {
-                        write_text(data);
-                    });
-            }
-        });
+          codec_.finish([&](telnetpp::bytes data, bool) { write_text(data); });
+        }
+      });
 }
 
 // ==========================================================================
@@ -30,7 +25,7 @@ client::client(telnetpp::session &sess, codec &cdc)
 // ==========================================================================
 void client::handle_subnegotiation(telnetpp::bytes /*data*/)
 {
-    codec_.start();
+  codec_.start();
 }
 
-}}}
+}  // namespace telnetpp::options::mccp

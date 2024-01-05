@@ -1,12 +1,12 @@
 #pragma once
 
-#include "telnetpp/element.hpp"
+#include "telnetpp/client_option.hpp"
 #include "telnetpp/detail/negotiation_router.hpp"
 #include "telnetpp/detail/subnegotiation_router.hpp"
-#include "telnetpp/client_option.hpp"
+#include "telnetpp/element.hpp"
 #include "telnetpp/server_option.hpp"
 
-namespace telnetpp { namespace detail {
+namespace telnetpp::detail {
 
 //* =========================================================================
 /// \brief Registers an option with negotiation and subnegotiation routers.
@@ -31,15 +31,13 @@ void register_server_option(
 template <class NegotiableOption>
 void register_route_from_negotiation_to_option(
     negotiation_router &route,
-    negotiation_type    request,
-    NegotiableOption   &option)
+    negotiation_type request,
+    NegotiableOption &option)
 {
-    route.register_route(
-        negotiation{request, option.option_code()},
-        [&option, request](telnetpp::negotiation const &)
-        {
-            return option.negotiate(request);
-        });
+  route.register_route(
+      negotiation{request, option.option_code()},
+      [&option, request](telnetpp::negotiation const &)
+      { return option.negotiate(request); });
 }
 
 //* =========================================================================
@@ -47,14 +45,12 @@ void register_route_from_negotiation_to_option(
 //* =========================================================================
 template <class SubnegotiableOption>
 void register_route_from_subnegotiation_to_option(
-    subnegotiation_router &route,
-    SubnegotiableOption   &option)
+    subnegotiation_router &route, SubnegotiableOption &option)
 {
-    route.register_route(option.option_code(),
-        [&option](telnetpp::subnegotiation const &sub)
-        {
-            return option.subnegotiate(sub.content());
-        });
+  route.register_route(
+      option.option_code(),
+      [&option](telnetpp::subnegotiation const &sub)
+      { return option.subnegotiate(sub.content()); });
 }
 
-}}
+}  // namespace telnetpp::detail

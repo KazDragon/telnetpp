@@ -22,8 +22,8 @@
 /// Activate as with any other option.
 /// \see https://www.ietf.org/rfc/rfc857.txt
 //* =========================================================================
-namespace telnetpp { namespace options { namespace echo { namespace detail {
+namespace telnetpp::options::echo::detail {
 
 static constexpr option_type const option = 1;
 
-}}}}
+}  // namespace telnetpp::options::echo::detail
