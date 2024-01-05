@@ -2,9 +2,9 @@
 
 #include "telnetpp/core.hpp"
 #include "telnetpp/detail/hash.hpp"
+#include <cassert>
 #include <iosfwd>
 #include <utility>
-#include <cassert>
 
 namespace telnetpp {
 
@@ -13,76 +13,76 @@ namespace telnetpp {
 //* =========================================================================
 class TELNETPP_EXPORT negotiation
 {
-public:
-    //* =====================================================================
-    /// \brief Constructor
-    //* =====================================================================
-    constexpr negotiation(negotiation_type request, option_type option) noexcept
-      : request_(request),
-        option_(option)
-    {
-        assert(request == telnetpp::will
-            || request == telnetpp::wont
-            || request == telnetpp::do_
-            || request == telnetpp::dont);
-    }
+ public:
+  //* =====================================================================
+  /// \brief Constructor
+  //* =====================================================================
+  constexpr negotiation(negotiation_type request, option_type option) noexcept
+    : request_(request), option_(option)
+  {
+    assert(
+        request == telnetpp::will || request == telnetpp::wont
+        || request == telnetpp::do_ || request == telnetpp::dont);
+  }
 
-    //* =====================================================================
-    /// \brief Returns the request (will, wont, do, dont) of this
-    /// negotiation.
-    //* =====================================================================
-    constexpr negotiation_type request() const noexcept
-    {
-        return request_;
-    }
+  //* =====================================================================
+  /// \brief Returns the request (will, wont, do, dont) of this
+  /// negotiation.
+  //* =====================================================================
+  [[nodiscard]] constexpr negotiation_type request() const noexcept
+  {
+    return request_;
+  }
 
-    //* =====================================================================
-    /// \brief Returns the option code (e.g. echo, naws) of this negotiation
-    //* =====================================================================
-    constexpr option_type option_code() const noexcept
-    {
-        return option_;
-    }
+  //* =====================================================================
+  /// \brief Returns the option code (e.g. echo, naws) of this negotiation
+  //* =====================================================================
+  [[nodiscard]] constexpr option_type option_code() const noexcept
+  {
+    return option_;
+  }
 
-    //* =====================================================================
-    /// \brief Combine a hash of the object
-    //* =====================================================================
-    constexpr void hash_combine(std::size_t &seed) const
-    {
-        telnetpp::detail::hash_combine(seed, request_, option_);
-    }
+  //* =====================================================================
+  /// \brief Combine a hash of the object
+  //* =====================================================================
+  constexpr void hash_combine(std::size_t &seed) const
+  {
+    telnetpp::detail::hash_combine(seed, request_, option_);
+  }
 
-private:
-    negotiation_type request_;
-    option_type option_;
+ private:
+  negotiation_type request_;
+  option_type option_;
 };
 
 //* =========================================================================
 /// \brief Comparison function for negotiations
 //* =========================================================================
-constexpr bool operator==(negotiation const &lhs, negotiation const &rhs) noexcept
+constexpr bool operator==(
+    negotiation const &lhs, negotiation const &rhs) noexcept
 {
-    return lhs.request() == rhs.request()
-        && lhs.option_code() == rhs.option_code();
+  return lhs.request() == rhs.request()
+         && lhs.option_code() == rhs.option_code();
 }
 
 //* =========================================================================
 /// \brief Ordering function for negotiations
 //* =========================================================================
-constexpr bool operator<(negotiation const &lhs, negotiation const &rhs) noexcept
+constexpr bool operator<(
+    negotiation const &lhs, negotiation const &rhs) noexcept
 {
-    return lhs.request() < rhs.request()
-        || (!(rhs.request() < lhs.request())
-           && lhs.option_code() < rhs.option_code());
+  return lhs.request() < rhs.request()
+         || (!(rhs.request() < lhs.request())
+             && lhs.option_code() < rhs.option_code());
 }
 
 //* =========================================================================
 /// \brief Stream output for negotiations
 //* =========================================================================
 TELNETPP_EXPORT
-std::ostream &operator<<(std::ostream &out, negotiation const &cmd);
+std::ostream &operator<<(std::ostream &out, negotiation const &neg);
 
-}
+}  // namespace telnetpp
 
 // This is necessary because the lookup for the recipient for a negotiation
 // in a session relies on both the request and the option type (will/wont

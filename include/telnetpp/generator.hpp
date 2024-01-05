@@ -1,8 +1,8 @@
 #pragma once
 
-#include "telnetpp/element.hpp"
 #include "telnetpp/detail/generate_helper.hpp"
 #include "telnetpp/detail/overloaded.hpp"
+#include "telnetpp/element.hpp"
 #include <algorithm>
 #include <utility>
 
@@ -18,24 +18,17 @@ namespace telnetpp {
 template <class Continuation>
 constexpr void generate(telnetpp::element const &elem, Continuation &&cont)
 {
-    std::visit(detail::overloaded{
-        [&cont](telnetpp::bytes data)
-        {
-            detail::generate_escaped(data, cont);
-        },
-        [&cont](telnetpp::command const &cmd)
-        {
-            detail::generate_command(cmd, cont);
-        },
-        [&cont](telnetpp::negotiation const &neg)
-        {
-            detail::generate_negotiation(neg, cont);
-        },
-        [&cont](telnetpp::subnegotiation const &sub)
-        {
-            detail::generate_subnegotiation(sub, cont);
-        }},
-        elem);
+  std::visit(
+      detail::overloaded{
+          [&cont](telnetpp::bytes data)
+          { detail::generate_escaped(data, cont); },
+          [&cont](telnetpp::command const &cmd)
+          { detail::generate_command(cmd, cont); },
+          [&cont](telnetpp::negotiation const &neg)
+          { detail::generate_negotiation(neg, cont); },
+          [&cont](telnetpp::subnegotiation const &sub)
+          { detail::generate_subnegotiation(sub, cont); }},
+      elem);
 }
 
-}
+}  // namespace telnetpp

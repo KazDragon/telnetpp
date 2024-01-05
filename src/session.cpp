@@ -1,43 +1,42 @@
 #include "telnetpp/session.hpp"
-#include "telnetpp/generator.hpp"
-#include "telnetpp/parser.hpp"
-#include "telnetpp/detail/registration.hpp"
-#include "telnetpp/detail/overloaded.hpp"
 #include "telnetpp/detail/command_router.hpp"
 #include "telnetpp/detail/negotiation_router.hpp"
+#include "telnetpp/detail/overloaded.hpp"
+#include "telnetpp/detail/registration.hpp"
 #include "telnetpp/detail/subnegotiation_router.hpp"
+#include "telnetpp/generator.hpp"
+#include "telnetpp/parser.hpp"
 
 namespace telnetpp {
 
 struct session::impl
 {
-    telnetpp::parser                        parser_;
-    telnetpp::detail::command_router        command_router_;
-    telnetpp::detail::negotiation_router    negotiation_router_;
-    telnetpp::detail::subnegotiation_router subnegotiation_router_;
+  telnetpp::parser parser_;
+  telnetpp::detail::command_router command_router_;
+  telnetpp::detail::negotiation_router negotiation_router_;
+  telnetpp::detail::subnegotiation_router subnegotiation_router_;
 };
 
 // ==========================================================================
 // CONSTRUCTOR
 // ==========================================================================
-session::session()
-  : pimpl_{std::make_unique<impl>()}
+session::session() : pimpl_{std::make_unique<impl>()}
 {
-    // By default, the session will respond to WILL/WONT(option) with
-    // DONT(option), and to DO/DONT(option) with WONT(option).  This behaviour
-    // is overridden with any installed options.
-    pimpl_->negotiation_router_.set_unregistered_route(
-        [this](telnetpp::negotiation const &negotiation)
-        {
-            auto const &request = negotiation.request();
+  // By default, the session will respond to WILL/WONT(option) with
+  // DONT(option), and to DO/DONT(option) with WONT(option).  This behaviour
+  // is overridden with any installed options.
+  pimpl_->negotiation_router_.set_unregistered_route(
+      [this](telnetpp::negotiation const &negotiation)
+      {
+        auto const &request = negotiation.request();
 
-            negotiation_type result =
-                (request == telnetpp::will || request == telnetpp::wont)
-              ? telnetpp::dont
-              : telnetpp::wont;
+        negotiation_type result =
+            (request == telnetpp::will || request == telnetpp::wont)
+                ? telnetpp::dont
+                : telnetpp::wont;
 
-            write(telnetpp::negotiation{result, negotiation.option_code()});
-        });
+        write(telnetpp::negotiation{result, negotiation.option_code()});
+      });
 }
 
 // ==========================================================================
@@ -50,7 +49,7 @@ session::~session() = default;
 // ==========================================================================
 bool session::is_alive() const
 {
-    return channel_->is_alive();
+  return channel_->is_alive();
 }
 
 // ==========================================================================
@@ -58,44 +57,36 @@ bool session::is_alive() const
 // ==========================================================================
 void session::close()
 {
-    channel_->close();
+  channel_->close();
 }
 
 // ==========================================================================
 // ASYNC_READ
 // ==========================================================================
-void session::async_read(
-    std::function<void (telnetpp::bytes)> const &callback)
+void session::async_read(std::function<void(telnetpp::bytes)> const &callback)
 {
-    channel_->async_read(
-        [this, callback](telnetpp::bytes content) {
-
+  channel_->async_read(
+      [this, callback](telnetpp::bytes content)
+      {
         auto const &token_handler =
             [this, callback](telnetpp::element const &elem)
-            {
-                std::visit(detail::overloaded{
-                    [&](telnetpp::bytes input_content)
-                    {
-                        callback(input_content);
-                    },
-                    [&](telnetpp::command const &cmd)
-                    {
-                        pimpl_->command_router_(cmd);
-                    },
-                    [&](telnetpp::negotiation const &neg)
-                    {
-                        pimpl_->negotiation_router_(neg);
-                    },
-                    [&](telnetpp::subnegotiation const &sub)
-                    {
-                        pimpl_->subnegotiation_router_(sub);
-                    }},
-                    elem);
-            };
+        {
+          std::visit(
+              detail::overloaded{
+                  [&](telnetpp::bytes input_content)
+                  { callback(input_content); },
+                  [&](telnetpp::command const &cmd)
+                  { pimpl_->command_router_(cmd); },
+                  [&](telnetpp::negotiation const &neg)
+                  { pimpl_->negotiation_router_(neg); },
+                  [&](telnetpp::subnegotiation const &sub)
+                  { pimpl_->subnegotiation_router_(sub); }},
+              elem);
+        };
 
         pimpl_->parser_(content, token_handler);
         callback({});
-    });
+      });
 }
 
 // ==========================================================================
@@ -103,11 +94,8 @@ void session::async_read(
 // ==========================================================================
 void session::write(telnetpp::element const &elem)
 {
-    telnetpp::generate(
-        elem, 
-        [this](telnetpp::bytes data) {
-            channel_->write(data);
-        });
+  telnetpp::generate(
+      elem, [this](telnetpp::bytes data) { channel_->write(data); });
 }
 
 // ==========================================================================
@@ -115,9 +103,9 @@ void session::write(telnetpp::element const &elem)
 // ==========================================================================
 void session::install(
     telnetpp::command_type cmd,
-    std::function<void (telnetpp::command)> const &handler)
+    std::function<void(telnetpp::command)> const &handler)
 {
-    pimpl_->command_router_.register_route(cmd, handler);
+  pimpl_->command_router_.register_route(cmd, handler);
 }
 
 // ==========================================================================
@@ -125,8 +113,8 @@ void session::install(
 // ==========================================================================
 void session::install(client_option &option)
 {
-    detail::register_client_option(
-        option, pimpl_->negotiation_router_, pimpl_->subnegotiation_router_);
+  detail::register_client_option(
+      option, pimpl_->negotiation_router_, pimpl_->subnegotiation_router_);
 }
 
 // ==========================================================================
@@ -134,8 +122,8 @@ void session::install(client_option &option)
 // ==========================================================================
 void session::install(server_option &option)
 {
-    detail::register_server_option(
-        option, pimpl_->negotiation_router_, pimpl_->subnegotiation_router_);
+  detail::register_server_option(
+      option, pimpl_->negotiation_router_, pimpl_->subnegotiation_router_);
 }
 
-}
+}  // namespace telnetpp

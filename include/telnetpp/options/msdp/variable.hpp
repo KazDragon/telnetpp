@@ -6,24 +6,20 @@
 #include <variant>
 #include <vector>
 
-namespace telnetpp { namespace options { namespace msdp {
+namespace telnetpp::options::msdp {
 
 struct variable;
 
 using string_value = telnetpp::byte_storage;
-using array_value  = boost::container::small_vector<string_value, 4>;
-using table_value  = std::vector<variable>;
+using array_value = boost::container::small_vector<string_value, 4>;
+using table_value = std::vector<variable>;
 
 //* =========================================================================
 /// \class telnetpp::options::msdp::value_type
 /// \brief A variant that can either be a string, an array of string, or
 /// an array of telnetpp::options::msdp::variable.
 //* =========================================================================
-using value_type = std::variant<
-    string_value,
-    array_value,
-    table_value
->;
+using value_type = std::variant<string_value, array_value, table_value>;
 
 //* =========================================================================
 /// \brief A structure that represents a named value.
@@ -32,28 +28,28 @@ using value_type = std::variant<
 //* =========================================================================
 struct TELNETPP_EXPORT variable
 {
-    //* =====================================================================
-    /// \brief Constructor
-    //* =====================================================================
-    variable();
+  //* =====================================================================
+  /// \brief Constructor
+  //* =====================================================================
+  variable();
 
-    //* =====================================================================
-    /// \brief Constructor
-    //* =====================================================================
-    variable(telnetpp::byte_storage name, string_value value);
+  //* =====================================================================
+  /// \brief Constructor
+  //* =====================================================================
+  variable(telnetpp::byte_storage name, string_value value);
 
-    //* =====================================================================
-    /// \brief Constructor
-    //* =====================================================================
-    variable(telnetpp::byte_storage name, array_value array_values);
+  //* =====================================================================
+  /// \brief Constructor
+  //* =====================================================================
+  variable(telnetpp::byte_storage name, array_value array_values);
 
-    //* =====================================================================
-    /// \brief Constructor
-    //* =====================================================================
-    variable(telnetpp::byte_storage name, table_value table_values);
-    
-    telnetpp::byte_storage name_;
-    value_type value_;
+  //* =====================================================================
+  /// \brief Constructor
+  //* =====================================================================
+  variable(telnetpp::byte_storage name, table_value table_values);
+
+  telnetpp::byte_storage name_;
+  value_type value_;
 };
 
 //* =========================================================================
@@ -74,4 +70,4 @@ bool operator!=(variable const &lhs, variable const &rhs);
 TELNETPP_EXPORT
 std::ostream &operator<<(std::ostream &out, variable const &var);
 
-}}}
+}  // namespace telnetpp::options::msdp

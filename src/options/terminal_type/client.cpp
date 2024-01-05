@@ -1,7 +1,7 @@
 #include "telnetpp/options/terminal_type/client.hpp"
 #include "telnetpp/options/terminal_type/detail/protocol.hpp"
 
-namespace telnetpp { namespace options { namespace terminal_type {
+namespace telnetpp::options::terminal_type {
 
 // ==========================================================================
 // CONSTRUCTOR
@@ -16,11 +16,9 @@ client::client(telnetpp::session &sess)
 // ==========================================================================
 void client::request_terminal_type()
 {
-    static constexpr telnetpp::byte const request_content[] = {
-        detail::send
-    };
+  static constexpr telnetpp::byte const request_content[] = {detail::send};
 
-    write_subnegotiation(request_content);
+  write_subnegotiation(request_content);
 }
 
 // ==========================================================================
@@ -28,10 +26,10 @@ void client::request_terminal_type()
 // ==========================================================================
 void client::handle_subnegotiation(telnetpp::bytes data)
 {
-    if (!data.empty() && data[0] == detail::is)
-    {
-        on_terminal_type(data.subspan(1));
-    }
+  if (!data.empty() && data[0] == detail::is)
+  {
+    on_terminal_type(data.subspan(1));
+  }
 }
 
-}}}
+}  // namespace telnetpp::options::terminal_type

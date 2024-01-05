@@ -1,9 +1,9 @@
 #pragma once
 
+#include "telnetpp/command.hpp"  // IWYU pragma: export
 #include "telnetpp/core.hpp"
-#include "telnetpp/command.hpp"
-#include "telnetpp/negotiation.hpp"
-#include "telnetpp/subnegotiation.hpp"
+#include "telnetpp/negotiation.hpp"     // IWYU pragma: export
+#include "telnetpp/subnegotiation.hpp"  // IWYU pragma: export
 #include <iosfwd>
 #include <variant>
 
@@ -15,12 +15,7 @@ namespace telnetpp {
 /// a command, negotiation, or subnegotiation, or a string that represents
 /// upper-layer non-Telnet data.
 //* =========================================================================
-using element = std::variant<
-    bytes,
-    negotiation,
-    subnegotiation,
-    command
->;
+using element = std::variant<bytes, negotiation, subnegotiation, command>;
 
 //* =========================================================================
 /// \brief A contiguous range of elements.
@@ -33,4 +28,4 @@ using elements = gsl::span<element const>;
 TELNETPP_EXPORT
 std::ostream &operator<<(std::ostream &out, telnetpp::element const &elem);
 
-}
+}  // namespace telnetpp

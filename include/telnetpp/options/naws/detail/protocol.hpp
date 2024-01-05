@@ -16,8 +16,8 @@
 /// set_window_size() function.
 /// \see https://www.ietf.org/rfc/rfc1073.txt
 //* =========================================================================
-namespace telnetpp { namespace options { namespace naws { namespace detail {
+namespace telnetpp::options::naws::detail {
 
 static constexpr option_type const option = 31;
 
-}}}}
+}

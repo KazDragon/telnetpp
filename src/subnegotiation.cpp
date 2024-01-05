@@ -9,28 +9,26 @@ namespace telnetpp {
 // ==========================================================================
 // OPERATOR<<
 // ==========================================================================
-std::ostream &operator<<(std::ostream& out, const subnegotiation& sub)
+std::ostream &operator<<(std::ostream &out, subnegotiation const &sub)
 {
-    boost::io::ios_all_saver ias(out);
+  boost::io::ios_all_saver ias(out);
 
-    out << "subnegotiation[0x"
-        << std::hex << std::setw(2) << std::setfill('0') << std::uppercase
-        << int(sub.option())
-        << ", [";
+  out << "subnegotiation[0x" << std::hex << std::setw(2) << std::setfill('0')
+      << std::uppercase << static_cast<int>(sub.option()) << ", [";
 
-    bool first = true;
+  bool first = true;
 
-    for (auto &&by : sub.content())
+  for (auto &&by : sub.content())
+  {
+    if (!std::exchange(first, false))
     {
-        if (!std::exchange(first, false))
-        {
-            out << ", ";
-        }
-
-        out << "0x" << std::setw(2) << int(by);
+      out << ", ";
     }
 
-    return out << "]]";
+    out << "0x" << std::setw(2) << static_cast<int>(by);
+  }
+
+  return out << "]]";
 }
 
-}
+}  // namespace telnetpp

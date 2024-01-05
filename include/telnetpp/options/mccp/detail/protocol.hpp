@@ -63,8 +63,8 @@
 /// \see https://www.ietf.org/rfc/rfc1950.txt
 //* =========================================================================
 
-namespace telnetpp { namespace options { namespace mccp { namespace detail {
+namespace telnetpp::options::mccp::detail {
 
 static constexpr option_type const option = 86;
 
-}}}}
+}

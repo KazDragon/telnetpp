@@ -1,6 +1,6 @@
 #pragma once
 
-#include <string>
+#include "telnetpp/core.hpp"
 
 //* =========================================================================
 /// \namespace telnetpp::options::new_environ
@@ -28,19 +28,18 @@
 /// automatically handle requests sent from a client by using this data.
 /// \see https://tools.ietf.org/html/rfc1572
 //* =========================================================================
-namespace telnetpp { namespace options { namespace new_environ {
-    namespace detail {
+namespace telnetpp::options::new_environ::detail {
 
-static constexpr option_type const option  = 39;
+static constexpr option_type const option = 39;
 
 using new_environ_command_type = byte;
-static constexpr new_environ_command_type const is      = 0;
-static constexpr new_environ_command_type const send    = 1;
-static constexpr new_environ_command_type const info    = 2;
+static constexpr new_environ_command_type const is = 0;
+static constexpr new_environ_command_type const send = 1;
+static constexpr new_environ_command_type const info = 2;
 
-static constexpr new_environ_command_type const var     = 0;
-static constexpr new_environ_command_type const value   = 1;
-static constexpr new_environ_command_type const esc     = 2;
+static constexpr new_environ_command_type const var = 0;
+static constexpr new_environ_command_type const value = 1;
+static constexpr new_environ_command_type const esc = 2;
 static constexpr new_environ_command_type const uservar = 3;
 
-}}}}
+}  // namespace telnetpp::options::new_environ::detail
