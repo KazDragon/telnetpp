@@ -16,10 +16,7 @@ class TELNETPP_EXPORT client : public telnetpp::options::basic_client<
                                    telnetpp::options::echo::detail::option>
 {
  public:
-  constexpr explicit client(telnetpp::session &sess) noexcept
-    : basic_client(sess)
-  {
-  }
+  explicit client(telnetpp::session &sess) noexcept;
 };
 
 }  // namespace telnetpp::options::echo
