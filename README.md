@@ -31,12 +31,6 @@ Telnet++ can be installed from source using CMake.  This requires Boost, GSL-Lit
     cmake --build .
     sudo cmake --install .
 
-# Installation - Conan
-
-You can also use [The Conan Package Manager](https://conan.io/) to install Telnet++ and its dependencies.
-
-See [the rot13server example](examples/rot13server) for a minimalistic project that describes this setup.
-
 # Features / Roadmap / Progress
 
 1. [x] Basic constants and structures for use with Telnet

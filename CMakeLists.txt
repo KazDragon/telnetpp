@@ -48,69 +48,20 @@ if (TELNETPP_DOC_ONLY)
     return()
 endif()
 
-if (EXISTS ${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-    message("Using Conan due to conanbuildinfo.cmake")
-    set(TELNETPP_USE_CONAN ON)
-    include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-    conan_basic_setup(TARGETS NO_OUTPUT_DIRS)
+# Telnet++ requires at least Boost 1.69.
+find_package(Boost 1.69.0 REQUIRED)
+
+# Telnet++ requires at least version 0.38 of gsl-lite.
+find_package(gsl-lite 0.38.0 REQUIRED)
+
+# If we are building with ZLib, then we require the ZLib library
+if (${TELNETPP_WITH_ZLIB})
+    find_package(ZLIB REQUIRED)
 endif()
 
-if (TELNETPP_USE_CONAN)
-    set(TELNETPP_PUBLIC_LIBRARIES
-        CONAN_PKG::boost
-        CONAN_PKG::gsl-lite
-    )
-
-    set(TELNETPP_PRIVATE_LIBRARIES
-    )
-
-    if (${TELNETPP_WITH_ZLIB})
-        set(TELNETPP_PRIVATE_LIBRARIES
-            ${TELNETPP_PRIVATE_LIBRARIES}
-            CONAN_PKG::zlib
-        )
-    endif()
-
-    set(TELNETPP_TESTER_LIBRARIES
-        telnetpp
-        CONAN_PKG::gtest
-    )
-else()
-    # Telnet++ requires at least Boost 1.69.
-    find_package(Boost 1.69.0 REQUIRED)
-
-    # Telnet++ requires at least version 0.38 of gsl-lite.
-    find_package(gsl-lite 0.38.0 REQUIRED)
-
-    # If we are building with ZLib, then we require the ZLib library
-    if (${TELNETPP_WITH_ZLIB})
-        find_package(ZLIB REQUIRED)
-    endif()
-
-    # If we are building with tests, then we require the GTest library
-    if (${TELNETPP_WITH_TESTS})
-        find_package(GTest REQUIRED)
-    endif()
-
-    set(TELNETPP_PUBLIC_LIBRARIES
-        Boost::boost
-        gsl::gsl-lite
-    )
-
-    if (${TELNETPP_WITH_ZLIB})
-        set(TELNETPP_PUBLIC_LIBRARIES
-            ${TELNETPP_PUBLIC_LIBRARIES}
-            ZLIB::ZLIB
-        )
-    endif()
-
-    if (${TELNETPP_WITH_TESTS})
-        set(TELNETPP_TESTER_LIBRARIES
-            telnetpp
-            GTest::GTest
-            GTest::Main
-        )
-    endif()
+# If we are building with tests, then we require the GTest library
+if (${TELNETPP_WITH_TESTS})
+    find_package(GTest REQUIRED)
 endif()
 
 # When building shared objects, etc., we only want to export certain symbols.
@@ -214,6 +165,12 @@ target_sources(telnetpp
         src/detail/registration.cpp
 )
 
+target_link_libraries(telnetpp
+    PUBLIC
+        Boost::boost
+        gsl::gsl-lite
+)
+
 # The zlib compressors for MCCP should only be compiled into the library
 # if zlib is available.
 if (TELNETPP_WITH_ZLIB)
@@ -224,14 +181,12 @@ if (TELNETPP_WITH_ZLIB)
             src/options/mccp/zlib/compressor.cpp
             src/options/mccp/zlib/decompressor.cpp
     )
-endif()
 
-target_link_libraries(telnetpp
-    PUBLIC
-        ${TELNETPP_PUBLIC_LIBRARIES}
-    PRIVATE
-        ${TELNETPP_PRIVATE_LIBRARIES}
-)
+    target_link_libraries(telnetpp
+        PUBLIC
+            ZLIB::ZLIB
+    )      
+endif()
 
 set_target_properties(telnetpp
     PROPERTIES
@@ -400,7 +355,9 @@ target_compile_options(telnetpp_tester
 
 target_link_libraries(telnetpp_tester
     PRIVATE
-        ${TELNETPP_TESTER_LIBRARIES}
+        telnetpp
+        GTest::GTest
+        GTest::Main
 )
 
 add_test(telnetpp_test telnetpp_tester)
