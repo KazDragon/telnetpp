@@ -1,5 +1,6 @@
 var searchData=
 [
-  ['value_156',['value',['../classtelnetpp_1_1command.html#a5e0b043553a5ef83bf5f2800b3e2d276',1,'telnetpp::command']]],
-  ['variable_157',['variable',['../structtelnetpp_1_1options_1_1msdp_1_1variable.html#a351c5bf0e411a79f444efcfa91a66609',1,'telnetpp::options::msdp::variable::variable()'],['../structtelnetpp_1_1options_1_1msdp_1_1variable.html#a1787df7cf41b93b76301aeddaa330a79',1,'telnetpp::options::msdp::variable::variable(telnetpp::byte_storage name, string_value value)'],['../structtelnetpp_1_1options_1_1msdp_1_1variable.html#a122c6297f9a88f38b6b39969bcf1ec97',1,'telnetpp::options::msdp::variable::variable(telnetpp::byte_storage name, array_value array_values)'],['../structtelnetpp_1_1options_1_1msdp_1_1variable.html#a9a71a9cff97c232acf8dc478cdcf5031',1,'telnetpp::options::msdp::variable::variable(telnetpp::byte_storage name, table_value table_values)']]]
+  ['write_154',['write',['../classtelnetpp_1_1session.html#a142c0ca472d06debadd5f553b58ba4ea',1,'telnetpp::session']]],
+  ['write_5fsubnegotiation_155',['write_subnegotiation',['../classtelnetpp_1_1option.html#ac2961b3f2e953b9e4616e51d6d9d87a9',1,'telnetpp::option']]],
+  ['write_5ftext_156',['write_text',['../classtelnetpp_1_1option.html#a6761c9fb1b67b669764e90250ceb95fb',1,'telnetpp::option']]]
 ];
