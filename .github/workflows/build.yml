@@ -1,6 +1,6 @@
 name: build
 
-on: 
+on:
   pull_request:
   push:
     branches:
@@ -21,93 +21,36 @@ jobs:
       BUILD_TYPE: ${{ matrix.build_type }}
 
     steps:
-    - uses: actions/checkout@v2
-      with:
-        fetch-depth: 0
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
 
-    - name: Install latest Boost
-      shell: bash
-      run: |
-        sudo apt-add-repository ppa:mhier/libboost-latest
-        sudo apt install libboost1.74-dev
-      
-    - name: Install dependencies from source
-      run: .ci/fetch_system_dependencies.sh
-      
-    - name: Create Build Environment
-      run: cmake -E make_directory ${{runner.workspace}}/telnetpp/build
+      - name: Install latest Boost
+        shell: bash
+        run: |
+          sudo apt-add-repository ppa:mhier/libboost-latest
+          sudo apt install libboost1.74-dev
 
-    - name: Configure CMake
-      shell: bash
-      working-directory: ${{runner.workspace}}/telnetpp/build
-      run: cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DCMAKE_PREFIX_PATH=$EXTERNAL_ROOT -DTELNETPP_WITH_ZLIB=True
+      - name: Install dependencies from source
+        run: .ci/fetch_system_dependencies.sh
 
-    - name: Build
-      shell: bash
-      working-directory: ${{runner.workspace}}/telnetpp/build
-      run: cmake --build . --config $BUILD_TYPE
+      - name: Create Build Environment
+        run: cmake -E make_directory ${{runner.workspace}}/telnetpp/build
 
-    - name: Test
-      working-directory: ${{runner.workspace}}/telnetpp/build
-      shell: bash
-      run: ctest -C $BUILD_TYPE
+      - name: Configure CMake
+        shell: bash
+        working-directory: ${{runner.workspace}}/telnetpp/build
+        run: cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DCMAKE_PREFIX_PATH=$EXTERNAL_ROOT -DTELNETPP_WITH_ZLIB=True
 
-  build-conan:
-    runs-on: ubuntu-latest
+      - name: Build
+        shell: bash
+        working-directory: ${{runner.workspace}}/telnetpp/build
+        run: cmake --build . --config $BUILD_TYPE
 
-    env:
-      BUILD_TYPE: Release
-
-    steps:
-    - uses: actions/checkout@v2
-      with:
-        fetch-depth: 0
-
-    - name: Extract branch name
-      shell: bash
-      run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
-      id: extract_branch
-
-    # Build a cache for conan packages.  A new branch will create a copy of
-    # the master cache, but the master cache isn't updated until something is
-    # merged to the master branch.
-    - name: Cache conan packages
-      uses: actions/cache@v2
-      with:
-        path: ~/.conan
-        key: conan-package-cache-${{ steps.extract_branch.outputs.branch }}
-        restore-keys: |
-          conan-package-cache-master
-
-    - name: Install Conan
-      run: |
-        pip3 install --upgrade --user wheel setuptools
-        pip3 install --user conan
-        echo "$HOME/.local/bin" >> $GITHUB_PATH
-
-    - name: Create Build Environment
-      run: cmake -E make_directory ${{runner.workspace}}/telnetpp/build
-
-    - name: Install dependencies from Conan
-      working-directory: ${{runner.workspace}}/telnetpp/build
-      run: |
-        conan config set general.request_timeout=120
-        conan install $GITHUB_WORKSPACE -s compiler.libcxx=libstdc++11 -s cppstd=17 -s build_type=$BUILD_TYPE --build=missing
-
-    - name: Configure CMake
-      shell: bash
-      working-directory: ${{runner.workspace}}/telnetpp/build
-      run: cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=$BUILD_TYPE
-
-    - name: Build
-      working-directory: ${{runner.workspace}}/telnetpp/build
-      shell: bash
-      run: cmake --build . --config $BUILD_TYPE
-
-    - name: Test
-      working-directory: ${{runner.workspace}}/telnetpp/build
-      shell: bash
-      run: ctest -C $BUILD_TYPE
+      - name: Test
+        working-directory: ${{runner.workspace}}/telnetpp/build
+        shell: bash
+        run: ctest -C $BUILD_TYPE
 
   build-coverage:
     runs-on: ubuntu-latest
@@ -122,153 +65,117 @@ jobs:
       BUILD_TYPE: ${{ matrix.build_type }}
 
     steps:
-    - uses: actions/checkout@v2
-      with:
-        fetch-depth: 0
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
 
-    - name: Install latest Boost
-      shell: bash
-      run: |
-        sudo apt-add-repository ppa:mhier/libboost-latest
-        sudo apt install libboost1.74-dev
+      - name: Install latest Boost
+        shell: bash
+        run: |
+          sudo apt-add-repository ppa:mhier/libboost-latest
+          sudo apt install libboost1.74-dev
 
-    - name: Extract branch name
-      shell: bash
-      run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
-      id: extract_branch
+      - name: Extract branch name
+        shell: bash
+        run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
+        id: extract_branch
 
-    # Build a cache for LCOV.
-    - name: Cache lcov
-      uses: actions/cache@v2
-      with:
-        path: ~/.lcov
-        key: lcov-cache-${{ steps.extract_branch.outputs.branch }}
-        restore-keys: |
-          lcov-cache-master
+      # Build a cache for LCOV.
+      - name: Cache lcov
+        uses: actions/cache@v2
+        with:
+          path: ~/.lcov
+          key: lcov-cache-${{ steps.extract_branch.outputs.branch }}
+          restore-keys: |
+            lcov-cache-master
 
-    - name: Install LCOV
-      shell: bash
-      run: |
-        if [ ! -f "$HOME/.lcov/usr/local/bin/lcov" ]; then
-          mkdir $HOME/.lcov-build || true;
-          cd $HOME/.lcov-build;
-          wget https://github.com/linux-test-project/lcov/releases/download/v1.16/lcov-1.16.tar.gz;
-          tar -xzf lcov-1.16.tar.gz;
-          mkdir -p $HOME/.lcov || true;
-          DESTDIR=$HOME/.lcov make -C lcov-1.16/ install;
-        fi
-        echo "##[set-output name=bin;]$(echo $HOME/.lcov/usr/local/bin/lcov)"
-      id: lcov
+      - name: Install LCOV
+        shell: bash
+        run: |
+          if [ ! -f "$HOME/.lcov/usr/local/bin/lcov" ]; then
+            mkdir $HOME/.lcov-build || true;
+            cd $HOME/.lcov-build;
+            wget https://github.com/linux-test-project/lcov/releases/download/v1.16/lcov-1.16.tar.gz;
+            tar -xzf lcov-1.16.tar.gz;
+            mkdir -p $HOME/.lcov || true;
+            DESTDIR=$HOME/.lcov make -C lcov-1.16/ install;
+          fi
+          echo "##[set-output name=bin;]$(echo $HOME/.lcov/usr/local/bin/lcov)"
+        id: lcov
 
-    - name: Install dependencies from source
-      run: .ci/fetch_system_dependencies.sh
-      
-    - name: Create Build Environment
-      run: cmake -E make_directory ${{runner.workspace}}/telnetpp/build
+      - name: Install dependencies from source
+        run: .ci/fetch_system_dependencies.sh
 
-    - name: Configure CMake
-      shell: bash
-      working-directory: ${{runner.workspace}}/telnetpp/build
-      run: cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DCMAKE_PREFIX_PATH=$EXTERNAL_ROOT -DTELNETPP_WITH_ZLIB=True -DTELNETPP_COVERAGE=True
+      - name: Create Build Environment
+        run: cmake -E make_directory ${{runner.workspace}}/telnetpp/build
 
-    - name: Build
-      shell: bash
-      working-directory: ${{runner.workspace}}/telnetpp/build
-      run: cmake --build . --config $BUILD_TYPE
+      - name: Configure CMake
+        shell: bash
+        working-directory: ${{runner.workspace}}/telnetpp/build
+        run: cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DCMAKE_PREFIX_PATH=$EXTERNAL_ROOT -DTELNETPP_WITH_ZLIB=True -DTELNETPP_COVERAGE=True
 
-    - name: Zero test counters
-      shell: bash
-      run: ${{ steps.lcov.outputs.bin }} --gcov-tool=gcov-9 --base-directory ${{runner.workspace}}/telnetpp/build --directory ${{runner.workspace}}/telnetpp/build --zerocounters -q
+      - name: Build
+        shell: bash
+        working-directory: ${{runner.workspace}}/telnetpp/build
+        run: cmake --build . --config $BUILD_TYPE
 
-    - name: Test
-      working-directory: ${{runner.workspace}}/telnetpp/build
-      shell: bash
-      run: ctest -C $BUILD_TYPE
+      - name: Zero test counters
+        shell: bash
+        run: ${{ steps.lcov.outputs.bin }} --gcov-tool=gcov-9 --base-directory ${{runner.workspace}}/telnetpp/build --directory ${{runner.workspace}}/telnetpp/build --zerocounters -q
 
-    - name: Calculate coverage
-      shell: bash
-      run: |
-        ${{ steps.lcov.outputs.bin }} --gcov-tool=gcov-9 --base-directory ${{runner.workspace}}/telnetpp/build --directory ${{runner.workspace}}/telnetpp/build  --capture --output-file coverage.info;
-        ${{ steps.lcov.outputs.bin }} --gcov-tool=gcov-9 --remove coverage.info '*/test/*' '/usr/*' '*/3party/*' --output-file coverage.info;
-        ${{ steps.lcov.outputs.bin }} --gcov-tool=gcov-9 --list coverage.info;
+      - name: Test
+        working-directory: ${{runner.workspace}}/telnetpp/build
+        shell: bash
+        run: ctest -C $BUILD_TYPE
 
-    - name: Post coverage to coveralls
-      uses: coverallsapp/github-action@master
-      with:
-        path-to-lcov: coverage.info
-        github-token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Calculate coverage
+        shell: bash
+        run: |
+          ${{ steps.lcov.outputs.bin }} --gcov-tool=gcov-9 --base-directory ${{runner.workspace}}/telnetpp/build --directory ${{runner.workspace}}/telnetpp/build  --capture --output-file coverage.info;
+          ${{ steps.lcov.outputs.bin }} --gcov-tool=gcov-9 --remove coverage.info '*/test/*' '/usr/*' '*/3party/*' --output-file coverage.info;
+          ${{ steps.lcov.outputs.bin }} --gcov-tool=gcov-9 --list coverage.info;
 
-    - name: Post coverage to Codacy
-      uses: codacy/codacy-coverage-reporter-action@v1
-      with:
-        project-token: ${{ secrets.CODACY_PROJECT_TOKEN }}
-        coverage-reports: coverage.info
+      - name: Post coverage to coveralls
+        uses: coverallsapp/github-action@master
+        with:
+          path-to-lcov: coverage.info
+          github-token: ${{ secrets.GITHUB_TOKEN }}
 
-  conan-create:
-    runs-on: ubuntu-latest
-    needs: [build-conan]
-  
-    env:
-      BUILD_TYPE: Release
-
-    steps:
-    - uses: actions/checkout@v2
-      with:
-        fetch-depth: 0
-
-    - name: Extract branch name
-      shell: bash
-      run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
-      id: extract_branch
-
-    - name: Cache conan packages
-      uses: actions/cache@v2
-      with:
-        path: ~/.conan
-        key: conan-package-cache-${{ steps.extract_branch.outputs.branch }}
-        restore-keys: |
-          conan-package-cache-master
-
-    - name: Install Conan
-      run: |
-        pip3 install --upgrade --user wheel setuptools
-        pip3 install --user conan
-        echo "$HOME/.local/bin" >> $GITHUB_PATH
-
-    - name: Create Conan Package
-      working-directory: ${{runner.workspace}}/telnetpp
-      run: |
-        conan create . telnetpp/9.9.9@_/_ -o telnetpp:withZlib=True --build=missing
+      - name: Post coverage to Codacy
+        uses: codacy/codacy-coverage-reporter-action@v1
+        with:
+          project-token: ${{ secrets.CODACY_PROJECT_TOKEN }}
+          coverage-reports: coverage.info
 
   build-docs:
     runs-on: ubuntu-latest
-#   Only build documentation for valid builds on master.
-    needs: [build, build-conan]
+    #   Only build documentation for valid builds on master.
+    needs: [build]
     if: github.ref == 'refs/heads/master'
 
     steps:
-    - uses: actions/checkout@v2
-      with:
-        fetch-depth: 0
-    
-    - name: Install Doxygen
-      shell: bash
-      run: sudo apt install doxygen
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
 
-    - name: Create Build Environment
-      run: cmake -E make_directory ${{runner.workspace}}/telnetpp/build
+      - name: Install Doxygen
+        shell: bash
+        run: sudo apt install doxygen
 
-    - name: Configure CMake
-      shell: bash
-      working-directory: ${{runner.workspace}}/telnetpp/build
-      run: cmake $GITHUB_WORKSPACE -DTELNETPP_DOC_ONLY=True
+      - name: Create Build Environment
+        run: cmake -E make_directory ${{runner.workspace}}/telnetpp/build
 
-    - name: Build
-      working-directory: ${{runner.workspace}}/telnetpp/build
-      shell: bash
-      run: cmake --build . --target telnetpp_doc
+      - name: Configure CMake
+        shell: bash
+        working-directory: ${{runner.workspace}}/telnetpp/build
+        run: cmake $GITHUB_WORKSPACE -DTELNETPP_DOC_ONLY=True
 
-    - uses: peaceiris/actions-gh-pages@v3
-      with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
-        publish_dir: ${{runner.workspace}}/telnetpp/build/html
+      - name: Build
+        working-directory: ${{runner.workspace}}/telnetpp/build
+        shell: bash
+        run: cmake --build . --target telnetpp_doc
+
+      - uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ${{runner.workspace}}/telnetpp/build/html

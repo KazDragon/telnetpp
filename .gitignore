@@ -5,3 +5,5 @@ version.hpp
 /out
 /CMakeSettings.json
 build
+.cache
+compile_commands.json
