@@ -1,6 +1,7 @@
 #pragma once
 
 #include "telnetpp/core.hpp"
+
 #include <iosfwd>
 
 namespace telnetpp {
@@ -10,24 +11,24 @@ namespace telnetpp {
 //* =========================================================================
 class TELNETPP_EXPORT command
 {
- public:
-  //* =====================================================================
-  /// \brief Constructor
-  //* =====================================================================
-  explicit constexpr command(command_type cmnd) noexcept : command_(cmnd)
-  {
-  }
+public:
+    //* =====================================================================
+    /// \brief Constructor
+    //* =====================================================================
+    explicit constexpr command(command_type cmnd) noexcept : command_(cmnd)
+    {
+    }
 
-  //* =====================================================================
-  /// \brief Returns the value of the command.
-  //* =====================================================================
-  [[nodiscard]] constexpr command_type value() const noexcept
-  {
-    return command_;
-  }
+    //* =====================================================================
+    /// \brief Returns the value of the command.
+    //* =====================================================================
+    [[nodiscard]] constexpr command_type value() const noexcept
+    {
+        return command_;
+    }
 
- private:
-  command_type command_;
+private:
+    command_type command_;
 };
 
 //* =========================================================================
@@ -35,7 +36,7 @@ class TELNETPP_EXPORT command
 //* =========================================================================
 constexpr bool operator==(command const &lhs, command const &rhs) noexcept
 {
-  return lhs.value() == rhs.value();
+    return lhs.value() == rhs.value();
 }
 
 //* =========================================================================
@@ -43,7 +44,7 @@ constexpr bool operator==(command const &lhs, command const &rhs) noexcept
 //* =========================================================================
 constexpr bool operator<(command const &lhs, command const &rhs) noexcept
 {
-  return lhs.value() < rhs.value();
+    return lhs.value() < rhs.value();
 }
 
 //* =========================================================================

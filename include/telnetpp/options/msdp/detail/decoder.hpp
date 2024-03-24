@@ -1,6 +1,7 @@
 #pragma once
 
 #include "telnetpp/options/msdp/variable.hpp"
+
 #include <functional>
 
 namespace telnetpp::options::msdp::detail {

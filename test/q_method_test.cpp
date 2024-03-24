@@ -1,6 +1,7 @@
 #include "fakes/fake_channel.hpp"
 #include "fakes/fake_client_option.hpp"
 #include "fakes/fake_server_option.hpp"
+
 #include <gtest/gtest.h>
 
 // The Q Method (RFC 1153) is a specification of how to use TELNET negotiations
@@ -32,8 +33,7 @@ protected:
     class option : public Option
     {
     public:
-        option(telnetpp::session &sess)
-          : Option(sess, 0)
+        explicit option(telnetpp::session &sess) : Option(sess, 0)
         {
         }
     };
@@ -102,8 +102,7 @@ protected:
     class option : public Option
     {
     public:
-        option(telnetpp::session &sess)
-          : Option(sess, 0)
+        explicit option(telnetpp::session &sess) : Option(sess, 0)
         {
         }
     };

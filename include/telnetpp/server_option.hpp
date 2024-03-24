@@ -33,12 +33,12 @@ class TELNETPP_EXPORT server_option
   : public telnetpp::
         option<telnetpp::will, telnetpp::wont, telnetpp::do_, telnetpp::dont>
 {
- public:
-  constexpr explicit server_option(
-      telnetpp::session &sess, telnetpp::option_type code) noexcept
-    : option{sess, code}
-  {
-  }
+public:
+    constexpr explicit server_option(
+        telnetpp::session &sess, telnetpp::option_type code) noexcept
+      : option{sess, code}
+    {
+    }
 };
 
 }  // namespace telnetpp

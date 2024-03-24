@@ -1,7 +1,9 @@
 #pragma once
 
 #include "fakes/fake_channel.hpp"
+
 #include <gtest/gtest.h>
+#include <telnetpp/session.hpp>
 
 class a_telnet_option_base : public testing::Test
 {

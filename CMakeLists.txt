@@ -300,8 +300,6 @@ target_sources(telnetpp_tester
     PRIVATE
         test/fakes/fake_channel.hpp
         test/fakes/fake_client_option.hpp
-        test/fakes/fake_compressor.hpp
-        test/fakes/fake_decompressor.hpp
         test/telnet_option_fixture.hpp
 
         test/client_option_test.cpp
@@ -360,7 +358,7 @@ target_link_libraries(telnetpp_tester
         GTest::Main
 )
 
-add_test(telnetpp_test telnetpp_tester)
+gtest_discover_tests(telnetpp_tester)
 endif()
 
 # Add customizations for packaging

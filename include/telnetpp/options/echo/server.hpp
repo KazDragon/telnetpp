@@ -15,8 +15,8 @@ namespace telnetpp::options::echo {
 class TELNETPP_EXPORT server : public telnetpp::options::basic_server<
                                    telnetpp::options::echo::detail::option>
 {
- public:
-  explicit server(telnetpp::session &sess) noexcept;
+public:
+    explicit server(telnetpp::session &sess) noexcept;
 };
 
 }  // namespace telnetpp::options::echo

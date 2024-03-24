@@ -1,6 +1,7 @@
 #pragma once
 
 #include "telnetpp/core.hpp"
+
 #include <optional>
 
 namespace telnetpp::options::new_environ {
@@ -10,8 +11,8 @@ namespace telnetpp::options::new_environ {
 //* =========================================================================
 enum class variable_type
 {
-  var,
-  uservar
+    var,
+    uservar
 };
 
 //* =========================================================================
@@ -19,8 +20,8 @@ enum class variable_type
 //* =========================================================================
 struct request
 {
-  variable_type type;
-  telnetpp::byte_storage name;
+    variable_type type;
+    telnetpp::byte_storage name;
 };
 
 using requests = gsl::span<request const>;
@@ -30,9 +31,9 @@ using requests = gsl::span<request const>;
 //* =========================================================================
 struct response
 {
-  variable_type type;
-  telnetpp::byte_storage name;
-  std::optional<telnetpp::byte_storage> value;
+    variable_type type;
+    telnetpp::byte_storage name;
+    std::optional<telnetpp::byte_storage> value;
 };
 
 using responses = gsl::span<response const>;

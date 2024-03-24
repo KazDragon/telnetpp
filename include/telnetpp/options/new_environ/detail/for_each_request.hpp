@@ -8,17 +8,17 @@ namespace telnetpp::options::new_environ::detail {
 template <typename Continuation>
 void for_each_request(telnetpp::bytes requests, Continuation &&cont)
 {
-  request_parsing_state state;
+    request_parsing_state state;
 
-  auto const *current = requests.begin();
-  auto const *end = requests.end();
+    auto const *current = requests.begin();
+    auto const *end = requests.end();
 
-  while (current != end)
-  {
-    parse_request_byte(state, current++, cont);
-  }
+    while (current != end)
+    {
+        parse_request_byte(state, current++, cont);
+    }
 
-  parse_request_end(state, cont);
+    parse_request_end(state, cont);
 }
 
 }  // namespace telnetpp::options::new_environ::detail

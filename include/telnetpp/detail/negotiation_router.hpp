@@ -8,10 +8,10 @@ namespace telnetpp::detail {
 
 struct negotiation_router_key_from_message_policy
 {
-  static negotiation key_from_message(negotiation const &neg)
-  {
-    return neg;
-  }
+    static negotiation key_from_message(negotiation const &neg)
+    {
+        return neg;
+    }
 };
 
 //* =========================================================================
