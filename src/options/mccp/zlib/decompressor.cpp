@@ -1,8 +1,10 @@
 #include "telnetpp/options/mccp/zlib/decompressor.hpp"
+
 #include <boost/core/ignore_unused.hpp>
 #include <zlib.h>
-#include <cassert>
+
 #include <optional>
+#include <cassert>
 
 namespace telnetpp::options::mccp::zlib {
 
@@ -23,35 +25,35 @@ constexpr std::size_t receive_buffer_size = 1024;
 // ==========================================================================
 struct decompressor::impl
 {
-  std::optional<z_stream> stream;
+    std::optional<z_stream> stream_;
 
-  // ======================================================================
-  // CONSTRUCT_STREAM
-  // ======================================================================
-  void construct_stream()
-  {
-    assert(stream == std::nullopt);
+    // ======================================================================
+    // CONSTRUCT_STREAM
+    // ======================================================================
+    void construct_stream()
+    {
+        assert(stream_ == std::nullopt);
 
-    stream = z_stream{};
+        stream_ = z_stream{};
 
-    auto result = inflateInit(&*stream);
-    boost::ignore_unused(result);
-    assert(result == Z_OK);
-  }
+        auto result = inflateInit(&*stream_);
+        boost::ignore_unused(result);
+        assert(result == Z_OK);
+    }
 
-  // ======================================================================
-  // DESTROY_STREAM
-  // ======================================================================
-  void destroy_stream()
-  {
-    assert(stream != std::nullopt);
+    // ======================================================================
+    // DESTROY_STREAM
+    // ======================================================================
+    void destroy_stream()
+    {
+        assert(stream_ != std::nullopt);
 
-    auto result = inflateEnd(&*stream);
-    boost::ignore_unused(result);
-    assert(result == Z_OK || result == Z_STREAM_ERROR);
+        auto result = inflateEnd(&*stream_);
+        boost::ignore_unused(result);
+        assert(result == Z_OK || result == Z_STREAM_ERROR);
 
-    stream = std::nullopt;
-  }
+        stream_ = std::nullopt;
+    }
 };
 
 // ==========================================================================
@@ -66,10 +68,10 @@ decompressor::decompressor() : pimpl_(new impl)
 // ==========================================================================
 decompressor::~decompressor()
 {
-  if (pimpl_->stream)
-  {
-    pimpl_->destroy_stream();
-  }
+    if (pimpl_->stream_)
+    {
+        pimpl_->destroy_stream();
+    }
 }
 
 // ==========================================================================
@@ -84,10 +86,10 @@ void decompressor::do_start()
 // ==========================================================================
 void decompressor::do_finish(continuation const & /*cont*/)
 {
-  if (pimpl_->stream)
-  {
-    pimpl_->destroy_stream();
-  }
+    if (pimpl_->stream_)
+    {
+        pimpl_->destroy_stream();
+    }
 }
 
 // ==========================================================================
@@ -96,42 +98,42 @@ void decompressor::do_finish(continuation const & /*cont*/)
 telnetpp::bytes decompressor::transform_chunk(
     telnetpp::bytes data, continuation const &cont)
 {
-  if (!pimpl_->stream)
-  {
-    pimpl_->construct_stream();
-  }
+    if (!pimpl_->stream_)
+    {
+        pimpl_->construct_stream();
+    }
 
-  assert(pimpl_->stream.has_value());
-  byte receive_buffer[receive_buffer_size];
-  pimpl_->stream->avail_in = static_cast<uInt>(data.size());
-  pimpl_->stream->next_in = const_cast<telnetpp::byte *>(data.data());
-  pimpl_->stream->avail_out = receive_buffer_size;
-  pimpl_->stream->next_out = receive_buffer;
+    assert(pimpl_->stream_.has_value());
+    byte receive_buffer[receive_buffer_size];
+    pimpl_->stream_->avail_in = static_cast<uInt>(data.size());
+    pimpl_->stream_->next_in = const_cast<telnetpp::byte *>(data.data());
+    pimpl_->stream_->avail_out = receive_buffer_size;
+    pimpl_->stream_->next_out = receive_buffer;
 
-  auto response = inflate(&*pimpl_->stream, Z_SYNC_FLUSH);
+    auto response = inflate(&*pimpl_->stream_, Z_SYNC_FLUSH);
 
-  if (response == Z_DATA_ERROR)
-  {
-    throw corrupted_stream_error(
-        "Inflation of byte in ZLib stream yielded Z_DATA_ERROR");
-  }
+    if (response == Z_DATA_ERROR)
+    {
+        throw corrupted_stream_error(
+            "Inflation of byte in ZLib stream yielded Z_DATA_ERROR");
+    }
 
-  assert(response == Z_OK || response == Z_STREAM_END);
+    assert(response == Z_OK || response == Z_STREAM_END);
 
-  auto const received_data =
-      telnetpp::bytes{receive_buffer, pimpl_->stream->next_out};
+    auto const received_data =
+        telnetpp::bytes{receive_buffer, pimpl_->stream_->next_out};
 
-  bool const stream_ended = response == Z_STREAM_END;
-  data = data.subspan(data.size() - pimpl_->stream->avail_in);
+    bool const stream_ended = response == Z_STREAM_END;
+    data = data.subspan(data.size() - pimpl_->stream_->avail_in);
 
-  if (stream_ended)
-  {
-    pimpl_->destroy_stream();
-  }
+    if (stream_ended)
+    {
+        pimpl_->destroy_stream();
+    }
 
-  cont(received_data, stream_ended);
+    cont(received_data, stream_ended);
 
-  return data;
+    return data;
 }
 
 }  // namespace telnetpp::options::mccp::zlib

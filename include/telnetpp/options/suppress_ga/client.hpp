@@ -17,8 +17,8 @@ class TELNETPP_EXPORT client
   : public telnetpp::options::basic_client<
         telnetpp::options::suppress_ga::detail::option>
 {
- public:
-  explicit client(telnetpp::session &sess) noexcept;
+public:
+    explicit client(telnetpp::session &sess) noexcept;
 };
 
 }  // namespace telnetpp::options::suppress_ga

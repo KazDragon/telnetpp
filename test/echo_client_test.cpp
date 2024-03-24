@@ -1,8 +1,9 @@
-#include "telnetpp/options/echo/client.hpp"
 #include "telnet_option_fixture.hpp"
-#include <gtest/gtest.h>
 
-using namespace telnetpp::literals;
+#include <gtest/gtest.h>
+#include <telnetpp/options/echo/client.hpp>
+
+using namespace telnetpp::literals;  // NOLINT
 
 namespace {
 

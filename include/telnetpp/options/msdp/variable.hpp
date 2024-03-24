@@ -1,7 +1,9 @@
 #pragma once
 
 #include "telnetpp/core.hpp"
+
 #include <boost/container/small_vector.hpp>
+
 #include <iosfwd>
 #include <variant>
 #include <vector>
@@ -28,28 +30,28 @@ using value_type = std::variant<string_value, array_value, table_value>;
 //* =========================================================================
 struct TELNETPP_EXPORT variable
 {
-  //* =====================================================================
-  /// \brief Constructor
-  //* =====================================================================
-  variable();
+    //* =====================================================================
+    /// \brief Constructor
+    //* =====================================================================
+    variable();
 
-  //* =====================================================================
-  /// \brief Constructor
-  //* =====================================================================
-  variable(telnetpp::byte_storage name, string_value value);
+    //* =====================================================================
+    /// \brief Constructor
+    //* =====================================================================
+    variable(telnetpp::byte_storage name, string_value value);
 
-  //* =====================================================================
-  /// \brief Constructor
-  //* =====================================================================
-  variable(telnetpp::byte_storage name, array_value array_values);
+    //* =====================================================================
+    /// \brief Constructor
+    //* =====================================================================
+    variable(telnetpp::byte_storage name, array_value array_values);
 
-  //* =====================================================================
-  /// \brief Constructor
-  //* =====================================================================
-  variable(telnetpp::byte_storage name, table_value table_values);
+    //* =====================================================================
+    /// \brief Constructor
+    //* =====================================================================
+    variable(telnetpp::byte_storage name, table_value table_values);
 
-  telnetpp::byte_storage name_;
-  value_type value_;
+    telnetpp::byte_storage name_;
+    value_type value_;
 };
 
 //* =========================================================================

@@ -12,23 +12,23 @@ namespace telnetpp::options {
 template <option_type Option>
 class TELNETPP_EXPORT basic_client : public telnetpp::client_option
 {
- public:
-  //* =====================================================================
-  /// \brief Constructor
-  //* =====================================================================
-  constexpr explicit basic_client(telnetpp::session &sess) noexcept
-    : client_option(sess, Option)
-  {
-  }
+public:
+    //* =====================================================================
+    /// \brief Constructor
+    //* =====================================================================
+    constexpr explicit basic_client(telnetpp::session &sess) noexcept
+      : client_option(sess, Option)
+    {
+    }
 
- private:
-  //* =====================================================================
-  /// \brief Called when a subnegotiation is received while the option is
-  /// active.  Override for option-specific functionality.
-  //* =====================================================================
-  void handle_subnegotiation(telnetpp::bytes /*content*/) override
-  {
-  }
+private:
+    //* =====================================================================
+    /// \brief Called when a subnegotiation is received while the option is
+    /// active.  Override for option-specific functionality.
+    //* =====================================================================
+    void handle_subnegotiation(telnetpp::bytes /*content*/) override
+    {
+    }
 };
 
 }  // namespace telnetpp::options

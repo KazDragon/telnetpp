@@ -18,9 +18,9 @@ void encode_variable(
 template <typename Continuation>
 void encode(telnetpp::options::msdp::variable const &vbl, Continuation &&cont)
 {
-  telnetpp::byte_storage storage;
-  encode_variable(vbl, storage);
-  cont(storage);
+    telnetpp::byte_storage storage;
+    encode_variable(vbl, storage);
+    cont(storage);
 }
 
 }  // namespace telnetpp::options::msdp::detail

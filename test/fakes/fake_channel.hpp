@@ -1,8 +1,8 @@
 #pragma once
 
 #include <telnetpp/core.hpp>
+
 #include <functional>
-#include <vector>
 
 struct fake_channel
 {
@@ -10,7 +10,7 @@ struct fake_channel
     /// \brief Asynchronously read from the channel and call the function
     /// back when it's available.
     //* =================================================================
-    void async_read(std::function<void (telnetpp::bytes)> const &callback)
+    void async_read(std::function<void(telnetpp::bytes)> const &callback)
     {
         read_callback_ = callback;
     }
@@ -26,7 +26,7 @@ struct fake_channel
     //* =================================================================
     /// \brief Returns whether the channel is alive.
     //* =================================================================
-    bool is_alive() const
+    [[nodiscard]] bool is_alive() const
     {
         return alive_;
     }
@@ -49,7 +49,7 @@ struct fake_channel
     //* =================================================================
     void receive(telnetpp::bytes data)
     {
-        std::function<void (telnetpp::bytes)> callback;
+        std::function<void(telnetpp::bytes)> callback;
         std::swap(read_callback_, callback);
 
         if (callback)
@@ -58,7 +58,7 @@ struct fake_channel
         }
     }
 
-    std::function<void (telnetpp::bytes)> read_callback_;
+    std::function<void(telnetpp::bytes)> read_callback_;
     telnetpp::byte_storage written_;
     bool alive_{true};
 };

@@ -34,10 +34,11 @@ void register_route_from_negotiation_to_option(
     negotiation_type request,
     NegotiableOption &option)
 {
-  route.register_route(
-      negotiation{request, option.option_code()},
-      [&option, request](telnetpp::negotiation const &)
-      { return option.negotiate(request); });
+    route.register_route(
+        negotiation{request, option.option_code()},
+        [&option, request](telnetpp::negotiation const &) {
+            return option.negotiate(request);
+        });
 }
 
 //* =========================================================================
@@ -47,10 +48,10 @@ template <class SubnegotiableOption>
 void register_route_from_subnegotiation_to_option(
     subnegotiation_router &route, SubnegotiableOption &option)
 {
-  route.register_route(
-      option.option_code(),
-      [&option](telnetpp::subnegotiation const &sub)
-      { return option.subnegotiate(sub.content()); });
+    route.register_route(
+        option.option_code(), [&option](telnetpp::subnegotiation const &sub) {
+            return option.subnegotiate(sub.content());
+        });
 }
 
 }  // namespace telnetpp::detail

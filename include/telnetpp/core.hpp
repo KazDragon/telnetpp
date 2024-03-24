@@ -1,9 +1,11 @@
 #pragma once
 
 #include "telnetpp/detail/export.hpp"  // IWYU pragma: export
+
 #include <gsl/gsl-lite.hpp>
-#include <cstdint>
+
 #include <string>
+#include <cstdint>
 
 namespace telnetpp {
 
@@ -47,15 +49,15 @@ namespace literals {
 // A simple function to convert from string literals to stored bytes.
 inline byte_storage operator""_tb(char const *text, size_t length)
 {
-  byte_storage result;
-  result.reserve(length);
+    byte_storage result;
+    result.reserve(length);
 
-  for (auto ch : gsl::span<char const>{text, length})
-  {
-    result.push_back(static_cast<telnetpp::byte>(ch));
-  }
+    for (auto ch : gsl::span<char const>{text, length})
+    {
+        result.push_back(static_cast<telnetpp::byte>(ch));
+    }
 
-  return result;
+    return result;
 }
 
 }  // namespace literals

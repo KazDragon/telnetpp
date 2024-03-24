@@ -2,6 +2,7 @@
 
 #include "telnetpp/core.hpp"
 #include "telnetpp/element.hpp"
+
 #include <functional>
 #include <memory>
 
@@ -138,157 +139,157 @@ class server_option;
 //* =========================================================================
 class TELNETPP_EXPORT session final  // NOLINT
 {
- public:
-  //* =====================================================================
-  /// \brief Constructor
-  //* =====================================================================
-  template <typename Channel>
-  explicit session(Channel &channel) : session{}
-  {
-    channel_ = std::unique_ptr<channel_concept>(
-        std::make_unique<channel_model<Channel>>(channel));
-  }
-
-  //* =====================================================================
-  /// \brief Destructor
-  //* =====================================================================
-  ~session();
-
-  //* =====================================================================
-  /// \brief Returns whether the session is still alive
-  //* =====================================================================
-  [[nodiscard]] bool is_alive() const;
-
-  //* =====================================================================
-  /// \brief Closes the session.
-  //* =====================================================================
-  void close();
-
-  //* =====================================================================
-  /// \brief Requests data from the underlying channel, acting on any
-  /// Telnet primitives that are received.
-  ///
-  /// Note: the callback may be called several times for any async_read.
-  /// For an example, it may contain two pieces of regular text surrounding
-  /// a block of negotiation, which may change the way those two pieces of
-  /// text are interpreted.  For this reason, after an async_read is
-  /// complete, the callback will always be called with an empty parameter
-  /// to indicate that a new read request can be made.
-  //* =====================================================================
-  void async_read(std::function<void(telnetpp::bytes)> const &callback);
-
-  //* =====================================================================
-  /// \brief Sends a Telnet data element.  Translates the element into a
-  /// sequence of bytes, that is then sent to the continuation.
-  /// \param content The data to send
-  //* =====================================================================
-  void write(telnetpp::element const &elem);
-
-  //* =====================================================================
-  /// \brief Installs a handler for the given command.
-  //* =====================================================================
-  void install(
-      telnetpp::command_type cmd,
-      std::function<void(telnetpp::command)> const &handler);
-
-  //* =====================================================================
-  /// \brief Installs a client option.
-  //* =====================================================================
-  void install(telnetpp::client_option &option);
-
-  //* =====================================================================
-  /// \brief Installs a server option.
-  //* =====================================================================
-  void install(telnetpp::server_option &option);
-
- private:
-  //* =====================================================================
-  /// \brief Constructor
-  //* =====================================================================
-  session();
-
-  //* =====================================================================
-  /// \brief An interface for the channel model.
-  //* =====================================================================
-  struct channel_concept
-  {
-    //* =================================================================
-    /// \brief Destructor
-    //* =================================================================
-    virtual ~channel_concept() = default;
-
-    //* =================================================================
-    /// \brief Asynchronously read from the channel and call the function
-    /// back when it's available.
-    //* =================================================================
-    virtual void async_read(std::function<void(bytes)> const &) = 0;
-
-    //* =================================================================
-    /// \brief Write the given data to the channel.
-    //* =================================================================
-    virtual void write(bytes data) = 0;
-
-    //* =================================================================
-    /// \brief Returns whether the channel is alive.
-    //* =================================================================
-    [[nodiscard]] virtual bool is_alive() const = 0;
-
-    //* =================================================================
-    /// \brief Closes the channel.
-    //* =================================================================
-    virtual void close() = 0;
-  };
-
-  template <typename Channel>
-  struct channel_model final : channel_concept
-  {
-    //* =================================================================
+public:
+    //* =====================================================================
     /// \brief Constructor
-    //* =================================================================
-    explicit channel_model(Channel &channel) : channel_{channel}
+    //* =====================================================================
+    template <typename Channel>
+    explicit session(Channel &channel) : session{}
     {
+        channel_ = std::unique_ptr<channel_concept>(
+            std::make_unique<channel_model<Channel>>(channel));
     }
 
-    //* =================================================================
-    /// \brief Asynchronously read from the channel and call the function
-    /// back when it's available.
-    //* =================================================================
-    void async_read(std::function<void(bytes)> const &callback) override
+    //* =====================================================================
+    /// \brief Destructor
+    //* =====================================================================
+    ~session();
+
+    //* =====================================================================
+    /// \brief Returns whether the session is still alive
+    //* =====================================================================
+    [[nodiscard]] bool is_alive() const;
+
+    //* =====================================================================
+    /// \brief Closes the session.
+    //* =====================================================================
+    void close();
+
+    //* =====================================================================
+    /// \brief Requests data from the underlying channel, acting on any
+    /// Telnet primitives that are received.
+    ///
+    /// Note: the callback may be called several times for any async_read.
+    /// For an example, it may contain two pieces of regular text surrounding
+    /// a block of negotiation, which may change the way those two pieces of
+    /// text are interpreted.  For this reason, after an async_read is
+    /// complete, the callback will always be called with an empty parameter
+    /// to indicate that a new read request can be made.
+    //* =====================================================================
+    void async_read(std::function<void(telnetpp::bytes)> const &callback);
+
+    //* =====================================================================
+    /// \brief Sends a Telnet data element.  Translates the element into a
+    /// sequence of bytes, that is then sent to the continuation.
+    /// \param content The data to send
+    //* =====================================================================
+    void write(telnetpp::element const &elem);
+
+    //* =====================================================================
+    /// \brief Installs a handler for the given command.
+    //* =====================================================================
+    void install(
+        telnetpp::command_type cmd,
+        std::function<void(telnetpp::command)> const &handler);
+
+    //* =====================================================================
+    /// \brief Installs a client option.
+    //* =====================================================================
+    void install(telnetpp::client_option &option);
+
+    //* =====================================================================
+    /// \brief Installs a server option.
+    //* =====================================================================
+    void install(telnetpp::server_option &option);
+
+private:
+    //* =====================================================================
+    /// \brief Constructor
+    //* =====================================================================
+    session();
+
+    //* =====================================================================
+    /// \brief An interface for the channel model.
+    //* =====================================================================
+    struct channel_concept
     {
-      channel_.async_read(callback);
-    }
+        //* =================================================================
+        /// \brief Destructor
+        //* =================================================================
+        virtual ~channel_concept() = default;
 
-    //* =================================================================
-    /// \brief Write the given data to the channel.
-    //* =================================================================
-    void write(bytes data) override
+        //* =================================================================
+        /// \brief Asynchronously read from the channel and call the function
+        /// back when it's available.
+        //* =================================================================
+        virtual void async_read(std::function<void(bytes)> const &) = 0;
+
+        //* =================================================================
+        /// \brief Write the given data to the channel.
+        //* =================================================================
+        virtual void write(bytes data) = 0;
+
+        //* =================================================================
+        /// \brief Returns whether the channel is alive.
+        //* =================================================================
+        [[nodiscard]] virtual bool is_alive() const = 0;
+
+        //* =================================================================
+        /// \brief Closes the channel.
+        //* =================================================================
+        virtual void close() = 0;
+    };
+
+    template <typename Channel>
+    struct channel_model final : channel_concept
     {
-      channel_.write(data);
-    }
+        //* =================================================================
+        /// \brief Constructor
+        //* =================================================================
+        explicit channel_model(Channel &channel) : channel_{channel}
+        {
+        }
 
-    //* =================================================================
-    /// \brief Returns whether the channel is alive.
-    //* =================================================================
-    [[nodiscard]] bool is_alive() const override
-    {
-      return channel_.is_alive();
-    }
+        //* =================================================================
+        /// \brief Asynchronously read from the channel and call the function
+        /// back when it's available.
+        //* =================================================================
+        void async_read(std::function<void(bytes)> const &callback) override
+        {
+            channel_.async_read(callback);
+        }
 
-    //* =================================================================
-    /// \brief Closes the channel.
-    //* =================================================================
-    void close() override
-    {
-      channel_.close();
-    }
+        //* =================================================================
+        /// \brief Write the given data to the channel.
+        //* =================================================================
+        void write(bytes data) override
+        {
+            channel_.write(data);
+        }
 
-   private:
-    Channel &channel_;
-  };
+        //* =================================================================
+        /// \brief Returns whether the channel is alive.
+        //* =================================================================
+        [[nodiscard]] bool is_alive() const override
+        {
+            return channel_.is_alive();
+        }
 
-  struct impl;
-  std::unique_ptr<channel_concept> channel_;
-  std::unique_ptr<impl> pimpl_;
+        //* =================================================================
+        /// \brief Closes the channel.
+        //* =================================================================
+        void close() override
+        {
+            channel_.close();
+        }
+
+    private:
+        Channel &channel_;
+    };
+
+    struct impl;
+    std::unique_ptr<channel_concept> channel_;
+    std::unique_ptr<impl> pimpl_;
 };
 
 }  // namespace telnetpp
