@@ -22,7 +22,7 @@
  <tr style="height: 56px;">
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname">Telnet++
-   &#160;<span id="projectnumber">3.1.0</span>
+   &#160;<span id="projectnumber">3.1.0.2</span>
    </div>
    <div id="projectbrief">A C++ library for interacting with Telnet streams</div>
   </td>
@@ -82,29 +82,29 @@ $(function() {
 <div class="line"><a name="l00010"></a><span class="lineno">   10</span>&#160;<span class="keyword">template</span> &lt;<span class="keyword">class</span> Continuation&gt;</div>
 <div class="line"><a name="l00011"></a><span class="lineno">   11</span>&#160;constexpr <span class="keywordtype">void</span> generate_escaped(telnetpp::bytes data, Continuation &amp;&amp;cont)</div>
 <div class="line"><a name="l00012"></a><span class="lineno">   12</span>&#160;{</div>
-<div class="line"><a name="l00013"></a><span class="lineno">   13</span>&#160;  telnetpp::bytes::iterator begin = data.begin();</div>
-<div class="line"><a name="l00014"></a><span class="lineno">   14</span>&#160;  telnetpp::bytes::iterator current = data.begin();</div>
-<div class="line"><a name="l00015"></a><span class="lineno">   15</span>&#160;  telnetpp::bytes::iterator end = data.end();</div>
+<div class="line"><a name="l00013"></a><span class="lineno">   13</span>&#160;    telnetpp::bytes::iterator begin = data.begin();</div>
+<div class="line"><a name="l00014"></a><span class="lineno">   14</span>&#160;    telnetpp::bytes::iterator current = data.begin();</div>
+<div class="line"><a name="l00015"></a><span class="lineno">   15</span>&#160;    telnetpp::bytes::iterator end = data.end();</div>
 <div class="line"><a name="l00016"></a><span class="lineno">   16</span>&#160; </div>
-<div class="line"><a name="l00017"></a><span class="lineno">   17</span>&#160;  <span class="comment">// If we come across an 0xFF byte in the data, then it must be repeated.</span></div>
-<div class="line"><a name="l00018"></a><span class="lineno">   18</span>&#160;  <span class="comment">// We do this by splitting the span into two, one of which ends with the</span></div>
-<div class="line"><a name="l00019"></a><span class="lineno">   19</span>&#160;  <span class="comment">// 0xFF byte and the second that begins with it.  In this way, the byte is</span></div>
-<div class="line"><a name="l00020"></a><span class="lineno">   20</span>&#160;  <span class="comment">// duplicated without requiring any extra allocations.</span></div>
-<div class="line"><a name="l00021"></a><span class="lineno">   21</span>&#160;  <span class="keywordflow">while</span> (current != end)</div>
-<div class="line"><a name="l00022"></a><span class="lineno">   22</span>&#160;  {</div>
-<div class="line"><a name="l00023"></a><span class="lineno">   23</span>&#160;    <span class="keywordflow">if</span> (*current == telnetpp::iac)</div>
-<div class="line"><a name="l00024"></a><span class="lineno">   24</span>&#160;    {</div>
-<div class="line"><a name="l00025"></a><span class="lineno">   25</span>&#160;      cont({begin, current + 1});</div>
-<div class="line"><a name="l00026"></a><span class="lineno">   26</span>&#160;      begin = current;</div>
-<div class="line"><a name="l00027"></a><span class="lineno">   27</span>&#160;    }</div>
+<div class="line"><a name="l00017"></a><span class="lineno">   17</span>&#160;    <span class="comment">// If we come across an 0xFF byte in the data, then it must be repeated.</span></div>
+<div class="line"><a name="l00018"></a><span class="lineno">   18</span>&#160;    <span class="comment">// We do this by splitting the span into two, one of which ends with the</span></div>
+<div class="line"><a name="l00019"></a><span class="lineno">   19</span>&#160;    <span class="comment">// 0xFF byte and the second that begins with it.  In this way, the byte is</span></div>
+<div class="line"><a name="l00020"></a><span class="lineno">   20</span>&#160;    <span class="comment">// duplicated without requiring any extra allocations.</span></div>
+<div class="line"><a name="l00021"></a><span class="lineno">   21</span>&#160;    <span class="keywordflow">while</span> (current != end)</div>
+<div class="line"><a name="l00022"></a><span class="lineno">   22</span>&#160;    {</div>
+<div class="line"><a name="l00023"></a><span class="lineno">   23</span>&#160;        <span class="keywordflow">if</span> (*current == telnetpp::iac)</div>
+<div class="line"><a name="l00024"></a><span class="lineno">   24</span>&#160;        {</div>
+<div class="line"><a name="l00025"></a><span class="lineno">   25</span>&#160;            cont({begin, current + 1});</div>
+<div class="line"><a name="l00026"></a><span class="lineno">   26</span>&#160;            begin = current;</div>
+<div class="line"><a name="l00027"></a><span class="lineno">   27</span>&#160;        }</div>
 <div class="line"><a name="l00028"></a><span class="lineno">   28</span>&#160; </div>
-<div class="line"><a name="l00029"></a><span class="lineno">   29</span>&#160;    ++current;</div>
-<div class="line"><a name="l00030"></a><span class="lineno">   30</span>&#160;  }</div>
+<div class="line"><a name="l00029"></a><span class="lineno">   29</span>&#160;        ++current;</div>
+<div class="line"><a name="l00030"></a><span class="lineno">   30</span>&#160;    }</div>
 <div class="line"><a name="l00031"></a><span class="lineno">   31</span>&#160; </div>
-<div class="line"><a name="l00032"></a><span class="lineno">   32</span>&#160;  <span class="keywordflow">if</span> (begin != end)</div>
-<div class="line"><a name="l00033"></a><span class="lineno">   33</span>&#160;  {</div>
-<div class="line"><a name="l00034"></a><span class="lineno">   34</span>&#160;    cont({begin, end});</div>
-<div class="line"><a name="l00035"></a><span class="lineno">   35</span>&#160;  }</div>
+<div class="line"><a name="l00032"></a><span class="lineno">   32</span>&#160;    <span class="keywordflow">if</span> (begin != end)</div>
+<div class="line"><a name="l00033"></a><span class="lineno">   33</span>&#160;    {</div>
+<div class="line"><a name="l00034"></a><span class="lineno">   34</span>&#160;        cont({begin, end});</div>
+<div class="line"><a name="l00035"></a><span class="lineno">   35</span>&#160;    }</div>
 <div class="line"><a name="l00036"></a><span class="lineno">   36</span>&#160;}</div>
 <div class="line"><a name="l00037"></a><span class="lineno">   37</span>&#160; </div>
 <div class="line"><a name="l00038"></a><span class="lineno">   38</span>&#160;<span class="comment">//* =========================================================================</span></div>
@@ -112,9 +112,9 @@ $(function() {
 <div class="line"><a name="l00041"></a><span class="lineno">   41</span>&#160;<span class="keyword">template</span> &lt;<span class="keyword">class</span> Continuation&gt;</div>
 <div class="line"><a name="l00042"></a><span class="lineno">   42</span>&#160;constexpr <span class="keywordtype">void</span> generate_command(<a class="code" href="classtelnetpp_1_1command.html">telnetpp::command</a> cmd, Continuation &amp;&amp;cont)</div>
 <div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160;{</div>
-<div class="line"><a name="l00044"></a><span class="lineno">   44</span>&#160;  telnetpp::byte <span class="keyword">const</span> data[] = {telnetpp::iac, cmd.<a class="code" href="classtelnetpp_1_1command.html#a5e0b043553a5ef83bf5f2800b3e2d276">value</a>()};</div>
+<div class="line"><a name="l00044"></a><span class="lineno">   44</span>&#160;    telnetpp::byte <span class="keyword">const</span> data[] = {telnetpp::iac, cmd.<a class="code" href="classtelnetpp_1_1command.html#a5e0b043553a5ef83bf5f2800b3e2d276">value</a>()};</div>
 <div class="line"><a name="l00045"></a><span class="lineno">   45</span>&#160; </div>
-<div class="line"><a name="l00046"></a><span class="lineno">   46</span>&#160;  cont(data);</div>
+<div class="line"><a name="l00046"></a><span class="lineno">   46</span>&#160;    cont(data);</div>
 <div class="line"><a name="l00047"></a><span class="lineno">   47</span>&#160;}</div>
 <div class="line"><a name="l00048"></a><span class="lineno">   48</span>&#160; </div>
 <div class="line"><a name="l00049"></a><span class="lineno">   49</span>&#160;<span class="comment">//* =========================================================================</span></div>
@@ -123,10 +123,10 @@ $(function() {
 <div class="line"><a name="l00053"></a><span class="lineno">   53</span>&#160;constexpr <span class="keywordtype">void</span> generate_negotiation(</div>
 <div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160;    <a class="code" href="classtelnetpp_1_1negotiation.html">telnetpp::negotiation</a> neg, Continuation &amp;&amp;cont)</div>
 <div class="line"><a name="l00055"></a><span class="lineno">   55</span>&#160;{</div>
-<div class="line"><a name="l00056"></a><span class="lineno">   56</span>&#160;  telnetpp::byte <span class="keyword">const</span> data[] = {</div>
-<div class="line"><a name="l00057"></a><span class="lineno">   57</span>&#160;      telnetpp::iac, neg.<a class="code" href="classtelnetpp_1_1negotiation.html#a67187e94d4e20e6d53dfc07eade3f5d0">request</a>(), neg.<a class="code" href="classtelnetpp_1_1negotiation.html#a6550089406de8eda1a7eb573e441873d">option_code</a>()};</div>
+<div class="line"><a name="l00056"></a><span class="lineno">   56</span>&#160;    telnetpp::byte <span class="keyword">const</span> data[] = {</div>
+<div class="line"><a name="l00057"></a><span class="lineno">   57</span>&#160;        telnetpp::iac, neg.<a class="code" href="classtelnetpp_1_1negotiation.html#a67187e94d4e20e6d53dfc07eade3f5d0">request</a>(), neg.<a class="code" href="classtelnetpp_1_1negotiation.html#a6550089406de8eda1a7eb573e441873d">option_code</a>()};</div>
 <div class="line"><a name="l00058"></a><span class="lineno">   58</span>&#160; </div>
-<div class="line"><a name="l00059"></a><span class="lineno">   59</span>&#160;  cont(data);</div>
+<div class="line"><a name="l00059"></a><span class="lineno">   59</span>&#160;    cont(data);</div>
 <div class="line"><a name="l00060"></a><span class="lineno">   60</span>&#160;}</div>
 <div class="line"><a name="l00061"></a><span class="lineno">   61</span>&#160; </div>
 <div class="line"><a name="l00062"></a><span class="lineno">   62</span>&#160;<span class="comment">//* =========================================================================</span></div>
@@ -135,28 +135,29 @@ $(function() {
 <div class="line"><a name="l00066"></a><span class="lineno">   66</span>&#160;constexpr <span class="keywordtype">void</span> generate_subnegotiation(</div>
 <div class="line"><a name="l00067"></a><span class="lineno">   67</span>&#160;    <a class="code" href="classtelnetpp_1_1subnegotiation.html">telnetpp::subnegotiation</a> sub, Continuation &amp;&amp;cont)</div>
 <div class="line"><a name="l00068"></a><span class="lineno">   68</span>&#160;{</div>
-<div class="line"><a name="l00069"></a><span class="lineno">   69</span>&#160;  telnetpp::byte <span class="keyword">const</span> preamble[] = {telnetpp::iac, telnetpp::sb, sub.<a class="code" href="classtelnetpp_1_1subnegotiation.html#abdb177303b929e0d173733cd4f1b2ffd">option</a>()};</div>
-<div class="line"><a name="l00070"></a><span class="lineno">   70</span>&#160; </div>
-<div class="line"><a name="l00071"></a><span class="lineno">   71</span>&#160;  constexpr telnetpp::byte <span class="keyword">const</span> postamble[] = {telnetpp::iac, telnetpp::se};</div>
-<div class="line"><a name="l00072"></a><span class="lineno">   72</span>&#160; </div>
-<div class="line"><a name="l00073"></a><span class="lineno">   73</span>&#160;  cont(preamble);</div>
-<div class="line"><a name="l00074"></a><span class="lineno">   74</span>&#160;  generate_escaped(sub.<a class="code" href="classtelnetpp_1_1subnegotiation.html#aaaf9895d250862589bbff527202cdce2">content</a>(), cont);</div>
-<div class="line"><a name="l00075"></a><span class="lineno">   75</span>&#160;  cont(postamble);</div>
-<div class="line"><a name="l00076"></a><span class="lineno">   76</span>&#160;}</div>
-<div class="line"><a name="l00077"></a><span class="lineno">   77</span>&#160; </div>
-<div class="line"><a name="l00078"></a><span class="lineno">   78</span>&#160;}  <span class="comment">// namespace telnetpp::detail</span></div>
-<div class="ttc" id="aclasstelnetpp_1_1command_html"><div class="ttname"><a href="classtelnetpp_1_1command.html">telnetpp::command</a></div><div class="ttdoc">A class that encapsulates the value of a Telnet command.</div><div class="ttdef"><b>Definition:</b> command.hpp:12</div></div>
-<div class="ttc" id="aclasstelnetpp_1_1command_html_a5e0b043553a5ef83bf5f2800b3e2d276"><div class="ttname"><a href="classtelnetpp_1_1command.html#a5e0b043553a5ef83bf5f2800b3e2d276">telnetpp::command::value</a></div><div class="ttdeci">constexpr command_type value() const noexcept</div><div class="ttdoc">Returns the value of the command.</div><div class="ttdef"><b>Definition:</b> command.hpp:24</div></div>
+<div class="line"><a name="l00069"></a><span class="lineno">   69</span>&#160;    telnetpp::byte <span class="keyword">const</span> preamble[] = {</div>
+<div class="line"><a name="l00070"></a><span class="lineno">   70</span>&#160;        telnetpp::iac, telnetpp::sb, sub.<a class="code" href="classtelnetpp_1_1subnegotiation.html#abdb177303b929e0d173733cd4f1b2ffd">option</a>()};</div>
+<div class="line"><a name="l00071"></a><span class="lineno">   71</span>&#160; </div>
+<div class="line"><a name="l00072"></a><span class="lineno">   72</span>&#160;    constexpr telnetpp::byte <span class="keyword">const</span> postamble[] = {telnetpp::iac, telnetpp::se};</div>
+<div class="line"><a name="l00073"></a><span class="lineno">   73</span>&#160; </div>
+<div class="line"><a name="l00074"></a><span class="lineno">   74</span>&#160;    cont(preamble);</div>
+<div class="line"><a name="l00075"></a><span class="lineno">   75</span>&#160;    generate_escaped(sub.<a class="code" href="classtelnetpp_1_1subnegotiation.html#aaaf9895d250862589bbff527202cdce2">content</a>(), cont);</div>
+<div class="line"><a name="l00076"></a><span class="lineno">   76</span>&#160;    cont(postamble);</div>
+<div class="line"><a name="l00077"></a><span class="lineno">   77</span>&#160;}</div>
+<div class="line"><a name="l00078"></a><span class="lineno">   78</span>&#160; </div>
+<div class="line"><a name="l00079"></a><span class="lineno">   79</span>&#160;}  <span class="comment">// namespace telnetpp::detail</span></div>
+<div class="ttc" id="aclasstelnetpp_1_1command_html"><div class="ttname"><a href="classtelnetpp_1_1command.html">telnetpp::command</a></div><div class="ttdoc">A class that encapsulates the value of a Telnet command.</div><div class="ttdef"><b>Definition:</b> command.hpp:13</div></div>
+<div class="ttc" id="aclasstelnetpp_1_1command_html_a5e0b043553a5ef83bf5f2800b3e2d276"><div class="ttname"><a href="classtelnetpp_1_1command.html#a5e0b043553a5ef83bf5f2800b3e2d276">telnetpp::command::value</a></div><div class="ttdeci">constexpr command_type value() const noexcept</div><div class="ttdoc">Returns the value of the command.</div><div class="ttdef"><b>Definition:</b> command.hpp:25</div></div>
 <div class="ttc" id="aclasstelnetpp_1_1negotiation_html"><div class="ttname"><a href="classtelnetpp_1_1negotiation.html">telnetpp::negotiation</a></div><div class="ttdoc">A class that encapsulates a Telnet negotiation.</div><div class="ttdef"><b>Definition:</b> negotiation.hpp:15</div></div>
 <div class="ttc" id="aclasstelnetpp_1_1negotiation_html_a6550089406de8eda1a7eb573e441873d"><div class="ttname"><a href="classtelnetpp_1_1negotiation.html#a6550089406de8eda1a7eb573e441873d">telnetpp::negotiation::option_code</a></div><div class="ttdeci">constexpr option_type option_code() const noexcept</div><div class="ttdoc">Returns the option code (e.g. echo, naws) of this negotiation.</div><div class="ttdef"><b>Definition:</b> negotiation.hpp:40</div></div>
 <div class="ttc" id="aclasstelnetpp_1_1negotiation_html_a67187e94d4e20e6d53dfc07eade3f5d0"><div class="ttname"><a href="classtelnetpp_1_1negotiation.html#a67187e94d4e20e6d53dfc07eade3f5d0">telnetpp::negotiation::request</a></div><div class="ttdeci">constexpr negotiation_type request() const noexcept</div><div class="ttdoc">Returns the request (will, wont, do, dont) of this negotiation.</div><div class="ttdef"><b>Definition:</b> negotiation.hpp:32</div></div>
-<div class="ttc" id="aclasstelnetpp_1_1subnegotiation_html"><div class="ttname"><a href="classtelnetpp_1_1subnegotiation.html">telnetpp::subnegotiation</a></div><div class="ttdoc">A class that encapsulates a Telnet subnegotiation.</div><div class="ttdef"><b>Definition:</b> subnegotiation.hpp:13</div></div>
-<div class="ttc" id="aclasstelnetpp_1_1subnegotiation_html_aaaf9895d250862589bbff527202cdce2"><div class="ttname"><a href="classtelnetpp_1_1subnegotiation.html#aaaf9895d250862589bbff527202cdce2">telnetpp::subnegotiation::content</a></div><div class="ttdeci">constexpr bytes content() const noexcept</div><div class="ttdoc">Returns the content for this subnegotiation.</div><div class="ttdef"><b>Definition:</b> subnegotiation.hpp:34</div></div>
-<div class="ttc" id="aclasstelnetpp_1_1subnegotiation_html_abdb177303b929e0d173733cd4f1b2ffd"><div class="ttname"><a href="classtelnetpp_1_1subnegotiation.html#abdb177303b929e0d173733cd4f1b2ffd">telnetpp::subnegotiation::option</a></div><div class="ttdeci">constexpr option_type option() const noexcept</div><div class="ttdoc">Returns the option for this subnegotiation.</div><div class="ttdef"><b>Definition:</b> subnegotiation.hpp:26</div></div>
+<div class="ttc" id="aclasstelnetpp_1_1subnegotiation_html"><div class="ttname"><a href="classtelnetpp_1_1subnegotiation.html">telnetpp::subnegotiation</a></div><div class="ttdoc">A class that encapsulates a Telnet subnegotiation.</div><div class="ttdef"><b>Definition:</b> subnegotiation.hpp:14</div></div>
+<div class="ttc" id="aclasstelnetpp_1_1subnegotiation_html_aaaf9895d250862589bbff527202cdce2"><div class="ttname"><a href="classtelnetpp_1_1subnegotiation.html#aaaf9895d250862589bbff527202cdce2">telnetpp::subnegotiation::content</a></div><div class="ttdeci">constexpr bytes content() const noexcept</div><div class="ttdoc">Returns the content for this subnegotiation.</div><div class="ttdef"><b>Definition:</b> subnegotiation.hpp:35</div></div>
+<div class="ttc" id="aclasstelnetpp_1_1subnegotiation_html_abdb177303b929e0d173733cd4f1b2ffd"><div class="ttname"><a href="classtelnetpp_1_1subnegotiation.html#abdb177303b929e0d173733cd4f1b2ffd">telnetpp::subnegotiation::option</a></div><div class="ttdeci">constexpr option_type option() const noexcept</div><div class="ttdoc">Returns the option for this subnegotiation.</div><div class="ttdef"><b>Definition:</b> subnegotiation.hpp:27</div></div>
 </div><!-- fragment --></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Fri Jan 5 2024 15:33:01 for Telnet++ by&#160;<a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1
+Generated on Mon Mar 25 2024 08:15:22 for Telnet++ by&#160;<a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1
 </small></address>
 </body>
 </html>

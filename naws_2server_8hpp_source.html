@@ -22,7 +22,7 @@
  <tr style="height: 56px;">
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname">Telnet++
-   &#160;<span id="projectnumber">3.1.0</span>
+   &#160;<span id="projectnumber">3.1.0.2</span>
    </div>
    <div id="projectbrief">A C++ library for interacting with Telnet streams</div>
   </td>
@@ -75,44 +75,45 @@ $(function() {
 <div class="line"><a name="l00002"></a><span class="lineno">    2</span>&#160; </div>
 <div class="line"><a name="l00003"></a><span class="lineno">    3</span>&#160;<span class="preprocessor">#include &quot;telnetpp/options/basic_server.hpp&quot;</span></div>
 <div class="line"><a name="l00004"></a><span class="lineno">    4</span>&#160;<span class="preprocessor">#include &quot;telnetpp/options/naws/detail/protocol.hpp&quot;</span></div>
-<div class="line"><a name="l00005"></a><span class="lineno">    5</span>&#160;<span class="preprocessor">#include &lt;optional&gt;</span></div>
-<div class="line"><a name="l00006"></a><span class="lineno">    6</span>&#160;<span class="preprocessor">#include &lt;utility&gt;</span></div>
-<div class="line"><a name="l00007"></a><span class="lineno">    7</span>&#160; </div>
-<div class="line"><a name="l00008"></a><span class="lineno">    8</span>&#160;<span class="keyword">namespace </span><a class="code" href="namespacetelnetpp_1_1options_1_1naws.html">telnetpp::options::naws</a> {</div>
-<div class="line"><a name="l00009"></a><span class="lineno">    9</span>&#160; </div>
-<div class="line"><a name="l00010"></a><span class="lineno">   10</span>&#160;<span class="comment">//* =========================================================================</span></div>
-<div class="line"><a name="l00012"></a><span class="lineno">   12</span>&#160;<span class="comment"></span><span class="comment">//* =========================================================================</span></div>
-<div class="line"><a name="l00013"></a><span class="lineno"><a class="line" href="classtelnetpp_1_1options_1_1naws_1_1server.html">   13</a></span>&#160;<span class="keyword">class </span>TELNETPP_EXPORT <a class="code" href="classtelnetpp_1_1options_1_1naws_1_1server.html">server</a></div>
-<div class="line"><a name="l00014"></a><span class="lineno">   14</span>&#160;  : <span class="keyword">public</span> <a class="code" href="classtelnetpp_1_1options_1_1basic__server.html">telnetpp::options::basic_server</a>&lt;detail::option&gt;</div>
-<div class="line"><a name="l00015"></a><span class="lineno">   15</span>&#160;{</div>
-<div class="line"><a name="l00016"></a><span class="lineno">   16</span>&#160; <span class="keyword">public</span>:</div>
-<div class="line"><a name="l00017"></a><span class="lineno">   17</span>&#160;  <span class="keyword">using</span> window_dimension = std::uint16_t;</div>
-<div class="line"><a name="l00018"></a><span class="lineno">   18</span>&#160; </div>
-<div class="line"><a name="l00019"></a><span class="lineno">   19</span>&#160;  <span class="comment">//* =====================================================================</span></div>
-<div class="line"><a name="l00021"></a><span class="lineno">   21</span>&#160;<span class="comment"></span>  <span class="comment">//* =====================================================================</span></div>
-<div class="line"><a name="l00022"></a><span class="lineno">   22</span>&#160;  <span class="keyword">explicit</span> <a class="code" href="classtelnetpp_1_1options_1_1naws_1_1server.html">server</a>(<a class="code" href="classtelnetpp_1_1session.html">telnetpp::session</a> &amp;sess);</div>
-<div class="line"><a name="l00023"></a><span class="lineno">   23</span>&#160; </div>
-<div class="line"><a name="l00024"></a><span class="lineno">   24</span>&#160;  <span class="comment">//* =====================================================================</span></div>
-<div class="line"><a name="l00026"></a><span class="lineno">   26</span>&#160;<span class="comment"></span>  <span class="comment">//* =====================================================================</span></div>
-<div class="line"><a name="l00027"></a><span class="lineno">   27</span>&#160;  <span class="keywordtype">void</span> set_window_size(window_dimension width, window_dimension height);</div>
-<div class="line"><a name="l00028"></a><span class="lineno">   28</span>&#160; </div>
-<div class="line"><a name="l00029"></a><span class="lineno">   29</span>&#160; <span class="keyword">private</span>:</div>
-<div class="line"><a name="l00030"></a><span class="lineno">   30</span>&#160;  <span class="comment">//* =====================================================================</span></div>
-<div class="line"><a name="l00032"></a><span class="lineno">   32</span>&#160;<span class="comment"></span>  <span class="comment">//* =====================================================================</span></div>
-<div class="line"><a name="l00033"></a><span class="lineno">   33</span>&#160;  <span class="keywordtype">void</span> report_window_size();</div>
-<div class="line"><a name="l00034"></a><span class="lineno">   34</span>&#160; </div>
-<div class="line"><a name="l00035"></a><span class="lineno">   35</span>&#160;  std::optional&lt;std::pair&lt;window_dimension, window_dimension&gt;&gt; window_size_;</div>
-<div class="line"><a name="l00036"></a><span class="lineno">   36</span>&#160;};</div>
-<div class="line"><a name="l00037"></a><span class="lineno">   37</span>&#160; </div>
-<div class="line"><a name="l00038"></a><span class="lineno">   38</span>&#160;}  <span class="comment">// namespace telnetpp::options::naws</span></div>
+<div class="line"><a name="l00005"></a><span class="lineno">    5</span>&#160; </div>
+<div class="line"><a name="l00006"></a><span class="lineno">    6</span>&#160;<span class="preprocessor">#include &lt;optional&gt;</span></div>
+<div class="line"><a name="l00007"></a><span class="lineno">    7</span>&#160;<span class="preprocessor">#include &lt;utility&gt;</span></div>
+<div class="line"><a name="l00008"></a><span class="lineno">    8</span>&#160; </div>
+<div class="line"><a name="l00009"></a><span class="lineno">    9</span>&#160;<span class="keyword">namespace </span><a class="code" href="namespacetelnetpp_1_1options_1_1naws.html">telnetpp::options::naws</a> {</div>
+<div class="line"><a name="l00010"></a><span class="lineno">   10</span>&#160; </div>
+<div class="line"><a name="l00011"></a><span class="lineno">   11</span>&#160;<span class="comment">//* =========================================================================</span></div>
+<div class="line"><a name="l00013"></a><span class="lineno">   13</span>&#160;<span class="comment"></span><span class="comment">//* =========================================================================</span></div>
+<div class="line"><a name="l00014"></a><span class="lineno"><a class="line" href="classtelnetpp_1_1options_1_1naws_1_1server.html">   14</a></span>&#160;<span class="keyword">class </span>TELNETPP_EXPORT <a class="code" href="classtelnetpp_1_1options_1_1naws_1_1server.html">server</a></div>
+<div class="line"><a name="l00015"></a><span class="lineno">   15</span>&#160;  : <span class="keyword">public</span> <a class="code" href="classtelnetpp_1_1options_1_1basic__server.html">telnetpp::options::basic_server</a>&lt;detail::option&gt;</div>
+<div class="line"><a name="l00016"></a><span class="lineno">   16</span>&#160;{</div>
+<div class="line"><a name="l00017"></a><span class="lineno">   17</span>&#160;<span class="keyword">public</span>:</div>
+<div class="line"><a name="l00018"></a><span class="lineno">   18</span>&#160;    <span class="keyword">using</span> window_dimension = std::uint16_t;</div>
+<div class="line"><a name="l00019"></a><span class="lineno">   19</span>&#160; </div>
+<div class="line"><a name="l00020"></a><span class="lineno">   20</span>&#160;    <span class="comment">//* =====================================================================</span></div>
+<div class="line"><a name="l00022"></a><span class="lineno">   22</span>&#160;<span class="comment"></span>    <span class="comment">//* =====================================================================</span></div>
+<div class="line"><a name="l00023"></a><span class="lineno">   23</span>&#160;    <span class="keyword">explicit</span> <a class="code" href="classtelnetpp_1_1options_1_1naws_1_1server.html">server</a>(<a class="code" href="classtelnetpp_1_1session.html">telnetpp::session</a> &amp;sess);</div>
+<div class="line"><a name="l00024"></a><span class="lineno">   24</span>&#160; </div>
+<div class="line"><a name="l00025"></a><span class="lineno">   25</span>&#160;    <span class="comment">//* =====================================================================</span></div>
+<div class="line"><a name="l00027"></a><span class="lineno">   27</span>&#160;<span class="comment"></span>    <span class="comment">//* =====================================================================</span></div>
+<div class="line"><a name="l00028"></a><span class="lineno">   28</span>&#160;    <span class="keywordtype">void</span> set_window_size(window_dimension width, window_dimension height);</div>
+<div class="line"><a name="l00029"></a><span class="lineno">   29</span>&#160; </div>
+<div class="line"><a name="l00030"></a><span class="lineno">   30</span>&#160;<span class="keyword">private</span>:</div>
+<div class="line"><a name="l00031"></a><span class="lineno">   31</span>&#160;    <span class="comment">//* =====================================================================</span></div>
+<div class="line"><a name="l00033"></a><span class="lineno">   33</span>&#160;<span class="comment"></span>    <span class="comment">//* =====================================================================</span></div>
+<div class="line"><a name="l00034"></a><span class="lineno">   34</span>&#160;    <span class="keywordtype">void</span> report_window_size();</div>
+<div class="line"><a name="l00035"></a><span class="lineno">   35</span>&#160; </div>
+<div class="line"><a name="l00036"></a><span class="lineno">   36</span>&#160;    std::optional&lt;std::pair&lt;window_dimension, window_dimension&gt;&gt; window_size_;</div>
+<div class="line"><a name="l00037"></a><span class="lineno">   37</span>&#160;};</div>
+<div class="line"><a name="l00038"></a><span class="lineno">   38</span>&#160; </div>
+<div class="line"><a name="l00039"></a><span class="lineno">   39</span>&#160;}  <span class="comment">// namespace telnetpp::options::naws</span></div>
 <div class="ttc" id="aclasstelnetpp_1_1options_1_1basic__server_html"><div class="ttname"><a href="classtelnetpp_1_1options_1_1basic__server.html">telnetpp::options::basic_server</a></div><div class="ttdoc">A class template that generates basic classes that handle no subnegotiations; they merely exist for e...</div><div class="ttdef"><b>Definition:</b> basic_server.hpp:14</div></div>
-<div class="ttc" id="aclasstelnetpp_1_1options_1_1naws_1_1server_html"><div class="ttname"><a href="classtelnetpp_1_1options_1_1naws_1_1server.html">telnetpp::options::naws::server</a></div><div class="ttdoc">An implementation of the server side of the Telnet NAWS option.</div><div class="ttdef"><b>Definition:</b> server.hpp:15</div></div>
-<div class="ttc" id="aclasstelnetpp_1_1session_html"><div class="ttname"><a href="classtelnetpp_1_1session.html">telnetpp::session</a></div><div class="ttdoc">An abstraction for a Telnet session.</div><div class="ttdef"><b>Definition:</b> session.hpp:140</div></div>
-<div class="ttc" id="anamespacetelnetpp_1_1options_1_1naws_html"><div class="ttname"><a href="namespacetelnetpp_1_1options_1_1naws.html">telnetpp::options::naws</a></div><div class="ttdoc">An implementation of the standard Telnet Negotiate About Window Size option.</div><div class="ttdef"><b>Definition:</b> client.hpp:6</div></div>
+<div class="ttc" id="aclasstelnetpp_1_1options_1_1naws_1_1server_html"><div class="ttname"><a href="classtelnetpp_1_1options_1_1naws_1_1server.html">telnetpp::options::naws::server</a></div><div class="ttdoc">An implementation of the server side of the Telnet NAWS option.</div><div class="ttdef"><b>Definition:</b> server.hpp:16</div></div>
+<div class="ttc" id="aclasstelnetpp_1_1session_html"><div class="ttname"><a href="classtelnetpp_1_1session.html">telnetpp::session</a></div><div class="ttdoc">An abstraction for a Telnet session.</div><div class="ttdef"><b>Definition:</b> session.hpp:141</div></div>
+<div class="ttc" id="anamespacetelnetpp_1_1options_1_1naws_html"><div class="ttname"><a href="namespacetelnetpp_1_1options_1_1naws.html">telnetpp::options::naws</a></div><div class="ttdoc">An implementation of the standard Telnet Negotiate About Window Size option.</div><div class="ttdef"><b>Definition:</b> client.hpp:7</div></div>
 </div><!-- fragment --></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Fri Jan 5 2024 15:33:01 for Telnet++ by&#160;<a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1
+Generated on Mon Mar 25 2024 08:15:22 for Telnet++ by&#160;<a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1
 </small></address>
 </body>
 </html>
