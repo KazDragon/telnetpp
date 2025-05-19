@@ -51,8 +51,8 @@ endif()
 # Telnet++ requires at least Boost 1.69.
 find_package(Boost 1.69.0 REQUIRED)
 
-# Telnet++ requires at least version 0.38 of gsl-lite.
-find_package(gsl-lite 0.38.0 REQUIRED)
+# Telnet++ requires at least version 1.0 of gsl-lite.
+find_package(gsl-lite 1.0 REQUIRED)
 
 # If we are building with ZLib, then we require the ZLib library
 if (${TELNETPP_WITH_ZLIB})
@@ -168,7 +168,7 @@ target_sources(telnetpp
 target_link_libraries(telnetpp
     PUBLIC
         Boost::boost
-        gsl::gsl-lite
+        gsl-lite::gsl-lite
 )
 
 # The zlib compressors for MCCP should only be compiled into the library

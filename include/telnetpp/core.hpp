@@ -2,12 +2,14 @@
 
 #include "telnetpp/detail/export.hpp"  // IWYU pragma: export
 
-#include <gsl/gsl-lite.hpp>
+#include <gsl-lite/gsl-lite.hpp>
 
 #include <string>
 #include <cstdint>
 
 namespace telnetpp {
+
+namespace gsl = ::gsl_lite;
 
 using byte = std::uint8_t;
 using option_type = std::uint8_t;
