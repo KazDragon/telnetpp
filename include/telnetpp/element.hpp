@@ -24,16 +24,16 @@ using element = std::variant<bytes, negotiation, subnegotiation, command>;
 gsl_constexpr20 inline bool operator==(
     element const &lhs, element const &rhs) noexcept
 {
-    auto visitor = [&rhs](auto const& lhs) noexcept
+    auto visitor = [&rhs](auto const& _lhs) noexcept
     {
-        using T = gsl::std20::remove_cvref_t<decltype(lhs)>;
+        using T = gsl::std20::remove_cvref_t<decltype(_lhs)>;
         if constexpr (std::is_same_v<T, bytes>)
         {
-            return telnetpp::bytes_equal(lhs, std::get<bytes>(rhs));
+            return telnetpp::bytes_equal(_lhs, std::get<bytes>(rhs));
         }
         else
         {
-            return lhs == std::get<T>(rhs);
+            return _lhs == std::get<T>(rhs);
         }
     };
     if (lhs.index() != rhs.index()) return false;
