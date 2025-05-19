@@ -1,4 +1,4 @@
-#!/bin/bash
+﻿#!/bin/bash
 if [ -z ${EXTERNAL_ROOT+x} ]; then echo EXTERNAL_ROOT not set; exit 1; fi
 
 export EXTERNAL_BUILD_ROOT=$HOME/external_build
@@ -11,7 +11,7 @@ if [ ! -f "$EXTERNAL_ROOT/include/gsl-lite/gsl-lite.hpp" ]; then
     wget https://github.com/gsl-lite/gsl-lite/archive/refs/tags/v1.0.1.tar.gz;
     tar -xzf v1.0.1.tar.gz;
     cd gsl-lite-1.0.1;
-    cmake -DCMAKE_INSTALL_PREFIX="$EXTERNAL_ROOT" -DGSL_LITE_OPT_BUILD_TESTS=Off .;
+    cmake -DCMAKE_INSTALL_PREFIX="$EXTERNAL_ROOT" .;
     make -j2 && make install;
 fi
 
