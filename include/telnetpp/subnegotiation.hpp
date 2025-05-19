@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "telnetpp/core.hpp"
 
@@ -45,11 +45,11 @@ class TELNETPP_EXPORT subnegotiation
 //* =========================================================================
 /// \brief Comparison function for subnegotiations
 //* =========================================================================
-TELNETPP_EXPORT
-constexpr bool operator==(
+gsl_constexpr20 inline bool operator==(
     subnegotiation const &lhs, subnegotiation const &rhs) noexcept
 {
-    return lhs.option() == rhs.option() && lhs.content() == rhs.content();
+    return lhs.option() == rhs.option() &&
+        telnetpp::bytes_equal(lhs.content(), rhs.content());
 }
 
 //* =========================================================================

@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "telnetpp/detail/export.hpp"  // IWYU pragma: export
 
@@ -6,6 +6,7 @@
 
 #include <string>
 #include <cstdint>
+#include <algorithm>
 
 namespace telnetpp {
 
@@ -45,6 +46,17 @@ using bytes = gsl::span<byte const>;
 // Where necessary, bytes are stored in this type, which has the small
 // string optimization, meaning that most cases will not cause an allocation.
 using byte_storage = std::basic_string<byte>;
+
+// Comparison function for bytes.
+// gsl::span<>, like std::span<> in C++20, does not define comparison
+// operators by default because the semantics are unclear (deep or shallow?).
+// This named comparison function is provided because we cannot define a
+// useful operator== because ADL would not find it in our namespace.
+constexpr inline auto bytes_equal = [](
+    bytes const &lhs, bytes const &rhs) noexcept
+{
+    return std::equal(lhs.begin(), lhs.end(), rhs.begin(), rhs.end());
+};
 
 namespace literals {
 

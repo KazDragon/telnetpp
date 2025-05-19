@@ -1,4 +1,4 @@
-#include <boost/range/algorithm/generate.hpp>
+﻿#include <boost/range/algorithm/generate.hpp>
 #include <gtest/gtest.h>
 #include <telnetpp/options/mccp/zlib/compressor.hpp>
 #include <zlib.h>
@@ -110,7 +110,7 @@ TEST_F(a_started_zlib_compressor, compresses_received_data)
 
     auto const expected_data = telnetpp::bytes{test_data};
 
-    ASSERT_EQ(expected_data, output_data);
+    ASSERT_TRUE(telnetpp::bytes_equal(expected_data, output_data));
     ASSERT_FALSE(compression_ended_);
 
     inflateEnd(&stream);
@@ -141,7 +141,7 @@ TEST_F(a_started_zlib_compressor, sends_a_stream_end_when_compression_is_ended)
 
     auto const expected_data = telnetpp::bytes{test_data};
 
-    ASSERT_EQ(expected_data, output_data);
+    ASSERT_TRUE(telnetpp::bytes_equal(expected_data, output_data));
     ASSERT_TRUE(compression_ended_);
 
     inflateEnd(&stream);

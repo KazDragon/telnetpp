@@ -1,4 +1,4 @@
-#include <gtest/gtest.h>
+﻿#include <gtest/gtest.h>
 #include <telnetpp/element.hpp>
 #include <telnetpp/parser.hpp>
 
@@ -71,7 +71,7 @@ TEST_F(parser_test, two_normal_characters_parse_to_string)
         static constexpr telnetpp::bytes const expected{expected_values};
 
         auto const actual = std::get<telnetpp::bytes>(elem);
-        ASSERT_EQ(expected, actual);
+        ASSERT_TRUE(telnetpp::bytes_equal(expected, actual));
     });
 
     ASSERT_EQ(size_t{1}, result_.size());
@@ -95,7 +95,7 @@ TEST_F(parser_test, byte_then_iac_emits_byte_only)
         static constexpr telnetpp::bytes const expected{expected_values};
 
         auto const actual = std::get<telnetpp::bytes>(elem);
-        ASSERT_EQ(expected, actual);
+        ASSERT_TRUE(telnetpp::bytes_equal(expected, actual));
     });
 
     ASSERT_EQ(size_t{1}, result_.size());
@@ -110,7 +110,7 @@ TEST_F(parser_test, double_iac_parses_to_iac)
         static constexpr telnetpp::bytes const expected{expected_values};
 
         auto const actual = std::get<telnetpp::bytes>(elem);
-        ASSERT_EQ(expected, actual);
+        ASSERT_TRUE(telnetpp::bytes_equal(expected, actual));
     });
 
     ASSERT_EQ(size_t{1}, result_.size());
