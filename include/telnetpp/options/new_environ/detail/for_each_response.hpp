@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "telnetpp/options/new_environ/detail/response_parser_helper.hpp"
 
@@ -9,8 +9,8 @@ void for_each_response(telnetpp::bytes content, Continuation &&cont)
 {
     parsing_state state;
 
-    auto const *current = content.begin();
-    auto const *end = content.end();
+    auto current = content.begin();
+    auto end = content.end();
 
     while (current != end)
     {
