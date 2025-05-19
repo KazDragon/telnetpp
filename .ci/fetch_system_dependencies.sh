@@ -8,9 +8,9 @@ mkdir "$EXTERNAL_BUILD_ROOT" || true
 # Install gsl-lite dependency
 if [ ! -f "$EXTERNAL_ROOT/include/gsl-lite/gsl-lite.hpp" ]; then
     cd "$EXTERNAL_BUILD_ROOT";
-    wget https://github.com/gsl-lite/gsl-lite/archive/refs/tags/v1.0.0.tar.gz;
-    tar -xzf v1.0.0.tar.gz;
-    cd gsl-lite-1.0.0;
+    wget https://github.com/gsl-lite/gsl-lite/archive/refs/tags/v1.0.1.tar.gz;
+    tar -xzf v1.0.1.tar.gz;
+    cd gsl-lite-1.0.1;
     cmake -DCMAKE_INSTALL_PREFIX="$EXTERNAL_ROOT" -DGSL_LITE_OPT_BUILD_TESTS=Off .;
     make -j2 && make install;
 fi
