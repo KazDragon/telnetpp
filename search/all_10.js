@@ -1,8 +1,7 @@
 var searchData=
 [
-  ['_7ecodec_72',['~codec',['../classtelnetpp_1_1options_1_1mccp_1_1codec.html#a16362d1df9ace5ccdc1a6d0e50b3d488',1,'telnetpp::options::mccp::codec']]],
-  ['_7ecompressor_73',['~compressor',['../classtelnetpp_1_1options_1_1mccp_1_1zlib_1_1compressor.html#a244163bf94c97c3299390382d059593c',1,'telnetpp::options::mccp::zlib::compressor']]],
-  ['_7edecompressor_74',['~decompressor',['../classtelnetpp_1_1options_1_1mccp_1_1zlib_1_1decompressor.html#afde183d5bb6bfae1c44239ca12b26b73',1,'telnetpp::options::mccp::zlib::decompressor']]],
-  ['_7eoption_75',['~option',['../classtelnetpp_1_1option.html#a4897a80d0b9a2dbfa80a90ef157735c9',1,'telnetpp::option']]],
-  ['_7esession_76',['~session',['../classtelnetpp_1_1session.html#ab295ec67d51602dc7b9af40611339a34',1,'telnetpp::session']]]
+  ['value_0',['value',['../classtelnetpp_1_1command.html#a5e0b043553a5ef83bf5f2800b3e2d276',1,'telnetpp::command']]],
+  ['value_5ftype_1',['value_type',['../classtelnetpp_1_1options_1_1msdp_1_1value__type.html',1,'']]],
+  ['variable_2',['variable',['../structtelnetpp_1_1options_1_1msdp_1_1variable.html',1,'telnetpp::options::msdp::variable'],['../structtelnetpp_1_1options_1_1msdp_1_1variable.html#a351c5bf0e411a79f444efcfa91a66609',1,'telnetpp::options::msdp::variable::variable()'],['../structtelnetpp_1_1options_1_1msdp_1_1variable.html#a1787df7cf41b93b76301aeddaa330a79',1,'telnetpp::options::msdp::variable::variable(telnetpp::byte_storage name, string_value value)'],['../structtelnetpp_1_1options_1_1msdp_1_1variable.html#a122c6297f9a88f38b6b39969bcf1ec97',1,'telnetpp::options::msdp::variable::variable(telnetpp::byte_storage name, array_value array_values)'],['../structtelnetpp_1_1options_1_1msdp_1_1variable.html#a9a71a9cff97c232acf8dc478cdcf5031',1,'telnetpp::options::msdp::variable::variable(telnetpp::byte_storage name, table_value table_values)']]],
+  ['variable_5ftype_3',['variable_type',['../namespacetelnetpp_1_1options_1_1new__environ.html#a2ab91cfc06104405f82d52865f6a599f',1,'telnetpp::options::new_environ']]]
 ];

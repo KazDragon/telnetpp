@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['option_93',['option',['../classtelnetpp_1_1option.html',1,'telnetpp']]]
+  ['option_0',['option',['../classtelnetpp_1_1option.html',1,'telnetpp']]]
 ];
