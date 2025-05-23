@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "telnetpp/command.hpp"  // IWYU pragma: export
 #include "telnetpp/core.hpp"
@@ -17,6 +17,28 @@ namespace telnetpp {
 /// upper-layer non-Telnet data.
 //* =========================================================================
 using element = std::variant<bytes, negotiation, subnegotiation, command>;
+
+//* =========================================================================
+/// \brief Equality comparison operator for a telnetpp::element.
+//* =========================================================================
+gsl_constexpr20 inline bool operator==(
+    element const &lhs, element const &rhs) noexcept
+{
+    auto visitor = [&rhs](auto const& _lhs) noexcept
+    {
+        using T = gsl::std20::remove_cvref_t<decltype(_lhs)>;
+        if constexpr (std::is_same_v<T, bytes>)
+        {
+            return telnetpp::bytes_equal(_lhs, std::get<bytes>(rhs));
+        }
+        else
+        {
+            return _lhs == std::get<T>(rhs);
+        }
+    };
+    if (lhs.index() != rhs.index()) return false;
+    return std::visit(visitor, lhs);
+}
 
 //* =========================================================================
 /// \brief A contiguous range of elements.

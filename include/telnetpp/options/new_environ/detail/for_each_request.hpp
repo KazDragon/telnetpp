@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "telnetpp/core.hpp"
 #include "telnetpp/options/new_environ/detail/request_parser_helper.hpp"
@@ -10,8 +10,8 @@ void for_each_request(telnetpp::bytes requests, Continuation &&cont)
 {
     request_parsing_state state;
 
-    auto const *current = requests.begin();
-    auto const *end = requests.end();
+    auto current = requests.begin();
+    auto end = requests.end();
 
     while (current != end)
     {
