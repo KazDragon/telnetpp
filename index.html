@@ -21,7 +21,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">Telnet++<span id="projectnumber">&#160;3.1.0.5</span>
+   <div id="projectname">Telnet++<span id="projectnumber">&#160;4.0.0</span>
    </div>
    <div id="projectbrief">A C++ library for interacting with Telnet streams</div>
   </td>
@@ -80,13 +80,12 @@ $(function() {
 Requirements</h1>
 <p>Telnet++ requires a C++17 compiler and the following libraries:</p><ul>
 <li>Boost (At least version 1.69.0)</li>
-<li>gsl-lite (At least version 1.0)</li>
 <li>(Optionally) ZLib</li>
 <li>(For testing only) Google Test</li>
 </ul>
 <h1><a class="anchor" id="autotoc_md10"></a>
 Installation - CMake</h1>
-<p>Telnet++ can be installed from source using CMake. This requires Boost, gsl-lite and any other dependencies to have been installed beforehand, using their own instructions, or for the call to <code>cmake --configure</code> to be adjusted appropriately (e.g. <code>-DBOOST_ROOT=...</code> or <code>-Dgsl-lite_DIR=...</code>). If you do not wish to install into a system directory, and thus avoid the use of sudo, you can also pass <code>-DCMAKE_INSTALL_PREFIX=...</code> into the <code>cmake --configure</code> call. </p><pre class="fragment">git clone https://github.com/KazDragon/telnetpp.git &amp;&amp; cd telnetpp
+<p>Telnet++ can be installed from source using CMake. This requires Boost and any other dependencies to have been installed beforehand, using their own instructions, or for the call to <code>cmake --configure</code> to be adjusted appropriately (e.g. <code>-DBOOST_ROOT=...</code>). If you do not wish to install into a system directory, and thus avoid the use of sudo, you can also pass <code>-DCMAKE_INSTALL_PREFIX=...</code> into the <code>cmake --configure</code> call. </p><pre class="fragment">git clone https://github.com/KazDragon/telnetpp.git &amp;&amp; cd telnetpp
 mkdir build &amp;&amp; cd build
 cmake --configure -DCMAKE_BUILD_TYPE=Release ..
 cmake --build .
@@ -220,7 +219,7 @@ Session</h1>
 </div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Sun May 25 2025 12:14:48 for Telnet++ by&#160;<a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8
+Generated on Sun May 25 2025 13:43:00 for Telnet++ by&#160;<a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8
 </small></address>
 </body>
 </html>
