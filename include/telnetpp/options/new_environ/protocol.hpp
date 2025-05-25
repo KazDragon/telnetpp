@@ -24,7 +24,7 @@ struct request
     telnetpp::byte_storage name;
 };
 
-using requests = gsl::span<request const>;
+using requests = std::span<request const>;
 
 //* =========================================================================
 /// \brief A response that is received from the remote server.
@@ -36,6 +36,6 @@ struct response
     std::optional<telnetpp::byte_storage> value;
 };
 
-using responses = gsl::span<response const>;
+using responses = std::span<response const>;
 
 }  // namespace telnetpp::options::new_environ
