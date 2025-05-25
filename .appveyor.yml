@@ -18,7 +18,7 @@ platform:
   - x64
 
 environment:
-#  APPVEYOR_SAVE_CACHE_ON_ERROR: true
+  #  APPVEYOR_SAVE_CACHE_ON_ERROR: true
 
   matrix:
     - shared: True
@@ -39,13 +39,13 @@ install:
   - cd %appveyor_build_folder%
   - vcpkg install boost-algorithm:%platform%-windows
   - vcpkg install boost-smart-ptr:%platform%-windows
+  - vcpkg install boost-scope-exit:%platform%-windows
   - vcpkg install boost-container:%platform%-windows
   - vcpkg install boost-core:%platform%-windows
   - vcpkg install boost-exception:%platform%-windows
   - vcpkg install boost-io:%platform%-windows
   - vcpkg install boost-range:%platform%-windows
   - vcpkg install boost-signals2:%platform%-windows
-  - vcpkg install gsl-lite:%platform%-windows
   - vcpkg install zlib:%platform%-windows
   - vcpkg install gtest:%platform%-windows
 

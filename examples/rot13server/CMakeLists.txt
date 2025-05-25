@@ -6,12 +6,9 @@ cmake_policy(VERSION 3.2)
 find_package(serverpp REQUIRED)
 find_package(telnetpp 3.0.0 REQUIRED)
 find_package(Boost COMPONENTS container REQUIRED)
-find_package(gsl-lite REQUIRED)
 find_package(ZLIB REQUIRED)
 find_package(Threads REQUIRED)
 
-# The required C++ Standard for Server++ is C++17.
-set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 set (ROT13_SERVER_PUBLIC_SOURCE_FILES

@@ -17,13 +17,12 @@ Telnet++ is an implementation of the Telnet Session Layer protocol that is used 
 
 Telnet++ requires a C++17 compiler and the following libraries:
   * Boost (At least version 1.69.0)
-  * gsl-lite (At least version 1.0)
   * (Optionally) ZLib
   * (For testing only) Google Test
 
 # Installation - CMake
 
-Telnet++ can be installed from source using CMake.  This requires Boost, gsl-lite and any other dependencies to have been installed beforehand, using their own instructions, or for the call to `cmake --configure` to be adjusted appropriately (e.g. `-DBOOST_ROOT=...` or `-Dgsl-lite_DIR=...`).  If you do not wish to install into a system directory, and thus avoid the use of sudo, you can also pass `-DCMAKE_INSTALL_PREFIX=...` into the `cmake --configure` call.
+Telnet++ can be installed from source using CMake.  This requires Boost and any other dependencies to have been installed beforehand, using their own instructions, or for the call to `cmake --configure` to be adjusted appropriately (e.g. `-DBOOST_ROOT=...`).  If you do not wish to install into a system directory, and thus avoid the use of sudo, you can also pass `-DCMAKE_INSTALL_PREFIX=...` into the `cmake --configure` call.
 
     git clone https://github.com/KazDragon/telnetpp.git && cd telnetpp
     mkdir build && cd build

@@ -6,6 +6,8 @@
 #include "telnetpp/subnegotiation.hpp"
 
 #include <boost/range/algorithm_ext/insert.hpp>
+#include <boost/range/iterator_range_core.hpp>
+#include <boost/scope_exit.hpp>
 
 #include <vector>
 
@@ -17,14 +19,19 @@ public:
     template <typename Continuation>
     void operator()(telnetpp::bytes data, Continuation &&c)
     {
-        boost::insert(unparsed_data_, unparsed_data_.end(), data);
+        boost::range::insert(
+            unparsed_data_,
+            unparsed_data_.end(),
+            boost::make_iterator_range(data.begin(), data.end()));
 
         if (!std::exchange(currently_parsing_, true))
         {
-            auto const _ = gsl::finally([this] {
+            BOOST_SCOPE_EXIT(&unparsed_data_, &currently_parsing_)
+            {
                 unparsed_data_.clear();
                 currently_parsing_ = false;
-            });
+            }
+            BOOST_SCOPE_EXIT_END;
 
             // Note: this is an indexed loop because it is plausible that
             // a response to a Telnet message may cause extra data to be

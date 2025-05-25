@@ -12,7 +12,7 @@ namespace telnetpp {
 //* =========================================================================
 class TELNETPP_EXPORT subnegotiation
 {
-   public:
+public:
     //* =====================================================================
     /// \brief Constructor
     //* =====================================================================
@@ -37,7 +37,7 @@ class TELNETPP_EXPORT subnegotiation
         return content_;
     }
 
-   private:
+private:
     option_type option_;
     bytes content_;
 };
@@ -45,11 +45,11 @@ class TELNETPP_EXPORT subnegotiation
 //* =========================================================================
 /// \brief Comparison function for subnegotiations
 //* =========================================================================
-gsl_constexpr20 inline bool operator==(
+constexpr inline bool operator==(
     subnegotiation const &lhs, subnegotiation const &rhs) noexcept
 {
-    return lhs.option() == rhs.option() &&
-        telnetpp::bytes_equal(lhs.content(), rhs.content());
+    return lhs.option() == rhs.option()
+        && telnetpp::bytes_equal(lhs.content(), rhs.content());
 }
 
 //* =========================================================================

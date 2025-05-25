@@ -2,6 +2,7 @@
 
 #include "telnetpp/options/new_environ/detail/for_each_response.hpp"
 #include "telnetpp/options/new_environ/detail/protocol.hpp"
+#include "telnetpp/options/new_environ/detail/response_parser_helper.hpp"
 #include "telnetpp/options/new_environ/detail/stream.hpp"
 
 #include <numeric>
@@ -21,15 +22,13 @@ client::client(telnetpp::session &sess) noexcept
 // ==========================================================================
 void client::request_variables(requests const &reqs)
 {
-    auto request_content = std::accumulate(
-        reqs.begin(),
-        reqs.end(),
-        byte_storage{detail::send},
-        [](byte_storage &content, request const &req) -> byte_storage & {
-            content.push_back(detail::type_to_byte(req.type));
-            detail::append_escaped(content, req.name);
-            return content;
-        });
+    byte_storage request_content{detail::send};
+
+    for (auto const &request : reqs)
+    {
+        request_content.push_back(detail::type_to_byte(request.type));
+        detail::append_escaped(request_content, request.name);
+    }
 
     write_subnegotiation(request_content);
 }

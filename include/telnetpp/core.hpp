@@ -2,15 +2,12 @@
 
 #include "telnetpp/detail/export.hpp"  // IWYU pragma: export
 
-#include <gsl-lite/gsl-lite.hpp>
-
+#include <algorithm>
+#include <span>
 #include <string>
 #include <cstdint>
-#include <algorithm>
 
 namespace telnetpp {
-
-namespace gsl = ::gsl_lite;
 
 using byte = std::uint8_t;
 using option_type = std::uint8_t;
@@ -41,20 +38,19 @@ static constexpr command_type const iac = 255;  // Interpret As Command
 // which it is found.  For that reason, these spans should never be stored.
 // if this is necessary, it must be converted into a longer-term data
 // structure, e.g. a std::vector, or std::basic_string<byte>.
-using bytes = gsl::span<byte const>;
+using bytes = std::span<byte const>;
 
 // Where necessary, bytes are stored in this type, which has the small
 // string optimization, meaning that most cases will not cause an allocation.
 using byte_storage = std::basic_string<byte>;
 
 // Comparison function for bytes.
-// gsl::span<>, like std::span<> in C++20, does not define comparison
-// operators by default because the semantics are unclear (deep or shallow?).
-// This named comparison function is provided because we cannot define a
-// useful operator== because ADL would not find it in our namespace.
-constexpr inline auto bytes_equal = [](
-    bytes const &lhs, bytes const &rhs) noexcept
-{
+// std::span<> does not define comparison operators by default because the
+// semantics are unclear (deep or shallow?).  This named comparison function
+// is provided because we cannot define a useful operator== because ADL
+// would not find it in our namespace.
+constexpr inline auto bytes_equal = [](bytes const &lhs,
+                                       bytes const &rhs) noexcept {
     return std::equal(lhs.begin(), lhs.end(), rhs.begin(), rhs.end());
 };
 
@@ -66,7 +62,7 @@ inline byte_storage operator""_tb(char const *text, size_t length)
     byte_storage result;
     result.reserve(length);
 
-    for (auto ch : gsl::span<char const>{text, length})
+    for (auto ch : std::span<char const>{text, length})
     {
         result.push_back(static_cast<telnetpp::byte>(ch));
     }
