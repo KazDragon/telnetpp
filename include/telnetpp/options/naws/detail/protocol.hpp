@@ -18,6 +18,6 @@
 //* =========================================================================
 namespace telnetpp::options::naws::detail {
 
-static constexpr option_type const option = 31;
+inline constexpr option_type const option = 31;
 
 }

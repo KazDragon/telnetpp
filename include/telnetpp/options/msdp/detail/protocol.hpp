@@ -25,14 +25,14 @@
 //* =========================================================================
 namespace telnetpp::options::msdp::detail {
 
-static constexpr option_type const option = 69;
+inline constexpr option_type const option = 69;
 
 using msdp_command_type = byte;
-static constexpr msdp_command_type const var = 1;
-static constexpr msdp_command_type const val = 2;
-static constexpr msdp_command_type const table_open = 3;
-static constexpr msdp_command_type const table_close = 4;
-static constexpr msdp_command_type const array_open = 5;
-static constexpr msdp_command_type const array_close = 6;
+inline constexpr msdp_command_type const var = 1;
+inline constexpr msdp_command_type const val = 2;
+inline constexpr msdp_command_type const table_open = 3;
+inline constexpr msdp_command_type const table_close = 4;
+inline constexpr msdp_command_type const array_open = 5;
+inline constexpr msdp_command_type const array_close = 6;
 
 }  // namespace telnetpp::options::msdp::detail

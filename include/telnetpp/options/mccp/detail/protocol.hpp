@@ -65,6 +65,6 @@
 
 namespace telnetpp::options::mccp::detail {
 
-static constexpr option_type const option = 86;
+inline constexpr option_type const option = 86;
 
 }
