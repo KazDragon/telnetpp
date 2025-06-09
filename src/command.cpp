@@ -1,8 +1,6 @@
 #include "telnetpp/command.hpp"
 
-#include <boost/io/ios_state.hpp>
-
-#include <iomanip>
+#include <format>
 #include <iostream>
 
 namespace telnetpp {
@@ -12,47 +10,35 @@ namespace telnetpp {
 // ==========================================================================
 std::ostream &operator<<(std::ostream &out, command const &cmd)
 {
-    out << "command[";
-
-    switch (cmd.value())
-    {
-        case telnetpp::nop:
-            out << "NOP";
-            break;
-        case telnetpp::dm:
-            out << "DM";
-            break;
-        case telnetpp::brk:
-            out << "BRK";
-            break;
-        case telnetpp::ip:
-            out << "IP";
-            break;
-        case telnetpp::ao:
-            out << "AO";
-            break;
-        case telnetpp::ayt:
-            out << "AYT";
-            break;
-        case telnetpp::ec:
-            out << "EC";
-            break;
-        case telnetpp::el:
-            out << "EL";
-            break;
-        case telnetpp::ga:
-            out << "GA";
-            break;
-        default:
+    std::string_view cmd_type = [](command_type const type) {
+        switch (type)
         {
-            boost::io::ios_flags_saver ifs(out);
-            out << "0x" << std::hex << std::setfill('0') << std::setw(2)
-                << std::uppercase << static_cast<int>(cmd.value());
-            break;
+            case telnetpp::nop:
+                return "NOP";
+            case telnetpp::dm:
+                return "DM";
+            case telnetpp::brk:
+                return "BRK";
+            case telnetpp::ip:
+                return "IP";
+            case telnetpp::ao:
+                return "AO";
+            case telnetpp::ayt:
+                return "AYT";
+            case telnetpp::ec:
+                return "EC";
+            case telnetpp::el:
+                return "EL";
+            case telnetpp::ga:
+                return "GA";
+            default:
+                return "";
         }
-    }
+    }(cmd.value());
 
-    return out << "]";
+    return cmd_type != ""
+             ? (out << std::format("command[{}]", cmd_type))
+             : (out << std::format("command[0x{:02X}]", cmd.value()));
 }
 
 }  // namespace telnetpp
