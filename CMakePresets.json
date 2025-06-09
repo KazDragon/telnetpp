@@ -33,9 +33,16 @@
             "cacheVariables": {
                 "CMAKE_BUILD_TYPE": "Debug"
             }
+        },
+        {
+            "name": "DebugSan",
+            "displayName": "Debug (with sanitizers)",
+            "inherits": "Debug",
+            "cacheVariables": {
+                "TELNETPP_SANITIZE": "address,undefined"
+            }
         }
     ],
-    "buildPresets": [
-    ],
+    "buildPresets": [],
     "testPresets": []
 }
