@@ -21,7 +21,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">Telnet++<span id="projectnumber">&#160;4.0.0</span>
+   <div id="projectname">Telnet++<span id="projectnumber">&#160;4.0.0.9</span>
    </div>
    <div id="projectbrief">A C++ library for interacting with Telnet streams</div>
   </td>
@@ -102,9 +102,9 @@ Typedefs</h2></td></tr>
 <tr class="memitem:ade722027bfb04dc20063051f92d91a32" id="r_ade722027bfb04dc20063051f92d91a32"><td class="memItemLeft" align="right" valign="top"><a id="ade722027bfb04dc20063051f92d91a32" name="ade722027bfb04dc20063051f92d91a32"></a>
 using&#160;</td><td class="memItemRight" valign="bottom"><b>string_value</b> = telnetpp::byte_storage</td></tr>
 <tr class="separator:ade722027bfb04dc20063051f92d91a32"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ac0e65ab278ce93d34bdc7a9887eb4682" id="r_ac0e65ab278ce93d34bdc7a9887eb4682"><td class="memItemLeft" align="right" valign="top"><a id="ac0e65ab278ce93d34bdc7a9887eb4682" name="ac0e65ab278ce93d34bdc7a9887eb4682"></a>
-using&#160;</td><td class="memItemRight" valign="bottom"><b>array_value</b> = boost::container::small_vector&lt; string_value, 4 &gt;</td></tr>
-<tr class="separator:ac0e65ab278ce93d34bdc7a9887eb4682"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a07dcdfe623afcf2abe93c86f0260a3fb" id="r_a07dcdfe623afcf2abe93c86f0260a3fb"><td class="memItemLeft" align="right" valign="top"><a id="a07dcdfe623afcf2abe93c86f0260a3fb" name="a07dcdfe623afcf2abe93c86f0260a3fb"></a>
+using&#160;</td><td class="memItemRight" valign="bottom"><b>array_value</b> = std::vector&lt; string_value &gt;</td></tr>
+<tr class="separator:a07dcdfe623afcf2abe93c86f0260a3fb"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af264c9c01b2692ece553cc78b95121c9" id="r_af264c9c01b2692ece553cc78b95121c9"><td class="memItemLeft" align="right" valign="top"><a id="af264c9c01b2692ece553cc78b95121c9" name="af264c9c01b2692ece553cc78b95121c9"></a>
 using&#160;</td><td class="memItemRight" valign="bottom"><b>table_value</b> = std::vector&lt; <a class="el" href="structtelnetpp_1_1options_1_1msdp_1_1variable.html">variable</a> &gt;</td></tr>
 <tr class="separator:af264c9c01b2692ece553cc78b95121c9"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -114,14 +114,6 @@ using&#160;</td><td class="memItemRight" valign="bottom"><b>value_type</b> = std
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
 Functions</h2></td></tr>
-<tr class="memitem:adf558a62271b9f816ad078c703488a75" id="r_adf558a62271b9f816ad078c703488a75"><td class="memItemLeft" align="right" valign="top"><a id="adf558a62271b9f816ad078c703488a75" name="adf558a62271b9f816ad078c703488a75"></a>
-TELNETPP_EXPORT bool&#160;</td><td class="memItemRight" valign="bottom"><b>operator==</b> (<a class="el" href="structtelnetpp_1_1options_1_1msdp_1_1variable.html">variable</a> const &amp;lhs, <a class="el" href="structtelnetpp_1_1options_1_1msdp_1_1variable.html">variable</a> const &amp;rhs)</td></tr>
-<tr class="memdesc:adf558a62271b9f816ad078c703488a75"><td class="mdescLeft">&#160;</td><td class="mdescRight">Equality operator. <br /></td></tr>
-<tr class="separator:adf558a62271b9f816ad078c703488a75"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a1cde7bb8600b05582bedef8ab38e773e" id="r_a1cde7bb8600b05582bedef8ab38e773e"><td class="memItemLeft" align="right" valign="top"><a id="a1cde7bb8600b05582bedef8ab38e773e" name="a1cde7bb8600b05582bedef8ab38e773e"></a>
-TELNETPP_EXPORT bool&#160;</td><td class="memItemRight" valign="bottom"><b>operator!=</b> (<a class="el" href="structtelnetpp_1_1options_1_1msdp_1_1variable.html">variable</a> const &amp;lhs, <a class="el" href="structtelnetpp_1_1options_1_1msdp_1_1variable.html">variable</a> const &amp;rhs)</td></tr>
-<tr class="memdesc:a1cde7bb8600b05582bedef8ab38e773e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Inequality operator. <br /></td></tr>
-<tr class="separator:a1cde7bb8600b05582bedef8ab38e773e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a4d9ba8ccab6af66a0d9bd19413cc2d0d" id="r_a4d9ba8ccab6af66a0d9bd19413cc2d0d"><td class="memItemLeft" align="right" valign="top"><a id="a4d9ba8ccab6af66a0d9bd19413cc2d0d" name="a4d9ba8ccab6af66a0d9bd19413cc2d0d"></a>
 TELNETPP_EXPORT std::ostream &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>operator&lt;&lt;</b> (std::ostream &amp;out, <a class="el" href="structtelnetpp_1_1options_1_1msdp_1_1variable.html">variable</a> const &amp;var)</td></tr>
 <tr class="memdesc:a4d9ba8ccab6af66a0d9bd19413cc2d0d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Stream Output operator. <br /></td></tr>
@@ -137,7 +129,7 @@ TELNETPP_EXPORT std::ostream &amp;&#160;</td><td class="memItemRight" valign="bo
 </div></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Sun May 25 2025 13:43:00 for Telnet++ by&#160;<a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8
+Generated on Mon Jun 9 2025 16:28:24 for Telnet++ by&#160;<a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8
 </small></address>
 </body>
 </html>

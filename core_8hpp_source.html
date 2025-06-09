@@ -21,7 +21,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">Telnet++<span id="projectnumber">&#160;4.0.0</span>
+   <div id="projectname">Telnet++<span id="projectnumber">&#160;4.0.0.9</span>
    </div>
    <div id="projectbrief">A C++ library for interacting with Telnet streams</div>
   </td>
@@ -100,22 +100,22 @@ $(document).ready(function() { init_codefold(0); });
 <div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span><span class="keyword">using </span>subnegotiation_content_type = byte;</div>
 <div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span> </div>
 <div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span><span class="comment">// TELNET Commands</span></div>
-<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span><span class="keyword">static</span> <span class="keyword">constexpr</span> command_type <span class="keyword">const</span> se = 240;   <span class="comment">// Subnegotiation End</span></div>
-<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span><span class="keyword">static</span> <span class="keyword">constexpr</span> command_type <span class="keyword">const</span> nop = 241;  <span class="comment">// No Operation</span></div>
-<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span><span class="keyword">static</span> <span class="keyword">constexpr</span> command_type <span class="keyword">const</span> dm = 242;   <span class="comment">// Data Mark</span></div>
-<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span><span class="keyword">static</span> <span class="keyword">constexpr</span> command_type <span class="keyword">const</span> brk = 243;  <span class="comment">// Break</span></div>
-<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span><span class="keyword">static</span> <span class="keyword">constexpr</span> command_type <span class="keyword">const</span> ip = 244;   <span class="comment">// Interrupt Process</span></div>
-<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span><span class="keyword">static</span> <span class="keyword">constexpr</span> command_type <span class="keyword">const</span> ao = 245;   <span class="comment">// Abort Output</span></div>
-<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span><span class="keyword">static</span> <span class="keyword">constexpr</span> command_type <span class="keyword">const</span> ayt = 246;  <span class="comment">// Are You There?</span></div>
-<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span><span class="keyword">static</span> <span class="keyword">constexpr</span> command_type <span class="keyword">const</span> ec = 247;   <span class="comment">// Erase Character</span></div>
-<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span><span class="keyword">static</span> <span class="keyword">constexpr</span> command_type <span class="keyword">const</span> el = 248;   <span class="comment">// Erase Line</span></div>
-<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span><span class="keyword">static</span> <span class="keyword">constexpr</span> command_type <span class="keyword">const</span> ga = 249;   <span class="comment">// Go Ahead</span></div>
-<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span><span class="keyword">static</span> <span class="keyword">constexpr</span> command_type <span class="keyword">const</span> sb = 250;   <span class="comment">// Subnegotiation Begin</span></div>
-<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span><span class="keyword">static</span> <span class="keyword">constexpr</span> command_type <span class="keyword">const</span> will = 251;</div>
-<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span><span class="keyword">static</span> <span class="keyword">constexpr</span> command_type <span class="keyword">const</span> wont = 252;</div>
-<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span><span class="keyword">static</span> <span class="keyword">constexpr</span> command_type <span class="keyword">const</span> do_ = 253;  <span class="comment">// NOLINT</span></div>
-<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span><span class="keyword">static</span> <span class="keyword">constexpr</span> command_type <span class="keyword">const</span> dont = 254;</div>
-<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span><span class="keyword">static</span> <span class="keyword">constexpr</span> command_type <span class="keyword">const</span> iac = 255;  <span class="comment">// Interpret As Command</span></div>
+<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span><span class="keyword">inline</span> <span class="keyword">constexpr</span> command_type <span class="keyword">const</span> se = 240;   <span class="comment">// Subnegotiation End</span></div>
+<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span><span class="keyword">inline</span> <span class="keyword">constexpr</span> command_type <span class="keyword">const</span> nop = 241;  <span class="comment">// No Operation</span></div>
+<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span><span class="keyword">inline</span> <span class="keyword">constexpr</span> command_type <span class="keyword">const</span> dm = 242;   <span class="comment">// Data Mark</span></div>
+<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span><span class="keyword">inline</span> <span class="keyword">constexpr</span> command_type <span class="keyword">const</span> brk = 243;  <span class="comment">// Break</span></div>
+<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span><span class="keyword">inline</span> <span class="keyword">constexpr</span> command_type <span class="keyword">const</span> ip = 244;   <span class="comment">// Interrupt Process</span></div>
+<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span><span class="keyword">inline</span> <span class="keyword">constexpr</span> command_type <span class="keyword">const</span> ao = 245;   <span class="comment">// Abort Output</span></div>
+<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span><span class="keyword">inline</span> <span class="keyword">constexpr</span> command_type <span class="keyword">const</span> ayt = 246;  <span class="comment">// Are You There?</span></div>
+<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span><span class="keyword">inline</span> <span class="keyword">constexpr</span> command_type <span class="keyword">const</span> ec = 247;   <span class="comment">// Erase Character</span></div>
+<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span><span class="keyword">inline</span> <span class="keyword">constexpr</span> command_type <span class="keyword">const</span> el = 248;   <span class="comment">// Erase Line</span></div>
+<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span><span class="keyword">inline</span> <span class="keyword">constexpr</span> command_type <span class="keyword">const</span> ga = 249;   <span class="comment">// Go Ahead</span></div>
+<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span><span class="keyword">inline</span> <span class="keyword">constexpr</span> command_type <span class="keyword">const</span> sb = 250;   <span class="comment">// Subnegotiation Begin</span></div>
+<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span><span class="keyword">inline</span> <span class="keyword">constexpr</span> command_type <span class="keyword">const</span> will = 251;</div>
+<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span><span class="keyword">inline</span> <span class="keyword">constexpr</span> command_type <span class="keyword">const</span> wont = 252;</div>
+<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span><span class="keyword">inline</span> <span class="keyword">constexpr</span> command_type <span class="keyword">const</span> do_ = 253;  <span class="comment">// NOLINT</span></div>
+<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span><span class="keyword">inline</span> <span class="keyword">constexpr</span> command_type <span class="keyword">const</span> dont = 254;</div>
+<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span><span class="keyword">inline</span> <span class="keyword">constexpr</span> command_type <span class="keyword">const</span> iac = 255;  <span class="comment">// Interpret As Command</span></div>
 <div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span> </div>
 <div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span><span class="comment">// A stream of bytes in Telnet++ is exposed as a non-owning span.  It is</span></div>
 <div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span><span class="comment">// expected that the data will live for no longer than any function in</span></div>
@@ -135,7 +135,7 @@ $(document).ready(function() { init_codefold(0); });
 <div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span><span class="comment">// would not find it in our namespace.</span></div>
 <div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span><span class="keyword">constexpr</span> <span class="keyword">inline</span> <span class="keyword">auto</span> bytes_equal = [](bytes <span class="keyword">const</span> &amp;lhs,</div>
 <div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span>                                       bytes <span class="keyword">const</span> &amp;rhs) <span class="keyword">noexcept</span> {</div>
-<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span>    <span class="keywordflow">return</span> std::equal(lhs.begin(), lhs.end(), rhs.begin(), rhs.end());</div>
+<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span>    <span class="keywordflow">return</span> std::ranges::equal(lhs, rhs);</div>
 <div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span>};</div>
 <div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span> </div>
 <div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span><span class="keyword">namespace </span>literals {</div>
@@ -159,7 +159,7 @@ $(document).ready(function() { init_codefold(0); });
 </div><!-- fragment --></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Sun May 25 2025 13:43:00 for Telnet++ by&#160;<a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8
+Generated on Mon Jun 9 2025 16:28:24 for Telnet++ by&#160;<a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8
 </small></address>
 </body>
 </html>
