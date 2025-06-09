@@ -51,7 +51,7 @@ using byte_storage = std::basic_string<byte>;
 // would not find it in our namespace.
 constexpr inline auto bytes_equal = [](bytes const &lhs,
                                        bytes const &rhs) noexcept {
-    return std::equal(lhs.begin(), lhs.end(), rhs.begin(), rhs.end());
+    return std::ranges::equal(lhs, rhs);
 };
 
 namespace literals {

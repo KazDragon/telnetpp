@@ -7,7 +7,7 @@
 
 namespace telnetpp::options::new_environ::detail {
 
-enum class request_parser_state
+enum class request_parser_state : std::uint8_t
 {
     state_send,
     state_type,
@@ -17,59 +17,57 @@ enum class request_parser_state
 
 struct request_parsing_state
 {
-    request_parser_state state = request_parser_state::state_send;
-    request req;
+    request_parser_state state_ = request_parser_state::state_send;
+    request req_;
 };
 
 // ==========================================================================
 // PARSE_REQUEST_SEND
 // ==========================================================================
 template <typename Continuation>
-void parse_request_send(
+constexpr void parse_request_send(
     request_parsing_state &state,
-    telnetpp::bytes::iterator /*current*/,
+    telnetpp::byte /*current*/,
     Continuation && /*cont*/)
 {
-    state.state = request_parser_state::state_type;
+    state.state_ = request_parser_state::state_type;
 }
 
 // ==========================================================================
 // PARSE_REQUEST_TYPE
 // ==========================================================================
 template <typename Continuation>
-void parse_request_type(
+constexpr void parse_request_type(
     request_parsing_state &state,
-    telnetpp::bytes::iterator current,
+    telnetpp::byte current,
     Continuation && /*cont*/)
 {
-    state.req.type = byte_to_type(*current);
-    state.state = request_parser_state::state_name;
+    state.req_.type = byte_to_type(current);
+    state.state_ = request_parser_state::state_name;
 }
 
 // ==========================================================================
 // PARSE_REQUEST_NAME
 // ==========================================================================
 template <typename Continuation>
-void parse_request_name(
-    request_parsing_state &state,
-    telnetpp::bytes::iterator current,
-    Continuation &&cont)
+constexpr void parse_request_name(
+    request_parsing_state &state, telnetpp::byte current, Continuation &&cont)
 {
-    switch (*current)
+    switch (current)
     {
         case detail::esc:
-            state.state = request_parser_state::state_name_esc;
+            state.state_ = request_parser_state::state_name_esc;
             break;
 
         case detail::var:  // Fall-through
         case detail::uservar:
-            cont(state.req);
-            state.req = {};
-            state.req.type = byte_to_type(*current);
+            cont(state.req_);
+            state.req_ = {};
+            state.req_.type = byte_to_type(current);
             break;
 
         default:
-            state.req.name.push_back(*current);
+            state.req_.name.push_back(current);
             break;
     }
 }
@@ -78,25 +76,23 @@ void parse_request_name(
 // PARSE_REQUEST_NAME_ESC
 // ==========================================================================
 template <typename Continuation>
-void parse_request_name_esc(
+constexpr void parse_request_name_esc(
     request_parsing_state &state,
-    telnetpp::bytes::iterator current,
+    telnetpp::byte current,
     Continuation && /*cont*/)
 {
-    state.req.name.push_back(*current);
-    state.state = request_parser_state::state_name;
+    state.req_.name.push_back(current);
+    state.state_ = request_parser_state::state_name;
 }
 
 // ==========================================================================
 // PARSE_REQUEST_BYTE
 // ==========================================================================
 template <typename Continuation>
-void parse_request_byte(
-    request_parsing_state &state,
-    telnetpp::bytes::iterator current,
-    Continuation &&cont)
+constexpr void parse_request_byte(
+    request_parsing_state &state, telnetpp::byte current, Continuation &&cont)
 {
-    switch (state.state)
+    switch (state.state_)
     {
         case request_parser_state::state_send:
             parse_request_send(state, current, cont);
@@ -124,11 +120,12 @@ void parse_request_byte(
 // PARSE_REQUEST_BYTE
 // ==========================================================================
 template <typename Continuation>
-void parse_request_end(request_parsing_state &state, Continuation &&cont)
+constexpr void parse_request_end(
+    request_parsing_state &state, Continuation &&cont)
 {
-    if (!state.req.name.empty())
+    if (!state.req_.name.empty())
     {
-        cont(state.req);
+        cont(state.req_);
     }
 }
 

@@ -5,8 +5,6 @@
 #include "telnetpp/options/new_environ/detail/response_parser_helper.hpp"
 #include "telnetpp/options/new_environ/detail/stream.hpp"
 
-#include <numeric>
-
 namespace telnetpp::options::new_environ {
 
 // ==========================================================================

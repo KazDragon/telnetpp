@@ -2,8 +2,6 @@
 
 #include "telnetpp/core.hpp"
 
-#include <boost/container/small_vector.hpp>
-
 #include <iosfwd>
 #include <variant>
 #include <vector>
@@ -13,7 +11,7 @@ namespace telnetpp::options::msdp {
 struct variable;
 
 using string_value = telnetpp::byte_storage;
-using array_value = boost::container::small_vector<string_value, 4>;
+using array_value = std::vector<string_value>;
 using table_value = std::vector<variable>;
 
 //* =========================================================================
@@ -33,38 +31,42 @@ struct TELNETPP_EXPORT variable
     //* =====================================================================
     /// \brief Constructor
     //* =====================================================================
-    variable();
+    constexpr variable() = default;
 
     //* =====================================================================
     /// \brief Constructor
     //* =====================================================================
-    variable(telnetpp::byte_storage name, string_value value);
+    constexpr variable(telnetpp::byte_storage name, string_value value)
+      : name_{std::move(name)}, value_{std::move(value)}
+    {
+    }
 
     //* =====================================================================
     /// \brief Constructor
     //* =====================================================================
-    variable(telnetpp::byte_storage name, array_value array_values);
+    constexpr variable(telnetpp::byte_storage name, array_value array_values)
+      : name_{std::move(name)}, value_{std::move(array_values)}
+    {
+    }
 
     //* =====================================================================
     /// \brief Constructor
     //* =====================================================================
-    variable(telnetpp::byte_storage name, table_value table_values);
+    constexpr variable(telnetpp::byte_storage name, table_value table_values)
+      : name_{std::move(name)}, value_{std::move(table_values)}
+    {
+    }
+
+    //* =====================================================================
+    /// \brief Equality operator
+    //* =====================================================================
+    TELNETPP_EXPORT
+    constexpr friend bool operator==(
+        variable const &lhs, variable const &rhs) noexcept = default;
 
     telnetpp::byte_storage name_;
     value_type value_;
 };
-
-//* =========================================================================
-/// \brief Equality operator.
-//* =========================================================================
-TELNETPP_EXPORT
-bool operator==(variable const &lhs, variable const &rhs);
-
-//* =========================================================================
-/// \brief Inequality operator.
-//* =========================================================================
-TELNETPP_EXPORT
-bool operator!=(variable const &lhs, variable const &rhs);
 
 //* =========================================================================
 /// \brief Stream Output operator.

@@ -7,54 +7,8 @@
 
 #include <ostream>
 #include <sstream>
-#include <tuple>
 
 namespace telnetpp::options::msdp {
-
-// ==========================================================================
-// CONSTRUCTOR
-// ==========================================================================
-variable::variable() = default;
-
-// ==========================================================================
-// CONSTRUCTOR
-// ==========================================================================
-variable::variable(telnetpp::byte_storage name, string_value value)
-  : name_{std::move(name)}, value_{std::move(value)}
-{
-}
-
-// ==========================================================================
-// CONSTRUCTOR
-// ==========================================================================
-variable::variable(telnetpp::byte_storage name, array_value array_values)
-  : name_{std::move(name)}, value_{std::move(array_values)}
-{
-}
-
-// ==========================================================================
-// CONSTRUCTOR
-// ==========================================================================
-variable::variable(telnetpp::byte_storage name, table_value table_values)
-  : name_{std::move(name)}, value_{std::move(table_values)}
-{
-}
-
-// ==========================================================================
-// OPERATOR==
-// ==========================================================================
-bool operator==(variable const &lhs, variable const &rhs)
-{
-    return std::tie(lhs.name_, lhs.value_) == std::tie(rhs.name_, rhs.value_);
-}
-
-// ==========================================================================
-// OPERATOR!=
-// ==========================================================================
-bool operator!=(variable const &lhs, variable const &rhs)
-{
-    return !(lhs == rhs);
-}
 
 // ==========================================================================
 // OPERATOR<<

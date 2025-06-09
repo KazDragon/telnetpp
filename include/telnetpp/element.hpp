@@ -21,10 +21,9 @@ using element = std::variant<bytes, negotiation, subnegotiation, command>;
 //* =========================================================================
 /// \brief Equality comparison operator for a telnetpp::element.
 //* =========================================================================
-constexpr inline bool operator==(
-    element const &lhs, element const &rhs) noexcept
+constexpr bool operator==(element const &lhs, element const &rhs) noexcept
 {
-    auto visitor = [&rhs](auto const &_lhs) noexcept {
+    auto const visitor = [&rhs](auto const &_lhs) noexcept {
         using T = std::decay_t<decltype(_lhs)>;
         if constexpr (std::is_same_v<T, bytes>)
         {
@@ -36,11 +35,7 @@ constexpr inline bool operator==(
         }
     };
 
-    if (lhs.index() != rhs.index())
-    {
-        return false;
-    }
-    return std::visit(visitor, lhs);
+    return lhs.index() == rhs.index() ? std::visit(visitor, lhs) : false;
 }
 
 //* =========================================================================

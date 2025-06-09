@@ -4,8 +4,7 @@
 #include "telnetpp/options/new_environ/detail/protocol.hpp"
 #include "telnetpp/options/new_environ/detail/stream.hpp"
 
-#include <boost/range/algorithm/for_each.hpp>
-
+#include <algorithm>
 #include <utility>
 
 namespace telnetpp::options::new_environ {
@@ -29,7 +28,7 @@ byte type_to_byte(variable_type const &type)
 // ==========================================================================
 server::server(telnetpp::session &sess) noexcept
   : telnetpp::server_option(
-      sess, telnetpp::options::new_environ::detail::option)
+        sess, telnetpp::options::new_environ::detail::option)
 {
 }
 
@@ -98,13 +97,13 @@ void server::handle_subnegotiation(telnetpp::bytes data)
     {
         // It can be assumed that this is an empty "SEND" subnegotiation.
         // This is interpreted to have the meaning "Send all the things".
-        boost::for_each(variables_, [&](auto &&variable) {
-            this->append_variable(
+        std::ranges::for_each(variables_, [&](auto &&variable) {
+            append_variable(
                 response, variable_type::var, variable.first, variable.second);
         });
 
-        boost::for_each(user_variables_, [&](auto &&variable) {
-            this->append_variable(
+        std::ranges::for_each(user_variables_, [&](auto &&variable) {
+            append_variable(
                 response,
                 variable_type::uservar,
                 variable.first,
@@ -116,21 +115,19 @@ void server::handle_subnegotiation(telnetpp::bytes data)
         detail::for_each_request(data, [&](request const &req) {
             if (req.type == variable_type::var)
             {
-                auto it = variables_.find(req.name);
-
-                if (it != variables_.end())
+                if (auto const it = variables_.find(req.name);
+                    it != variables_.end())
                 {
-                    this->append_variable(
+                    append_variable(
                         response, variable_type::var, req.name, it->second);
                 }
             }
             else
             {
-                auto it = user_variables_.find(req.name);
-
-                if (it != user_variables_.end())
+                if (auto const it = user_variables_.find(req.name);
+                    it != user_variables_.end())
                 {
-                    this->append_variable(
+                    append_variable(
                         response, variable_type::uservar, req.name, it->second);
                 }
             }
