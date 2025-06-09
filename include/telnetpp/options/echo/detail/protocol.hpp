@@ -24,6 +24,6 @@
 //* =========================================================================
 namespace telnetpp::options::echo::detail {
 
-static constexpr option_type const option = 1;
+inline constexpr option_type const option = 1;
 
 }  // namespace telnetpp::options::echo::detail

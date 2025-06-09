@@ -19,10 +19,10 @@
 //* =========================================================================
 namespace telnetpp::options::terminal_type::detail {
 
-static constexpr option_type const option = 24;
+inline constexpr option_type const option = 24;
 
 using terminal_type_command_type = byte;
-static constexpr terminal_type_command_type const is = 0;
-static constexpr terminal_type_command_type const send = 1;
+inline constexpr terminal_type_command_type const is = 0;
+inline constexpr terminal_type_command_type const send = 1;
 
 }  // namespace telnetpp::options::terminal_type::detail

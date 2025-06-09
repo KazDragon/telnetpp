@@ -23,6 +23,6 @@
 //* =========================================================================
 namespace telnetpp::options::suppress_ga::detail {
 
-static constexpr option_type const option = 3;
+inline constexpr option_type const option = 3;
 
 }
