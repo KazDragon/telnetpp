@@ -15,7 +15,7 @@ Telnet++ is an implementation of the Telnet Session Layer protocol that is used 
 
 # Requirements
 
-Telnet++ requires a C++17 compiler and the following libraries:
+Telnet++ requires a C++20 compiler and the following libraries:
   * Boost (At least version 1.69.0)
   * (Optionally) ZLib
   * (For testing only) Google Test
@@ -54,7 +54,7 @@ Telnet++ can be installed from source using CMake.  This requires Boost and any 
 
 # Status
 
-Telnet++ is automatically tested with MSVC 2019 and GNU g++ 7.5.
+Telnet++ is automatically tested with MSVC 2022 and GNU g++ 13.3.
 
 # The Basics
 
