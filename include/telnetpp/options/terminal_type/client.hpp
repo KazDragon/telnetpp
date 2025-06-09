@@ -23,7 +23,7 @@ public:
     //* =====================================================================
     void request_terminal_type();
 
-    boost::signals2::signal<void(telnetpp::bytes)> on_terminal_type;
+    boost::signals2::signal<void(telnetpp::bytes)> on_terminal_type;  // NOLINT
 
 private:
     //* =====================================================================

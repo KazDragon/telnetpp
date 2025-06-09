@@ -20,7 +20,7 @@ public:
     explicit client(telnetpp::session &sess) noexcept;
 
     boost::signals2::signal<void(window_dimension, window_dimension)>
-        on_window_size_changed;
+        on_window_size_changed;  // NOLINT
 
 private:
     //* =====================================================================
