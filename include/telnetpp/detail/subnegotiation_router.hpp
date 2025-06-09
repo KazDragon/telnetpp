@@ -8,7 +8,7 @@ namespace telnetpp::detail {
 
 struct subnegotiation_router_key_from_message_policy
 {
-    static option_type key_from_message(subnegotiation const &sub)
+    static constexpr option_type key_from_message(subnegotiation const &sub)
     {
         return sub.option();
     }

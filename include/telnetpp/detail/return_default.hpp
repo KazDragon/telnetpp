@@ -5,7 +5,7 @@ namespace telnetpp::detail {
 template <class T>
 struct return_default_constructed
 {
-    T operator()()
+    constexpr T operator()()
     {
         return T{};
     }
@@ -14,7 +14,7 @@ struct return_default_constructed
 template <>
 struct return_default_constructed<void>
 {
-    void operator()()
+    constexpr void operator()()
     {
     }
 };

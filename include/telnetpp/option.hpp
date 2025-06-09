@@ -262,7 +262,7 @@ private:
     //* =====================================================================
     virtual void handle_subnegotiation(telnetpp::bytes data) = 0;
 
-    enum class internal_state
+    enum class internal_state : std::uint8_t
     {
         inactive,
         activating,
