@@ -2,8 +2,9 @@
 
 #include "telnetpp/core.hpp"
 
-#include <boost/exception/all.hpp>
+#include <boost/exception/exception.hpp>
 
+#include <functional>
 #include <stdexcept>
 
 namespace telnetpp::options::mccp {
@@ -49,12 +50,12 @@ private:
     //* =====================================================================
     /// \brief A hook for when the transformation stream starts.
     //* =====================================================================
-    virtual void do_start(){};
+    virtual void do_start() {};
 
     //* =====================================================================
     /// \brief A hook for when transformation stream ends.
     //* =====================================================================
-    virtual void do_finish(continuation const & /*cont*/){};
+    virtual void do_finish(continuation const & /*cont*/) {};
 
     //* =====================================================================
     /// \brief Transform the given bytes, sending the transformed data

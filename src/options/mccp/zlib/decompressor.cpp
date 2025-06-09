@@ -1,6 +1,5 @@
 #include "telnetpp/options/mccp/zlib/decompressor.hpp"
 
-#include <boost/core/ignore_unused.hpp>
 #include <zlib.h>
 
 #include <optional>
@@ -36,8 +35,7 @@ struct decompressor::impl
 
         stream_ = z_stream{};
 
-        auto result = inflateInit(&*stream_);
-        boost::ignore_unused(result);
+        [[maybe_unused]] auto result = inflateInit(&*stream_);
         assert(result == Z_OK);
     }
 
@@ -48,8 +46,7 @@ struct decompressor::impl
     {
         assert(stream_ != std::nullopt);
 
-        auto result = inflateEnd(&*stream_);
-        boost::ignore_unused(result);
+        [[maybe_unused]] auto result = inflateEnd(&*stream_);
         assert(result == Z_OK || result == Z_STREAM_ERROR);
 
         stream_ = std::nullopt;

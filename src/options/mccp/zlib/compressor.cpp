@@ -1,6 +1,5 @@
 #include "telnetpp/options/mccp/zlib/compressor.hpp"
 
-#include <boost/core/ignore_unused.hpp>
 #include <zlib.h>
 
 #include <optional>
@@ -36,8 +35,8 @@ struct compressor::impl
 
         stream_ = z_stream{};
 
-        auto result = deflateInit(&*stream_, Z_DEFAULT_COMPRESSION);
-        boost::ignore_unused(result);
+        [[maybe_unused]] auto result =
+            deflateInit(&*stream_, Z_DEFAULT_COMPRESSION);
         assert(result == Z_OK);
     }
 
@@ -48,8 +47,7 @@ struct compressor::impl
     {
         assert(stream_ != std::nullopt);
 
-        auto result = deflateEnd(&*stream_);
-        boost::ignore_unused(result);
+        [[maybe_unused]] auto result = deflateEnd(&*stream_);
         assert(result == Z_OK || result == Z_STREAM_ERROR || Z_DATA_ERROR);
 
         stream_ = std::nullopt;
@@ -134,8 +132,7 @@ telnetpp::bytes compressor::transform_chunk(
     pimpl_->stream_->avail_out = output_buffer_size;
     pimpl_->stream_->next_out = output_buffer;
 
-    auto response = deflate(&*pimpl_->stream_, Z_SYNC_FLUSH);
-    boost::ignore_unused(response);
+    [[maybe_unused]] auto response = deflate(&*pimpl_->stream_, Z_SYNC_FLUSH);
     assert(response == Z_OK);
 
     auto const output_data =
