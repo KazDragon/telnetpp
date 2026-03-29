@@ -58,7 +58,8 @@ endif()
 
 # If we are building with tests, then we require the GTest library
 if (${TELNETPP_WITH_TESTS})
-    find_package(GTest REQUIRED)
+    find_package(Threads REQUIRED)
+    find_package(GTest CONFIG REQUIRED)
 endif()
 
 # When building shared objects, etc., we only want to export certain symbols.
@@ -312,6 +313,7 @@ install(
 )
 
 if (TELNETPP_WITH_TESTS)
+include(GoogleTest)
 enable_testing()
 
 add_executable(telnetpp_tester)
@@ -374,8 +376,8 @@ target_compile_options(telnetpp_tester
 target_link_libraries(telnetpp_tester
     PRIVATE
         telnetpp
-        GTest::GTest
-        GTest::Main
+        GTest::gtest
+        GTest::gtest_main
 )
 
 gtest_discover_tests(telnetpp_tester)
