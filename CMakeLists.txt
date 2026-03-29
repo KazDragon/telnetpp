@@ -79,6 +79,15 @@ endif()
 add_library(telnetpp)
 add_library(KazDragon::telnetpp ALIAS telnetpp)
 
+set(TELNETPP_GENERATED_INCLUDE_DIR
+    "${PROJECT_BINARY_DIR}/generated/include")
+set(TELNETPP_GENERATED_EXPORT_HEADER
+    "${TELNETPP_GENERATED_INCLUDE_DIR}/telnetpp/detail/export.hpp")
+set(TELNETPP_GENERATED_VERSION_HEADER
+    "${TELNETPP_GENERATED_INCLUDE_DIR}/telnetpp/version.hpp")
+
+file(MAKE_DIRECTORY "${TELNETPP_GENERATED_INCLUDE_DIR}/telnetpp/detail")
+
 target_sources(telnetpp
     PRIVATE
         include/telnetpp/client_option.hpp
@@ -93,7 +102,7 @@ target_sources(telnetpp
         include/telnetpp/session.hpp
         include/telnetpp/subnegotiation.hpp
         include/telnetpp/telnetpp.hpp
-        include/telnetpp/version.hpp
+        ${TELNETPP_GENERATED_VERSION_HEADER}
         include/telnetpp/options/basic_client.hpp
         include/telnetpp/options/basic_server.hpp
         include/telnetpp/options/echo/client.hpp
@@ -113,7 +122,7 @@ target_sources(telnetpp
         include/telnetpp/options/suppress_ga/server.hpp
 
         include/telnetpp/detail/command_router.hpp
-        include/telnetpp/detail/export.hpp
+        ${TELNETPP_GENERATED_EXPORT_HEADER}
         include/telnetpp/detail/generate_helper.hpp
         include/telnetpp/detail/negotiation_router.hpp
         include/telnetpp/detail/overloaded.hpp
@@ -213,17 +222,18 @@ target_compile_features(telnetpp
 
 target_include_directories(telnetpp
     PUBLIC
+        $<BUILD_INTERFACE:${TELNETPP_GENERATED_INCLUDE_DIR}>
         $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
         $<INSTALL_INTERFACE:include/telnetpp-${TELNETPP_VERSION}>
 )
 
 generate_export_header(telnetpp
-    EXPORT_FILE_NAME "${PROJECT_SOURCE_DIR}/include/telnetpp/detail/export.hpp"
+    EXPORT_FILE_NAME "${TELNETPP_GENERATED_EXPORT_HEADER}"
 )
 
 configure_file(
     ${PROJECT_SOURCE_DIR}/include/telnetpp/version.hpp.in
-    ${PROJECT_SOURCE_DIR}/include/telnetpp/version.hpp
+    ${TELNETPP_GENERATED_VERSION_HEADER}
     @ONLY)
 
 include(GNUInstallDirs)
@@ -277,6 +287,20 @@ install(
         include/
     DESTINATION
         ${CMAKE_INSTALL_INCLUDEDIR}/telnetpp-${TELNETPP_VERSION}
+)
+
+install(
+    FILES
+        "${TELNETPP_GENERATED_EXPORT_HEADER}"
+    DESTINATION
+        ${CMAKE_INSTALL_INCLUDEDIR}/telnetpp-${TELNETPP_VERSION}/telnetpp/detail
+)
+
+install(
+    FILES
+        "${TELNETPP_GENERATED_VERSION_HEADER}"
+    DESTINATION
+        ${CMAKE_INSTALL_INCLUDEDIR}/telnetpp-${TELNETPP_VERSION}/telnetpp
 )
 
 install(
