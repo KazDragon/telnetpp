@@ -1,0 +1,55 @@
+* text=auto eol=lf
+
+# Source and build files
+*.c text eol=lf
+*.cc text eol=lf
+*.cpp text eol=lf
+*.cxx text eol=lf
+*.h text eol=lf
+*.hh text eol=lf
+*.hpp text eol=lf
+*.hxx text eol=lf
+*.inl text eol=lf
+*.ipp text eol=lf
+CMakeLists.txt text eol=lf
+*.cmake text eol=lf
+CMakePresets.json text eol=lf
+CTestPresets.json text eol=lf
+
+# Project and config files
+*.txt text eol=lf
+*.md text eol=lf
+*.json text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+*.toml text eol=lf
+*.ini text eol=lf
+*.cfg text eol=lf
+*.conf text eol=lf
+*.clang-format text eol=lf
+*.clang-tidy text eol=lf
+*.clangd text eol=lf
+.gitignore text eol=lf
+.gitattributes text eol=lf
+.gitmodules text eol=lf
+.editorconfig text eol=lf
+Dockerfile text eol=lf
+Doxyfile.in text eol=lf
+
+# Scripts
+*.sh text eol=lf
+*.bash text eol=lf
+*.py text eol=lf
+*.bat text eol=crlf
+*.cmd text eol=crlf
+*.ps1 text eol=crlf
+
+# Binary assets
+*.png binary
+*.gif binary
+*.jpg binary
+*.jpeg binary
+*.ico binary
+*.zip binary
+*.gz binary
+*.7z binary
