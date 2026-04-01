@@ -1,0 +1,13 @@
+{
+    "$schema": "https://raw.githubusercontent.com/microsoft/vcpkg-tool/main/docs/vcpkg.schema.json",
+    "name": "telnetpp",
+    "version-string": "0.0.0",
+    "dependencies": [
+        "boost-signals2",
+        "boost-algorithm",
+        "boost-range",
+        "boost-exception",
+        "gtest",
+        "zlib"
+    ]
+}
