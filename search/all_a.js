@@ -9,5 +9,5 @@ var searchData=
   ['operator_3d_3d_6',['operator==',['../structtelnetpp_1_1options_1_1msdp_1_1variable.html#aa5fd03ea5cb35433c16dcefe217aecba',1,'telnetpp::options::msdp::variable']]],
   ['option_7',['option',['../classtelnetpp_1_1option.html',1,'telnetpp::option&lt; LocalPositive, LocalNegative, RemotePositive, RemoteNegative &gt;'],['../classtelnetpp_1_1option.html#a50c0d20ada7d130c44ce801fb074c279',1,'telnetpp::option::option()'],['../classtelnetpp_1_1subnegotiation.html#abdb177303b929e0d173733cd4f1b2ffd',1,'telnetpp::subnegotiation::option()'],['..//home/runner/work/telnetpp/telnetpp/include/telnetpp/detail/registration.hpp#autotoc_md7',1,'server option.']]],
   ['option_5fcode_8',['option_code',['../classtelnetpp_1_1negotiation.html#a6550089406de8eda1a7eb573e441873d',1,'telnetpp::negotiation::option_code()'],['../classtelnetpp_1_1option.html#ae2da4d9e03d2dff632b8b022c1f53ae4',1,'telnetpp::option::option_code()']]],
-  ['options_9',['options',['../classtelnetpp_1_1detail_1_1negotiation__router.html#autotoc_md6',1,'negotiations and the set of supported client and server options.'],['../index.html#autotoc_md19',1,'Options']]]
+  ['options_9',['options',['../classtelnetpp_1_1detail_1_1negotiation__router.html#autotoc_md6',1,'negotiations and the set of supported client and server options.'],['../index.html#autotoc_md21',1,'Options']]]
 ];
