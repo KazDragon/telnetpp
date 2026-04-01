@@ -13,22 +13,60 @@
 
 Telnet++ is an implementation of the Telnet Session Layer protocol that is used primarily to negotiate a feature set between a client and server, the former of which is usually some kind of text-based terminal,  Commonly used terminals include Xterm, PuTTY, and a whole host of Telnet-enabled MUD clients including Tintin++, MushClient, and more.
 
-# Requirements
+## Requirements
 
-Telnet++ requires a C++20 compiler and the following libraries:
-  * Boost (At least version 1.69.0)
-  * (Optionally) ZLib
-  * (For testing only) Google Test
+- C++20 compiler
+- CMake 3.16+
+- Boost 1.69+ (required)
+- ZLib (optional, enable with `-DTELNETPP_WITH_ZLIB=True`)
+- Google Test (for tests only)
 
-# Installation - CMake
+## Build And Install (From Source)
 
-Telnet++ can be installed from source using CMake.  This requires Boost and any other dependencies to have been installed beforehand, using their own instructions, or for the call to `cmake --configure` to be adjusted appropriately (e.g. `-DBOOST_ROOT=...`).  If you do not wish to install into a system directory, and thus avoid the use of sudo, you can also pass `-DCMAKE_INSTALL_PREFIX=...` into the `cmake --configure` call.
+```bash
+git clone https://github.com/KazDragon/telnetpp.git
+cd telnetpp
 
-    git clone https://github.com/KazDragon/telnetpp.git && cd telnetpp
-    mkdir build && cd build
-    cmake --configure -DCMAKE_BUILD_TYPE=Release ..
-    cmake --build .
-    sudo cmake --install .
+cmake -S . -B build \
+  -DCMAKE_BUILD_TYPE=Release \
+  -DCMAKE_INSTALL_PREFIX="$HOME/.local" \
+  -DTELNETPP_WITH_ZLIB=True
+
+cmake --build build --config Release
+cmake --install build --config Release
+```
+
+## Dependency Resolution With vcpkg
+
+Telnet++ can resolve dependencies automatically through `vcpkg`:
+
+```bash
+cmake -S . -B build \
+  -DCMAKE_BUILD_TYPE=Release \
+  -DCMAKE_TOOLCHAIN_FILE="$VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake" \
+  -DTELNETPP_WITH_ZLIB=True
+```
+
+When using manifest mode (`vcpkg.json` in this repository), configure will
+trigger dependency installation automatically.
+
+## Consume From CMake (Installed Package)
+
+```cmake
+cmake_minimum_required(VERSION 3.16)
+project(my_app LANGUAGES CXX)
+
+find_package(telnetpp CONFIG REQUIRED)
+
+add_executable(my_app main.cpp)
+target_link_libraries(my_app PRIVATE KazDragon::telnetpp)
+```
+
+If installed to a non-system prefix:
+
+```bash
+cmake -S . -B build -DCMAKE_PREFIX_PATH="$HOME/.local"
+```
 
 # Features / Roadmap / Progress
 
