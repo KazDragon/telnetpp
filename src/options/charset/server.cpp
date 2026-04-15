@@ -25,8 +25,40 @@ void server::request_charsets()
 // ==========================================================================
 // HANDLE_SUBNEGOTIATION
 // ==========================================================================
-void server::handle_subnegotiation(telnetpp::bytes /*data*/)
+void server::handle_subnegotiation(telnetpp::bytes data)
 {
+    if (data.size() < 2 || data[0] != detail::request)
+    {
+        return;
+    }
+
+    auto const separator = data[1];
+
+    advertised_charsets_.clear();
+    negotiated_charset_.reset();
+
+    telnetpp::byte_storage charset;
+
+    for (auto const byte : data.subspan(2))
+    {
+        if (byte == separator)
+        {
+            if (!charset.empty())
+            {
+                advertised_charsets_.push_back(charset);
+                charset.clear();
+            }
+        }
+        else
+        {
+            charset.push_back(byte);
+        }
+    }
+
+    if (!charset.empty())
+    {
+        advertised_charsets_.push_back(charset);
+    }
 }
 
 }  // namespace telnetpp::options::charset

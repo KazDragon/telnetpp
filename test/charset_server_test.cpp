@@ -3,6 +3,8 @@
 #include <gtest/gtest.h>
 #include <telnetpp/options/charset/server.hpp>
 
+using namespace telnetpp::literals;  // NOLINT
+
 namespace {
 using a_charset_server = a_telnet_option<telnetpp::options::charset::server>;
 }
@@ -43,4 +45,21 @@ TEST_F(
         telnetpp::se};
 
     ASSERT_EQ(expected_content, channel_.written_);
+}
+
+TEST_F(
+    an_active_charset_server,
+    receiving_charset_offer_without_utf8_records_offer_order_and_leaves_charset_empty)
+{
+    static auto const content = "\x01;US-ASCII;CP437"_tb;
+
+    option_.subnegotiate(content);
+
+    std::vector<telnetpp::byte_storage> const expected_charsets = {
+        "US-ASCII"_tb,
+        "CP437"_tb};
+
+    ASSERT_EQ(expected_charsets, option_.advertised_charsets());
+    ASSERT_FALSE(option_.negotiated_charset().has_value());
+    ASSERT_TRUE(channel_.written_.empty());
 }
