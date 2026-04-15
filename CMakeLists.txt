@@ -363,6 +363,8 @@ target_sources(telnetpp_tester
         test/terminal_type_client_test.cpp
 )
 
+add_test(telnetpp_tester telnetpp_tester)
+
 # The tests for the zlib compressors for MCCP should only be compiled into
 # the executable if zlib is available.
 if (TELNETPP_WITH_ZLIB)
