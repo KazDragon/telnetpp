@@ -106,6 +106,8 @@ target_sources(telnetpp
         ${TELNETPP_GENERATED_VERSION_HEADER}
         include/telnetpp/options/basic_client.hpp
         include/telnetpp/options/basic_server.hpp
+        include/telnetpp/options/binary/client.hpp
+        include/telnetpp/options/binary/server.hpp
         include/telnetpp/options/echo/client.hpp
         include/telnetpp/options/echo/server.hpp
         include/telnetpp/options/mccp/client.hpp
@@ -148,6 +150,8 @@ target_sources(telnetpp
         src/command.cpp
         src/element.cpp
         src/negotiation.cpp
+        src/options/binary/client.cpp
+        src/options/binary/server.cpp
         src/options/echo/client.cpp
         src/options/echo/server.cpp
         src/options/mccp/client.cpp
@@ -327,10 +331,19 @@ target_sources(telnetpp_tester
         test/client_option_test.cpp
         test/command_test.cpp
         test/command_router_test.cpp
-        test/echo_client_test.cpp
-        test/echo_server_test.cpp
         test/element_test.cpp
         test/generator_test.cpp
+        test/negotiation_test.cpp
+        test/negotiation_router_test.cpp
+        test/parser_test.cpp
+        test/q_method_test.cpp
+        test/server_option_test.cpp
+        test/session_test.cpp
+        test/subnegotiation_test.cpp
+
+        test/binary_client_test.cpp
+        test/echo_client_test.cpp
+        test/echo_server_test.cpp
         test/mccp_client_test.cpp
         test/mccp_server_test.cpp
         test/msdp_client_test.cpp
@@ -338,15 +351,8 @@ target_sources(telnetpp_tester
         test/msdp_variable_test.cpp
         test/naws_client_test.cpp
         test/naws_server_test.cpp
-        test/negotiation_test.cpp
         test/new_environ_client_test.cpp
         test/new_environ_server_test.cpp
-        test/negotiation_router_test.cpp
-        test/parser_test.cpp
-        test/q_method_test.cpp
-        test/server_option_test.cpp
-        test/session_test.cpp
-        test/subnegotiation_test.cpp
         test/subnegotiation_router_test.cpp
         test/suppress_ga_client_test.cpp
         test/suppress_ga_server_test.cpp
@@ -380,7 +386,6 @@ target_link_libraries(telnetpp_tester
         GTest::gtest_main
 )
 
-gtest_discover_tests(telnetpp_tester)
 endif()
 
 # Add customizations for packaging
