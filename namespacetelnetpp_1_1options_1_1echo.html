@@ -21,7 +21,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">Telnet++<span id="projectnumber">&#160;4.0.1.4</span>
+   <div id="projectname">Telnet++<span id="projectnumber">&#160;4.0.1.5</span>
    </div>
    <div id="projectbrief">A C++ library for interacting with Telnet streams</div>
   </td>
@@ -80,7 +80,7 @@ $(function() {
 </div><!--header-->
 <div class="contents">
 
-<p>An implementation of the standard Telnet Echo option.  
+<p>An implementation of the standard Telnet Binary option.  
 <a href="namespacetelnetpp_1_1options_1_1echo.html#details">More...</a></p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="nested-classes" name="nested-classes"></a>
@@ -93,14 +93,18 @@ Classes</h2></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><p>An implementation of the standard Telnet Echo option. </p>
+<div class="textblock"><p>An implementation of the standard Telnet Binary option. </p>
+<p>An implementation of the standard Telnet Echo option.</p>
+<dl class="section user"><dt>Overview</dt><dd>The Binary option is used in a client/server relationship for agreeing whether binary data (i.e. 8-bit data) may be transmitted. </dd></dl>
+<dl class="section user"><dt>Usage</dt><dd>Create an instance of an binary client or server, depending on which side of the connection your application sits. Install it into a session. Activate as with any other option. </dd></dl>
+<dl class="section see"><dt>See also</dt><dd><a href="https://www.ietf.org/rfc/rfc856.txt">https://www.ietf.org/rfc/rfc856.txt</a></dd></dl>
 <dl class="section user"><dt>Overview</dt><dd>The Echo option is used in a client/server relationship for agreeing whether the server should echo the client or not. In many cases, such as communicating with a remote shell, the user is better served by having his client print out the results of his or her keypresses immediately. This is the default, with Echo disabled. The alternative, which is achieved by activating the Echo option, is for the server to print out the result of the keypresses. While this increases the time it takes to see the result of an operation, it also allows the server to show application-specific behaviour instead of just printing the value of the pressed key. </dd></dl>
 <dl class="section user"><dt>Usage</dt><dd>Create an instance of an echo client or server, depending on which side of the connection your application sits. Install it into a session. Activate as with any other option. </dd></dl>
 <dl class="section see"><dt>See also</dt><dd><a href="https://www.ietf.org/rfc/rfc857.txt">https://www.ietf.org/rfc/rfc857.txt</a> </dd></dl>
 </div></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Wed Apr 1 2026 11:43:13 for Telnet++ by&#160;<a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8
+Generated on Wed Apr 15 2026 21:09:56 for Telnet++ by&#160;<a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8
 </small></address>
 </body>
 </html>
