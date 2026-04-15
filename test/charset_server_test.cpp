@@ -109,3 +109,35 @@ TEST_F(
     ASSERT_EQ(expected_content, channel_.written_);
     ASSERT_EQ("UTF-8"_tb, option_.negotiated_charset().value());
 }
+
+TEST_F(
+    an_active_charset_server,
+    higher_layer_can_select_charset_from_advertised_charset_callback)
+{
+    option_.on_charsets_advertised.connect([this](
+                                               std::vector<
+                                                   telnetpp::byte_storage> const
+                                                   & /*charsets*/) {
+        option_.select_charset("UTF-8"_tb);
+    });
+
+    static auto const content = "\x01;UTF-8;US-ASCII"_tb;
+
+    option_.subnegotiate(content);
+
+    telnetpp::byte_storage const expected_content = {
+        telnetpp::iac,
+        telnetpp::sb,
+        option_.option_code(),
+        0x02,
+        'U',
+        'T',
+        'F',
+        '-',
+        '8',
+        telnetpp::iac,
+        telnetpp::se};
+
+    ASSERT_EQ(expected_content, channel_.written_);
+    ASSERT_EQ("UTF-8"_tb, option_.negotiated_charset().value());
+}
