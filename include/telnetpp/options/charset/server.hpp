@@ -1,0 +1,32 @@
+#pragma once
+
+#include "telnetpp/options/charset/detail/protocol.hpp"
+#include "telnetpp/server_option.hpp"
+
+namespace telnetpp::options::charset {
+
+//* =========================================================================
+/// \brief An implementation of the server side of the Telnet CHARSET option.
+//* =========================================================================
+class TELNETPP_EXPORT server final : public telnetpp::server_option
+{
+public:
+    //* =====================================================================
+    /// \brief Constructor
+    //* =====================================================================
+    explicit server(telnetpp::session &sess) noexcept;
+
+    //* =====================================================================
+    /// \brief Requests that the remote end advertise its supported charsets.
+    //* =====================================================================
+    void request_charsets();
+
+private:
+    //* =====================================================================
+    /// \brief Called when a subnegotiation is received while the option is
+    /// active. Override for option-specific functionality.
+    //* =====================================================================
+    void handle_subnegotiation(telnetpp::bytes data) override;
+};
+
+}  // namespace telnetpp::options::charset
