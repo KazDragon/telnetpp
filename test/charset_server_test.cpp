@@ -24,9 +24,14 @@ protected:
         option_.negotiate(telnetpp::do_);
         assert(option_.active());
         channel_.written_.clear();
+
+        option_.on_charset_selected.connect([this](telnetpp::bytes charset) {
+            selected_charsets_.emplace_back(charset.begin(), charset.end());
+        });
     }
 
     std::vector<std::vector<telnetpp::byte_storage>> received_charset_offers_;
+    std::vector<telnetpp::byte_storage> selected_charsets_;
 };
 
 }  // namespace
@@ -53,6 +58,11 @@ TEST_F(
     an_active_charset_server,
     receiving_charset_offer_without_utf8_records_offer_order_and_leaves_charset_empty)
 {
+    option_.on_charsets_advertised.connect(
+        [this](std::vector<telnetpp::byte_storage> const &charsets) {
+            received_charset_offers_.push_back(charsets);
+        });
+
     static auto const content = "\x01;US-ASCII;CP437"_tb;
 
     option_.subnegotiate(content);
@@ -61,8 +71,9 @@ TEST_F(
         "US-ASCII"_tb,
         "CP437"_tb};
 
-    ASSERT_EQ(expected_charsets, option_.advertised_charsets());
-    ASSERT_FALSE(option_.negotiated_charset().has_value());
+    ASSERT_EQ(size_t{1U}, received_charset_offers_.size());
+    ASSERT_EQ(expected_charsets, received_charset_offers_[0]);
+    ASSERT_TRUE(selected_charsets_.empty());
     ASSERT_TRUE(channel_.written_.empty());
 }
 
@@ -107,7 +118,7 @@ TEST_F(
         telnetpp::se};
 
     ASSERT_EQ(expected_content, channel_.written_);
-    ASSERT_EQ("UTF-8"_tb, option_.negotiated_charset().value());
+    ASSERT_EQ(std::vector<telnetpp::byte_storage>{"UTF-8"_tb}, selected_charsets_);
 }
 
 TEST_F(
@@ -139,7 +150,7 @@ TEST_F(
         telnetpp::se};
 
     ASSERT_EQ(expected_content, channel_.written_);
-    ASSERT_EQ("UTF-8"_tb, option_.negotiated_charset().value());
+    ASSERT_EQ(std::vector<telnetpp::byte_storage>{"UTF-8"_tb}, selected_charsets_);
 }
 
 TEST_F(
@@ -148,6 +159,7 @@ TEST_F(
 {
     option_.select_charset("UTF-8"_tb);
     channel_.written_.clear();
+    selected_charsets_.clear();
 
     std::size_t callback_count = 0;
     option_.on_charsets_advertised.connect(
@@ -160,6 +172,6 @@ TEST_F(
     option_.subnegotiate(malformed_content);
 
     ASSERT_EQ(size_t{0U}, callback_count);
-    ASSERT_EQ("UTF-8"_tb, option_.negotiated_charset().value());
+    ASSERT_TRUE(selected_charsets_.empty());
     ASSERT_TRUE(channel_.written_.empty());
 }

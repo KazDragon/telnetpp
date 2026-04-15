@@ -1,7 +1,5 @@
 #include "telnetpp/options/charset/server.hpp"
 
-#include <utility>
-
 namespace telnetpp::options::charset {
 
 // ==========================================================================
@@ -35,7 +33,7 @@ void server::select_charset(telnetpp::bytes charset)
     content.push_back(detail::accepted);
     content.insert(content.end(), charset.begin(), charset.end());
 
-    negotiated_charset_ = telnetpp::byte_storage{charset.begin(), charset.end()};
+    on_charset_selected(charset);
     write_subnegotiation(content);
 }
 
@@ -80,9 +78,7 @@ void server::handle_subnegotiation(telnetpp::bytes data)
         return;
     }
 
-    advertised_charsets_ = std::move(advertised_charsets);
-    negotiated_charset_.reset();
-    on_charsets_advertised(advertised_charsets_);
+    on_charsets_advertised(advertised_charsets);
 }
 
 }  // namespace telnetpp::options::charset

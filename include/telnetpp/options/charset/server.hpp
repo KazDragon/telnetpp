@@ -5,7 +5,6 @@
 
 #include <boost/signals2.hpp>
 
-#include <optional>
 #include <vector>
 
 namespace telnetpp::options::charset {
@@ -31,27 +30,12 @@ public:
     //* =====================================================================
     void select_charset(telnetpp::bytes charset);
 
-    //* =====================================================================
-    /// \brief Returns the last advertised charsets in offer order.
-    //* =====================================================================
-    [[nodiscard]] std::vector<telnetpp::byte_storage> const &
-    advertised_charsets() const noexcept
-    {
-        return advertised_charsets_;
-    }
-
-    //* =====================================================================
-    /// \brief Returns the negotiated charset, if one has been selected.
-    //* =====================================================================
-    [[nodiscard]] std::optional<telnetpp::byte_storage> const &
-    negotiated_charset() const noexcept
-    {
-        return negotiated_charset_;
-    }
-
     boost::signals2::signal<void(
         std::vector<telnetpp::byte_storage> const &)>
         on_charsets_advertised;  // NOLINT
+
+    boost::signals2::signal<void(telnetpp::bytes)>
+        on_charset_selected;  // NOLINT
 
 private:
     //* =====================================================================
@@ -59,9 +43,6 @@ private:
     /// active. Override for option-specific functionality.
     //* =====================================================================
     void handle_subnegotiation(telnetpp::bytes data) override;
-
-    std::vector<telnetpp::byte_storage> advertised_charsets_;
-    std::optional<telnetpp::byte_storage> negotiated_charset_;
 };
 
 }  // namespace telnetpp::options::charset
