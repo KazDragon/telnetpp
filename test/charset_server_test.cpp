@@ -86,3 +86,26 @@ TEST_F(
     ASSERT_EQ(size_t{1U}, received_charset_offers_.size());
     ASSERT_EQ(expected_charsets, received_charset_offers_[0]);
 }
+
+TEST_F(
+    an_active_charset_server,
+    selecting_a_charset_sends_charset_selection_and_records_negotiated_charset)
+{
+    option_.select_charset("UTF-8"_tb);
+
+    telnetpp::byte_storage const expected_content = {
+        telnetpp::iac,
+        telnetpp::sb,
+        option_.option_code(),
+        0x02,
+        'U',
+        'T',
+        'F',
+        '-',
+        '8',
+        telnetpp::iac,
+        telnetpp::se};
+
+    ASSERT_EQ(expected_content, channel_.written_);
+    ASSERT_EQ("UTF-8"_tb, option_.negotiated_charset().value());
+}

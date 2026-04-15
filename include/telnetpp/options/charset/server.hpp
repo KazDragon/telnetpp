@@ -27,6 +27,11 @@ public:
     void request_charsets();
 
     //* =====================================================================
+    /// \brief Selects the negotiated charset.
+    //* =====================================================================
+    void select_charset(telnetpp::bytes charset);
+
+    //* =====================================================================
     /// \brief Returns the last advertised charsets in offer order.
     //* =====================================================================
     [[nodiscard]] std::vector<telnetpp::byte_storage> const &

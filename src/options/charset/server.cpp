@@ -23,6 +23,21 @@ void server::request_charsets()
 }
 
 // ==========================================================================
+// SELECT_CHARSET
+// ==========================================================================
+void server::select_charset(telnetpp::bytes charset)
+{
+    telnetpp::byte_storage content;
+    content.reserve(1 + charset.size());
+
+    content.push_back(detail::accepted);
+    content.insert(content.end(), charset.begin(), charset.end());
+
+    negotiated_charset_ = telnetpp::byte_storage{charset.begin(), charset.end()};
+    write_subnegotiation(content);
+}
+
+// ==========================================================================
 // HANDLE_SUBNEGOTIATION
 // ==========================================================================
 void server::handle_subnegotiation(telnetpp::bytes data)
