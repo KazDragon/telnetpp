@@ -1,5 +1,7 @@
 #include "telnetpp/options/charset/server.hpp"
 
+#include <utility>
+
 namespace telnetpp::options::charset {
 
 // ==========================================================================
@@ -49,9 +51,7 @@ void server::handle_subnegotiation(telnetpp::bytes data)
 
     auto const separator = data[1];
 
-    advertised_charsets_.clear();
-    negotiated_charset_.reset();
-
+    std::vector<telnetpp::byte_storage> advertised_charsets;
     telnetpp::byte_storage charset;
 
     for (auto const byte : data.subspan(2))
@@ -60,7 +60,7 @@ void server::handle_subnegotiation(telnetpp::bytes data)
         {
             if (!charset.empty())
             {
-                advertised_charsets_.push_back(charset);
+                advertised_charsets.push_back(charset);
                 charset.clear();
             }
         }
@@ -72,9 +72,16 @@ void server::handle_subnegotiation(telnetpp::bytes data)
 
     if (!charset.empty())
     {
-        advertised_charsets_.push_back(charset);
+        advertised_charsets.push_back(charset);
     }
 
+    if (advertised_charsets.empty())
+    {
+        return;
+    }
+
+    advertised_charsets_ = std::move(advertised_charsets);
+    negotiated_charset_.reset();
     on_charsets_advertised(advertised_charsets_);
 }
 

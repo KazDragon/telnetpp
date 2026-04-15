@@ -141,3 +141,25 @@ TEST_F(
     ASSERT_EQ(expected_content, channel_.written_);
     ASSERT_EQ("UTF-8"_tb, option_.negotiated_charset().value());
 }
+
+TEST_F(
+    an_active_charset_server,
+    malformed_charset_offer_does_not_report_or_change_negotiated_charset)
+{
+    option_.select_charset("UTF-8"_tb);
+    channel_.written_.clear();
+
+    std::size_t callback_count = 0;
+    option_.on_charsets_advertised.connect(
+        [&callback_count](std::vector<telnetpp::byte_storage> const &) {
+            ++callback_count;
+        });
+
+    static auto const malformed_content = "\x01;"_tb;
+
+    option_.subnegotiate(malformed_content);
+
+    ASSERT_EQ(size_t{0U}, callback_count);
+    ASSERT_EQ("UTF-8"_tb, option_.negotiated_charset().value());
+    ASSERT_TRUE(channel_.written_.empty());
+}
