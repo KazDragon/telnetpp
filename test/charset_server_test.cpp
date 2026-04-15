@@ -25,6 +25,8 @@ protected:
         assert(option_.active());
         channel_.written_.clear();
     }
+
+    std::vector<std::vector<telnetpp::byte_storage>> received_charset_offers_;
 };
 
 }  // namespace
@@ -62,4 +64,25 @@ TEST_F(
     ASSERT_EQ(expected_charsets, option_.advertised_charsets());
     ASSERT_FALSE(option_.negotiated_charset().has_value());
     ASSERT_TRUE(channel_.written_.empty());
+}
+
+TEST_F(
+    an_active_charset_server,
+    receiving_charset_offer_reports_advertised_charsets_to_higher_layer)
+{
+    option_.on_charsets_advertised.connect(
+        [this](std::vector<telnetpp::byte_storage> const &charsets) {
+            received_charset_offers_.push_back(charsets);
+        });
+
+    static auto const content = "\x01;UTF-8;US-ASCII"_tb;
+
+    option_.subnegotiate(content);
+
+    std::vector<telnetpp::byte_storage> const expected_charsets = {
+        "UTF-8"_tb,
+        "US-ASCII"_tb};
+
+    ASSERT_EQ(size_t{1U}, received_charset_offers_.size());
+    ASSERT_EQ(expected_charsets, received_charset_offers_[0]);
 }

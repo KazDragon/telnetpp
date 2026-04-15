@@ -59,6 +59,8 @@ void server::handle_subnegotiation(telnetpp::bytes data)
     {
         advertised_charsets_.push_back(charset);
     }
+
+    on_charsets_advertised(advertised_charsets_);
 }
 
 }  // namespace telnetpp::options::charset

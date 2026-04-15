@@ -3,6 +3,8 @@
 #include "telnetpp/options/charset/detail/protocol.hpp"
 #include "telnetpp/server_option.hpp"
 
+#include <boost/signals2.hpp>
+
 #include <optional>
 #include <vector>
 
@@ -41,6 +43,10 @@ public:
     {
         return negotiated_charset_;
     }
+
+    boost::signals2::signal<void(
+        std::vector<telnetpp::byte_storage> const &)>
+        on_charsets_advertised;  // NOLINT
 
 private:
     //* =====================================================================
