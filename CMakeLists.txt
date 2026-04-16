@@ -108,6 +108,8 @@ target_sources(telnetpp
         include/telnetpp/options/basic_server.hpp
         include/telnetpp/options/binary/client.hpp
         include/telnetpp/options/binary/server.hpp
+        include/telnetpp/options/charset/detail/protocol.hpp
+        include/telnetpp/options/charset/server.hpp
         include/telnetpp/options/echo/client.hpp
         include/telnetpp/options/echo/server.hpp
         include/telnetpp/options/mccp/client.hpp
@@ -152,6 +154,7 @@ target_sources(telnetpp
         src/negotiation.cpp
         src/options/binary/client.cpp
         src/options/binary/server.cpp
+        src/options/charset/server.cpp
         src/options/echo/client.cpp
         src/options/echo/server.cpp
         src/options/mccp/client.cpp
@@ -342,6 +345,7 @@ target_sources(telnetpp_tester
         test/subnegotiation_test.cpp
 
         test/binary_client_test.cpp
+        test/charset_server_test.cpp
         test/echo_client_test.cpp
         test/echo_server_test.cpp
         test/mccp_client_test.cpp
@@ -358,6 +362,8 @@ target_sources(telnetpp_tester
         test/suppress_ga_server_test.cpp
         test/terminal_type_client_test.cpp
 )
+
+add_test(telnetpp_tester telnetpp_tester)
 
 # The tests for the zlib compressors for MCCP should only be compiled into
 # the executable if zlib is available.
